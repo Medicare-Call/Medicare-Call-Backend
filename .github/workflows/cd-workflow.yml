@@ -50,6 +50,9 @@ jobs:
           script: |
             DOCKER_USERNAME="${{ secrets.DOCKER_USERNAME }}"
             DOCKER_IMAGE="${{ secrets.DOCKER_IMAGE }}"
+            MYSQL_USER="${{ secrets.MYSQL_USER }}"
+            MYSQL_PASSWORD="${{ secrets.MYSQL_PASSWORD }}"
+            MYSQL_URL="${{ secrets.MYSQL_URL }}"
 
             echo "✋🏻Stopping existing container"
             sudo docker stop medicare-call || true
@@ -64,7 +67,11 @@ jobs:
             echo "이미지명: ${DOCKER_USERNAME}/${DOCKER_IMAGE}"
 
             echo "🌱 Running new container"
-            sudo docker run -d -p 8000:8080 --name medicare-call ${DOCKER_USERNAME}/${DOCKER_IMAGE}
+            sudo docker run -d -p 8000:8080 --name medicare-call \
+            -e MYSQL_USER=${MYSQL_USER} \
+            -e MYSQL_PASSWORD=${MYSQL_PASSWORD} \
+            -e MYSQL_URL=${MYSQL_URL} \
+            ${DOCKER_USERNAME}/${DOCKER_IMAGE}
 
             echo "🚮 Cleaning up old images"
             sudo docker image prune -f
