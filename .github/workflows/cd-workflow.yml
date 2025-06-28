@@ -19,13 +19,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: ☕️ set up JDK 17        # 프로젝트의 java 버전에 맞추어 설정
-        uses: actions/setup-java@v
+
+      - name: ☕️ set up JDK 17
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
           server-id: github
-          setting-path: ${{ github.workspace }}
+          settings-path: ${{ github.workspace }}
 
       - name: 👏🏻 grant execute permission for gradlew
         run: chmod +x gradlew
@@ -34,7 +35,7 @@ jobs:
         run: ./gradlew clean build -x test --stacktrace
 
       - name: 🐳 Docker build & push
-        run:  |
+        run: |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
           docker build -f Dockerfile -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }} .
           docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}
@@ -46,19 +47,20 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_KEY }}
           port: ${{ secrets.EC2_PORT }}
-          envs: GITHUB_SHA
+          envs: GITHUB_SHA,DOCKER_USERNAME,DOCKER_IMAGE
           script: |
             echo "✋🏻Stopping existing container"
-            sudo docker stop medicare-call
-            sudo docker rm medicare-call
-        
+            sudo docker stop medicare-call || true
+            sudo docker rm medicare-call || true
+            
+            echo "📦 Current containers:"
             sudo docker ps -a
             
             echo "🥳 Pulling new image"
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}
+            sudo docker pull ${DOCKER_USERNAME}/${DOCKER_IMAGE}
             
             echo "🌱 Running new container"
-            sudo docker run -d -p 8000:8080 --name mdeicare-call ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}
+            sudo docker run -d -p 8000:8080 --name medicare-call ${DOCKER_USERNAME}/${DOCKER_IMAGE}
 
             echo "🚮 Cleaning up old images"
             sudo docker image prune -f
