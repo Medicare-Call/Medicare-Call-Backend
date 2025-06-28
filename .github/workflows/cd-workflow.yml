@@ -59,6 +59,8 @@ jobs:
             echo "🥳 Pulling new image"
             sudo docker pull ${DOCKER_USERNAME}/${DOCKER_IMAGE}
             
+            echo ${DOCKER_USERNAME} ${DOCKER_IMAGE}
+            
             echo "🌱 Running new container"
             sudo docker run -d -p 8000:8080 --name medicare-call ${DOCKER_USERNAME}/${DOCKER_IMAGE}
 
