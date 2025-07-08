@@ -5,11 +5,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.Builder;
 
 @Entity
 @Table(name = "Member")
 @Getter
-@Setter
 public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,4 +35,15 @@ public class Member {
     private Byte plan;
 
     public Member() {}
+
+    @Builder
+    public Member(Integer id, String name, String phone, LocalDate birthDate, Byte gender, LocalDateTime termsAgreedAt, Byte plan) {
+        this.id = id;
+        this.name = name;
+        this.phone = phone;
+        this.birthDate = birthDate;
+        this.gender = gender;
+        this.termsAgreedAt = termsAgreedAt;
+        this.plan = plan;
+    }
 } 

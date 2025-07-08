@@ -2,15 +2,16 @@ package com.example.medicare_call.domain;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Builder;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import com.example.medicare_call.global.enums.ElderRelation;
+import com.example.medicare_call.global.enums.ResidenceType;
 
 @Entity
 @Table(name = "Elder")
 @Getter
-@Setter
 @NoArgsConstructor
 public class Elder {
     @Id
@@ -34,9 +35,23 @@ public class Elder {
     @Column(name = "phone", length = 20)
     private String phone;
 
-    @Column(name = "relationship", nullable = false)
-    private Byte relationship;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "relationship", nullable = false, length = 20)
+    private ElderRelation relationship;
 
-    @Column(name = "residence_type", nullable = false)
-    private Byte residenceType;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "residence_type", nullable = false, length = 20)
+    private ResidenceType residenceType;
+
+    @Builder
+    public Elder(Integer id, Member guardian, String name, LocalDate birthDate, Byte gender, String phone, ElderRelation relationship, ResidenceType residenceType) {
+        this.id = id;
+        this.guardian = guardian;
+        this.name = name;
+        this.birthDate = birthDate;
+        this.gender = gender;
+        this.phone = phone;
+        this.relationship = relationship;
+        this.residenceType = residenceType;
+    }
 } 
