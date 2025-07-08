@@ -3,12 +3,10 @@ name: CI with Gradle
 on:
   push:
     branches:
-      - 'main'
-      - 'dev'
+      - '**'
   pull_request:
     branches:
-      - 'main'
-      - 'dev'
+      - '**'
 
 permissions:
   contents: read
@@ -30,5 +28,5 @@ jobs:
       - name: 👏🏻 grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: 🐘 build with Gradle (without test)
-        run: ./gradlew clean build -x test --stacktrace
+      - name: 🐘 build with Gradle (with test)
+        run: ./gradlew clean build --stacktrace
