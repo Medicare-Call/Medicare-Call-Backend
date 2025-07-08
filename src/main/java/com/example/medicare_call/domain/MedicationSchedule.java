@@ -2,14 +2,13 @@ package com.example.medicare_call.domain;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Builder;
 
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "MedicationSchedule")
 @Getter
-@Setter
 @NoArgsConstructor
 public class MedicationSchedule {
     @Id
@@ -39,4 +38,16 @@ public class MedicationSchedule {
 
     @Column(name = "notes", length = 500)
     private String notes;
+
+    @Builder
+    public MedicationSchedule(Integer id, Elder elder, Medication medication, String dosage, java.time.LocalTime scheduleTime, Byte frequencyType, String frequencyDetail, String notes) {
+        this.id = id;
+        this.elder = elder;
+        this.medication = medication;
+        this.dosage = dosage;
+        this.scheduleTime = scheduleTime;
+        this.frequencyType = frequencyType;
+        this.frequencyDetail = frequencyDetail;
+        this.notes = notes;
+    }
 } 

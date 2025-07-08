@@ -2,7 +2,7 @@ package com.example.medicare_call.domain;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Builder;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "MealRecord")
 @Getter
-@Setter
 @NoArgsConstructor
 public class MealRecord {
     @Id
@@ -33,4 +32,14 @@ public class MealRecord {
 
     @Column(name = "recorded_at", nullable = false)
     private LocalDateTime recordedAt;
+
+    @Builder
+    public MealRecord(Integer id, CareCallRecord careCallRecord, Byte mealType, Byte eatenStatus, String responseSummary, LocalDateTime recordedAt) {
+        this.id = id;
+        this.careCallRecord = careCallRecord;
+        this.mealType = mealType;
+        this.eatenStatus = eatenStatus;
+        this.responseSummary = responseSummary;
+        this.recordedAt = recordedAt;
+    }
 } 

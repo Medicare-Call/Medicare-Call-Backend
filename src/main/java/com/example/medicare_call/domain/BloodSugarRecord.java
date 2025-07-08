@@ -2,7 +2,7 @@ package com.example.medicare_call.domain;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Builder;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -11,7 +11,6 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "BloodSugarRecord")
 @Getter
-@Setter
 @NoArgsConstructor
 public class BloodSugarRecord {
     @Id
@@ -40,4 +39,16 @@ public class BloodSugarRecord {
 
     @Column(name = "response_summary", length = 500)
     private String responseSummary;
+
+    @Builder
+    public BloodSugarRecord(Integer id, CareCallRecord careCallRecord, Byte measurementType, BigDecimal value, String unit, Byte status, LocalDateTime recordedAt, String responseSummary) {
+        this.id = id;
+        this.careCallRecord = careCallRecord;
+        this.measurementType = measurementType;
+        this.value = value;
+        this.unit = unit;
+        this.status = status;
+        this.recordedAt = recordedAt;
+        this.responseSummary = responseSummary;
+    }
 } 

@@ -2,14 +2,13 @@ package com.example.medicare_call.domain;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Builder;
 
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "GuardianSettings")
 @Getter
-@Setter
 @NoArgsConstructor
 public class GuardianSettings {
     @Id
@@ -32,4 +31,14 @@ public class GuardianSettings {
 
     @Column(name = "missed_call_alert", nullable = false, columnDefinition = "TINYINT DEFAULT 0")
     private Byte missedCallAlert;
+
+    @Builder
+    public GuardianSettings(Integer id, Member guardian, Byte pushAlert, Byte callCompleteAlert, Byte healthAlert, Byte missedCallAlert) {
+        this.id = id;
+        this.guardian = guardian;
+        this.pushAlert = pushAlert;
+        this.callCompleteAlert = callCompleteAlert;
+        this.healthAlert = healthAlert;
+        this.missedCallAlert = missedCallAlert;
+    }
 } 
