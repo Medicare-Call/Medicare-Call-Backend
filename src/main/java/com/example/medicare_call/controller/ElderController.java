@@ -7,18 +7,16 @@ import com.example.medicare_call.dto.ElderResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Elder", description = "어르신(노인) 등록/관리 API")
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/elders")
 public class ElderController {
     private final ElderService elderService;
-
-    public ElderController(ElderService elderService) {
-        this.elderService = elderService;
-    }
 
     @Operation(summary = "어르신 등록", description = "이름, 생년월일, 성별, 휴대폰, 관계, 거주방식 정보를 입력받아 어르신을 등록합니다.")
     @PostMapping
