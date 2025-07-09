@@ -2,14 +2,13 @@ package com.example.medicare_call.domain;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Builder;
 
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "Medication")
 @Getter
-@Setter
 @NoArgsConstructor
 public class Medication {
     @Id
@@ -19,4 +18,10 @@ public class Medication {
 
     @Column(name = "name", nullable = false, length = 200)
     private String name;
+
+    @Builder
+    public Medication(Integer id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 } 

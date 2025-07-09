@@ -2,14 +2,13 @@ package com.example.medicare_call.domain;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Builder;
 
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "ElderHealthInfo")
 @Getter
-@Setter
 @NoArgsConstructor
 public class ElderHealthInfo {
     @Id
@@ -23,4 +22,11 @@ public class ElderHealthInfo {
 
     @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
+
+    @Builder
+    public ElderHealthInfo(Integer id, Elder elder, String notes) {
+        this.id = id;
+        this.elder = elder;
+        this.notes = notes;
+    }
 } 

@@ -2,7 +2,7 @@ package com.example.medicare_call.domain;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Builder;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
@@ -11,7 +11,6 @@ import java.time.LocalTime;
 @Entity
 @Table(name = "WeeklyStats")
 @Getter
-@Setter
 @NoArgsConstructor
 public class WeeklyStats {
     @Id
@@ -49,4 +48,19 @@ public class WeeklyStats {
 
     @Column(name = "psych_summary", columnDefinition = "json")
     private String psychSummary;
+
+    @Builder
+    public WeeklyStats(Integer id, Elder elder, LocalDate weekStart, LocalDate weekEnd, String mealRate, String medicationRate, Integer absentCount, LocalTime avgSleepHours, String bloodSugarStats, String healthSummary, String psychSummary) {
+        this.id = id;
+        this.elder = elder;
+        this.weekStart = weekStart;
+        this.weekEnd = weekEnd;
+        this.mealRate = mealRate;
+        this.medicationRate = medicationRate;
+        this.absentCount = absentCount;
+        this.avgSleepHours = avgSleepHours;
+        this.bloodSugarStats = bloodSugarStats;
+        this.healthSummary = healthSummary;
+        this.psychSummary = psychSummary;
+    }
 } 

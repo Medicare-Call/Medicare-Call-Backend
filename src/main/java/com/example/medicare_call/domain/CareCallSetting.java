@@ -2,7 +2,7 @@ package com.example.medicare_call.domain;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Builder;
 
 import jakarta.persistence.*;
 import java.time.LocalTime;
@@ -10,7 +10,6 @@ import java.time.LocalTime;
 @Entity
 @Table(name = "CareCallSetting")
 @Getter
-@Setter
 @NoArgsConstructor
 public class CareCallSetting {
     @Id
@@ -30,4 +29,13 @@ public class CareCallSetting {
 
     @Column(name = "recurrence", nullable = false)
     private Byte recurrence;
+
+    @Builder
+    public CareCallSetting(Integer id, Elder elder, LocalTime firstCallTime, LocalTime secondCallTime, Byte recurrence) {
+        this.id = id;
+        this.elder = elder;
+        this.firstCallTime = firstCallTime;
+        this.secondCallTime = secondCallTime;
+        this.recurrence = recurrence;
+    }
 } 

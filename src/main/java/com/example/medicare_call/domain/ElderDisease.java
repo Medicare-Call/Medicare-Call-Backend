@@ -2,14 +2,13 @@ package com.example.medicare_call.domain;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Builder;
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "ElderDisease")
 @IdClass(ElderDiseaseId.class)
 @Getter
-@Setter
 @NoArgsConstructor
 public class ElderDisease {
     @Id
@@ -21,4 +20,10 @@ public class ElderDisease {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "disease_id", nullable = false)
     private Disease disease;
+
+    @Builder
+    public ElderDisease(Elder elder, Disease disease) {
+        this.elder = elder;
+        this.disease = disease;
+    }
 } 

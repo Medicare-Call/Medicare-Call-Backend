@@ -3,13 +3,12 @@ package com.example.medicare_call.domain;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Builder;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "CareCallRecord")
 @Getter
-@Setter
 @NoArgsConstructor
 public class CareCallRecord {
     @Id
@@ -42,4 +41,17 @@ public class CareCallRecord {
 
     @Column(name = "psych_status")
     private Byte psychStatus;
+
+    @Builder
+    public CareCallRecord(Integer id, Elder elder, CareCallSetting setting, LocalDateTime calledAt, Byte responded, LocalDateTime sleepStart, LocalDateTime sleepEnd, Byte healthStatus, Byte psychStatus) {
+        this.id = id;
+        this.elder = elder;
+        this.setting = setting;
+        this.calledAt = calledAt;
+        this.responded = responded;
+        this.sleepStart = sleepStart;
+        this.sleepEnd = sleepEnd;
+        this.healthStatus = healthStatus;
+        this.psychStatus = psychStatus;
+    }
 } 
