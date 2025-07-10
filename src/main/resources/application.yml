@@ -20,14 +20,16 @@ spring:
       mode: always
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: validate
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     properties:
       hibernate:
         show-sql: true
   flyway:
-    enabled: false
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
 
 
 ---
@@ -47,12 +49,14 @@ spring:
       mode: never
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: validate
       naming:
-        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl 
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
         show-sql: true
   flyway:
-    enabled: false
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
