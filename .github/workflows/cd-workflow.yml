@@ -64,6 +64,7 @@ jobs:
 
             echo "🌱 Running new container"
             sudo docker run -d -p 8000:8080 --name medicare-call \
+            -e SPRING_PROFILES_ACTIVE=prod \
             -e MYSQL_USER=${MYSQL_USER} \
             -e MYSQL_PASSWORD=${MYSQL_PASSWORD} \
             -e MYSQL_URL=${MYSQL_URL} \
