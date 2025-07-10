@@ -25,8 +25,8 @@ public class BloodSugarRecord {
     @Column(name = "measurement_type")
     private Byte measurementType;
 
-    @Column(name = "value")
-    private BigDecimal value;
+    @Column(name = "blood_sugar_value")
+    private BigDecimal blood_sugar_value;
 
     @Column(name = "unit", length = 10)
     private String unit;
@@ -41,11 +41,11 @@ public class BloodSugarRecord {
     private String responseSummary;
 
     @Builder
-    public BloodSugarRecord(Integer id, CareCallRecord careCallRecord, Byte measurementType, BigDecimal value, String unit, Byte status, LocalDateTime recordedAt, String responseSummary) {
+    public BloodSugarRecord(Integer id, CareCallRecord careCallRecord, Byte measurementType, BigDecimal blood_sugar_value, String unit, Byte status, LocalDateTime recordedAt, String responseSummary) {
         this.id = id;
         this.careCallRecord = careCallRecord;
         this.measurementType = measurementType;
-        this.value = value;
+        this.blood_sugar_value = blood_sugar_value;
         this.unit = unit;
         this.status = status;
         this.recordedAt = recordedAt;
