@@ -31,7 +31,8 @@ public class SecurityConfig {
     private final String[] PUBLIC_POST = {
             "/users/signup",
             "/users/login",
-            "/members/sms/**"
+            "/members/sms/**",
+            "/members/signup"
     };
 
     private final String[] PUBLIC_GET = {
@@ -39,7 +40,7 @@ public class SecurityConfig {
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/",
-            "/redis/**"
+            "/redis/**",
     };
 
     private final String[] PUBLIC_PUT = {

@@ -10,6 +10,8 @@ import org.apache.catalina.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -28,6 +30,11 @@ public class AuthService {
         // 사용자 생성
         Member member = Member.builder()
                 .phone(req.getPhone())
+                .name(req.getName())
+                .birthDate(req.getBirthDate())
+                .gender(req.getGender().getCode())
+                .plan((byte) 0)
+                .termsAgreedAt(LocalDateTime.now())
                 .build();
 
         Member savedMember = memberRepository.save(member);
