@@ -1,5 +1,6 @@
 package com.example.medicare_call.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -7,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@Tag(name = "REDIS", description = "redis연결 확인용 API. 실제 서비스에서 사용하지 않습니다.")
 public class RedisTestController {
 
     @Autowired

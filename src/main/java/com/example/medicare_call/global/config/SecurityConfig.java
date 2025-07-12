@@ -29,14 +29,11 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     private final String[] PUBLIC_POST = {
-            "/users/signup",
-            "/users/login",
             "/members/sms/**",
             "/members/signup"
     };
 
     private final String[] PUBLIC_GET = {
-            /* swagger v3 */
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/",

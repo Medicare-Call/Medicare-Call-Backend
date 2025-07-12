@@ -2,19 +2,23 @@ package com.example.medicare_call.service;
 
 import com.example.medicare_call.domain.Member;
 import com.example.medicare_call.dto.SignUpRequest;
+import com.example.medicare_call.dto.SmsVerificationResponse;
 import com.example.medicare_call.dto.TokenResponse;
 import com.example.medicare_call.global.jwt.JwtProvider;
 import com.example.medicare_call.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class AuthService {
 
     private final MemberRepository memberRepository;
@@ -42,28 +46,24 @@ public class AuthService {
         return generateTokenResponse(savedMember);
     }
 
-//    // 로그인
-//    public TokenResponse login(LoginDto loginDto) {
-//        try {
-//            // 인증 시도
-//            Authentication authentication = authenticationManager.authenticate(
-//                    new UsernamePasswordAuthenticationToken(
-//                            loginDto.getPhone(),
-//                            loginDto.getPassword()
-//                    )
-//            );
-//
-//            // 인증 성공 시 사용자 정보 조회
-//            User user = userRepository.findByPhone(loginDto.getPhone())
-//                    .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-//
-//            // JWT 토큰 생성
-//            return generateTokenResponse(user);
-//
-//        } catch (AuthenticationException e) {
-//            throw new IllegalArgumentException("전화번호 또는 비밀번호가 올바르지 않습니다.");
-//        }
-//    }
+    public SmsVerificationResponse handlePhoneVerification(String phone) {
+        Optional<Member> memberOpt = memberRepository.findByPhone(phone);
+        log.info("기존/신규 회원 분기");
+        if (memberOpt.isPresent()) {
+            Member member = memberOpt.get();
+
+            //기존회원
+            TokenResponse tokenResponse = generateTokenResponse(member);
+            return SmsVerificationResponse.forExistingMember(tokenResponse);
+
+        } else {
+            //신규회원
+            log.info("신규회원");
+            return SmsVerificationResponse.forNewMember();
+        }
+
+
+    }
 
     // 토큰 응답 생성
     private TokenResponse generateTokenResponse(Member member) {
