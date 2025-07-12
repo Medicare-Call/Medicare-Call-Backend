@@ -23,14 +23,18 @@ spring:
       mode: always
   jpa:
     hibernate:
-      ddl-auto: update
+      # 데이터베이스의 스키마와 jpa 엔티티가 불일치할때 애플리케이션 실행 중단
+      ddl-auto: validate
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     properties:
       hibernate:
         show-sql: update
   flyway:
-    enabled: false
+    enabled: true
+    baseline-on-migrate: true
+    #마이그레이션 파일 경로
+    locations: classpath:db/migration
 
   data:
     redis:
@@ -61,12 +65,16 @@ spring:
       mode: never
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      # 데이터베이스의 스키마와 jpa 엔티티가 불일치할때 애플리케이션 실행 중단
+      ddl-auto: validate
       naming:
-        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl 
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
         show-sql: true
   flyway:
-    enabled: false
+    enabled: true
+    baseline-on-migrate: true
+    #마이그레이션 파일 경로
+    locations: classpath:db/migration
