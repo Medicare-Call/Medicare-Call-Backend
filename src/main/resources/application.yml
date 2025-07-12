@@ -2,6 +2,9 @@ spring:
   profiles:
     active: local # 기본 active profile 설정
 
+jwt:
+  secret: ${JWT_SECRET}
+  accessTokenExpiration: ${JWT_EXPIRATION} # 1일
 
 ---
 spring:
@@ -26,7 +29,7 @@ spring:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     properties:
       hibernate:
-        show-sql: true
+        show-sql: update
   flyway:
     enabled: true
     baseline-on-migrate: true

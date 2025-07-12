@@ -9,4 +9,7 @@ spring:
       ddl-auto: create-drop
     database-platform: org.hibernate.dialect.H2Dialect
   flyway:
-    enabled: false 
+    enabled: false
+jwt:
+  secret: test-secret-key-for-testing-purposes-only
+  accessTokenExpiration: 86400000  # 1일
