@@ -14,13 +14,13 @@ spring:
     redis:
       host: ${EC2_HOST}
       port: ${REDIS_PORT}
+  coolsms:
+    api:
+      key: test
+      secret: test
+      number: test
 jwt:
   secret: test-secret-key-for-testing-purposes-only
   accessTokenExpiration: 86400000  # 1일
 
 
-coolsms:
-  api:
-    key: test
-    secret: test
-    number: test

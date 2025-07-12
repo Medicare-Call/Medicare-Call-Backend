@@ -31,7 +31,7 @@ public class Member {
     @Column(name = "terms_agreed_at", nullable = false)
     private LocalDateTime termsAgreedAt;
 
-    @Column(name = "plan", nullable = false)
+    @Column(name = "plan") //처음 회원가입 시 plan이 없으므로  nullable=false 조건 삭제
     private Byte plan;
 
     public Member() {}
