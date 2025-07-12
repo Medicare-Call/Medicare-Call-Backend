@@ -49,7 +49,7 @@ public class SmsController {
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<Map<String, Object>> verifySms(@Valid @RequestBody SmsVerifyDto request) {
+    public ResponseEntity<?> verifySms(@Valid @RequestBody SmsVerifyDto request) {
         Map<String, Object> response = new HashMap<>();
 
         boolean isVerified = smsService.verifyCertificationNumber(request.getPhone(), request.getCertificationCode());
