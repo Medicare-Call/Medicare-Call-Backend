@@ -12,8 +12,9 @@ spring:
     enabled: false
   data:
     redis:
-      host: ${EC2_HOST}
-      port: ${REDIS_PORT}
+      port: 6000
+      host: 0.0.0.0
+
   coolsms:
     api:
       key: test
