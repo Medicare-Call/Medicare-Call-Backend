@@ -10,6 +10,17 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
   flyway:
     enabled: false
+  data:
+    redis:
+      host: ${EC2_HOST}
+      port: ${REDIS_PORT}
 jwt:
   secret: test-secret-key-for-testing-purposes-only
   accessTokenExpiration: 86400000  # 1일
+
+
+coolsms:
+  api:
+    key: test
+    secret: test
+    number: test
