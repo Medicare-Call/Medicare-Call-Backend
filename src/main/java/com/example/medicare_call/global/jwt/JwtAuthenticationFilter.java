@@ -43,7 +43,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private Authentication getAuthentication(String token) {
-        Long usIdx = jwtProvider.getUserId(token);
+        Long usIdx = jwtProvider.getMemberId(token);
         System.out.println("Extracted userId from JWT: " + usIdx);
 
         return new JwtTokenAuthentication(usIdx);
