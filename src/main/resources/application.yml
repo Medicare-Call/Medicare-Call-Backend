@@ -41,11 +41,11 @@ spring:
       host: ${EC2_HOST}
       port: ${REDIS_PORT}
 
-coolsms:
-  api:
-    key: ${SMS_KEY}
-    secret: ${SMS_SECRET}
-    number: ${SMS_NUMBER}
+  coolsms:
+    api:
+      key: ${SMS_KEY}
+      secret: ${SMS_SECRET}
+      number: ${SMS_NUMBER}
 
 
 ---

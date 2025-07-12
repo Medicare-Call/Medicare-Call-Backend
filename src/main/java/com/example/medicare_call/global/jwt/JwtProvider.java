@@ -70,8 +70,8 @@ public class JwtProvider {
                 .getBody();
     }
 
-    public Long getUserId(String token) {
-        return Long.parseLong(getClaims(token).get("userId").toString());
+    public Long getMemberId(String token) {
+        return Long.parseLong(getClaims(token).get("id").toString());
     }
 
 }
