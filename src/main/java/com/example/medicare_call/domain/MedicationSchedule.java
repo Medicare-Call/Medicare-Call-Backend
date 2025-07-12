@@ -24,30 +24,17 @@ public class MedicationSchedule {
     @JoinColumn(name = "medication_id", nullable = false)
     private Medication medication;
 
-    @Column(name = "dosage", length = 50)
-    private String dosage;
-
     @Column(name = "schedule_time", nullable = false)
-    private java.time.LocalTime scheduleTime;
-
-    @Column(name = "frequency_type", nullable = false)
-    private Byte frequencyType;
-
-    @Column(name = "frequency_detail", length = 100)
-    private String frequencyDetail;
+    private String scheduleTime;
 
     @Column(name = "notes", length = 500)
     private String notes;
 
     @Builder
-    public MedicationSchedule(Integer id, Elder elder, Medication medication, String dosage, java.time.LocalTime scheduleTime, Byte frequencyType, String frequencyDetail, String notes) {
+    public MedicationSchedule(Integer id, Elder elder, Medication medication, String scheduleTime) {
         this.id = id;
         this.elder = elder;
         this.medication = medication;
-        this.dosage = dosage;
         this.scheduleTime = scheduleTime;
-        this.frequencyType = frequencyType;
-        this.frequencyDetail = frequencyDetail;
-        this.notes = notes;
     }
 } 

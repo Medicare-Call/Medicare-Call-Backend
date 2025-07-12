@@ -50,7 +50,7 @@ jobs:
             MYSQL_PASSWORD="${{ secrets.MYSQL_PASSWORD }}"
             MYSQL_URL="${{ secrets.MYSQL_URL }}"
 
-            echo "✋🏻Stopping existing container"
+            echo "✋🏻 Stopping existing container"
             sudo docker stop medicare-call || true
             sudo docker rm medicare-call || true
 
@@ -64,10 +64,32 @@ jobs:
 
             echo "🌱 Running new container"
             sudo docker run -d -p 8000:8080 --name medicare-call \
+            -e SPRING_PROFILES_ACTIVE=prod \
             -e MYSQL_USER=${MYSQL_USER} \
             -e MYSQL_PASSWORD=${MYSQL_PASSWORD} \
             -e MYSQL_URL=${MYSQL_URL} \
             ${DOCKER_USERNAME}/${DOCKER_IMAGE}
 
+            echo "⏳ Waiting for container to start..."
+            sleep 15
+
+            echo "🏥 Health check - Container status"
+            sudo docker ps | grep medicare-call
+
+            echo "🏥 Health check - Application logs"
+            sudo docker logs --tail 30 medicare-call
+
+            echo "🏥 Health check - Container health status"
+            if sudo docker ps | grep medicare-call | grep -q "Up"; then
+              echo "✅ Container is running successfully!"
+            else
+              echo "❌ Container failed to start properly!"
+              echo "📋 Full container logs:"
+              sudo docker logs medicare-call
+              exit 1
+            fi
+
             echo "🚮 Cleaning up old images"
             sudo docker image prune -f
+
+            echo "🎉 Deployment completed successfully!"
