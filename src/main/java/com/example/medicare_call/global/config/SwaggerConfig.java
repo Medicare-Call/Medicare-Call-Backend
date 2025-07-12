@@ -16,15 +16,14 @@ public class SwaggerConfig {
 
     private Info apiInfo() {
         return new Info()
-                .title("Tomoto-proj")
-                .description("Tomoto API")
-                .version("1.0.0");
+                .title("Medicare Call API"); //나중에 info추가 가능
     }
 
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .components(setComponents())
+                .info(apiInfo())
                 .addSecurityItem(setSecurityItems());
     }
 

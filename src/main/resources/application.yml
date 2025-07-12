@@ -23,7 +23,7 @@ spring:
       mode: always
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     properties:
@@ -31,6 +31,17 @@ spring:
         show-sql: update
   flyway:
     enabled: false
+
+  data:
+    redis:
+      host: ${EC2_HOST}
+      port: ${REDIS_PORT}
+
+coolsms:
+  api:
+    key: ${SMS_KEY}
+    secret: ${SMS_SECRET}
+    number: ${SMS_NUMBER}
 
 
 ---
