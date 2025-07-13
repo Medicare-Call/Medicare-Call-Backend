@@ -43,19 +43,28 @@ public class JwtProvider {
                     .build()
                     .parseClaimsJws(token);
         } catch (SecurityException | MalformedJwtException e) {
-            log.debug("잘못된 Jwt 서명입니다.");
+            log.error("JWT 서명 검증 실패 - Token: [{}], Error: {}",
+                    token, e.getMessage(), e);
             throw new IllegalArgumentException("JWT 검증 중 오류가 발생했습니다.");
+
         } catch (ExpiredJwtException e) {
-            log.debug("만료된 토큰입니다.");
+            log.error("JWT 토큰 만료 - Token: [{}], ExpiredAt: {}",
+                    token, e.getClaims().getExpiration(), e);
             throw new IllegalArgumentException("JWT 검증 중 오류가 발생했습니다.");
+
         } catch (UnsupportedJwtException e) {
-            log.debug("지원하지 않는 토큰입니다.");
+            log.error("지원하지 않는 JWT 토큰 - Token: [{}], Error: {}",
+                    token, e.getMessage(), e);
             throw new IllegalArgumentException("JWT 검증 중 오류가 발생했습니다.");
+
         } catch (IllegalArgumentException e) {
-            log.debug("잘못된 토큰입니다.");
+            log.error("잘못된 JWT 토큰 형식 - Token: [{}], Error: {}",
+                    token, e.getMessage(), e);
             throw new IllegalArgumentException("JWT 검증 중 오류가 발생했습니다.");
+
         } catch (Exception e) {
-            log.debug(e.getMessage());
+            log.error("JWT 검증 중 예상치 못한 오류 - Token: [{}], Error: {}",
+                    token, e.getMessage(), e);
             throw new IllegalArgumentException("JWT 검증 중 오류가 발생했습니다.");
         }
 

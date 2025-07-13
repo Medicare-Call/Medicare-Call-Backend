@@ -26,27 +26,8 @@ public class MemberController {
     private final AuthService authService;
 
     @PostMapping("/signup")
-    public ResponseEntity<Map<String, Object>> signUp(@Valid @RequestBody SignUpRequest signUpDto) {
-        Map<String, Object> response = new HashMap<>();
-
-        try {
-            TokenResponse tokenResponse = authService.signUp(signUpDto);
-
-            response.put("success", true);
-            response.put("message", "회원가입이 완료되었습니다.");
-            response.put("data", tokenResponse);
-
-            return ResponseEntity.ok(response);
-
-        } catch (IllegalArgumentException e) {
-            response.put("success", false);
-            response.put("message", e.getMessage());
-            return ResponseEntity.badRequest().body(response);
-
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "회원가입에 실패했습니다.");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
+    public ResponseEntity<TokenResponse> signUp(@Valid @RequestBody SignUpRequest signUpDto) {
+        TokenResponse tokenResponse = authService.signUp(signUpDto);
+        return ResponseEntity.ok(tokenResponse);
     }
 }

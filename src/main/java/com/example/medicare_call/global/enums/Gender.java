@@ -7,8 +7,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * (MALE: 남성, FEMALE: 여성)
  */
 public enum Gender {
-    FEMALE((byte) 0),
-    MALE((byte) 1);
+    MALE((byte) 0),
+    FEMALE((byte) 1);
 
     private final byte code;
 
