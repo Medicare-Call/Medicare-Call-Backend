@@ -24,14 +24,12 @@ public class AuthService {
     private final MemberRepository memberRepository;
     private final JwtProvider jwtProvider;
 
-    // 회원가입
     public TokenResponse signUp(SignUpRequest req) {
-        // 중복 확인
+
         if (memberRepository.existsByPhone(req.getPhone())) {
             throw new IllegalArgumentException("이미 등록된 전화번호입니다.");
         }
 
-        // 사용자 생성
         Member member = Member.builder()
                 .phone(req.getPhone())
                 .name(req.getName())
@@ -42,13 +40,11 @@ public class AuthService {
                 .build();
 
         Member savedMember = memberRepository.save(member);
-        // JWT 토큰 생성
         return generateTokenResponse(savedMember);
     }
 
     public SmsVerificationResponse handlePhoneVerification(String phone) {
         Optional<Member> memberOpt = memberRepository.findByPhone(phone);
-        log.info("기존/신규 회원 분기");
         if (memberOpt.isPresent()) {
             Member member = memberOpt.get();
 

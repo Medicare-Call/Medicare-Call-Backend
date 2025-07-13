@@ -4,7 +4,6 @@ import com.example.medicare_call.dto.SmsRequest;
 import com.example.medicare_call.dto.SmsVerificationResponse;
 import com.example.medicare_call.dto.SmsVerifyDto;
 import com.example.medicare_call.service.AuthService;
-import com.example.medicare_call.service.MemberService;
 import com.example.medicare_call.service.SmsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -56,9 +55,7 @@ public class SmsController {
         boolean isVerified = smsService.verifyCertificationNumber(request.getPhone(), request.getCertificationCode());
 
         if (isVerified) {
-            log.info("인증완료");
             SmsVerificationResponse res = authService.handlePhoneVerification(request.getPhone());
-            log.info("회원등록으로");
             return ResponseEntity.ok(res);
         } else {
             SmsVerificationResponse errorResponse = SmsVerificationResponse.builder()

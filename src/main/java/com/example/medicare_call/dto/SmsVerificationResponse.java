@@ -1,12 +1,9 @@
 package com.example.medicare_call.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 @Builder
-@Setter
 @Getter
 public class SmsVerificationResponse {
     private boolean verified;

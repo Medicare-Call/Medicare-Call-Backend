@@ -30,7 +30,7 @@ public class SecurityConfig {
 
     private final String[] PUBLIC_POST = {
             "/members/sms/**",
-            "/members/signup"
+            "/members/register"
     };
 
     private final String[] PUBLIC_GET = {
