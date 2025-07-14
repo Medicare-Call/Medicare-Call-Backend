@@ -25,7 +25,7 @@ public class MemberController {
 
     private final AuthService authService;
 
-    @PostMapping("/signup")
+    @PostMapping("/register")
     public ResponseEntity<TokenResponse> signUp(@Valid @RequestBody SignUpRequest signUpDto) {
         TokenResponse tokenResponse = authService.signUp(signUpDto);
         return ResponseEntity.ok(tokenResponse);

@@ -24,7 +24,6 @@ import java.util.Map;
 public class SmsController {
 
     private final SmsService smsService;
-//    private final MemberService memberService;
 
     // 인증번호 발송
     @PostMapping("/send")
@@ -32,11 +31,6 @@ public class SmsController {
         Map<String, String> response = new HashMap<>();
 
         try {
-//            // 이미 가입된 전화번호인지 확인
-//            if (memberService.isPhoneExists(request.getPhone())) {
-//                response.put("message", "이미 가입된 전화번호입니다.");
-//                return ResponseEntity.badRequest().body(response);
-//            }
 
             smsService.sendCertificationNumber(request.getPhone());
             response.put("message", "인증번호가 발송되었습니다.");
