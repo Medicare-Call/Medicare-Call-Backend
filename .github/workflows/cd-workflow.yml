@@ -49,6 +49,13 @@ jobs:
             MYSQL_USER="${{ secrets.MYSQL_USER }}"
             MYSQL_PASSWORD="${{ secrets.MYSQL_PASSWORD }}"
             MYSQL_URL="${{ secrets.MYSQL_URL }}"
+            JWT_SECRET="${{ secrets.JWT_SECRET }}"
+            JWT_EXPIRATION="${{ secrets.JWT_EXPIRATION }}"
+            REDIS_HOST="${{ secrets.REDIS_HOST }}"
+            REDIS_PORT="${{ secrets.REDIS_PORT }}"
+            SMS_KEY="${{ secrets.SMS_KEY }}"
+            SMS_NUMBER="${{ secrets.SMS_NUMBER }}"
+            SMS_SECRET="${{ secrets.SMS_SECRET }}"
 
             echo "✋🏻 Stopping existing container"
             sudo docker stop medicare-call || true
