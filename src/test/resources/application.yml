@@ -9,4 +9,19 @@ spring:
       ddl-auto: create-drop
     database-platform: org.hibernate.dialect.H2Dialect
   flyway:
-    enabled: false 
+    enabled: false
+  data:
+    redis:
+      port: 6000
+      host: 0.0.0.0
+
+  coolsms:
+    api:
+      key: test
+      secret: test
+      number: test
+jwt:
+  secret: test-secret-key-for-testing-purposes-only
+  accessTokenExpiration: 86400000  # 1일
+
+
