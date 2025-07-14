@@ -75,6 +75,15 @@ jobs:
             -e MYSQL_USER=${MYSQL_USER} \
             -e MYSQL_PASSWORD=${MYSQL_PASSWORD} \
             -e MYSQL_URL=${MYSQL_URL} \
+            -e MYSQL_PASSWORD=${MYSQL_PASSWORD} \
+            -e MYSQL_URL=${MYSQL_URL} \
+            -e JWT_SECRET=${JWT_SECRET} \
+            -e JWT_EXPIRATION=${JWT_EXPIRATION} \
+            -e REDIS_HOST=${REDIS_HOST} \
+            -e REDIS_PORT=${REDIS_PORT} \
+            -e SMS_KEY=${SMS_KEY} \
+            -e SMS_NUMBER=${SMS_NUMBER} \
+            -e SMS_SECRET=${SMS_SECRET} \
             ${DOCKER_USERNAME}/${DOCKER_IMAGE}
 
             echo "⏳ Waiting for container to start..."
