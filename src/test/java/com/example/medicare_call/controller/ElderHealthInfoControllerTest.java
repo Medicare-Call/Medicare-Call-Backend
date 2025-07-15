@@ -3,6 +3,7 @@ package com.example.medicare_call.controller;
 import com.example.medicare_call.dto.ElderHealthRegisterRequest;
 import com.example.medicare_call.global.enums.ElderHealthNoteType;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
+import com.example.medicare_call.global.jwt.JwtProvider;
 import com.example.medicare_call.service.ElderHealthInfoService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,7 @@ class ElderHealthInfoControllerTest {
     @Autowired MockMvc mockMvc;
     @MockBean ElderHealthInfoService elderHealthInfoService;
     @Autowired ObjectMapper objectMapper;
+    @MockBean private JwtProvider jwtProvider;
 
     @Test
     void registerElderHealthInfo_success() throws Exception {
