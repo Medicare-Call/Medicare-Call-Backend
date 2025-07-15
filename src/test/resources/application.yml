@@ -23,5 +23,6 @@ spring:
 jwt:
   secret: test-secret-key-for-testing-purposes-only
   accessTokenExpiration: 1
+  phoneTokenExpiration: 1
 
 

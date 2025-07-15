@@ -54,7 +54,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // Phone Token인 경우 (phone 클레임 존재)
             String phone = jwtProvider.getPhone(token);
             log.info("Extracted phone from Phone Token: {}", phone);
-            return new JwtTokenAuthentication(-1L); // 또는 별도 Authentication 객체 사용
+            return new JwtTokenAuthentication(-1L);
         }
     }
 }
