@@ -41,7 +41,7 @@ spring:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
-      local_host: localhost
+#      local_host: localhost
 
   coolsms:
     api:
