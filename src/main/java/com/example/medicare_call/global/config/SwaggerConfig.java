@@ -15,11 +15,14 @@ import java.util.List;
 @Configuration
 public class SwaggerConfig {
 
+    private final String ACCESS_TOKEN_SCHEME = "AccessToken";
+    private final String PHONE_TOKEN_SCHEME = "PhoneToken";
     private final String securitySchemaName = "JWT";
 
     private Info apiInfo() {
         return new Info()
-                .title("Medicare Call API"); //나중에 info추가 가능
+                .title("Medicare Call API")
+                .description("Access Token: 기존 회원용 토큰\nPhone Token: 신규 회원 인증용 토큰");
     }
 
     @Bean
@@ -27,9 +30,10 @@ public class SwaggerConfig {
         return new OpenAPI()
                 .components(setComponents())
                 .info(apiInfo())
-                .addSecurityItem(setSecurityItems())
-                .servers(setServers());
+                .servers(setServers())
+                .addSecurityItem(setSecurityItems());
     }
+
 
     private Components setComponents() {
         return new Components()
@@ -51,15 +55,14 @@ public class SwaggerConfig {
     }
 
     private List<Server> setServers() {
-        Server httpsServer = new Server();
-        httpsServer.setUrl("https://medicare-call.shop");
-        httpsServer.setDescription("HTTPS 서버");
-
         Server localServer = new Server();
         localServer.setUrl("http://localhost:8080");
         localServer.setDescription("로컬 서버");
 
+        Server httpsServer = new Server();
+        httpsServer.setUrl("https://medicare-call.shop");
+        httpsServer.setDescription("HTTPS 서버");
+
         return List.of(httpsServer, localServer);
     }
-
 }

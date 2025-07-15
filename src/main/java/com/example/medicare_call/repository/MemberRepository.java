@@ -7,4 +7,5 @@ import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Integer> {
     Boolean existsByPhone(String phone);
+    Optional<Member> findByPhone(String phone);
 }

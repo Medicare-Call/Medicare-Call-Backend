@@ -3,6 +3,7 @@ package com.example.medicare_call.service;
 import com.example.medicare_call.repository.SmsRepository;
 import com.example.medicare_call.util.SmsUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,6 +12,7 @@ import java.util.Random;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class SmsService {
 
     private final SmsRepository smsRepository;
@@ -18,6 +20,7 @@ public class SmsService {
 
     public void sendCertificationNumber(String phone) {
         String certificationNumber = String.format("%06d", new Random().nextInt(999999));
+//        log.info("인증번호는: " + certificationNumber); //로컬 테스트용
         smsUtil.sendSMS(phone, certificationNumber);
         //redis에 저장
         smsRepository.createSmsCertification(phone, certificationNumber);

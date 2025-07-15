@@ -32,7 +32,7 @@ public class SecurityConfig {
             "/users/signup",
             "/users/login",
             "/members/sms/**",
-            "/members/signup"
+            "/members/register"
     };
 
     private final String[] PUBLIC_GET = {

@@ -1,9 +1,12 @@
 package com.example.medicare_call.controller;
 
 import com.example.medicare_call.dto.SmsRequest;
+import com.example.medicare_call.dto.SmsVerificationResponse;
 import com.example.medicare_call.dto.SmsVerifyDto;
+import com.example.medicare_call.service.AuthService;
 import com.example.medicare_call.service.MemberService;
 import com.example.medicare_call.service.SmsService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +27,7 @@ import java.util.Map;
 public class SmsController {
 
     private final SmsService smsService;
+    private final AuthService authService;
 
     // 인증번호 발송
     @PostMapping("/send")
@@ -43,19 +47,20 @@ public class SmsController {
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<Map<String, Object>> verifySms(@Valid @RequestBody SmsVerifyDto request) {
-        Map<String, Object> response = new HashMap<>();
+    @Operation(summary = "SMS 인증 및 회원 상태 확인", description = "인증번호 검증 후 회원 상태에 따른 다음 단계를 안내합니다.")
+    public ResponseEntity<SmsVerificationResponse> verifySms(@Valid @RequestBody SmsVerifyDto request) {
 
         boolean isVerified = smsService.verifyCertificationNumber(request.getPhone(), request.getCertificationCode());
 
         if (isVerified) {
-            response.put("verified", true);
-            response.put("message", "인증이 완료되었습니다.");
-            return ResponseEntity.ok(response);
+            SmsVerificationResponse res = authService.handlePhoneVerification(request.getPhone());
+            return ResponseEntity.ok(res);
         } else {
-            response.put("verified", false);
-            response.put("message", "인증번호가 올바르지 않거나 만료되었습니다.");
-            return ResponseEntity.badRequest().body(response);
+            SmsVerificationResponse errorResponse = SmsVerificationResponse.builder()
+                    .verified(false)
+                    .message("인증번호가 올바르지 않거나 만료되었습니다.")
+                    .build();
+            return ResponseEntity.badRequest().body(errorResponse);
         }
     }
 
