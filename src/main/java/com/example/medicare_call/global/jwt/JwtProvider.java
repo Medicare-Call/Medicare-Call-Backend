@@ -16,13 +16,15 @@ import java.util.Date;
 public class JwtProvider {
 
     private final Long ACCESS_TOKEN_EXPIRE_MILLIS;
-
+    private final Long PHONE_TOKEN_EXPIRE_MILLIS;
     private final SecretKey secretKey;
 
     public JwtProvider(@Value("${jwt.secret}") String secretKey,
-                       @Value("${jwt.accessTokenExpiration}") Long accessTokenExpiration) {
+                       @Value("${jwt.accessTokenExpiration}") Long accessTokenExpiration,
+                       @Value("${jwt.phoneTokenExpiration}") Long phoneTokenExpiration) {
         this.secretKey = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
         this.ACCESS_TOKEN_EXPIRE_MILLIS = accessTokenExpiration;
+        this.PHONE_TOKEN_EXPIRE_MILLIS = phoneTokenExpiration;
     }
 
     public String createAccessToken(Member member) {
@@ -32,6 +34,17 @@ public class JwtProvider {
                 .claim("id", member.getId())
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_MILLIS))
+                .signWith(secretKey, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public String createPhoneVerificationToken(String phoneNumber) {
+        Date now = new Date();
+        return Jwts.builder()
+                .claim("category", "phone")
+                .claim("phone", phoneNumber)
+                .setIssuedAt(now)
+                .setExpiration(new Date(now.getTime() + PHONE_TOKEN_EXPIRE_MILLIS))
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -82,5 +95,6 @@ public class JwtProvider {
     public Long getMemberId(String token) {
         return Long.parseLong(getClaims(token).get("id").toString());
     }
+    public String getPhone(String token) {return  getClaims(token).get("phone").toString();}
 
 }

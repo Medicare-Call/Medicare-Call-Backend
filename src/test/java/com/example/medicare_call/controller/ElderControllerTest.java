@@ -5,6 +5,7 @@ import com.example.medicare_call.dto.ElderRegisterRequest;
 import com.example.medicare_call.global.enums.ElderRelation;
 import com.example.medicare_call.global.enums.ResidenceType;
 import com.example.medicare_call.global.enums.Gender;
+import com.example.medicare_call.global.jwt.JwtProvider;
 import com.example.medicare_call.service.ElderService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,6 +44,9 @@ class ElderControllerTest {
 
     @MockBean
     private MemberRepository memberRepository;
+
+    @MockBean
+    private JwtProvider jwtProvider;
 
     @BeforeEach
     void setUp() {

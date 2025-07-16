@@ -4,7 +4,8 @@ spring:
 
 jwt:
   secret: ${JWT_SECRET}
-  accessTokenExpiration: ${JWT_EXPIRATION} # 1일
+  accessTokenExpiration: ${JWT_ACCESS_EXPIRATION}
+  phoneTokenExpiration: ${JWT_PHONE_EXPIRATION}
 
 ---
 spring:
@@ -40,6 +41,7 @@ spring:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
+#      local_host: localhost
 
   coolsms:
     api:
