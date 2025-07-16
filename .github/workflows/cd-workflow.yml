@@ -79,8 +79,8 @@ jobs:
             -e MYSQL_PASSWORD=${MYSQL_PASSWORD} \
             -e MYSQL_URL=${MYSQL_URL} \
             -e JWT_SECRET=${JWT_SECRET} \
-            -e JWT_ACCESS_EXPIRATION=${JWT_ACCESS_EXPIRATION}\
-            -e JWT_PHONE_EXPIRATION=${JWT_PHONE_EXPIRATION}\
+            -e JWT_ACCESS_EXPIRATION=${JWT_ACCESS_EXPIRATION} \
+            -e JWT_PHONE_EXPIRATION=${JWT_PHONE_EXPIRATION} \
             -e REDIS_HOST=${REDIS_HOST} \
             -e REDIS_PORT=${REDIS_PORT} \
             -e SMS_KEY=${SMS_KEY} \
