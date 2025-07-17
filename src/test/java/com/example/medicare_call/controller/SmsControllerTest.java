@@ -52,7 +52,7 @@ class SmsControllerTest {
         SmsRequest request = new SmsRequest();
         request.setPhone(""); // 전화번호 누락
 
-        mockMvc.perform(post("/members/sms/send")
+        mockMvc.perform(post("/verifications")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -76,7 +76,7 @@ class SmsControllerTest {
                         .build()
         );
 
-        mockMvc.perform(post("/members/sms/verify")
+        mockMvc.perform(post("/verifications/confirmation")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -103,7 +103,7 @@ class SmsControllerTest {
                         .build()
         );
 
-        mockMvc.perform(post("/members/sms/verify")
+        mockMvc.perform(post("/verifications/confirmation")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -121,7 +121,7 @@ class SmsControllerTest {
 
         when(smsService.verifyCertificationNumber(anyString(), anyString())).thenReturn(false);
 
-        mockMvc.perform(post("/members/sms/verify")
+        mockMvc.perform(post("/verifications/confirmation")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
