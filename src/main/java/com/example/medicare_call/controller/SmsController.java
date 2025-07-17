@@ -23,14 +23,15 @@ import java.util.Map;
 @Tag(name = "Sms", description = "전화번호 인증 API")
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/members/sms")
+@RequestMapping("/verifications")
 public class SmsController {
 
     private final SmsService smsService;
     private final AuthService authService;
 
     // 인증번호 발송
-    @PostMapping("/send")
+    @PostMapping("")
+    @Operation(summary = "인증번호 발송", description = "입력된 전화번호로 6자리 인증번호를 발송합니다.")
     public ResponseEntity<Map<String, String>> sendSms(@Valid @RequestBody SmsRequest request) {
         Map<String, String> response = new HashMap<>();
 
@@ -46,7 +47,7 @@ public class SmsController {
         }
     }
 
-    @PostMapping("/verify")
+    @PostMapping("/confirmation")
     @Operation(summary = "SMS 인증 및 회원 상태 확인", description = "인증번호 검증 후 회원 상태에 따른 다음 단계를 안내합니다.")
     public ResponseEntity<SmsVerificationResponse> verifySms(@Valid @RequestBody SmsVerifyDto request) {
 

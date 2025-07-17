@@ -31,8 +31,8 @@ public class SecurityConfig {
     private final String[] PUBLIC_POST = {
             "/users/signup",
             "/users/login",
-            "/members/sms/**",
-            "/members/register"
+            "/verifications/**",
+            "/members"
     };
 
     private final String[] PUBLIC_GET = {
