@@ -21,7 +21,7 @@ public class MemberController {
 
     private final AuthService authService;
 
-    @PostMapping("/register")
+    @PostMapping("")
     public ResponseEntity<String> register(@Parameter(hidden = true) @AuthPhone String phone,
                                            @Valid @RequestBody RegisterRequest signUpDto) {
         String accessTokenResponse = authService.register(phone,signUpDto);
