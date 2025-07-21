@@ -56,11 +56,11 @@ public class SwaggerConfig {
 
     private List<Server> setServers() {
         Server localServer = new Server();
-        localServer.setUrl("http://localhost:8080");
+        localServer.setUrl("http://localhost:8080/api");
         localServer.setDescription("로컬 서버");
 
         Server httpsServer = new Server();
-        httpsServer.setUrl("https://medicare-call.shop");
+        httpsServer.setUrl("https://medicare-call.shop/api");
         httpsServer.setDescription("HTTPS 서버");
 
         return List.of(httpsServer, localServer);

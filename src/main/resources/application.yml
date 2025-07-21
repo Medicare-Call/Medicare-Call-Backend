@@ -91,3 +91,7 @@ spring:
       key: ${SMS_KEY}
       secret: ${SMS_SECRET}
       number: ${SMS_NUMBER}
+
+server:
+  servlet:
+    context-path: /api
