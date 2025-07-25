@@ -25,4 +25,4 @@ jwt:
   accessTokenExpiration: 1
   phoneTokenExpiration: 1
 care-call:
-  url: ${CARE_CALL_URL}
+  url: test

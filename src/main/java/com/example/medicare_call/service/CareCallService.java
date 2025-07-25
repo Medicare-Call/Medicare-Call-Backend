@@ -30,20 +30,11 @@ public class CareCallService {
     @Value("${care-call.url}")
     private String callUrl;
 
-//    private final RestTemplate restTemplate = new RestTemplate();
     private final RestTemplate restTemplate;
     private final ElderRepository elderRepository;
     private final ElderHealthInfoRepository healthInfoRepository;
     private final DiseaseRepository diseaseRepository;
     private final ElderDiseaseRepository elderDiseaseRepository;
-
-    @PostConstruct
-    public void checkConfiguration() {
-        System.out.println("=== CareCallService 설정 확인 ===");
-        System.out.println("Care Call URL: " + callUrl);
-        System.out.println("환경변수 CARE_CALL_URL: " + System.getenv("CARE_CALL_URL"));
-        System.out.println("===============================");
-    }
 
     public void sendCall(Integer elderId, CallType callType) {
         Elder elder = elderRepository.findById(elderId)
