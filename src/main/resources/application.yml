@@ -48,6 +48,8 @@ spring:
       key: ${SMS_KEY}
       secret: ${SMS_SECRET}
       number: ${SMS_NUMBER}
+care-call:
+  url: ${CARE_CALL_URL}
 
 
 ---
@@ -95,3 +97,6 @@ spring:
 server:
   servlet:
     context-path: /api
+
+care-call:
+  url: ${CARE_CALL_URL}
