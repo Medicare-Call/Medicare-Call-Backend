@@ -4,4 +4,5 @@ import com.example.medicare_call.domain.ElderHealthInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ElderHealthInfoRepository extends JpaRepository<ElderHealthInfo, Integer> {
+    ElderHealthInfo findByElderId(Integer elderId);
 } 

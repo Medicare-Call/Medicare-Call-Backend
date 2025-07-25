@@ -57,6 +57,8 @@ jobs:
             SMS_KEY="${{ secrets.SMS_KEY }}"
             SMS_NUMBER="${{ secrets.SMS_NUMBER }}"
             SMS_SECRET="${{ secrets.SMS_SECRET }}"
+            CARE_CALL_URL="${{ secrets.CARE_CALL_URL }}"
+
 
             echo "✋🏻 Stopping existing container"
             sudo docker stop medicare-call || true
@@ -86,6 +88,7 @@ jobs:
             -e SMS_KEY=${SMS_KEY} \
             -e SMS_NUMBER=${SMS_NUMBER} \
             -e SMS_SECRET=${SMS_SECRET} \
+            -e CARE_CALL_URL=${CARE_CALL_URL} \
             ${DOCKER_USERNAME}/${DOCKER_IMAGE}
 
             echo "⏳ Waiting for container to start..."
