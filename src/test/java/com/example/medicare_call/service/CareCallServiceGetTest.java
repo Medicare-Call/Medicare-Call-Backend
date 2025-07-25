@@ -14,7 +14,7 @@ class CareCallServiceGetTest {
     private CareCallService careCallService;
 
     @Test
-//    @Disabled("실제 서버 요청이므로 일시적으로 비활성화. 실행될 때마다 전화가 계속 걸림")
+    @Disabled("실제 서버 요청이므로 일시적으로 비활성화. 실행될 때마다 전화가 계속 걸림")
     @DisplayName("전화 서버 통합 테스트")
     void testRealServerCall() {
         // When - 실제 Spring Context의 서비스 사용
