@@ -39,7 +39,7 @@ class AuthServiceTest {
     @Test
     @DisplayName("회원가입 성공 - 새로운 전화번호")
     void register_success() {
-        String phone = "010-1234-5678";
+        String phone = "01012345678";
         RegisterRequest request = new RegisterRequest();
         request.setName("홍길동");
         request.setBirthDate(LocalDate.of(1990, 1, 1));
@@ -67,7 +67,7 @@ class AuthServiceTest {
     @Test
     @DisplayName("회원가입 실패 - 이미 등록된 전화번호")
     void register_fail_duplicatePhone() {
-        String phone = "010-1234-5678";
+        String phone = "01012345678";
         RegisterRequest request = new RegisterRequest();
         request.setName("홍길동");
         request.setBirthDate(LocalDate.of(1990, 1, 1));
@@ -83,7 +83,7 @@ class AuthServiceTest {
     @Test
     @DisplayName("전화번호 인증 처리 - 기존 회원")
     void handlePhoneVerification_existingMember() {
-        String phone = "010-1234-5678";
+        String phone = "01012345678";
         Member existingMember = Member.builder()
                 .id(1)
                 .phone(phone)
@@ -109,7 +109,7 @@ class AuthServiceTest {
     @Test
     @DisplayName("전화번호 인증 처리 - 신규 회원")
     void handlePhoneVerification_newMember() {
-        String phone = "010-9876-5432";
+        String phone = "01098765432";
 
         when(memberRepository.findByPhone(phone)).thenReturn(Optional.empty());
         when(jwtProvider.createPhoneVerificationToken(phone)).thenReturn("sample-phone-token");

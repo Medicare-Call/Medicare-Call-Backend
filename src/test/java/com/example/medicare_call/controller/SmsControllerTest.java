@@ -62,7 +62,7 @@ class SmsControllerTest {
     @DisplayName("SMS 인증 성공 - 기존 회원")
     void verifySms_success_existingMember() throws Exception {
         SmsVerifyDto request = new SmsVerifyDto();
-        request.setPhone("010-1234-5678");
+        request.setPhone("01012345678");
         request.setCertificationCode("123456");
 
         when(smsService.verifyCertificationNumber(anyString(), anyString())).thenReturn(true);
@@ -89,7 +89,7 @@ class SmsControllerTest {
     @DisplayName("SMS 인증 성공 - 신규 회원")
     void verifySms_success_newMember() throws Exception {
         SmsVerifyDto request = new SmsVerifyDto();
-        request.setPhone("010-9876-5432");
+        request.setPhone("01098765432");
         request.setCertificationCode("654321");
 
         when(smsService.verifyCertificationNumber(anyString(), anyString())).thenReturn(true);
@@ -116,7 +116,7 @@ class SmsControllerTest {
     @DisplayName("SMS 인증 실패 - 잘못된 인증번호")
     void verifySms_fail_wrongCode() throws Exception {
         SmsVerifyDto request = new SmsVerifyDto();
-        request.setPhone("010-1234-5678");
+        request.setPhone("01012345678");
         request.setCertificationCode("000000");
 
         when(smsService.verifyCertificationNumber(anyString(), anyString())).thenReturn(false);

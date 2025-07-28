@@ -28,7 +28,7 @@ class SmsServiceTest {
     @Test
     @DisplayName("SMS 인증번호 발송 성공")
     void sendCertificationNumber_success() {
-        String phone = "010-1234-5678";
+        String phone = "01012345678";
 
         doNothing().when(smsUtil).sendSMS(anyString(), anyString());
         doNothing().when(smsRepository).createSmsCertification(anyString(), anyString());
@@ -42,7 +42,7 @@ class SmsServiceTest {
     @Test
     @DisplayName("SMS 인증번호 검증 성공")
     void verifyCertificationNumber_success() {
-        String phone = "010-1234-5678";
+        String phone = "01012345678";
         String certificationNumber = "123456";
 
         when(smsRepository.hasKey(phone)).thenReturn(true);
@@ -60,7 +60,7 @@ class SmsServiceTest {
     @Test
     @DisplayName("SMS 인증번호 검증 실패 - 키 존재하지 않음")
     void verifyCertificationNumber_fail_noKey() {
-        String phone = "010-1234-5678";
+        String phone = "01012345678";
         String certificationNumber = "123456";
 
         when(smsRepository.hasKey(phone)).thenReturn(false);
@@ -76,7 +76,7 @@ class SmsServiceTest {
     @Test
     @DisplayName("SMS 인증번호 검증 실패 - 인증번호 불일치")
     void verifyCertificationNumber_fail_wrongCode() {
-        String phone = "010-1234-5678";
+        String phone = "01012345678";
         String certificationNumber = "123456";
         String wrongCode = "654321";
 
@@ -94,7 +94,7 @@ class SmsServiceTest {
     @Test
     @DisplayName("SMS 인증번호 검증 실패 - 저장된 인증번호 null")
     void verifyCertificationNumber_fail_nullStoredNumber() {
-        String phone = "010-1234-5678";
+        String phone = "01012345678";
         String certificationNumber = "123456";
 
         when(smsRepository.hasKey(phone)).thenReturn(true);
