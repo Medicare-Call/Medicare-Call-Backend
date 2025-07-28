@@ -32,7 +32,8 @@ public class SecurityConfig {
             "/users/signup",
             "/users/login",
             "/verifications/**",
-            "/members"
+            "/members",
+            "/call-data"
     };
 
     private final String[] PUBLIC_GET = {
