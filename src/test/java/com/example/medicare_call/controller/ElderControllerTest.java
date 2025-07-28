@@ -52,7 +52,7 @@ class ElderControllerTest {
     void setUp() {
         Member member = Member.builder()
             .name("테스트보호자")
-            .phone("010-0000-0000")
+            .phone("01000000000")
             .gender((byte)1)
             .termsAgreedAt(LocalDateTime.now())
             .plan((byte)1)
@@ -67,7 +67,7 @@ class ElderControllerTest {
         req.setName("홍길동");
         req.setBirthDate(java.time.LocalDate.of(1940, 5, 1));
         req.setGender(Gender.MALE);
-        req.setPhone("010-1234-5678");
+        req.setPhone("01012345678");
         req.setRelationship(ElderRelation.GRANDCHILD);
         req.setResidenceType(ResidenceType.ALONE);
         req.setGuardianId(1);
@@ -78,13 +78,13 @@ class ElderControllerTest {
                 .name("홍길동")
                 .birthDate(java.time.LocalDate.of(1940, 5, 1))
                 .gender((byte)0)
-                .phone("010-1234-5678")
+                .phone("01012345678")
                 .relationship(ElderRelation.GRANDCHILD)
                 .residenceType(ResidenceType.ALONE)
                 .guardian(Member.builder()
                     .id(1)
                     .name("테스트보호자")
-                    .phone("010-0000-0000")
+                    .phone("01000000000")
                     .gender((byte)1)
                     .termsAgreedAt(LocalDateTime.now())
                     .plan((byte)1)
@@ -105,7 +105,7 @@ class ElderControllerTest {
         req.setName(""); // name 누락
         req.setBirthDate(java.time.LocalDate.of(1940, 5, 1));
         req.setGender(Gender.MALE);
-        req.setPhone("010-1234-5678");
+        req.setPhone("01012345678");
         req.setRelationship(ElderRelation.GRANDCHILD);
         req.setResidenceType(ResidenceType.ALONE);
         req.setGuardianId(1);
