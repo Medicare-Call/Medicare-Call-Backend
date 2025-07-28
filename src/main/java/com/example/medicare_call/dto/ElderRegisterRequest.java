@@ -29,11 +29,11 @@ public class ElderRegisterRequest {
     @Pattern(regexp = "^010-\\d{4}-\\d{4}$", message = "휴대폰 번호는 010-1234-5678 형식이어야 합니다.")
     private String phone;
 
-    @Schema(description = "어르신과의 관계 (GRANDCHILD: 손자, SPOUSE: 배우자)", example = "GRANDCHILD")
+    @Schema(description = "어르신과의 관계 (CHILD: 자식, GRANDCHILD: 손자, SIBLING: 형제, RELATIVE: 친척, ACQUAINTANCE: 지인)", example = "GRANDCHILD")
     @NotNull(message = "어르신과의 관계는 필수입니다.")
     private ElderRelation relationship;
 
-    @Schema(description = "어르신 거주방식 (ALONE: 혼자 계세요, WITH_SPOUSE: 배우자와 함께, WITH_ME: 저와 함께, WITH_FAMILY: 가족과 함께)", example = "ALONE")
+    @Schema(description = "어르신 거주방식 (ALONE: 혼자 계세요, WITH_FAMILY: 가족과 함께 살아요)", example = "ALONE")
     @NotNull(message = "어르신 거주방식은 필수입니다.")
     private ResidenceType residenceType;
 

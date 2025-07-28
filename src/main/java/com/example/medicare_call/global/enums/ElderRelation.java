@@ -4,10 +4,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * 어르신과의 관계를 나타내는 Enum
- * (예: 손자, 배우자 등)
+ * (예: 자식, 손자, 형제, 친척, 지인)
  */
-@Schema(description = "어르신과의 관계 (GRANDCHILD: 손자, SPOUSE: 배우자)")
+@Schema(description = "어르신과의 관계 (CHILD: 자식, GRANDCHILD: 손자, SIBLING: 형제, RELATIVE: 친척, ACQUAINTANCE: 지인)")
 public enum ElderRelation {
-    GRANDCHILD, // 손자
-    SPOUSE      // 배우자
+    CHILD,         // 자식
+    GRANDCHILD,    // 손자
+    SIBLING,       // 형제
+    RELATIVE,      // 친척
+    ACQUAINTANCE   // 지인
 } 
