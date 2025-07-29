@@ -42,8 +42,24 @@ public class CareCallRecord {
     @Column(name = "psych_status")
     private Byte psychStatus;
 
+    @Column(name = "start_time")
+    private LocalDateTime startTime;
+
+    @Column(name = "end_time")
+    private LocalDateTime endTime;
+
+    @Column(name = "call_status")
+    private String callStatus;
+
+    @Column(name = "transcription_language")
+    private String transcriptionLanguage;
+
+    @Column(name = "transcription_text", columnDefinition = "TEXT")
+    private String transcriptionText;
+
     @Builder
-    public CareCallRecord(Integer id, Elder elder, CareCallSetting setting, LocalDateTime calledAt, Byte responded, LocalDateTime sleepStart, LocalDateTime sleepEnd, Byte healthStatus, Byte psychStatus) {
+    public CareCallRecord(Integer id, Elder elder, CareCallSetting setting, LocalDateTime calledAt, Byte responded, LocalDateTime sleepStart, LocalDateTime sleepEnd, Byte healthStatus, Byte psychStatus,
+                          LocalDateTime startTime, LocalDateTime endTime, String callStatus, String transcriptionLanguage, String transcriptionText) {
         this.id = id;
         this.elder = elder;
         this.setting = setting;
@@ -53,5 +69,10 @@ public class CareCallRecord {
         this.sleepEnd = sleepEnd;
         this.healthStatus = healthStatus;
         this.psychStatus = psychStatus;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.callStatus = callStatus;
+        this.transcriptionLanguage = transcriptionLanguage;
+        this.transcriptionText = transcriptionText;
     }
 } 
