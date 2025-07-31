@@ -91,7 +91,7 @@ public class OpenAiHealthDataService {
             다음 통화 내용에서 건강 데이터를 추출하여 JSON 형태로 응답해주세요.
             
             통화 날짜: %s
-            통화 언어: %s
+            통화 언어: 한국어
             통화 내용:
             %s
             
@@ -143,7 +143,6 @@ public class OpenAiHealthDataService {
             }
             """, 
             request.getCallDate(),
-            request.getTranscriptionLanguage(),
             request.getTranscriptionText()
         );
     }

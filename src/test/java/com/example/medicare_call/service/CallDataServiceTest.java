@@ -90,7 +90,6 @@ class CallDataServiceTest {
                 .startTime(LocalDateTime.parse("2025-01-27T10:00:00"))
                 .endTime(LocalDateTime.parse("2025-01-27T10:15:00"))
                 .callStatus("completed")
-                .transcriptionLanguage("ko")
                 .transcriptionText("고객: 안녕하세요, 오늘 컨디션은 어떠세요?\n어르신: 네, 오늘은 컨디션이 좋아요.")
                 .build();
 
@@ -105,7 +104,7 @@ class CallDataServiceTest {
         assertThat(result).isNotNull();
         assertThat(result.getId()).isEqualTo(1);
         assertThat(result.getCallStatus()).isEqualTo("completed");
-        assertThat(result.getTranscriptionLanguage()).isEqualTo("ko");
+
         assertThat(result.getTranscriptionText()).isEqualTo("고객: 안녕하세요, 오늘 컨디션은 어떠세요?\n어르신: 네, 오늘은 컨디션이 좋아요.");
         
         verify(elderRepository).findById(1);
@@ -113,7 +112,6 @@ class CallDataServiceTest {
         verify(careCallRecordRepository).save(any(CareCallRecord.class));
         verify(openAiHealthDataService).extractHealthData(argThat(healthRequest -> 
             healthRequest.getTranscriptionText().equals("고객: 안녕하세요, 오늘 컨디션은 어떠세요?\n어르신: 네, 오늘은 컨디션이 좋아요.") &&
-            healthRequest.getTranscriptionLanguage().equals("ko") &&
             healthRequest.getCallDate().equals("2025-01-27")
         ));
     }
@@ -154,7 +152,7 @@ class CallDataServiceTest {
         assertThat(result).isNotNull();
         assertThat(result.getId()).isEqualTo(1);
         assertThat(result.getCallStatus()).isEqualTo("failed");
-        assertThat(result.getTranscriptionLanguage()).isNull();
+
         assertThat(result.getTranscriptionText()).isNull();
         
         verify(elderRepository).findById(1);
@@ -164,11 +162,10 @@ class CallDataServiceTest {
     }
 
     @Test
-    @DisplayName("통화 데이터 저장 성공 - 녹음 텍스트 언어만 있고 텍스트 없음")
-    void saveCallData_success_transcriptionLanguageOnly() {
+    @DisplayName("통화 데이터 저장 성공 - 녹음 텍스트 없음")
+    void saveCallData_success_transcriptionTextOnly() {
         // given
         CallDataRequest.TranscriptionData transcriptionData = CallDataRequest.TranscriptionData.builder()
-                .language("en")
                 .build();
 
         CallDataRequest request = CallDataRequest.builder()
@@ -191,7 +188,6 @@ class CallDataServiceTest {
                 .elder(elder)
                 .setting(setting)
                 .callStatus("busy")
-                .transcriptionLanguage("en")
                 .build();
 
         when(elderRepository.findById(1)).thenReturn(Optional.of(elder));
@@ -205,7 +201,6 @@ class CallDataServiceTest {
         assertThat(result).isNotNull();
         assertThat(result.getId()).isEqualTo(1);
         assertThat(result.getCallStatus()).isEqualTo("busy");
-        assertThat(result.getTranscriptionLanguage()).isEqualTo("en");
         assertThat(result.getTranscriptionText()).isNull();
         
         verify(elderRepository).findById(1);
@@ -318,7 +313,6 @@ class CallDataServiceTest {
                 .build();
 
         CallDataRequest.TranscriptionData transcriptionData = CallDataRequest.TranscriptionData.builder()
-                .language("ko")
                 .fullText(Arrays.asList(segment))
                 .build();
 
@@ -344,7 +338,6 @@ class CallDataServiceTest {
                 .setting(setting)
                 .startTime(LocalDateTime.parse("2025-01-27T10:00:00"))
                 .callStatus("completed")
-                .transcriptionLanguage("ko")
                 .transcriptionText("어르신: 오늘 아침에 밥을 먹었고, 혈당을 측정했어요. 120이 나왔어요.")
                 .build();
 
@@ -359,7 +352,6 @@ class CallDataServiceTest {
         assertThat(result).isNotNull();
         verify(openAiHealthDataService).extractHealthData(argThat(healthRequest -> 
             healthRequest.getTranscriptionText().equals("어르신: 오늘 아침에 밥을 먹었고, 혈당을 측정했어요. 120이 나왔어요.") &&
-            healthRequest.getTranscriptionLanguage().equals("ko") &&
             healthRequest.getCallDate().equals("2025-01-27")
         ));
     }

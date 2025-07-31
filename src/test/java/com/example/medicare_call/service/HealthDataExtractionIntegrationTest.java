@@ -46,7 +46,6 @@ class HealthDataExtractionIntegrationTest {
                     상담사: 좋은 수치네요. 기분은 어떠세요?
                     어르신: 오늘은 기분이 좋아요. 잠도 잘 잤어요.
                     """)
-                .transcriptionLanguage("ko")
                 .callDate("2024-01-01")
                 .build();
 
@@ -113,7 +112,6 @@ class HealthDataExtractionIntegrationTest {
                     상담사: 좋습니다. 컨디션은 어떠세요?
                     어르신: 오늘은 머리가 좀 아파요.
                     """)
-                .transcriptionLanguage("ko")
                 .callDate("2024-01-01")
                 .build();
 
@@ -171,7 +169,6 @@ class HealthDataExtractionIntegrationTest {
         // given
         HealthDataExtractionRequest request = HealthDataExtractionRequest.builder()
                 .transcriptionText("")
-                .transcriptionLanguage("ko")
                 .callDate("2024-01-01")
                 .build();
 
