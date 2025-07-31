@@ -19,12 +19,7 @@ public class HealthDataExtractionRequest {
     )
     private String transcriptionText;
     
-    @Schema(
-        description = "통화 언어",
-        example = "ko",
-        allowableValues = {"ko", "en"}
-    )
-    private String transcriptionLanguage;
+
     
     @Schema(
         description = "통화 날짜 (YYYY-MM-DD 형식)",

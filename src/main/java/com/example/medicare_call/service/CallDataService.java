@@ -39,14 +39,10 @@ public class CallDataService {
                 .orElseThrow(() -> new IllegalArgumentException("통화 설정을 찾을 수 없습니다: " + request.getSettingId()));
         
         String transcriptionText = null;
-        String transcriptionLanguage = null;
-        if (request.getTranscription() != null) {
-            transcriptionLanguage = request.getTranscription().getLanguage();
-            if (request.getTranscription().getFullText() != null) {
-                transcriptionText = request.getTranscription().getFullText().stream()
-                        .map(segment -> segment.getSpeaker() + ": " + segment.getText())
-                        .collect(Collectors.joining("\n"));
-            }
+        if (request.getTranscription() != null && request.getTranscription().getFullText() != null) {
+            transcriptionText = request.getTranscription().getFullText().stream()
+                    .map(segment -> segment.getSpeaker() + ": " + segment.getText())
+                    .collect(Collectors.joining("\n"));
         }
         
         CareCallRecord record = CareCallRecord.builder()
@@ -55,7 +51,6 @@ public class CallDataService {
                 .startTime(request.getStartTime() != null ? LocalDateTime.ofInstant(request.getStartTime(), ZoneOffset.UTC) : null)
                 .endTime(request.getEndTime() != null ? LocalDateTime.ofInstant(request.getEndTime(), ZoneOffset.UTC) : null)
                 .callStatus(request.getStatus())
-                .transcriptionLanguage(transcriptionLanguage)
                 .transcriptionText(transcriptionText)
                 .build();
         
@@ -65,7 +60,7 @@ public class CallDataService {
         // OpenAI를 통한 건강 데이터 추출
         if (transcriptionText != null && !transcriptionText.trim().isEmpty()) {
             try {
-                extractHealthDataFromCall(saved, transcriptionText, transcriptionLanguage);
+                extractHealthDataFromCall(saved, transcriptionText);
             } catch (Exception e) {
                 log.error("건강 데이터 추출 중 오류 발생", e);
             }
@@ -74,7 +69,7 @@ public class CallDataService {
         return saved;
     }
     
-    private void extractHealthDataFromCall(CareCallRecord callRecord, String transcriptionText, String transcriptionLanguage) {
+    private void extractHealthDataFromCall(CareCallRecord callRecord, String transcriptionText) {
         log.info("통화 내용에서 건강 데이터 추출 시작: callId={}", callRecord.getId());
         
         String callDate = callRecord.getStartTime() != null ? 
@@ -83,7 +78,6 @@ public class CallDataService {
         
         HealthDataExtractionRequest request = HealthDataExtractionRequest.builder()
                 .transcriptionText(transcriptionText)
-                .transcriptionLanguage(transcriptionLanguage)
                 .callDate(callDate)
                 .build();
         

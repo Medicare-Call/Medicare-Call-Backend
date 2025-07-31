@@ -104,7 +104,7 @@ class CallDataControllerTest {
                 .startTime(LocalDateTime.parse("2025-01-27T10:00:00"))
                 .endTime(LocalDateTime.parse("2025-01-27T10:15:00"))
                 .callStatus("completed")
-                .transcriptionLanguage("ko")
+
                 .transcriptionText("고객: 안녕하세요, 오늘 컨디션은 어떠세요?\n어르신: 네, 오늘은 컨디션이 좋아요.")
                 .build();
 
@@ -117,7 +117,7 @@ class CallDataControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.callStatus").value("completed"))
-                .andExpect(jsonPath("$.transcriptionLanguage").value("ko"))
+
                 .andExpect(jsonPath("$.transcriptionText").value("고객: 안녕하세요, 오늘 컨디션은 어떠세요?\n어르신: 네, 오늘은 컨디션이 좋아요."));
     }
 

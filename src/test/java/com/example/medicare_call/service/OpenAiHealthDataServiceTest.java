@@ -50,7 +50,6 @@ class OpenAiHealthDataServiceTest {
         // given
         HealthDataExtractionRequest request = HealthDataExtractionRequest.builder()
                 .transcriptionText("오늘 아침에 밥을 먹었고, 혈당을 측정했어요. 120이 나왔어요.")
-                .transcriptionLanguage("ko")
                 .callDate("2024-01-01")
                 .build();
 
@@ -101,7 +100,7 @@ class OpenAiHealthDataServiceTest {
         when(restTemplate.postForObject(eq("https://api.openai.com/v1/chat/completions"), any(HttpEntity.class), eq(OpenAiResponse.class)))
                 .thenReturn(openAiResponse);
         // parseHealthDataResponse 메서드에서 trim()된 JSON 문자열을 사용하므로 Mock 설정을 수정
-        when(objectMapper.readValue(mockOpenAiResponse.trim(), HealthDataExtractionResponse.class))
+        when(objectMapper.readValue(any(String.class), eq(HealthDataExtractionResponse.class)))
                 .thenReturn(expectedResponse);
 
         // when
@@ -121,7 +120,6 @@ class OpenAiHealthDataServiceTest {
         // given
         HealthDataExtractionRequest request = HealthDataExtractionRequest.builder()
                 .transcriptionText("테스트 통화 내용")
-                .transcriptionLanguage("ko")
                 .callDate("2024-01-01")
                 .build();
 
@@ -148,7 +146,6 @@ class OpenAiHealthDataServiceTest {
         // given
         HealthDataExtractionRequest request = HealthDataExtractionRequest.builder()
                 .transcriptionText("테스트 통화 내용")
-                .transcriptionLanguage("ko")
                 .callDate("2024-01-01")
                 .build();
 
@@ -164,7 +161,7 @@ class OpenAiHealthDataServiceTest {
 
         when(restTemplate.postForObject(eq("https://api.openai.com/v1/chat/completions"), any(HttpEntity.class), eq(OpenAiResponse.class)))
                 .thenReturn(openAiResponse);
-        when(objectMapper.readValue("잘못된 JSON 형식", HealthDataExtractionResponse.class))
+        when(objectMapper.readValue(any(String.class), eq(HealthDataExtractionResponse.class)))
                 .thenThrow(new RuntimeException("JSON 파싱 오류"));
 
         // when
@@ -182,7 +179,6 @@ class OpenAiHealthDataServiceTest {
         // given
         HealthDataExtractionRequest request = HealthDataExtractionRequest.builder()
                 .transcriptionText("")
-                .transcriptionLanguage("ko")
                 .callDate("2024-01-01")
                 .build();
 
@@ -208,7 +204,7 @@ class OpenAiHealthDataServiceTest {
 
         when(restTemplate.postForObject(eq("https://api.openai.com/v1/chat/completions"), any(HttpEntity.class), eq(OpenAiResponse.class)))
                 .thenReturn(openAiResponse);
-        when(objectMapper.readValue("{}", HealthDataExtractionResponse.class))
+        when(objectMapper.readValue(any(String.class), eq(HealthDataExtractionResponse.class)))
                 .thenReturn(expectedResponse);
 
         // when

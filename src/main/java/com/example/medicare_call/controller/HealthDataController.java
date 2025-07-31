@@ -48,7 +48,6 @@ public class HealthDataController {
             example = """
             {
               "transcriptionText": "오늘 아침에 밥을 먹었고, 혈당을 측정했어요. 120이 나왔어요.",
-              "transcriptionLanguage": "ko",
               "callDate": "2024-01-01"
             }
             """
