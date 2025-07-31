@@ -78,21 +78,22 @@ jobs:
             echo "🌱 Running new container"
             sudo docker run -d -p 8000:8080 --name medicare-call \
             -e SPRING_PROFILES_ACTIVE=prod \
-            -e MYSQL_USER=${MYSQL_USER} \
-            -e MYSQL_PASSWORD=${MYSQL_PASSWORD} \
-            -e MYSQL_URL=${MYSQL_URL} \
-            -e MYSQL_PASSWORD=${MYSQL_PASSWORD} \
-            -e MYSQL_URL=${MYSQL_URL} \
-            -e JWT_SECRET=${JWT_SECRET} \
-            -e JWT_ACCESS_EXPIRATION=${JWT_ACCESS_EXPIRATION} \
-            -e JWT_PHONE_EXPIRATION=${JWT_PHONE_EXPIRATION} \
-            -e REDIS_HOST=${REDIS_HOST} \
-            -e REDIS_PORT=${REDIS_PORT} \
-            -e SMS_KEY=${SMS_KEY} \
-            -e SMS_NUMBER=${SMS_NUMBER} \
-            -e SMS_SECRET=${SMS_SECRET} \
-            -e CARE_CALL_URL=${CARE_CALL_URL} \
-            ${DOCKER_USERNAME}/${DOCKER_IMAGE}
+            -e MYSQL_USER="${MYSQL_USER}" \
+            -e MYSQL_PASSWORD="${MYSQL_PASSWORD}" \
+            -e MYSQL_URL="${MYSQL_URL}" \
+            -e JWT_SECRET="${JWT_SECRET}" \
+            -e JWT_ACCESS_EXPIRATION="${JWT_ACCESS_EXPIRATION}" \
+            -e JWT_PHONE_EXPIRATION="${JWT_PHONE_EXPIRATION}" \
+            -e REDIS_HOST="${REDIS_HOST}" \
+            -e REDIS_PORT="${REDIS_PORT}" \
+            -e SMS_KEY="${SMS_KEY}" \
+            -e SMS_NUMBER="${SMS_NUMBER}" \
+            -e SMS_SECRET="${SMS_SECRET}" \
+            -e CARE_CALL_URL="${CARE_CALL_URL}" \
+            -e OPENAI_API_KEY="${OPENAI_API_KEY}" \
+            -e OPENAI_API_URL="${OPENAI_API_URL}" \
+            -e OPENAI_API_MODEL="${OPENAI_API_MODEL}" \
+            "${DOCKER_USERNAME}/${DOCKER_IMAGE}"
 
             echo "⏳ Waiting for container to start..."
             sleep 15
