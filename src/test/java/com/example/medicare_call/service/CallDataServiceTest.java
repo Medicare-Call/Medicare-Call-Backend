@@ -4,6 +4,8 @@ import com.example.medicare_call.domain.CareCallRecord;
 import com.example.medicare_call.domain.CareCallSetting;
 import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.dto.CallDataRequest;
+import com.example.medicare_call.dto.HealthDataExtractionRequest;
+import com.example.medicare_call.dto.HealthDataExtractionResponse;
 import com.example.medicare_call.repository.CareCallRecordRepository;
 import com.example.medicare_call.repository.CareCallSettingRepository;
 import com.example.medicare_call.repository.ElderRepository;
@@ -22,6 +24,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -37,6 +40,9 @@ class CallDataServiceTest {
 
     @Mock
     private CareCallSettingRepository careCallSettingRepository;
+
+    @Mock
+    private OpenAiHealthDataService openAiHealthDataService;
 
     @InjectMocks
     private CallDataService callDataService;
@@ -105,6 +111,11 @@ class CallDataServiceTest {
         verify(elderRepository).findById(1);
         verify(careCallSettingRepository).findById(2);
         verify(careCallRecordRepository).save(any(CareCallRecord.class));
+        verify(openAiHealthDataService).extractHealthData(argThat(healthRequest -> 
+            healthRequest.getTranscriptionText().equals("고객: 안녕하세요, 오늘 컨디션은 어떠세요?\n어르신: 네, 오늘은 컨디션이 좋아요.") &&
+            healthRequest.getTranscriptionLanguage().equals("ko") &&
+            healthRequest.getCallDate().equals("2025-01-27")
+        ));
     }
 
     @Test
@@ -149,6 +160,7 @@ class CallDataServiceTest {
         verify(elderRepository).findById(1);
         verify(careCallSettingRepository).findById(2);
         verify(careCallRecordRepository).save(any(CareCallRecord.class));
+        verify(openAiHealthDataService, never()).extractHealthData(any());
     }
 
     @Test
@@ -199,6 +211,7 @@ class CallDataServiceTest {
         verify(elderRepository).findById(1);
         verify(careCallSettingRepository).findById(2);
         verify(careCallRecordRepository).save(any(CareCallRecord.class));
+        verify(openAiHealthDataService, never()).extractHealthData(any());
     }
 
     @Test
@@ -220,6 +233,7 @@ class CallDataServiceTest {
         
         verify(elderRepository).findById(999);
         verify(careCallSettingRepository, never()).findById(any());
+        verify(openAiHealthDataService, never()).extractHealthData(any());
     }
 
     @Test
@@ -246,6 +260,7 @@ class CallDataServiceTest {
         
         verify(elderRepository).findById(1);
         verify(careCallSettingRepository).findById(999);
+        verify(openAiHealthDataService, never()).extractHealthData(any());
     }
 
     @Test
@@ -290,5 +305,62 @@ class CallDataServiceTest {
         verify(elderRepository).findById(1);
         verify(careCallSettingRepository).findById(2);
         verify(careCallRecordRepository).save(any(CareCallRecord.class));
+        verify(openAiHealthDataService, never()).extractHealthData(any());
+    }
+
+    @Test
+    @DisplayName("통화 데이터 저장 시 OpenAI 건강 데이터 추출 서비스가 호출된다")
+    void saveCallData_callsOpenAiHealthDataService() {
+        // given
+        CallDataRequest.TranscriptionData.TranscriptionSegment segment = CallDataRequest.TranscriptionData.TranscriptionSegment.builder()
+                .speaker("어르신")
+                .text("오늘 아침에 밥을 먹었고, 혈당을 측정했어요. 120이 나왔어요.")
+                .build();
+
+        CallDataRequest.TranscriptionData transcriptionData = CallDataRequest.TranscriptionData.builder()
+                .language("ko")
+                .fullText(Arrays.asList(segment))
+                .build();
+
+        CallDataRequest request = CallDataRequest.builder()
+                .elderId(1)
+                .settingId(2)
+                .startTime(Instant.parse("2025-01-27T10:00:00Z"))
+                .status("completed")
+                .transcription(transcriptionData)
+                .build();
+
+        Elder elder = Elder.builder()
+                .id(1)
+                .build();
+        
+        CareCallSetting setting = CareCallSetting.builder()
+                .id(2)
+                .build();
+        
+        CareCallRecord expectedRecord = CareCallRecord.builder()
+                .id(1)
+                .elder(elder)
+                .setting(setting)
+                .startTime(LocalDateTime.parse("2025-01-27T10:00:00"))
+                .callStatus("completed")
+                .transcriptionLanguage("ko")
+                .transcriptionText("어르신: 오늘 아침에 밥을 먹었고, 혈당을 측정했어요. 120이 나왔어요.")
+                .build();
+
+        when(elderRepository.findById(1)).thenReturn(Optional.of(elder));
+        when(careCallSettingRepository.findById(2)).thenReturn(Optional.of(setting));
+        when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(expectedRecord);
+
+        // when
+        CareCallRecord result = callDataService.saveCallData(request);
+
+        // then
+        assertThat(result).isNotNull();
+        verify(openAiHealthDataService).extractHealthData(argThat(healthRequest -> 
+            healthRequest.getTranscriptionText().equals("어르신: 오늘 아침에 밥을 먹었고, 혈당을 측정했어요. 120이 나왔어요.") &&
+            healthRequest.getTranscriptionLanguage().equals("ko") &&
+            healthRequest.getCallDate().equals("2025-01-27")
+        ));
     }
 } 

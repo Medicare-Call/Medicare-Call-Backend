@@ -58,6 +58,9 @@ jobs:
             SMS_NUMBER="${{ secrets.SMS_NUMBER }}"
             SMS_SECRET="${{ secrets.SMS_SECRET }}"
             CARE_CALL_URL="${{ secrets.CARE_CALL_URL }}"
+            OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}"
+            OPENAI_API_URL="${{ secrets.OPENAI_API_URL }}"
+            OPENAI_API_MODEL="${{ secrets.OPENAI_API_MODEL }}"
 
 
             echo "✋🏻 Stopping existing container"

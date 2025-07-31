@@ -33,7 +33,8 @@ public class SecurityConfig {
             "/users/login",
             "/verifications/**",
             "/members",
-            "/call-data"
+            "/call-data",
+            "/health-data/**" // 제거 예정
     };
 
     private final String[] PUBLIC_GET = {
