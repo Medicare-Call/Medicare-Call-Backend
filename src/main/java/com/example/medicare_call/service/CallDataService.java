@@ -4,6 +4,8 @@ import com.example.medicare_call.domain.CareCallRecord;
 import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.domain.CareCallSetting;
 import com.example.medicare_call.dto.CallDataRequest;
+import com.example.medicare_call.dto.HealthDataExtractionRequest;
+import com.example.medicare_call.dto.HealthDataExtractionResponse;
 import com.example.medicare_call.repository.CareCallRecordRepository;
 import com.example.medicare_call.repository.ElderRepository;
 import com.example.medicare_call.repository.CareCallSettingRepository;
@@ -14,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -23,6 +26,7 @@ public class CallDataService {
     private final CareCallRecordRepository careCallRecordRepository;
     private final ElderRepository elderRepository;
     private final CareCallSettingRepository careCallSettingRepository;
+    private final OpenAiHealthDataService openAiHealthDataService;
 
     @Transactional
     public CareCallRecord saveCallData(CallDataRequest request) {
@@ -57,6 +61,36 @@ public class CallDataService {
         
         CareCallRecord saved = careCallRecordRepository.save(record);
         log.info("통화 데이터 저장 완료: id={}", saved.getId());
+        
+        // OpenAI를 통한 건강 데이터 추출
+        if (transcriptionText != null && !transcriptionText.trim().isEmpty()) {
+            try {
+                extractHealthDataFromCall(saved, transcriptionText, transcriptionLanguage);
+            } catch (Exception e) {
+                log.error("건강 데이터 추출 중 오류 발생", e);
+            }
+        }
+        
         return saved;
+    }
+    
+    private void extractHealthDataFromCall(CareCallRecord callRecord, String transcriptionText, String transcriptionLanguage) {
+        log.info("통화 내용에서 건강 데이터 추출 시작: callId={}", callRecord.getId());
+        
+        String callDate = callRecord.getStartTime() != null ? 
+            callRecord.getStartTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) : 
+            LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        
+        HealthDataExtractionRequest request = HealthDataExtractionRequest.builder()
+                .transcriptionText(transcriptionText)
+                .transcriptionLanguage(transcriptionLanguage)
+                .callDate(callDate)
+                .build();
+        
+        HealthDataExtractionResponse healthData = openAiHealthDataService.extractHealthData(request);
+        
+        log.info("추출된 건강 데이터: {}", healthData);
+        
+        // TODO: 추출된 건강 데이터를 적절한 엔티티에 저장하는 로직 추가
     }
 } 

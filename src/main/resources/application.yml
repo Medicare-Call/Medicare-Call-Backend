@@ -48,9 +48,19 @@ spring:
       key: ${SMS_KEY}
       secret: ${SMS_SECRET}
       number: ${SMS_NUMBER}
+
+server:
+  servlet:
+    context-path: /api
+
 care-call:
   url: ${CARE_CALL_URL}
 
+openai:
+  api:
+    key: ${OPENAI_API_KEY}
+    url: ${OPENAI_API_URL}
+  model: ${OPENAI_API_MODEL}
 
 ---
 spring:
@@ -100,3 +110,9 @@ server:
 
 care-call:
   url: ${CARE_CALL_URL}
+
+openai:
+  api:
+    key: ${OPENAI_API_KEY}
+    url: ${OPENAI_API_URL}
+  model: ${OPENAI_API_MODEL}

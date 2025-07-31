@@ -26,3 +26,9 @@ jwt:
   phoneTokenExpiration: 1
 care-call:
   url: test
+
+openai:
+  api:
+    key: test-openai-key
+    url: https://api.openai.com/v1/chat/completions
+  model: gpt-4
