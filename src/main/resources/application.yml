@@ -56,6 +56,11 @@ server:
 care-call:
   url: ${CARE_CALL_URL}
 
+openai:
+  api:
+    key: ${OPENAI_API_KEY}
+    url: ${OPENAI_API_URL}
+  model: ${OPENAI_API_MODEL}
 
 ---
 spring:

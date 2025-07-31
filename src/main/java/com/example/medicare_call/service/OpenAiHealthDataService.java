@@ -31,10 +31,10 @@ public class OpenAiHealthDataService {
     @Value("${openai.api.key}")
     private String openaiApiKey;
 
-    @Value("${openai.api.url:https://api.openai.com/v1/chat/completions}")
+    @Value("${openai.api.url}")
     private String openaiApiUrl;
     
-    @Value("${openai.model:gpt-4}")
+    @Value("${openai.model}")
     private String openaiModel;
 
     public HealthDataExtractionResponse extractHealthData(HealthDataExtractionRequest request) {
