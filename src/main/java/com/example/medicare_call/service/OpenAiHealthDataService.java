@@ -131,7 +131,7 @@ public class OpenAiHealthDataService {
               "psychologicalState": ["심리 상태 요약 1", "심리 상태 요약 2"],
               "bloodSugarData": {
                 "measurementTime": "측정 시각",
-                "beforeMeal": "식전/식후",
+                "mealTime": "식전/식후",
                 "bloodSugarValue": 숫자값
               },
               "medicationData": {

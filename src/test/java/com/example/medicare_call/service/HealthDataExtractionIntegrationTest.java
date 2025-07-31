@@ -61,7 +61,7 @@ class HealthDataExtractionIntegrationTest {
               "psychologicalState": ["기분이 좋음", "잠을 잘 잤음"],
               "bloodSugarData": {
                 "measurementTime": "아침",
-                "beforeMeal": "식후",
+                "mealTime": "식후",
                 "bloodSugarValue": 120
               },
               "medicationData": null,
@@ -88,7 +88,7 @@ class HealthDataExtractionIntegrationTest {
         // 혈당 데이터 검증
         assertThat(result.getBloodSugarData()).isNotNull();
         assertThat(result.getBloodSugarData().getBloodSugarValue()).isEqualTo(120);
-        assertThat(result.getBloodSugarData().getBeforeMeal()).isEqualTo("식후");
+        assertThat(result.getBloodSugarData().getMealTime()).isEqualTo("식후");
         
         // 심리 상태 검증
         assertThat(result.getPsychologicalState()).isNotNull();

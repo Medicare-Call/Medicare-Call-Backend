@@ -86,7 +86,7 @@ public class HealthDataExtractionResponse {
             example = "식후",
             allowableValues = {"식전", "식후"}
         )
-        private String beforeMeal;
+        private String mealTime;
         
         @Schema(description = "혈당 값 (mg/dL)", example = "120")
         private Integer bloodSugarValue;

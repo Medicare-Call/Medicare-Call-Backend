@@ -65,7 +65,7 @@ class OpenAiHealthDataServiceTest {
               "psychologicalState": ["기분이 좋음"],
               "bloodSugarData": {
                 "measurementTime": "아침",
-                "beforeMeal": "식후",
+                "mealTime": "식후",
                 "bloodSugarValue": 120
               },
               "medicationData": null,
@@ -91,7 +91,7 @@ class OpenAiHealthDataServiceTest {
                         .build())
                 .bloodSugarData(HealthDataExtractionResponse.BloodSugarData.builder()
                         .measurementTime("아침")
-                        .beforeMeal("식후")
+                        .mealTime("식후")
                         .bloodSugarValue(120)
                         .build())
                 .psychologicalState(List.of("기분이 좋음"))
