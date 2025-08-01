@@ -42,8 +42,8 @@ class CareCallIntegrationTest {
     private MemberRepository memberRepository;
 
     @Test
-    void 실제로_등록된_시간과_일치하면_전화를_보낸다() {
-        // given: 보호자 정보는 모든 필수 필드 포함해야 함
+    void 크론잡_전화요청() {
+        // given
         Member guardian = memberRepository.save(
                 Member.builder()
                         .name("보호자")
