@@ -45,7 +45,7 @@ public class CareCallService {
         List<Disease> diseases = elderDiseaseRepository.findDiseasesByElder(elder);
 
         String prompt = generatePrompt(elder, healthInfo, diseases, callType);
-        sendPrompt(prompt);
+        sendPrompt(elder.getId(), elder.getPhone(), prompt);
     }
 
     //TODO: CallType에 따라서 전달하는 1,2,3차 프롬프트 내용 알맞게 수정
@@ -71,15 +71,17 @@ public class CareCallService {
         return sb.toString();
     }
 
-    private void sendPrompt(String prompt) {
+    private void sendPrompt(Integer elderId, String phoneNumber, String prompt) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
-            Map<String, String> body = new HashMap<>();
+            Map<String, Object> body = new HashMap<>();
+            body.put("elderId", elderId);
+            body.put("phoneNumber", phoneNumber);
             body.put("prompt", prompt);
 
-            HttpEntity<Map<String, String>> request = new HttpEntity<>(body, headers);
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
             ResponseEntity<String> response = restTemplate.postForEntity(callUrl, request, String.class);
 
             System.out.println("호출 성공: " + response.getBody());

@@ -74,7 +74,6 @@ class ElderControllerTest {
 
         when(elderService.registerElder(any())).thenReturn(
             Elder.builder()
-                .id(1)
                 .name("홍길동")
                 .birthDate(java.time.LocalDate.of(1940, 5, 1))
                 .gender((byte)0)
