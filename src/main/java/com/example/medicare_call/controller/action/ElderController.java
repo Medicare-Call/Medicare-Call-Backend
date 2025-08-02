@@ -1,4 +1,4 @@
-package com.example.medicare_call.controller;
+package com.example.medicare_call.controller.action;
 
 import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.service.ElderService;
