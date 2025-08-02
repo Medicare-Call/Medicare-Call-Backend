@@ -1,0 +1,45 @@
+package com.example.medicare_call.service;
+
+import com.example.medicare_call.domain.BloodSugarRecord;
+import com.example.medicare_call.domain.CareCallRecord;
+import com.example.medicare_call.dto.HealthDataExtractionResponse;
+import com.example.medicare_call.global.enums.BloodSugarMeasurementType;
+import com.example.medicare_call.repository.BloodSugarRecordRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class BloodSugarService {
+    private final BloodSugarRecordRepository bloodSugarRecordRepository;
+
+    @Transactional
+    public void saveBloodSugarData(CareCallRecord callRecord, HealthDataExtractionResponse.BloodSugarData bloodSugarData) {
+        if (bloodSugarData.getBloodSugarValue() == null) {
+            log.warn("혈당 값이 없어서 저장하지 않습니다.");
+            return;
+        }
+
+        // measurementType 결정 (식전/식후)
+        BloodSugarMeasurementType measurementType = BloodSugarMeasurementType.fromDescription(bloodSugarData.getMealTime());
+        
+        BloodSugarRecord bloodSugarRecord = BloodSugarRecord.builder()
+                .careCallRecord(callRecord)
+                .blood_sugar_value(BigDecimal.valueOf(bloodSugarData.getBloodSugarValue()))
+                .measurementType(measurementType)
+                .recordedAt(LocalDateTime.now()) // TODO: 혈당 측정한 시간을 전화를 통해 질의할 것인지 확정한 뒤에 재검토
+                .responseSummary(String.format("측정시각: %s, 식전/식후: %s", 
+                    bloodSugarData.getMeasurementTime(), bloodSugarData.getMealTime()))
+                .build();
+        
+        bloodSugarRecordRepository.save(bloodSugarRecord);
+        log.info("혈당 데이터 저장 완료: value={}, mealTime={}", 
+            bloodSugarData.getBloodSugarValue(), bloodSugarData.getMealTime());
+    }
+} 

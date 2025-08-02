@@ -1,5 +1,6 @@
 package com.example.medicare_call.domain;
 
+import com.example.medicare_call.global.enums.MedicationTakenStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Builder;
@@ -23,14 +24,15 @@ public class MedicationTakenRecord {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medication_schedule_id")
-    private MedicationSchedule medicationSchedule;
+    private MedicationSchedule medicationSchedule; // 매칭되는 스케줄이 있으면 설정, 없으면 null
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medication_id", nullable = false)
     private Medication medication;
 
-    @Column(name = "taken_status")
-    private Byte takenStatus;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "taken_status", columnDefinition = "VARCHAR(20)")
+    private MedicationTakenStatus takenStatus;
 
     @Column(name = "response_summary", length = 500)
     private String responseSummary;
@@ -39,7 +41,7 @@ public class MedicationTakenRecord {
     private LocalDateTime recordedAt;
 
     @Builder
-    public MedicationTakenRecord(Integer id, CareCallRecord careCallRecord, MedicationSchedule medicationSchedule, Medication medication, Byte takenStatus, String responseSummary, LocalDateTime recordedAt) {
+    public MedicationTakenRecord(Integer id, CareCallRecord careCallRecord, MedicationSchedule medicationSchedule, Medication medication, MedicationTakenStatus takenStatus, String responseSummary, LocalDateTime recordedAt) {
         this.id = id;
         this.careCallRecord = careCallRecord;
         this.medicationSchedule = medicationSchedule;

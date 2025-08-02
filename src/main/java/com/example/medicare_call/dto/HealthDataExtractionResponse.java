@@ -27,6 +27,13 @@ public class HealthDataExtractionResponse {
     @Schema(description = "심리 상태 목록", example = "[\"기분이 좋음\", \"스트레스 없음\"]")
     private List<String> psychologicalState;
     
+    @Schema(
+        description = "심리 상태 요약",
+        example = "좋음",
+        allowableValues = {"좋음", "나쁨"}
+    )
+    private String psychologicalStatus;
+    
     @Schema(description = "혈당 데이터")
     private BloodSugarData bloodSugarData;
     
@@ -35,6 +42,13 @@ public class HealthDataExtractionResponse {
     
     @Schema(description = "건강 징후 목록", example = "[\"혈당이 정상 범위\", \"수면 패턴 양호\"]")
     private List<String> healthSigns;
+    
+    @Schema(
+        description = "건강 상태 요약",
+        example = "좋음",
+        allowableValues = {"좋음", "나쁨"}
+    )
+    private String healthStatus;
 
     @Getter
     @Builder
