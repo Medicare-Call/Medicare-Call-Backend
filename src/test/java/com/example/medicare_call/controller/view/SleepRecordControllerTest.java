@@ -1,0 +1,139 @@
+package com.example.medicare_call.controller.view;
+
+import com.example.medicare_call.dto.DailySleepResponse;
+import com.example.medicare_call.global.jwt.JwtProvider;
+import com.example.medicare_call.service.SleepRecordService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
+
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@WebMvcTest(SleepRecordController.class)
+@AutoConfigureMockMvc(addFilters = false) // security 필터 비활성화
+@ActiveProfiles("test")
+class SleepRecordControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private SleepRecordService sleepRecordService;
+
+    @MockBean
+    private JwtProvider jwtProvider;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Test
+    @DisplayName("날짜별 수면 데이터 조회 성공 - 모든 데이터 있음")
+    void getDailySleep_성공() throws Exception {
+        // given
+        Integer elderId = 1;
+        String date = "2025-07-16";
+        
+        DailySleepResponse.TotalSleep totalSleep = DailySleepResponse.TotalSleep.builder()
+                .hours(7)
+                .minutes(48)
+                .build();
+        
+        DailySleepResponse expectedResponse = DailySleepResponse.builder()
+                .date(date)
+                .totalSleep(totalSleep)
+                .sleepTime("22:12")
+                .wakeTime("06:00")
+                .build();
+
+        when(sleepRecordService.getDailySleep(eq(elderId), eq(date)))
+                .thenReturn(expectedResponse);
+
+        // when & then
+        mockMvc.perform(get("/view/dailySleep")
+                        .param("elderId", elderId.toString())
+                        .param("date", date))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.date").value(date))
+                .andExpect(jsonPath("$.totalSleep.hours").value(7))
+                .andExpect(jsonPath("$.totalSleep.minutes").value(48))
+                .andExpect(jsonPath("$.sleepTime").value("22:12"))
+                .andExpect(jsonPath("$.wakeTime").value("06:00"));
+    }
+
+    @Test
+    @DisplayName("날짜별 수면 데이터 조회 성공 - 일부 데이터 있음")
+    void getDailySleep_일부_데이터_있음() throws Exception {
+        // given
+        Integer elderId = 1;
+        String date = "2025-07-16";
+        
+        DailySleepResponse.TotalSleep totalSleep = DailySleepResponse.TotalSleep.builder()
+                .hours(0)
+                .minutes(0)
+                .build();
+        
+        DailySleepResponse expectedResponse = DailySleepResponse.builder()
+                .date(date)
+                .totalSleep(totalSleep)
+                .sleepTime("22:00")
+                .wakeTime(null)
+                .build();
+
+        when(sleepRecordService.getDailySleep(eq(elderId), eq(date)))
+                .thenReturn(expectedResponse);
+
+        // when & then
+        mockMvc.perform(get("/view/dailySleep")
+                        .param("elderId", elderId.toString())
+                        .param("date", date))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.date").value(date))
+                .andExpect(jsonPath("$.totalSleep.hours").value(0))
+                .andExpect(jsonPath("$.totalSleep.minutes").value(0))
+                .andExpect(jsonPath("$.sleepTime").value("22:00"))
+                .andExpect(jsonPath("$.wakeTime").isEmpty());
+    }
+
+    @Test
+    @DisplayName("날짜별 수면 데이터 조회 성공 - 데이터 없음")
+    void getDailySleep_데이터_없음() throws Exception {
+        // given
+        Integer elderId = 1;
+        String date = "2025-07-16";
+        
+        DailySleepResponse.TotalSleep totalSleep = DailySleepResponse.TotalSleep.builder()
+                .hours(0)
+                .minutes(0)
+                .build();
+        
+        DailySleepResponse expectedResponse = DailySleepResponse.builder()
+                .date(date)
+                .totalSleep(totalSleep)
+                .sleepTime(null)
+                .wakeTime(null)
+                .build();
+
+        when(sleepRecordService.getDailySleep(eq(elderId), eq(date)))
+                .thenReturn(expectedResponse);
+
+        // when & then
+        mockMvc.perform(get("/view/dailySleep")
+                        .param("elderId", elderId.toString())
+                        .param("date", date))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.date").value(date))
+                .andExpect(jsonPath("$.totalSleep.hours").value(0))
+                .andExpect(jsonPath("$.totalSleep.minutes").value(0))
+                .andExpect(jsonPath("$.sleepTime").isEmpty())
+                .andExpect(jsonPath("$.wakeTime").isEmpty());
+    }
+} 

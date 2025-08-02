@@ -75,28 +75,36 @@ public class HealthDataService {
     }
     
     private CareCallRecord updateSleepData(CareCallRecord callRecord, HealthDataExtractionResponse.SleepData sleepData) {
-        LocalDateTime callDate = callRecord.getStartTime() != null ? 
-            callRecord.getStartTime().toLocalDate().atStartOfDay() : 
-            LocalDateTime.now().toLocalDate().atStartOfDay();
-        
         LocalDateTime sleepStart = null;
         LocalDateTime sleepEnd = null;
         
-        // 수면 시작 시간 파싱
+        // 수면 시작 시간 파싱 (HH:mm 형식)
         if (sleepData.getSleepStartTime() != null) {
             try {
                 LocalTime sleepStartTime = LocalTime.parse(sleepData.getSleepStartTime());
+                LocalDateTime callDate = callRecord.getStartTime() != null ? 
+                    callRecord.getStartTime().toLocalDate().atStartOfDay() : 
+                    LocalDateTime.now().toLocalDate().atStartOfDay();
                 sleepStart = callDate.plusHours(sleepStartTime.getHour()).plusMinutes(sleepStartTime.getMinute());
             } catch (Exception e) {
                 log.warn("수면 시작 시간 파싱 실패: {}", sleepData.getSleepStartTime(), e);
             }
         }
         
-        // 수면 종료 시간 파싱
+        // 수면 종료 시간 파싱 (HH:mm 형식)
         if (sleepData.getSleepEndTime() != null) {
             try {
                 LocalTime sleepEndTime = LocalTime.parse(sleepData.getSleepEndTime());
-                sleepEnd = callDate.plusHours(sleepEndTime.getHour()).plusMinutes(sleepEndTime.getMinute());
+                LocalDateTime callDate = callRecord.getStartTime() != null ? 
+                    callRecord.getStartTime().toLocalDate().atStartOfDay() : 
+                    LocalDateTime.now().toLocalDate().atStartOfDay();
+                
+                // 수면 종료 시간이 시작 시간보다 이전이면 다음날로 설정
+                LocalDateTime sleepEndDateTime = callDate.plusHours(sleepEndTime.getHour()).plusMinutes(sleepEndTime.getMinute());
+                if (sleepStart != null && sleepEndDateTime.isBefore(sleepStart)) {
+                    sleepEndDateTime = sleepEndDateTime.plusDays(1);
+                }
+                sleepEnd = sleepEndDateTime;
             } catch (Exception e) {
                 log.warn("수면 종료 시간 파싱 실패: {}", sleepData.getSleepEndTime(), e);
             }
