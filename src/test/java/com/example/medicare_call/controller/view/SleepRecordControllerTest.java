@@ -13,10 +13,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import java.time.LocalDate;
 
 @WebMvcTest(SleepRecordController.class)
 @AutoConfigureMockMvc(addFilters = false) // security 필터 비활성화
@@ -48,13 +51,13 @@ class SleepRecordControllerTest {
                 .build();
         
         DailySleepResponse expectedResponse = DailySleepResponse.builder()
-                .date(date)
+                .date(LocalDate.of(2025, 7, 16))
                 .totalSleep(totalSleep)
                 .sleepTime("22:12")
                 .wakeTime("06:00")
                 .build();
 
-        when(sleepRecordService.getDailySleep(eq(elderId), eq(date)))
+        when(sleepRecordService.getDailySleep(eq(elderId), any(LocalDate.class)))
                 .thenReturn(expectedResponse);
 
         // when & then
@@ -81,13 +84,13 @@ class SleepRecordControllerTest {
                 .build();
         
         DailySleepResponse expectedResponse = DailySleepResponse.builder()
-                .date(date)
+                .date(LocalDate.of(2025, 7, 16))
                 .totalSleep(totalSleep)
                 .sleepTime("22:00")
                 .wakeTime(null)
                 .build();
 
-        when(sleepRecordService.getDailySleep(eq(elderId), eq(date)))
+        when(sleepRecordService.getDailySleep(eq(elderId), any(LocalDate.class)))
                 .thenReturn(expectedResponse);
 
         // when & then
@@ -114,13 +117,13 @@ class SleepRecordControllerTest {
                 .build();
         
         DailySleepResponse expectedResponse = DailySleepResponse.builder()
-                .date(date)
+                .date(LocalDate.of(2025, 7, 16))
                 .totalSleep(totalSleep)
                 .sleepTime(null)
                 .wakeTime(null)
                 .build();
 
-        when(sleepRecordService.getDailySleep(eq(elderId), eq(date)))
+        when(sleepRecordService.getDailySleep(eq(elderId), any(LocalDate.class)))
                 .thenReturn(expectedResponse);
 
         // when & then

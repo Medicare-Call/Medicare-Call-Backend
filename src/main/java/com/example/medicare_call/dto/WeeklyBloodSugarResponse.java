@@ -1,10 +1,12 @@
 package com.example.medicare_call.dto;
 
 import com.example.medicare_call.global.enums.BloodSugarStatus;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -28,19 +30,22 @@ public class WeeklyBloodSugarResponse {
     @Builder
     @Schema(description = "조회 구간")
     public static class Period {
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
         @Schema(description = "조회 시작일", example = "2025-07-09")
-        private String startDate;
+        private LocalDate startDate;
 
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
         @Schema(description = "조회 종료일", example = "2025-07-16")
-        private String endDate;
+        private LocalDate endDate;
     }
 
     @Getter
     @Builder
     @Schema(description = "혈당 측정 데이터")
     public static class BloodSugarData {
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
         @Schema(description = "측정 날짜", example = "2025-07-09")
-        private String date;
+        private LocalDate date;
 
         @Schema(description = "혈당 수치 (mg/dL)", example = "120")
         private Integer value;

@@ -82,7 +82,7 @@ class SleepRecordServiceTest {
                 .thenReturn(sleepRecords);
 
         // when
-        DailySleepResponse response = sleepRecordService.getDailySleep(1, dateStr);
+        DailySleepResponse response = sleepRecordService.getDailySleep(1, date);
 
         // then
         assertThat(response.getDate()).isEqualTo(dateStr);
@@ -114,7 +114,7 @@ class SleepRecordServiceTest {
                 .thenReturn(sleepRecords);
 
         // when
-        DailySleepResponse response = sleepRecordService.getDailySleep(1, dateStr);
+        DailySleepResponse response = sleepRecordService.getDailySleep(1, date);
 
         // then
         assertThat(response.getDate()).isEqualTo(dateStr);
@@ -134,7 +134,7 @@ class SleepRecordServiceTest {
                 .thenReturn(Collections.emptyList());
 
         // when
-        DailySleepResponse response = sleepRecordService.getDailySleep(1, dateStr);
+        DailySleepResponse response = sleepRecordService.getDailySleep(1, date);
 
         // then
         assertThat(response.getDate()).isEqualTo(dateStr);

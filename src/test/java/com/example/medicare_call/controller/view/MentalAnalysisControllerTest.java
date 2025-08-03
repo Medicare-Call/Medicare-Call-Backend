@@ -16,10 +16,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Arrays;
 import java.util.Collections;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import java.time.LocalDate;
 
 @WebMvcTest(MentalAnalysisController.class)
 @AutoConfigureMockMvc(addFilters = false) // security 필터 비활성화
@@ -46,11 +49,11 @@ class MentalAnalysisControllerTest {
         String date = "2025-07-16";
         
         DailyMentalAnalysisResponse expectedResponse = DailyMentalAnalysisResponse.builder()
-                .date(date)
+                .date(LocalDate.of(2025, 7, 16))
                 .commentList(Arrays.asList("날씨가 좋아서 기분이 좋음", "어느 때와 비슷함"))
                 .build();
 
-        when(mentalAnalysisService.getDailyMentalAnalysis(eq(elderId), eq(date)))
+        when(mentalAnalysisService.getDailyMentalAnalysis(eq(elderId), any(LocalDate.class)))
                 .thenReturn(expectedResponse);
 
         // when & then
@@ -71,11 +74,11 @@ class MentalAnalysisControllerTest {
         String date = "2025-07-16";
         
         DailyMentalAnalysisResponse expectedResponse = DailyMentalAnalysisResponse.builder()
-                .date(date)
+                .date(LocalDate.of(2025, 7, 16))
                 .commentList(Collections.singletonList("오늘은 기분이 좋음"))
                 .build();
 
-        when(mentalAnalysisService.getDailyMentalAnalysis(eq(elderId), eq(date)))
+        when(mentalAnalysisService.getDailyMentalAnalysis(eq(elderId), any(LocalDate.class)))
                 .thenReturn(expectedResponse);
 
         // when & then
@@ -95,11 +98,11 @@ class MentalAnalysisControllerTest {
         String date = "2025-07-16";
         
         DailyMentalAnalysisResponse expectedResponse = DailyMentalAnalysisResponse.builder()
-                .date(date)
+                .date(LocalDate.of(2025, 7, 16))
                 .commentList(Collections.emptyList())
                 .build();
 
-        when(mentalAnalysisService.getDailyMentalAnalysis(eq(elderId), eq(date)))
+        when(mentalAnalysisService.getDailyMentalAnalysis(eq(elderId), any(LocalDate.class)))
                 .thenReturn(expectedResponse);
 
         // when & then

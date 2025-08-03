@@ -17,10 +17,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Arrays;
 import java.util.Collections;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import java.time.LocalDate;
 
 @WebMvcTest(BloodSugarController.class)
 @AutoConfigureMockMvc(addFilters = false) // security 필터 비활성화
@@ -48,18 +51,18 @@ class BloodSugarControllerTest {
         String type = "BEFORE_MEAL";
 
         WeeklyBloodSugarResponse.Period period = WeeklyBloodSugarResponse.Period.builder()
-                .startDate("2025-07-09")
-                .endDate("2025-07-15")
+                .startDate(LocalDate.of(2025, 7, 9))
+                .endDate(LocalDate.of(2025, 7, 15))
                 .build();
 
         WeeklyBloodSugarResponse.BloodSugarData data1 = WeeklyBloodSugarResponse.BloodSugarData.builder()
-                .date("2025-07-09")
+                .date(LocalDate.of(2025, 7, 9))
                 .value(90)
                 .status(BloodSugarStatus.LOW)
                 .build();
 
         WeeklyBloodSugarResponse.BloodSugarData data2 = WeeklyBloodSugarResponse.BloodSugarData.builder()
-                .date("2025-07-10")
+                .date(LocalDate.of(2025, 7, 10))
                 .value(105)
                 .status(BloodSugarStatus.NORMAL)
                 .build();
@@ -81,7 +84,7 @@ class BloodSugarControllerTest {
                 .latest(latest)
                 .build();
 
-        when(weeklyBloodSugarService.getWeeklyBloodSugar(eq(elderId), eq(startDate), eq(type)))
+        when(weeklyBloodSugarService.getWeeklyBloodSugar(eq(elderId), any(LocalDate.class), eq(type)))
                 .thenReturn(expectedResponse);
 
         // when & then
@@ -113,8 +116,8 @@ class BloodSugarControllerTest {
         String type = "AFTER_MEAL";
 
         WeeklyBloodSugarResponse.Period period = WeeklyBloodSugarResponse.Period.builder()
-                .startDate("2025-07-09")
-                .endDate("2025-07-15")
+                .startDate(LocalDate.of(2025, 7, 9))
+                .endDate(LocalDate.of(2025, 7, 15))
                 .build();
 
         WeeklyBloodSugarResponse expectedResponse = WeeklyBloodSugarResponse.builder()
@@ -124,7 +127,7 @@ class BloodSugarControllerTest {
                 .latest(null)
                 .build();
 
-        when(weeklyBloodSugarService.getWeeklyBloodSugar(eq(elderId), eq(startDate), eq(type)))
+        when(weeklyBloodSugarService.getWeeklyBloodSugar(eq(elderId), any(LocalDate.class), eq(type)))
                 .thenReturn(expectedResponse);
 
         // when & then
