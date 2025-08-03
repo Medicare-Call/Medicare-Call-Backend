@@ -162,31 +162,20 @@ public class HomeService {
     }
 
     private MedicationScheduleTime calculateNextMedicationTime(List<MedicationSchedule> schedules) {
+        return calculateNextMedicationTimeFrom(schedules);
+    }
+
+    private MedicationScheduleTime calculateNextMedicationTimeFrom(List<MedicationSchedule> schedules) {
         LocalTime now = LocalTime.now();
-        LocalTime nextTime = null;
-        MedicationScheduleTime nextScheduleTime = null;
 
-        for (MedicationSchedule schedule : schedules) {
-            MedicationScheduleTime scheduleTime = MedicationScheduleTime.valueOf(schedule.getScheduleTime());
-            LocalTime scheduleLocalTime = getLocalTimeFromScheduleTime(scheduleTime);
-            
-            if (scheduleLocalTime.isAfter(now)) {
-                if (nextTime == null || scheduleLocalTime.isBefore(nextTime)) {
-                    nextTime = scheduleLocalTime;
-                    nextScheduleTime = scheduleTime;
-                }
-            }
-        }
-
-        // 오늘 남은 시간이 없으면 내일의 첫 번째 복약 시간으로 설정
-        if (nextScheduleTime == null && !schedules.isEmpty()) {
-            nextScheduleTime = schedules.stream()
-                    .map(schedule -> MedicationScheduleTime.valueOf(schedule.getScheduleTime()))
-                    .min(Comparator.comparing(this::getLocalTimeFromScheduleTime))
-                    .orElse(MedicationScheduleTime.MORNING);
-        }
-
-        return nextScheduleTime != null ? nextScheduleTime : MedicationScheduleTime.MORNING;
+        return schedules.stream()
+                .map(schedule -> MedicationScheduleTime.valueOf(schedule.getScheduleTime()))
+                .filter(scheduleTime -> getLocalTimeFromScheduleTime(scheduleTime).isAfter(now))
+                .min(Comparator.comparing(this::getLocalTimeFromScheduleTime))
+                .orElseGet(() -> schedules.stream()
+                        .map(schedule -> MedicationScheduleTime.valueOf(schedule.getScheduleTime()))
+                        .min(Comparator.comparing(this::getLocalTimeFromScheduleTime))
+                        .orElse(MedicationScheduleTime.MORNING));
     }
 
     private LocalTime getLocalTimeFromScheduleTime(MedicationScheduleTime scheduleTime) {
@@ -203,31 +192,7 @@ public class HomeService {
     }
 
     private MedicationScheduleTime calculateNextMedicationTimeForMedication(List<MedicationSchedule> medicationSchedules) {
-        LocalTime now = LocalTime.now();
-        LocalTime nextTime = null;
-        MedicationScheduleTime nextScheduleTime = null;
-
-        for (MedicationSchedule schedule : medicationSchedules) {
-            MedicationScheduleTime scheduleTime = MedicationScheduleTime.valueOf(schedule.getScheduleTime());
-            LocalTime scheduleLocalTime = getLocalTimeFromScheduleTime(scheduleTime);
-            
-            if (scheduleLocalTime.isAfter(now)) {
-                if (nextTime == null || scheduleLocalTime.isBefore(nextTime)) {
-                    nextTime = scheduleLocalTime;
-                    nextScheduleTime = scheduleTime;
-                }
-            }
-        }
-
-        // 오늘 남은 시간이 없으면 내일의 첫 번째 복약 시간으로 설정
-        if (nextScheduleTime == null && !medicationSchedules.isEmpty()) {
-            nextScheduleTime = medicationSchedules.stream()
-                    .map(schedule -> MedicationScheduleTime.valueOf(schedule.getScheduleTime())) // enum 목록
-                    .min(Comparator.comparing(this::getLocalTimeFromScheduleTime)) // 수치 기준으로 가장 이른 시간대 선택
-                    .orElse(MedicationScheduleTime.MORNING); // fallback인데 null로 처리하는게 좋을지?
-        }
-
-        return nextScheduleTime != null ? nextScheduleTime : MedicationScheduleTime.MORNING;
+        return calculateNextMedicationTimeFrom(medicationSchedules);
     }
 
     private HomeResponse.Sleep getSleepInfo(Integer elderId, LocalDate date) {
