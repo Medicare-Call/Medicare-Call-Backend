@@ -1,6 +1,7 @@
 package com.example.medicare_call.domain;
 
 import com.example.medicare_call.global.enums.BloodSugarMeasurementType;
+import com.example.medicare_call.global.enums.BloodSugarStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Builder;
@@ -33,9 +34,9 @@ public class BloodSugarRecord {
     @Column(name = "unit", length = 10)
     private String unit;
 
-    // TODO: 주간 분석 결과로 초기화
-    @Column(name = "status")
-    private Byte status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", columnDefinition = "VARCHAR(20)")
+    private BloodSugarStatus status;
 
     @Column(name = "recorded_at", nullable = false)
     private LocalDateTime recordedAt;
@@ -44,7 +45,7 @@ public class BloodSugarRecord {
     private String responseSummary;
 
     @Builder
-    public BloodSugarRecord(Integer id, CareCallRecord careCallRecord, BloodSugarMeasurementType measurementType, BigDecimal blood_sugar_value, String unit, Byte status, LocalDateTime recordedAt, String responseSummary) {
+    public BloodSugarRecord(Integer id, CareCallRecord careCallRecord, BloodSugarMeasurementType measurementType, BigDecimal blood_sugar_value, String unit, BloodSugarStatus status, LocalDateTime recordedAt, String responseSummary) {
         this.id = id;
         this.careCallRecord = careCallRecord;
         this.measurementType = measurementType;
