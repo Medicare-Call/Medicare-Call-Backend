@@ -23,4 +23,11 @@ public interface BloodSugarRecordRepository extends JpaRepository<BloodSugarReco
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate
     );
+
+    @Query("SELECT bsr FROM BloodSugarRecord bsr " +
+           "JOIN bsr.careCallRecord ccr " +
+           "WHERE ccr.elder.id = :elderId " +
+           "AND DATE(bsr.recordedAt) = :date " +
+           "ORDER BY bsr.recordedAt")
+    List<BloodSugarRecord> findByElderIdAndDate(@Param("elderId") Integer elderId, @Param("date") LocalDate date);
 } 
