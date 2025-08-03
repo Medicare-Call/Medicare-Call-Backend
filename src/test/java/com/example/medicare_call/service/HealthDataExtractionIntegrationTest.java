@@ -62,7 +62,8 @@ class HealthDataExtractionIntegrationTest {
               "bloodSugarData": {
                 "measurementTime": "아침",
                 "mealTime": "식후",
-                "bloodSugarValue": 120
+                "bloodSugarValue": 120,
+                "status": "NORMAL"
               },
               "medicationData": null,
               "healthSigns": ["혈당이 정상 범위", "식사 후 혈당 측정"],

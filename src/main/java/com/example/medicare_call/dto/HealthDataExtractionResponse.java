@@ -104,6 +104,13 @@ public class HealthDataExtractionResponse {
         
         @Schema(description = "혈당 값 (mg/dL)", example = "120")
         private Integer bloodSugarValue;
+        
+        @Schema(
+            description = "혈당 상태",
+            example = "NORMAL",
+            allowableValues = {"LOW", "NORMAL", "HIGH"}
+        )
+        private String status;
     }
 
     @Getter

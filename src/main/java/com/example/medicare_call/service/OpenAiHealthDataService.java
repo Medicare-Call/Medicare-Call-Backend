@@ -112,6 +112,7 @@ public class OpenAiHealthDataService {
                - 측정한 시각
                - 식전 여부
                - 혈당 값 (mg/dL)
+               - 혈당 상태 (식전/식후 여부를 고려하여 LOW/NORMAL/HIGH 판단)
             6. 복약 데이터
                - 약의 종류
                - 복약 여부
@@ -137,7 +138,8 @@ public class OpenAiHealthDataService {
               "bloodSugarData": {
                 "measurementTime": "측정 시각",
                 "mealTime": "식전/식후",
-                "bloodSugarValue": 숫자값
+                "bloodSugarValue": 숫자값,
+                "status": "LOW/NORMAL/HIGH"
               },
               "medicationData": {
                 "medicationType": "약 종류",

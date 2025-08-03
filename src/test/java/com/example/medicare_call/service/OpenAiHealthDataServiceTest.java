@@ -65,7 +65,8 @@ class OpenAiHealthDataServiceTest {
               "bloodSugarData": {
                 "measurementTime": "아침",
                 "mealTime": "식후",
-                "bloodSugarValue": 120
+                "bloodSugarValue": 120,
+                "status": "NORMAL"
               },
               "medicationData": null,
               "healthSigns": ["혈당이 정상 범위"]
@@ -92,6 +93,7 @@ class OpenAiHealthDataServiceTest {
                         .measurementTime("아침")
                         .mealTime("식후")
                         .bloodSugarValue(120)
+                        .status("NORMAL")
                         .build())
                 .psychologicalState(List.of("기분이 좋음"))
                 .healthSigns(List.of("혈당이 정상 범위"))
