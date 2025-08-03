@@ -13,13 +13,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
-@RequestMapping("/view")
+@RequestMapping("/elders")
 @RequiredArgsConstructor
 @Tag(name = "Home", description = "홈 화면 데이터 조회 API")
 public class HomeController {
@@ -48,10 +48,10 @@ public class HomeController {
             description = "어르신 정보를 찾을 수 없음"
         )
     })
-    @GetMapping("/home")
+    @GetMapping("/{elderId}/home")
     public ResponseEntity<HomeResponse> getHomeData(
         @Parameter(description = "조회할 어르신의 식별자", required = true, example = "1")
-        @RequestParam("elderId") Integer elderId
+        @PathVariable("elderId") Integer elderId
     ) {
         log.info("홈 화면 데이터 조회 요청: elderId={}", elderId);
 

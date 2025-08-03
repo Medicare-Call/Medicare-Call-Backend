@@ -81,8 +81,7 @@ class HomeControllerTest {
                 .thenReturn(expectedResponse);
 
         // when & then
-        mockMvc.perform(get("/view/home")
-                        .param("elderId", elderId.toString()))
+        mockMvc.perform(get("/elders/{elderId}/home", elderId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.elderName").value("김옥자"))
                 .andExpect(jsonPath("$.aisummary").value("TODO: AI 요약 기능 구현 필요"))

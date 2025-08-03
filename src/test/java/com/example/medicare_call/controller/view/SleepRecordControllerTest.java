@@ -58,8 +58,7 @@ class SleepRecordControllerTest {
                 .thenReturn(expectedResponse);
 
         // when & then
-        mockMvc.perform(get("/view/dailySleep")
-                        .param("elderId", elderId.toString())
+        mockMvc.perform(get("/elders/{elderId}/sleep", elderId)
                         .param("date", date))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.date").value(date))
@@ -92,8 +91,7 @@ class SleepRecordControllerTest {
                 .thenReturn(expectedResponse);
 
         // when & then
-        mockMvc.perform(get("/view/dailySleep")
-                        .param("elderId", elderId.toString())
+        mockMvc.perform(get("/elders/{elderId}/sleep", elderId)
                         .param("date", date))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.date").value(date))
@@ -126,8 +124,7 @@ class SleepRecordControllerTest {
                 .thenReturn(expectedResponse);
 
         // when & then
-        mockMvc.perform(get("/view/dailySleep")
-                        .param("elderId", elderId.toString())
+        mockMvc.perform(get("/elders/{elderId}/sleep", elderId)
                         .param("date", date))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.date").value(date))
