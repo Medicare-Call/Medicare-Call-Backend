@@ -12,10 +12,17 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CareCallRecordRepository extends JpaRepository<CareCallRecord, Integer> {
     
-    @Query("SELECT ccr FROM CareCallRecord ccr " +
-           "WHERE ccr.elder.id = :elderId " +
-           "AND DATE(ccr.startTime) = :date " +
-           "AND ccr.sleepStart IS NOT NULL " +
-           "ORDER BY ccr.startTime")
-    List<CareCallRecord> findByElderIdAndDateWithSleepData(@Param("elderId") Integer elderId, @Param("date") LocalDate date);
+                @Query("SELECT ccr FROM CareCallRecord ccr " +
+                   "WHERE ccr.elder.id = :elderId " +
+                   "AND DATE(ccr.startTime) = :date " +
+                   "AND ccr.sleepStart IS NOT NULL " +
+                   "ORDER BY ccr.startTime")
+            List<CareCallRecord> findByElderIdAndDateWithSleepData(@Param("elderId") Integer elderId, @Param("date") LocalDate date);
+
+            @Query("SELECT ccr FROM CareCallRecord ccr " +
+                   "WHERE ccr.elder.id = :elderId " +
+                   "AND DATE(ccr.startTime) = :date " +
+                   "AND ccr.psychologicalDetails IS NOT NULL " +
+                   "ORDER BY ccr.startTime")
+            List<CareCallRecord> findByElderIdAndDateWithPsychologicalData(@Param("elderId") Integer elderId, @Param("date") LocalDate date);
 } 
