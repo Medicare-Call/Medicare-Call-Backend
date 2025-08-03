@@ -91,6 +91,8 @@ class CallDataServiceTest {
                 .endTime(LocalDateTime.parse("2025-01-27T10:15:00"))
                 .callStatus("completed")
                 .transcriptionText("고객: 안녕하세요, 오늘 컨디션은 어떠세요?\n어르신: 네, 오늘은 컨디션이 좋아요.")
+                .psychologicalDetails(null)
+                .healthDetails(null)
                 .build();
 
         when(elderRepository.findById(1)).thenReturn(Optional.of(elder));
@@ -139,6 +141,8 @@ class CallDataServiceTest {
                 .elder(elder)
                 .setting(setting)
                 .callStatus("failed")
+                .psychologicalDetails(null)
+                .healthDetails(null)
                 .build();
 
         when(elderRepository.findById(1)).thenReturn(Optional.of(elder));
@@ -188,6 +192,8 @@ class CallDataServiceTest {
                 .elder(elder)
                 .setting(setting)
                 .callStatus("busy")
+                .psychologicalDetails(null)
+                .healthDetails(null)
                 .build();
 
         when(elderRepository.findById(1)).thenReturn(Optional.of(elder));
@@ -281,6 +287,8 @@ class CallDataServiceTest {
                 .elder(elder)
                 .setting(setting)
                 .callStatus("no-answer")
+                .psychologicalDetails(null)
+                .healthDetails(null)
                 .build();
 
         when(elderRepository.findById(1)).thenReturn(Optional.of(elder));
@@ -339,6 +347,8 @@ class CallDataServiceTest {
                 .startTime(LocalDateTime.parse("2025-01-27T10:00:00"))
                 .callStatus("completed")
                 .transcriptionText("어르신: 오늘 아침에 밥을 먹었고, 혈당을 측정했어요. 120이 나왔어요.")
+                .psychologicalDetails(null)
+                .healthDetails(null)
                 .build();
 
         when(elderRepository.findById(1)).thenReturn(Optional.of(elder));
