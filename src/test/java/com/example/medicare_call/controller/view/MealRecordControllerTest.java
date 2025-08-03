@@ -13,10 +13,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import java.time.LocalDate;
 
 @WebMvcTest(MealRecordController.class)
 @AutoConfigureMockMvc(addFilters = false) // security 필터 비활성화
@@ -49,11 +52,11 @@ class MealRecordControllerTest {
                 .build();
         
         DailyMealResponse expectedResponse = DailyMealResponse.builder()
-                .date(date)
+                .date(LocalDate.of(2025, 7, 16))
                 .meals(meals)
                 .build();
 
-        when(mealRecordService.getDailyMeals(eq(elderId), eq(date)))
+        when(mealRecordService.getDailyMeals(eq(elderId), any(LocalDate.class)))
                 .thenReturn(expectedResponse);
 
         // when & then
@@ -80,11 +83,11 @@ class MealRecordControllerTest {
                 .build();
         
         DailyMealResponse expectedResponse = DailyMealResponse.builder()
-                .date(date)
+                .date(LocalDate.of(2025, 7, 16))
                 .meals(meals)
                 .build();
 
-        when(mealRecordService.getDailyMeals(eq(elderId), eq(date)))
+        when(mealRecordService.getDailyMeals(eq(elderId), any(LocalDate.class)))
                 .thenReturn(expectedResponse);
 
         // when & then
@@ -111,11 +114,11 @@ class MealRecordControllerTest {
                 .build();
         
         DailyMealResponse expectedResponse = DailyMealResponse.builder()
-                .date(date)
+                .date(LocalDate.of(2025, 7, 16))
                 .meals(meals)
                 .build();
 
-        when(mealRecordService.getDailyMeals(eq(elderId), eq(date)))
+        when(mealRecordService.getDailyMeals(eq(elderId), any(LocalDate.class)))
                 .thenReturn(expectedResponse);
 
         // when & then

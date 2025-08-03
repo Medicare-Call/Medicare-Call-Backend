@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,9 +18,7 @@ public class MentalAnalysisService {
 
     private final CareCallRecordRepository careCallRecordRepository;
 
-    public DailyMentalAnalysisResponse getDailyMentalAnalysis(Integer elderId, String dateStr) {
-        LocalDate date = LocalDate.parse(dateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-
+    public DailyMentalAnalysisResponse getDailyMentalAnalysis(Integer elderId, LocalDate date) {
         List<CareCallRecord> mentalRecords = careCallRecordRepository.findByElderIdAndDateWithPsychologicalData(elderId, date);
 
         List<String> commentList = new ArrayList<>();
@@ -40,7 +37,7 @@ public class MentalAnalysisService {
         }
 
         return DailyMentalAnalysisResponse.builder()
-                .date(dateStr)
+                .date(date)
                 .commentList(commentList)
                 .build();
     }

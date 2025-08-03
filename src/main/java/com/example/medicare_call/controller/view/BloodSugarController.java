@@ -12,11 +12,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.time.LocalDate;
 
 @Slf4j
 @RestController
@@ -55,7 +58,7 @@ public class BloodSugarController {
         @PathVariable("elderId") Integer elderId,
 
         @Parameter(description = "주간 조회 시작일 (yyyy-MM-dd)", required = true, example = "2025-07-09")
-        @RequestParam("startDate") String startDate,
+        @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
 
         @Parameter(description = "식사 시간대", required = true, example = "BEFORE_MEAL", 
                   schema = @Schema(allowableValues = {"BEFORE_MEAL", "AFTER_MEAL"}))

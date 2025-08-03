@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,8 +22,7 @@ public class WeeklyBloodSugarService {
 
     private final BloodSugarRecordRepository bloodSugarRecordRepository;
 
-    public WeeklyBloodSugarResponse getWeeklyBloodSugar(Integer elderId, String startDateStr, String typeStr) {
-        LocalDate startDate = LocalDate.parse(startDateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+    public WeeklyBloodSugarResponse getWeeklyBloodSugar(Integer elderId, LocalDate startDate, String typeStr) {
         LocalDate endDate = startDate.plusDays(6); // 7일간 조회
 
         BloodSugarMeasurementType measurementType = BloodSugarMeasurementType.valueOf(typeStr);
@@ -44,8 +42,8 @@ public class WeeklyBloodSugarService {
 
         return WeeklyBloodSugarResponse.builder()
                 .period(WeeklyBloodSugarResponse.Period.builder()
-                        .startDate(startDateStr)
-                        .endDate(endDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                        .startDate(startDate)
+                        .endDate(endDate)
                         .build())
                 .data(data)
                 .average(average)
@@ -55,7 +53,7 @@ public class WeeklyBloodSugarService {
 
     private WeeklyBloodSugarResponse.BloodSugarData convertToBloodSugarData(BloodSugarRecord record) {
         return WeeklyBloodSugarResponse.BloodSugarData.builder()
-                .date(record.getRecordedAt().toLocalDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                .date(record.getRecordedAt().toLocalDate())
                 .value(record.getBlood_sugar_value().intValue())
                 .status(record.getStatus())
                 .build();

@@ -78,7 +78,7 @@ class MealRecordServiceTest {
                 .thenReturn(mealRecords);
 
         // when
-        DailyMealResponse response = mealRecordService.getDailyMeals(1, dateStr);
+        DailyMealResponse response = mealRecordService.getDailyMeals(1, date);
 
         // then
         assertThat(response.getDate()).isEqualTo(dateStr);
@@ -102,7 +102,7 @@ class MealRecordServiceTest {
                 .thenReturn(mealRecords);
 
         // when
-        DailyMealResponse response = mealRecordService.getDailyMeals(1, dateStr);
+        DailyMealResponse response = mealRecordService.getDailyMeals(1, date);
 
         // then
         assertThat(response.getDate()).isEqualTo(dateStr);
@@ -121,7 +121,7 @@ class MealRecordServiceTest {
                 .thenReturn(Collections.emptyList());
 
         // when
-        DailyMealResponse response = mealRecordService.getDailyMeals(1, dateStr);
+        DailyMealResponse response = mealRecordService.getDailyMeals(1, date);
 
         // then
         assertThat(response.getDate()).isEqualTo(dateStr);

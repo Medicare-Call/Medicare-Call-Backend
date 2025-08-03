@@ -1,16 +1,20 @@
 package com.example.medicare_call.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
+
+import java.time.LocalDate;
 
 @Getter
 @Builder
 @Schema(description = "날짜별 수면 데이터 조회 응답")
 public class DailySleepResponse {
     
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @Schema(description = "조회 기준 날짜", example = "2025-07-16")
-    private String date;
+    private LocalDate date;
     
     @Schema(description = "총 수면 시간")
     private TotalSleep totalSleep;

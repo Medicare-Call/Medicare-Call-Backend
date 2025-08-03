@@ -72,7 +72,7 @@ class WeeklyBloodSugarServiceTest {
                 .thenReturn(records);
 
         // when
-        WeeklyBloodSugarResponse response = weeklyBloodSugarService.getWeeklyBloodSugar(elderId, startDate, type);
+        WeeklyBloodSugarResponse response = weeklyBloodSugarService.getWeeklyBloodSugar(elderId, LocalDate.of(2025, 7, 9), type);
 
         // then
         assertThat(response).isNotNull();
@@ -100,7 +100,7 @@ class WeeklyBloodSugarServiceTest {
                 .thenReturn(Collections.emptyList());
 
         // when
-        WeeklyBloodSugarResponse response = weeklyBloodSugarService.getWeeklyBloodSugar(elderId, startDate, type);
+        WeeklyBloodSugarResponse response = weeklyBloodSugarService.getWeeklyBloodSugar(elderId, LocalDate.of(2025, 7, 9), type);
 
         // then
         assertThat(response).isNotNull();
@@ -128,7 +128,7 @@ class WeeklyBloodSugarServiceTest {
                 .thenReturn(records);
 
         // when
-        WeeklyBloodSugarResponse response = weeklyBloodSugarService.getWeeklyBloodSugar(elderId, startDate, type);
+        WeeklyBloodSugarResponse response = weeklyBloodSugarService.getWeeklyBloodSugar(elderId, LocalDate.of(2025, 7, 9), type);
 
         // then
         assertThat(response).isNotNull();

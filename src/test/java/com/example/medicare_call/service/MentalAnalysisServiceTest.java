@@ -69,7 +69,7 @@ class MentalAnalysisServiceTest {
                 .thenReturn(Arrays.asList(record1, record2));
 
         // when
-        DailyMentalAnalysisResponse response = mentalAnalysisService.getDailyMentalAnalysis(1, dateStr);
+        DailyMentalAnalysisResponse response = mentalAnalysisService.getDailyMentalAnalysis(1, testDate);
 
         // then
         assertThat(response.getDate()).isEqualTo(dateStr);
@@ -99,7 +99,7 @@ class MentalAnalysisServiceTest {
                 .thenReturn(Collections.singletonList(record));
 
         // when
-        DailyMentalAnalysisResponse response = mentalAnalysisService.getDailyMentalAnalysis(1, dateStr);
+        DailyMentalAnalysisResponse response = mentalAnalysisService.getDailyMentalAnalysis(1, testDate);
 
         // then
         assertThat(response.getDate()).isEqualTo(dateStr);
@@ -117,7 +117,7 @@ class MentalAnalysisServiceTest {
                 .thenReturn(Collections.emptyList());
 
         // when
-        DailyMentalAnalysisResponse response = mentalAnalysisService.getDailyMentalAnalysis(1, dateStr);
+        DailyMentalAnalysisResponse response = mentalAnalysisService.getDailyMentalAnalysis(1, testDate);
 
         // then
         assertThat(response.getDate()).isEqualTo(dateStr);
@@ -142,7 +142,7 @@ class MentalAnalysisServiceTest {
                 .thenReturn(Collections.singletonList(record));
 
         // when
-        DailyMentalAnalysisResponse response = mentalAnalysisService.getDailyMentalAnalysis(1, dateStr);
+        DailyMentalAnalysisResponse response = mentalAnalysisService.getDailyMentalAnalysis(1, testDate);
 
         // then
         assertThat(response.getDate()).isEqualTo(dateStr);

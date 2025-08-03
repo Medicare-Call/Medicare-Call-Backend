@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Slf4j
@@ -19,9 +18,7 @@ public class MealRecordService {
     
     private final MealRecordRepository mealRecordRepository;
     
-    public DailyMealResponse getDailyMeals(Integer elderId, String dateStr) {
-        LocalDate date = LocalDate.parse(dateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        
+    public DailyMealResponse getDailyMeals(Integer elderId, LocalDate date) {
         List<MealRecord> mealRecords = mealRecordRepository.findByElderIdAndDate(elderId, date);
         
         String breakfast = null;
@@ -54,7 +51,7 @@ public class MealRecordService {
                 .build();
         
         return DailyMealResponse.builder()
-                .date(dateStr)
+                .date(date)
                 .meals(meals)
                 .build();
     }

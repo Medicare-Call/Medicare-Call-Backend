@@ -21,14 +21,12 @@ public class SleepRecordService {
     
     private final CareCallRecordRepository careCallRecordRepository;
     
-    public DailySleepResponse getDailySleep(Integer elderId, String dateStr) {
-        LocalDate date = LocalDate.parse(dateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        
+    public DailySleepResponse getDailySleep(Integer elderId, LocalDate date) {
         List<CareCallRecord> sleepRecords = careCallRecordRepository.findByElderIdAndDateWithSleepData(elderId, date);
         
         if (sleepRecords.isEmpty()) {
             return DailySleepResponse.builder()
-                    .date(dateStr)
+                    .date(date)
                     .totalSleep(DailySleepResponse.TotalSleep.builder()
                             .hours(0)
                             .minutes(0)
@@ -72,7 +70,7 @@ public class SleepRecordService {
         }
         
         return DailySleepResponse.builder()
-                .date(dateStr)
+                .date(date)
                 .totalSleep(totalSleep)
                 .sleepTime(sleepTime)
                 .wakeTime(wakeTime)
