@@ -57,8 +57,7 @@ class MealRecordControllerTest {
                 .thenReturn(expectedResponse);
 
         // when & then
-        mockMvc.perform(get("/view/dailyMeal")
-                        .param("elderId", elderId.toString())
+        mockMvc.perform(get("/elders/{elderId}/meals", elderId)
                         .param("date", date))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.date").value(date))
@@ -89,8 +88,7 @@ class MealRecordControllerTest {
                 .thenReturn(expectedResponse);
 
         // when & then
-        mockMvc.perform(get("/view/dailyMeal")
-                        .param("elderId", elderId.toString())
+        mockMvc.perform(get("/elders/{elderId}/meals", elderId)
                         .param("date", date))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.date").value(date))
@@ -121,8 +119,7 @@ class MealRecordControllerTest {
                 .thenReturn(expectedResponse);
 
         // when & then
-        mockMvc.perform(get("/view/dailyMeal")
-                        .param("elderId", elderId.toString())
+        mockMvc.perform(get("/elders/{elderId}/meals", elderId)
                         .param("date", date))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.date").value(date))

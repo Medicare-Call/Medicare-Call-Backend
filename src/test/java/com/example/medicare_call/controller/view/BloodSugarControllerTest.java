@@ -85,8 +85,7 @@ class BloodSugarControllerTest {
                 .thenReturn(expectedResponse);
 
         // when & then
-        mockMvc.perform(get("/view/blood-sugar/weekly")
-                        .param("elderId", elderId.toString())
+        mockMvc.perform(get("/elders/{elderId}/blood-sugar/weekly", elderId)
                         .param("startDate", startDate)
                         .param("type", type))
                 .andExpect(status().isOk())
@@ -129,8 +128,7 @@ class BloodSugarControllerTest {
                 .thenReturn(expectedResponse);
 
         // when & then
-        mockMvc.perform(get("/view/blood-sugar/weekly")
-                        .param("elderId", elderId.toString())
+        mockMvc.perform(get("/elders/{elderId}/blood-sugar/weekly", elderId)
                         .param("startDate", startDate)
                         .param("type", type))
                 .andExpect(status().isOk())

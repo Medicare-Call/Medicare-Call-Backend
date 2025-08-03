@@ -54,8 +54,7 @@ class MentalAnalysisControllerTest {
                 .thenReturn(expectedResponse);
 
         // when & then
-        mockMvc.perform(get("/view/dailyMentalAnalysis")
-                        .param("elderId", elderId.toString())
+        mockMvc.perform(get("/elders/{elderId}/mental-analysis", elderId)
                         .param("date", date))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.date").value(date))
@@ -80,8 +79,7 @@ class MentalAnalysisControllerTest {
                 .thenReturn(expectedResponse);
 
         // when & then
-        mockMvc.perform(get("/view/dailyMentalAnalysis")
-                        .param("elderId", elderId.toString())
+        mockMvc.perform(get("/elders/{elderId}/mental-analysis", elderId)
                         .param("date", date))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.date").value(date))
@@ -105,8 +103,7 @@ class MentalAnalysisControllerTest {
                 .thenReturn(expectedResponse);
 
         // when & then
-        mockMvc.perform(get("/view/dailyMentalAnalysis")
-                        .param("elderId", elderId.toString())
+        mockMvc.perform(get("/elders/{elderId}/mental-analysis", elderId)
                         .param("date", date))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.date").value(date))
