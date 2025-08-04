@@ -3,12 +3,9 @@ package com.example.medicare_call.service;
 import com.example.medicare_call.domain.Disease;
 import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.domain.ElderHealthInfo;
+import com.example.medicare_call.domain.MedicationSchedule;
 import com.example.medicare_call.global.enums.CallType;
-import com.example.medicare_call.repository.DiseaseRepository;
-import com.example.medicare_call.repository.ElderDiseaseRepository;
-import com.example.medicare_call.repository.ElderHealthInfoRepository;
-import com.example.medicare_call.repository.ElderRepository;
-import jakarta.annotation.PostConstruct;
+import com.example.medicare_call.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -21,7 +18,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
@@ -33,42 +30,26 @@ public class CareCallService {
     private final RestTemplate restTemplate;
     private final ElderRepository elderRepository;
     private final ElderHealthInfoRepository healthInfoRepository;
-    private final DiseaseRepository diseaseRepository;
     private final ElderDiseaseRepository elderDiseaseRepository;
+    private final MedicationScheduleRepository medicationScheduleRepository;
+
+    private final CallPromptGeneratorFactory callPromptGeneratorFactory;
 
     public void sendCall(Integer elderId, CallType callType) {
         Elder elder = elderRepository.findById(elderId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 어르신"));
 
-        //TODO: null값일 때 처리
         ElderHealthInfo healthInfo = healthInfoRepository.findByElderId(elderId);
         List<Disease> diseases = elderDiseaseRepository.findDiseasesByElder(elder);
+        List<MedicationSchedule> medicationSchedules = medicationScheduleRepository.findByElderId(elderId);
 
-        String prompt = generatePrompt(elder, healthInfo, diseases, callType);
+        // CallPromptGenerator를 CallType으로부터 선택
+        CallPromptGenerator promptGenerator = callPromptGeneratorFactory.getGenerator(callType);
+
+        // 선택된 생성기로 프롬프트 생성
+        String prompt = promptGenerator.generate(elder, healthInfo, diseases, medicationSchedules);
+
         sendPrompt(elder.getId(), elder.getPhone(), prompt);
-    }
-
-    //TODO: CallType에 따라서 전달하는 1,2,3차 프롬프트 내용 알맞게 수정
-    private String generatePrompt(Elder elder, ElderHealthInfo healthInfo, List<Disease> diseases, CallType callType) {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("당신은 ").append(elder.getName()).append(" 어르신을 위한 AI 전화 상담원입니다.\n\n");
-
-        sb.append("어르신 정보\n")
-                .append("- 성별: ").append(elder.getGender() == 1 ? "남성" : "여성").append("\n")
-                .append("- 생년월일: ").append(elder.getBirthDate()).append("\n");
-
-        sb.append("건강 정보\n")
-                .append("- 질환: ").append(diseases.isEmpty() ? "없음" :
-                        diseases.stream().map(Disease::getName).collect(Collectors.joining(", ")))
-                .append("\n");
-
-        if (healthInfo != null && healthInfo.getNotes() != null) {
-            sb.append("- 보호자 메모: ").append(healthInfo.getNotes()).append("\n");
-        }
-
-        sb.append("\n지금 인사를 시작해 주세요.");
-        return sb.toString();
     }
 
     private void sendPrompt(Integer elderId, String phoneNumber, String prompt) {
@@ -89,25 +70,4 @@ public class CareCallService {
             System.err.println("호출 실패: " + e.getMessage());
         }
     }
-
-    //TODO: 테스트용 함수 삭제
-    /*-------------------------테스트용 GET요청 함수, 추후 삭제, 시작-------------------------*/
-    public String testGetRequest() {
-        try {
-            System.out.println("테스트 GET 요청 URL: " + callUrl);
-
-            ResponseEntity<String> response = restTemplate.getForEntity(callUrl, String.class);
-
-            String result = "GET 요청 성공, 상태코드: " + response.getStatusCode() +
-                    ", 응답: " + response.getBody();
-            System.out.println(result);
-            return result;
-
-        } catch (Exception e) {
-            String error = "GET 요청 실패: " + e.getMessage();
-            System.err.println(error);
-            return error;
-        }
-    }
-    /*-------------------------테스트용 GET요청 함수, 추후 삭제 끝-------------------------*/
 }
