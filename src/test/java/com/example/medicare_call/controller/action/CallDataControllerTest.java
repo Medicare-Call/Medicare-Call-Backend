@@ -90,6 +90,7 @@ class CallDataControllerTest {
                 .build();
 
         Elder elder = Elder.builder()
+                .id(1)
                 .build();
         
         CareCallSetting setting = CareCallSetting.builder()

@@ -36,6 +36,7 @@ public class CareCallService {
     private final CallPromptGeneratorFactory callPromptGeneratorFactory;
 
     public void sendCall(Integer elderId, CallType callType) {
+        System.out.println("Call URL: " + callUrl);
         Elder elder = elderRepository.findById(elderId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 어르신"));
 

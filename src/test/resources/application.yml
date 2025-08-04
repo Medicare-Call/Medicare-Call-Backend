@@ -25,7 +25,7 @@ jwt:
   accessTokenExpiration: 1
   phoneTokenExpiration: 1
 care-call:
-  url: test
+  url: https://medicare-call.shop/call/run
 
 openai:
   api:
