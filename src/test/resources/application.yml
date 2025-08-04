@@ -32,3 +32,4 @@ openai:
     key: test-openai-key
     url: https://api.openai.com/v1/chat/completions
   model: gpt-4
+

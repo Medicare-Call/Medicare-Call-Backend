@@ -9,9 +9,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface MedicationScheduleRepository extends JpaRepository<MedicationSchedule, Integer> {
+    List<MedicationSchedule> findByElderId(Integer elderId);
     List<MedicationSchedule> findByElder(Elder elder);
     
-    @Query("SELECT ms FROM MedicationSchedule ms " +
-           "WHERE ms.elder.id = :elderId")
-    List<MedicationSchedule> findByElderId(@Param("elderId") Integer elderId);
 } 
