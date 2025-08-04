@@ -90,13 +90,6 @@ public class RefreshTokenService {
         refreshTokenRepository.deleteByMemberId(memberId);
         log.info("Refresh Token 삭제 완료 - Member ID: {}", memberId);
     }
-
-    /**
-     * 토큰에서 사용자 ID를 추출
-     */
-    public Long getMemberIdFromToken(String token) {
-        return jwtProvider.getMemberId(token);
-    }
     
     /**
      * 만료된 Refresh Token들을 정리 (매일 새벽 2시 실행)

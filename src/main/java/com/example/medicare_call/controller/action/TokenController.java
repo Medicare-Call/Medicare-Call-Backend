@@ -1,6 +1,7 @@
 package com.example.medicare_call.controller.action;
 
 import com.example.medicare_call.dto.TokenResponse;
+import com.example.medicare_call.global.jwt.JwtProvider;
 import com.example.medicare_call.service.RefreshTokenService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 public class TokenController {
     
     private final RefreshTokenService refreshTokenService;
+    private final JwtProvider jwtProvider;
     
     @PostMapping("/refresh")
     @Operation(summary = "Access Token 갱신", description = "Refresh Token을 사용하여 새로운 Access Token을 발급받습니다.")
@@ -35,7 +37,7 @@ public class TokenController {
         String token = authorization.replace("Bearer ", "");
         
         // 토큰에서 사용자 ID 추출
-        Long memberId = refreshTokenService.getMemberIdFromToken(token);
+        Long memberId = jwtProvider.getMemberId(token);
         
         // Refresh Token 삭제
         refreshTokenService.deleteRefreshToken(memberId.intValue());

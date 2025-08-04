@@ -181,19 +181,4 @@ class RefreshTokenServiceTest {
         // then
         verify(refreshTokenRepository).deleteByMemberId(memberId);
     }
-
-    @Test
-    @DisplayName("토큰에서 사용자 ID 추출 성공")
-    void getMemberIdFromToken_success() {
-        // given
-        String token = "valid-token";
-        when(jwtProvider.getMemberId(token)).thenReturn(1L);
-
-        // when
-        Long result = refreshTokenService.getMemberIdFromToken(token);
-
-        // then
-        assertThat(result).isEqualTo(1L);
-        verify(jwtProvider).getMemberId(token);
-    }
 } 

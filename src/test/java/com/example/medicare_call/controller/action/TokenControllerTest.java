@@ -70,7 +70,7 @@ class TokenControllerTest {
         String authorization = "Bearer " + accessToken;
         Long memberId = 1L;
 
-        when(refreshTokenService.getMemberIdFromToken(accessToken)).thenReturn(memberId);
+        when(jwtProvider.getMemberId(accessToken)).thenReturn(memberId);
 
         // when & then
         mockMvc.perform(post("/auth/logout")
