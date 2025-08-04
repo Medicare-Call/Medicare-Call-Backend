@@ -27,15 +27,19 @@ public class CareCallSetting {
     @Column(name = "second_call_time")
     private LocalTime secondCallTime;
 
+    @Column(name = "third_call_time")
+    private LocalTime thirdCallTime;
+
     @Column(name = "recurrence", nullable = false)
     private Byte recurrence;
 
     @Builder
-    public CareCallSetting(Integer id, Elder elder, LocalTime firstCallTime, LocalTime secondCallTime, Byte recurrence) {
+    public CareCallSetting(Integer id, Elder elder, LocalTime firstCallTime, LocalTime secondCallTime, LocalTime thirdCallTime, Byte recurrence) {
         this.id = id;
         this.elder = elder;
         this.firstCallTime = firstCallTime;
         this.secondCallTime = secondCallTime;
+        this.thirdCallTime = thirdCallTime;
         this.recurrence = recurrence;
     }
 } 

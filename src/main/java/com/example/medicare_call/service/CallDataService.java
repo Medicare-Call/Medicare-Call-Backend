@@ -4,6 +4,7 @@ import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.CallDataRequest;
 import com.example.medicare_call.dto.HealthDataExtractionRequest;
 import com.example.medicare_call.dto.HealthDataExtractionResponse;
+import com.example.medicare_call.global.ResourceNotFoundException;
 import com.example.medicare_call.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,10 +33,10 @@ public class CallDataService {
         log.info("통화 데이터 저장 시작: elderId={}, settingId={}", request.getElderId(), request.getSettingId());
         
         Elder elder = elderRepository.findById(request.getElderId())
-                .orElseThrow(() -> new IllegalArgumentException("어르신을 찾을 수 없습니다: " + request.getElderId()));
+                .orElseThrow(() -> new ResourceNotFoundException("어르신을 찾을 수 없습니다: " + request.getElderId()));
         
         CareCallSetting setting = careCallSettingRepository.findById(request.getSettingId())
-                .orElseThrow(() -> new IllegalArgumentException("통화 설정을 찾을 수 없습니다: " + request.getSettingId()));
+                .orElseThrow(() -> new ResourceNotFoundException("통화 설정을 찾을 수 없습니다: " + request.getSettingId()));
         
         String transcriptionText = null;
         if (request.getTranscription() != null && request.getTranscription().getFullText() != null) {

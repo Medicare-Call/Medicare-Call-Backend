@@ -2,6 +2,7 @@ package com.example.medicare_call.service;
 
 import com.example.medicare_call.dto.ElderHealthRegisterRequest;
 import com.example.medicare_call.domain.*;
+import com.example.medicare_call.global.ResourceNotFoundException;
 import com.example.medicare_call.repository.*;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class ElderHealthInfoService {
     public void registerElderHealthInfo(Integer elderId, ElderHealthRegisterRequest request) {
         // TODO : 이쪽 Exception에 대한 Monitoring 추가 필요. 데이터의 무결성이 깨졌을 확률이 높다
        Elder elder = elderRepository.findById(elderId)
-               .orElseThrow(() -> new IllegalArgumentException("어르신을 찾을 수 없습니다. elderId: " + elderId));
+               .orElseThrow(() -> new ResourceNotFoundException("어르신을 찾을 수 없습니다. elderId: " + elderId));
 
        // 질환 등록
        for (String diseaseName : request.getDiseaseNames()) {

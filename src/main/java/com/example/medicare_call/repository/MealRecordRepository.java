@@ -16,4 +16,11 @@ public interface MealRecordRepository extends JpaRepository<MealRecord, Integer>
            "AND DATE(mr.recordedAt) = :date " +
            "ORDER BY mr.recordedAt")
     List<MealRecord> findByElderIdAndDate(@Param("elderId") Integer elderId, @Param("date") LocalDate date);
+
+    @Query("SELECT mr FROM MealRecord mr " +
+           "JOIN mr.careCallRecord ccr " +
+           "WHERE ccr.elder.id = :elderId " +
+           "AND DATE(mr.recordedAt) BETWEEN :startDate AND :endDate " +
+           "ORDER BY mr.recordedAt")
+    List<MealRecord> findByElderIdAndDateBetween(@Param("elderId") Integer elderId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 } 
