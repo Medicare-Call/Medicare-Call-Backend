@@ -22,8 +22,8 @@ import java.time.LocalTime;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-//@Disabled("실제 전화 서버 요청이므로 일시적으로 비활성화. " +
-//        "테스트 하려면 1. 전화번호를 본인 것으로 바꾸고 2.test application.yml파일의 care-call.url을 요청 엔드포인트로 변경")
+@Disabled("실제 전화 서버 요청이므로 일시적으로 비활성화. " +
+        "테스트 하려면 1. 전화번호를 본인 것으로 바꾸고 2.test application.yml파일의 care-call.url을 요청 엔드포인트로 변경")
 class CareCallIntegrationTest {
 
     @Autowired
@@ -57,10 +57,10 @@ class CareCallIntegrationTest {
                 Elder.builder()
                         .id(1)
                         .guardian(guardian)
-                        .name("김지현")
+                        .name("테스터")
                         .birthDate(LocalDate.of(1940, 1, 1))
                         .gender((byte) 1)
-                        .phone("+821088918199")
+                        .phone("+821088000000")
                         .relationship(ElderRelation.CHILD)
                         .residenceType(ResidenceType.ALONE)
                         .build()
