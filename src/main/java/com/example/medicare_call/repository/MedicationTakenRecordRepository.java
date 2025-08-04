@@ -15,4 +15,10 @@ public interface MedicationTakenRecordRepository extends JpaRepository<Medicatio
            "WHERE ccr.elder.id = :elderId " +
            "AND DATE(mtr.recordedAt) = :date")
     List<MedicationTakenRecord> findByElderIdAndDate(@Param("elderId") Integer elderId, @Param("date") LocalDate date);
+
+    @Query("SELECT mtr FROM MedicationTakenRecord mtr " +
+           "JOIN mtr.careCallRecord ccr " +
+           "WHERE ccr.elder.id = :elderId " +
+           "AND DATE(mtr.recordedAt) BETWEEN :startDate AND :endDate")
+    List<MedicationTakenRecord> findByElderIdAndDateBetween(@Param("elderId") Integer elderId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 } 
