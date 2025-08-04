@@ -29,7 +29,7 @@ public class SmsUtil {
         Message message = new Message();
         message.setFrom(fromNumber);
         message.setTo(to);
-        message.setText("[메디케어 콜]\n인증번호는 [" + certificationNumber + "]입니다.");
+        message.setText("[메디케어콜]\n인증번호는 [" + certificationNumber + "]입니다.");
 
         try {
             messageService.send(message);
