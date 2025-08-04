@@ -6,6 +6,7 @@ import com.example.medicare_call.domain.Medication;
 import com.example.medicare_call.domain.MedicationSchedule;
 import com.example.medicare_call.domain.MedicationTakenRecord;
 import com.example.medicare_call.dto.HomeResponse;
+import com.example.medicare_call.global.ResourceNotFoundException;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.repository.BloodSugarRecordRepository;
 import com.example.medicare_call.repository.CareCallRecordRepository;
@@ -122,8 +123,8 @@ class HomeServiceTest {
 
         // when & then
         assertThatThrownBy(() -> homeService.getHomeData(elderId))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("어르신을 찾을 수 없습니다");
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("어르신을 찾을 수 없습니다: 999");
     }
 
                     @Test

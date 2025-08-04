@@ -2,6 +2,7 @@ package com.example.medicare_call.service;
 
 import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.dto.ElderRegisterRequest;
+import com.example.medicare_call.global.ResourceNotFoundException;
 import com.example.medicare_call.global.enums.ElderRelation;
 import com.example.medicare_call.global.enums.ResidenceType;
 import com.example.medicare_call.global.enums.Gender;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -61,5 +63,26 @@ class ElderServiceTest {
 
         Elder result = elderService.registerElder(req);
         assertThat(result.getName()).isEqualTo("홍길동");
+    }
+
+    @Test
+    @DisplayName("어르신 등록 실패 - 보호자를 찾을 수 없음")
+    void registerElder_fail_guardianNotFound() {
+        // given
+        ElderRegisterRequest req = new ElderRegisterRequest();
+        req.setName("홍길동");
+        req.setBirthDate(LocalDate.of(1940, 5, 1));
+        req.setGender(Gender.MALE);
+        req.setPhone("01012345678");
+        req.setRelationship(ElderRelation.GRANDCHILD);
+        req.setResidenceType(ResidenceType.ALONE);
+        req.setGuardianId(999);
+
+        when(memberRepository.findById(999)).thenReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> elderService.registerElder(req))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("보호자를 찾을 수 없습니다: 999");
     }
 } 
