@@ -58,13 +58,16 @@ class HealthDataExtractionIntegrationTest {
               },
               "sleepData": null,
               "psychologicalState": ["기분이 좋음", "잠을 잘 잤음"],
+              "psychologicalStatus": "좋음",
               "bloodSugarData": {
                 "measurementTime": "아침",
                 "mealTime": "식후",
-                "bloodSugarValue": 120
+                "bloodSugarValue": 120,
+                "status": "NORMAL"
               },
               "medicationData": null,
-              "healthSigns": ["혈당이 정상 범위", "식사 후 혈당 측정"]
+              "healthSigns": ["혈당이 정상 범위", "식사 후 혈당 측정"],
+              "healthStatus": "좋음"
             }
             """;
 
@@ -125,13 +128,15 @@ class HealthDataExtractionIntegrationTest {
                 "totalSleepTime": "8시간"
               },
               "psychologicalState": null,
+              "psychologicalStatus": null,
               "bloodSugarData": null,
               "medicationData": {
                 "medicationType": "혈압약",
                 "taken": "복용함",
                 "takenTime": "아침"
               },
-              "healthSigns": ["머리가 아픔"]
+              "healthSigns": ["머리가 아픔"],
+              "healthStatus": "나쁨"
             }
             """;
 
@@ -178,9 +183,11 @@ class HealthDataExtractionIntegrationTest {
               "mealData": null,
               "sleepData": null,
               "psychologicalState": null,
+              "psychologicalStatus": null,
               "bloodSugarData": null,
               "medicationData": null,
-              "healthSigns": null
+              "healthSigns": null,
+              "healthStatus": null
             }
             """;
 

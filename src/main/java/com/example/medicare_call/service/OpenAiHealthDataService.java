@@ -102,19 +102,24 @@ public class OpenAiHealthDataService {
                - 식사의 종류 (아침/점심/저녁)
                - 식사 간단 요약
             3. 수면 데이터
-               - 취침 시작 시각
-               - 취침 종료 시각
-               - 총 수면 시간
-            4. 심리 상태 요약 데이터 (짧은 문장들로 요약)
+               - 취침 시작 시각 (HH:mm 형식, 예: 22:00)
+               - 취침 종료 시각 (HH:mm 형식, 예: 06:00)
+               - 총 수면 시간 (예: 8시간)
+            4. 심리 상태 데이터
+               - 심리 상태 상세 내용 (짧은 문장들로 요약)
+               - 심리 상태 요약 (좋음/나쁨)
             5. 혈당 데이터
                - 측정한 시각
                - 식전 여부
                - 혈당 값 (mg/dL)
+               - 혈당 상태 (식전/식후 여부를 고려하여 LOW/NORMAL/HIGH 판단)
             6. 복약 데이터
                - 약의 종류
                - 복약 여부
                - 복용 시간
-            7. 건강 징후 데이터 (짧은 문장들로 요약)
+            7. 건강 징후 데이터
+               - 건강 징후 상세 내용 (짧은 문장들로 요약)
+               - 건강 상태 요약 (좋음/나쁨)
             
             응답은 반드시 다음 JSON 구조로 해주세요:
             {
@@ -128,18 +133,21 @@ public class OpenAiHealthDataService {
                 "sleepEndTime": "취침 종료 시각",
                 "totalSleepTime": "총 수면 시간"
               },
-              "psychologicalState": ["심리 상태 요약 1", "심리 상태 요약 2"],
+              "psychologicalState": ["심리 상태 상세 내용 1", "심리 상태 상세 내용 2"],
+              "psychologicalStatus": "좋음/나쁨",
               "bloodSugarData": {
                 "measurementTime": "측정 시각",
                 "mealTime": "식전/식후",
-                "bloodSugarValue": 숫자값
+                "bloodSugarValue": 숫자값,
+                "status": "LOW/NORMAL/HIGH"
               },
               "medicationData": {
                 "medicationType": "약 종류",
                 "taken": "복용 여부",
                 "takenTime": "복용 시간"
               },
-              "healthSigns": ["건강 징후 1", "건강 징후 2"]
+              "healthSigns": ["건강 징후 상세 내용 1", "건강 징후 상세 내용 2"],
+              "healthStatus": "좋음/나쁨"
             }
             """, 
             request.getCallDate(),
@@ -171,9 +179,11 @@ public class OpenAiHealthDataService {
                 .mealData(null)
                 .sleepData(null)
                 .psychologicalState(null)
+                .psychologicalStatus(null)
                 .bloodSugarData(null)
                 .medicationData(null)
                 .healthSigns(null)
+                .healthStatus(null)
                 .build();
     }
 } 

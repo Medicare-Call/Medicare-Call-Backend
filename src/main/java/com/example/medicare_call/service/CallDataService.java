@@ -1,14 +1,10 @@
 package com.example.medicare_call.service;
 
-import com.example.medicare_call.domain.CareCallRecord;
-import com.example.medicare_call.domain.Elder;
-import com.example.medicare_call.domain.CareCallSetting;
+import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.CallDataRequest;
 import com.example.medicare_call.dto.HealthDataExtractionRequest;
 import com.example.medicare_call.dto.HealthDataExtractionResponse;
-import com.example.medicare_call.repository.CareCallRecordRepository;
-import com.example.medicare_call.repository.ElderRepository;
-import com.example.medicare_call.repository.CareCallSettingRepository;
+import com.example.medicare_call.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,6 +23,9 @@ public class CallDataService {
     private final ElderRepository elderRepository;
     private final CareCallSettingRepository careCallSettingRepository;
     private final OpenAiHealthDataService openAiHealthDataService;
+    private final BloodSugarService bloodSugarService;
+    private final MedicationService medicationService;
+    private final HealthDataService healthDataService;
 
     @Transactional
     public CareCallRecord saveCallData(CallDataRequest request) {
@@ -82,9 +81,22 @@ public class CallDataService {
                 .build();
         
         HealthDataExtractionResponse healthData = openAiHealthDataService.extractHealthData(request);
-        
+        saveHealthDataToDatabase(callRecord, healthData);
+
         log.info("추출된 건강 데이터: {}", healthData);
+    }
+    
+    public void saveHealthDataToDatabase(CareCallRecord callRecord, HealthDataExtractionResponse healthData) {
+        log.info("건강 데이터 DB 저장 시작: callId={}", callRecord.getId());
         
-        // TODO: 추출된 건강 데이터를 적절한 엔티티에 저장하는 로직 추가
+        if (healthData.getBloodSugarData() != null) {
+            bloodSugarService.saveBloodSugarData(callRecord, healthData.getBloodSugarData());
+        }
+        if (healthData.getMedicationData() != null) {
+            medicationService.saveMedicationTakenRecord(callRecord, healthData.getMedicationData());
+        }
+        healthDataService.updateCareCallRecordWithHealthData(callRecord, healthData);
+        
+        log.info("건강 데이터 DB 저장 완료: callId={}", callRecord.getId());
     }
 } 

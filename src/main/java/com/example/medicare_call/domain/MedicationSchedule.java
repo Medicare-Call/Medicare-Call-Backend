@@ -1,5 +1,6 @@
 package com.example.medicare_call.domain;
 
+import com.example.medicare_call.global.enums.FrequencyType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Builder;
@@ -30,11 +31,17 @@ public class MedicationSchedule {
     @Column(name = "notes", length = 500)
     private String notes;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "frequency_type", nullable = false, columnDefinition = "VARCHAR(20)")
+    private FrequencyType frequencyType;
+
     @Builder
-    public MedicationSchedule(Integer id, Elder elder, Medication medication, String scheduleTime) {
+    public MedicationSchedule(Integer id, Elder elder, Medication medication, String scheduleTime, String notes, FrequencyType frequencyType) {
         this.id = id;
         this.elder = elder;
         this.medication = medication;
         this.scheduleTime = scheduleTime;
+        this.notes = notes;
+        this.frequencyType = frequencyType;
     }
 } 

@@ -1,4 +1,4 @@
-package com.example.medicare_call.controller;
+package com.example.medicare_call.controller.action;
 
 import com.example.medicare_call.dto.ElderHealthRegisterRequest;
 import com.example.medicare_call.global.enums.ElderHealthNoteType;
@@ -8,7 +8,6 @@ import com.example.medicare_call.service.CareCallSettingService;
 import com.example.medicare_call.service.ElderHealthInfoService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;

@@ -1,4 +1,4 @@
-package com.example.medicare_call.controller;
+package com.example.medicare_call.controller.action;
 
 import com.example.medicare_call.dto.CareCallSettingRequest;
 import com.example.medicare_call.dto.ElderHealthRegisterRequest;
