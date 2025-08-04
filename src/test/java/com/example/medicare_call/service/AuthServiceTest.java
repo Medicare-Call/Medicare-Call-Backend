@@ -1,8 +1,10 @@
 package com.example.medicare_call.service;
 
 import com.example.medicare_call.domain.Member;
+import com.example.medicare_call.domain.RefreshToken;
 import com.example.medicare_call.dto.RegisterRequest;
 import com.example.medicare_call.dto.SmsVerificationResponse;
+import com.example.medicare_call.dto.TokenResponse;
 import com.example.medicare_call.global.enums.Gender;
 import com.example.medicare_call.global.enums.MemberStatus;
 import com.example.medicare_call.global.jwt.JwtProvider;
@@ -33,6 +35,9 @@ class AuthServiceTest {
     @Mock
     private JwtProvider jwtProvider;
 
+    @Mock
+    private RefreshTokenService refreshTokenService;
+
     @InjectMocks
     private AuthService authService;
 
@@ -58,10 +63,20 @@ class AuthServiceTest {
         when(memberRepository.existsByPhone(phone)).thenReturn(false);
         when(memberRepository.save(any(Member.class))).thenReturn(savedMember);
         when(jwtProvider.createAccessToken(savedMember)).thenReturn("sample-access-token");
+        when(jwtProvider.getAccessTokenExpirationMillis()).thenReturn(3600000L);
 
-        String result = authService.register(phone, request);
+        RefreshToken refreshToken = RefreshToken.builder()
+                .id(1L)
+                .memberId(1)
+                .token("sample-refresh-token")
+                .expiresAt(LocalDateTime.now().plusDays(30))
+                .build();
+        when(refreshTokenService.createRefreshToken(savedMember)).thenReturn(refreshToken);
 
-        assertThat(result).isEqualTo("sample-access-token");
+        TokenResponse result = authService.register(phone, request);
+
+        assertThat(result.getAccessToken()).isEqualTo("sample-access-token");
+        assertThat(result.getRefreshToken()).isEqualTo("sample-refresh-token");
     }
 
     @Test
@@ -96,13 +111,22 @@ class AuthServiceTest {
 
         when(memberRepository.findByPhone(phone)).thenReturn(Optional.of(existingMember));
         when(jwtProvider.createAccessToken(existingMember)).thenReturn("sample-access-token");
+        when(jwtProvider.getAccessTokenExpirationMillis()).thenReturn(3600000L);
+
+        RefreshToken refreshToken = RefreshToken.builder()
+                .id(1L)
+                .memberId(1)
+                .token("sample-refresh-token")
+                .expiresAt(LocalDateTime.now().plusDays(30))
+                .build();
+        when(refreshTokenService.createRefreshToken(existingMember)).thenReturn(refreshToken);
 
         SmsVerificationResponse result = authService.handlePhoneVerification(phone);
 
         assertThat(result.isVerified()).isTrue();
         assertThat(result.getMemberStatus()).isEqualTo(MemberStatus.EXISTING_MEMBER);
-        assertThat(result.getNextAction()).isEqualTo("HOME");
-        assertThat(result.getToken()).isEqualTo("sample-access-token");
+        assertThat(result.getAccessToken()).isEqualTo("sample-access-token");
+        assertThat(result.getRefreshToken()).isEqualTo("sample-refresh-token");
         assertThat(result.getMessage()).isEqualTo("인증이 완료되었습니다. 로그인되었습니다.");
     }
 
@@ -118,7 +142,6 @@ class AuthServiceTest {
 
         assertThat(result.isVerified()).isTrue();
         assertThat(result.getMemberStatus()).isEqualTo(MemberStatus.NEW_MEMBER);
-        assertThat(result.getNextAction()).isEqualTo("REGISTER");
         assertThat(result.getToken()).isEqualTo("sample-phone-token");
         assertThat(result.getMessage()).isEqualTo("인증이 완료되었습니다. 회원 정보를 입력해주세요.");
     }

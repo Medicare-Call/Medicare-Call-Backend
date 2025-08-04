@@ -1,8 +1,10 @@
 package com.example.medicare_call.service;
 
 import com.example.medicare_call.domain.Member;
+import com.example.medicare_call.domain.RefreshToken;
 import com.example.medicare_call.dto.RegisterRequest;
 import com.example.medicare_call.dto.SmsVerificationResponse;
+import com.example.medicare_call.dto.TokenResponse;
 import com.example.medicare_call.global.jwt.JwtProvider;
 import com.example.medicare_call.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +22,9 @@ public class AuthService {
 
     private final MemberRepository memberRepository;
     private final JwtProvider jwtProvider;
+    private final RefreshTokenService refreshTokenService;
 
-    public String register(String phone, RegisterRequest req) {
+    public TokenResponse register(String phone, RegisterRequest req) {
 
         if (memberRepository.existsByPhone(phone)) {
             throw new IllegalArgumentException("이미 등록된 전화번호입니다.");
@@ -37,7 +40,7 @@ public class AuthService {
                 .build();
 
         Member savedMember = memberRepository.save(member);
-        return generateAccessTokenResponse(savedMember);
+        return generateTokenResponse(savedMember);
     }
 
     public SmsVerificationResponse handlePhoneVerification(String phone) {
@@ -46,22 +49,26 @@ public class AuthService {
             Member member = memberOpt.get();
             log.info("기존회원");
             //기존회원
-            String accessToken = generateAccessTokenResponse(member);
-            return SmsVerificationResponse.forExistingMember(accessToken);
-
+            TokenResponse tokenResponse = generateTokenResponse(member);
+            return SmsVerificationResponse.forExistingMember(tokenResponse.getAccessToken(), tokenResponse.getRefreshToken());
         } else {
             //신규회원
             log.info("신규회원");
             String phoneVerificationToken = generatePhoneVerificationToken(phone);
             return SmsVerificationResponse.forNewMember(phoneVerificationToken);
         }
-
-
     }
 
     // 토큰 응답 생성
-    private String generateAccessTokenResponse(Member member) {
-        return jwtProvider.createAccessToken(member);
+    private TokenResponse generateTokenResponse(Member member) {
+        String accessToken = jwtProvider.createAccessToken(member);
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(member);
+        
+        return TokenResponse.of(
+                accessToken,
+                refreshToken.getToken(),
+                jwtProvider.getAccessTokenExpirationMillis() / 1000
+        );
     }
 
     private String generatePhoneVerificationToken(String phone) {
