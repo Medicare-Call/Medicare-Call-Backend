@@ -6,6 +6,7 @@ import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.dto.CallDataRequest;
 import com.example.medicare_call.dto.HealthDataExtractionRequest;
 import com.example.medicare_call.dto.HealthDataExtractionResponse;
+import com.example.medicare_call.global.ResourceNotFoundException;
 import com.example.medicare_call.repository.CareCallRecordRepository;
 import com.example.medicare_call.repository.CareCallSettingRepository;
 import com.example.medicare_call.repository.ElderRepository;
@@ -229,7 +230,7 @@ class CallDataServiceTest {
 
         // when & then
         assertThatThrownBy(() -> callDataService.saveCallData(request))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("어르신을 찾을 수 없습니다: 999");
         
         verify(elderRepository).findById(999);
@@ -256,7 +257,7 @@ class CallDataServiceTest {
 
         // when & then
         assertThatThrownBy(() -> callDataService.saveCallData(request))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("통화 설정을 찾을 수 없습니다: 999");
         
         verify(elderRepository).findById(1);

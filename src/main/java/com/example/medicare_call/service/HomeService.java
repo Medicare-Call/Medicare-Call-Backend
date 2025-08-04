@@ -7,6 +7,7 @@ import com.example.medicare_call.domain.MealRecord;
 import com.example.medicare_call.domain.MedicationSchedule;
 import com.example.medicare_call.domain.MedicationTakenRecord;
 import com.example.medicare_call.dto.HomeResponse;
+import com.example.medicare_call.global.ResourceNotFoundException;
 import com.example.medicare_call.global.enums.MealType;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.repository.BloodSugarRecordRepository;
@@ -48,7 +49,7 @@ public class HomeService {
 
         // 어르신 정보 조회
         Elder elder = elderRepository.findById(elderId)
-                .orElseThrow(() -> new RuntimeException("어르신을 찾을 수 없습니다: " + elderId));
+                .orElseThrow(() -> new ResourceNotFoundException("어르신을 찾을 수 없습니다: " + elderId));
 
         // 오늘의 식사 기록 조회
         List<MealRecord> todayMeals = mealRecordRepository.findByElderIdAndDate(elderId, today);

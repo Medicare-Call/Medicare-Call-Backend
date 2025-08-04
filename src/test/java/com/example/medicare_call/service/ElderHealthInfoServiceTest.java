@@ -2,6 +2,7 @@ package com.example.medicare_call.service;
 
 import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.ElderHealthRegisterRequest;
+import com.example.medicare_call.global.ResourceNotFoundException;
 import com.example.medicare_call.global.enums.ElderHealthNoteType;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.repository.*;
@@ -14,6 +15,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -56,5 +58,22 @@ class ElderHealthInfoServiceTest {
         verify(elderDiseaseRepository, times(1)).save(any(ElderDisease.class));
         verify(medicationScheduleRepository, times(1)).save(any(MedicationSchedule.class));
         verify(elderHealthInfoRepository, times(1)).save(any(ElderHealthInfo.class));
+    }
+
+    @Test
+    void registerElderHealthInfo_fail_elderNotFound() {
+        // given
+        ElderHealthRegisterRequest request = ElderHealthRegisterRequest.builder()
+                .diseaseNames(List.of("당뇨"))
+                .medicationSchedules(List.of())
+                .notes(List.of())
+                .build();
+
+        when(elderRepository.findById(999)).thenReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> elderHealthInfoService.registerElderHealthInfo(999, request))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("어르신을 찾을 수 없습니다. elderId: 999");
     }
 } 

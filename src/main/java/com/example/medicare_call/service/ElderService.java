@@ -2,6 +2,7 @@ package com.example.medicare_call.service;
 
 import com.example.medicare_call.dto.ElderRegisterRequest;
 import com.example.medicare_call.domain.Elder;
+import com.example.medicare_call.global.ResourceNotFoundException;
 import com.example.medicare_call.global.enums.Gender;
 import com.example.medicare_call.repository.ElderRepository;
 import com.example.medicare_call.repository.MemberRepository;
@@ -20,7 +21,7 @@ public class ElderService {
     @Transactional
     public Elder registerElder(@Valid ElderRegisterRequest request) {
         Member guardian = memberRepository.findById(request.getGuardianId())
-            .orElseThrow(() -> new IllegalArgumentException("보호자 없음"));
+            .orElseThrow(() -> new ResourceNotFoundException("보호자를 찾을 수 없습니다: " + request.getGuardianId()));
         Elder elder = Elder.builder()
             .name(request.getName())
             .birthDate(request.getBirthDate())
