@@ -95,6 +95,25 @@ public class JwtProvider {
     public Long getMemberId(String token) {
         return Long.parseLong(getClaims(token).get("id").toString());
     }
-    public String getPhone(String token) {return  getClaims(token).get("phone").toString();}
+    
+    public String getPhone(String token) {
+        return getClaims(token).get("phone").toString();
+    }
+    
+    public String getTokenCategory(String token) {
+        return getClaims(token).get("category").toString();
+    }
+    
+    public boolean isAccessToken(String token) {
+        try {
+            return "access".equals(getTokenCategory(token));
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+    public Long getAccessTokenExpirationMillis() {
+        return ACCESS_TOKEN_EXPIRE_MILLIS;
+    }
 
 }

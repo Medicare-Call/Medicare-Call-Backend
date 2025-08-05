@@ -71,7 +71,6 @@ class SmsControllerTest {
                         .verified(true)
                         .message("인증이 완료되었습니다. 로그인되었습니다.")
                         .memberStatus(MemberStatus.EXISTING_MEMBER)
-                        .nextAction("HOME")
                         .token("sample-access-token")
                         .build()
         );
@@ -81,8 +80,7 @@ class SmsControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.verified").value(true))
-                .andExpect(jsonPath("$.memberStatus").value("EXISTING_MEMBER"))
-                .andExpect(jsonPath("$.nextAction").value("HOME"));
+                .andExpect(jsonPath("$.memberStatus").value("EXISTING_MEMBER"));
     }
 
     @Test
@@ -98,7 +96,6 @@ class SmsControllerTest {
                         .verified(true)
                         .message("인증이 완료되었습니다. 회원 정보를 입력해주세요.")
                         .memberStatus(MemberStatus.NEW_MEMBER)
-                        .nextAction("REGISTER")
                         .token("sample-phone-token")
                         .build()
         );
@@ -108,8 +105,7 @@ class SmsControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.verified").value(true))
-                .andExpect(jsonPath("$.memberStatus").value("NEW_MEMBER"))
-                .andExpect(jsonPath("$.nextAction").value("REGISTER"));
+                .andExpect(jsonPath("$.memberStatus").value("NEW_MEMBER"));
     }
 
     @Test

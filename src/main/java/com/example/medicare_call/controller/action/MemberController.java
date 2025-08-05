@@ -1,6 +1,7 @@
 package com.example.medicare_call.controller.action;
 
 import com.example.medicare_call.dto.RegisterRequest;
+import com.example.medicare_call.dto.TokenResponse;
 import com.example.medicare_call.global.annotation.AuthPhone;
 import com.example.medicare_call.service.AuthService;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -22,9 +23,9 @@ public class MemberController {
     private final AuthService authService;
 
     @PostMapping("")
-    public ResponseEntity<String> register(@Parameter(hidden = true) @AuthPhone String phone,
+    public ResponseEntity<TokenResponse> register(@Parameter(hidden = true) @AuthPhone String phone,
                                            @Valid @RequestBody RegisterRequest signUpDto) {
-        String accessTokenResponse = authService.register(phone,signUpDto);
-        return ResponseEntity.ok(accessTokenResponse);
+        TokenResponse tokenResponse = authService.register(phone,signUpDto);
+        return ResponseEntity.ok(tokenResponse);
     }
 }

@@ -6,6 +6,7 @@ jwt:
   secret: ${JWT_SECRET}
   accessTokenExpiration: ${JWT_ACCESS_EXPIRATION}
   phoneTokenExpiration: ${JWT_PHONE_EXPIRATION}
+  refreshTokenExpirationDays: ${JWT_REFRESH_EXPIRATION_DAYS}
 
 ---
 spring:

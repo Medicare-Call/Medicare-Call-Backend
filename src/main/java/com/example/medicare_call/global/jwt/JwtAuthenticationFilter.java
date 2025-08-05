@@ -46,15 +46,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private Authentication getAuthentication(String token) {
         try {
-            // Access Token인지 확인 (id 클레임 존재)
-            Long memberId = jwtProvider.getMemberId(token);
-            log.info("Extracted memberId from Access Token: {}", memberId);
-            return new JwtTokenAuthentication(memberId);
+            // Access Token인지 확인
+            if (jwtProvider.isAccessToken(token)) {
+                Long memberId = jwtProvider.getMemberId(token);
+                log.info("Extracted memberId from Access Token: {}", memberId);
+                return new JwtTokenAuthentication(memberId);
+            } else {
+                // Phone Token인 경우
+                String phone = jwtProvider.getPhone(token);
+                log.info("Extracted phone from Phone Token: {}", phone);
+                return new JwtPhoneTokenAuthentication(phone);
+            }
         } catch (Exception e) {
-            // Phone Token인 경우 (phone 클레임 존재)
-            String phone = jwtProvider.getPhone(token);
-            log.info("Extracted phone from Phone Token: {}", phone);
-            return new JwtTokenAuthentication(-1L);
+            log.error("토큰 인증 처리 중 오류 발생: {}", e.getMessage());
+            return null;
         }
     }
 }
