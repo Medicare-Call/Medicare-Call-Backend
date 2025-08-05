@@ -35,7 +35,8 @@ public class SecurityConfig {
             "/members",
             "/call-data",
             "/health-data/**", // 제거 예정
-            "/auth/refresh"
+            "/auth/refresh",
+            "/test-care-call" //제거 예정
     };
 
     private final String[] PUBLIC_GET = {
