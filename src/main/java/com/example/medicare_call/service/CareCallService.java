@@ -6,7 +6,9 @@ import com.example.medicare_call.domain.ElderHealthInfo;
 import com.example.medicare_call.domain.MedicationSchedule;
 import com.example.medicare_call.global.enums.CallType;
 import com.example.medicare_call.repository.*;
+import com.example.medicare_call.util.PhoneNumberUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -20,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CareCallService {
@@ -58,9 +61,11 @@ public class CareCallService {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
+            String normalizedPhoneNumber = PhoneNumberUtil.normalizeKoreanPhoneNumber(phoneNumber);
+
             Map<String, Object> body = new HashMap<>();
             body.put("elderId", elderId);
-            body.put("phoneNumber", phoneNumber);
+            body.put("phoneNumber", normalizedPhoneNumber);
             body.put("prompt", prompt);
 
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);

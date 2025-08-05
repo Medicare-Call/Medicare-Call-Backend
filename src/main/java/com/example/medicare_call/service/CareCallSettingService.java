@@ -26,6 +26,7 @@ public class CareCallSettingService {
                 .elder(elder)
                 .firstCallTime(request.firstCallTime())
                 .secondCallTime(request.secondCallTime())
+                .thirdCallTime(request.thirdCallTime())
                 .recurrence(CallRecurrenceType.DAILY.getValue()) //TODO: MVP 단계에서는 daily로 고정
                 .build();
 
