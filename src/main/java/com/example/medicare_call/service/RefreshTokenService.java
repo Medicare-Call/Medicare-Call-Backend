@@ -14,6 +14,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -26,6 +27,7 @@ public class RefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final MemberRepository memberRepository;
     private final JwtProvider jwtProvider;
+    private final EntityManager entityManager;
     
     @Value("${jwt.refreshTokenExpirationDays}")
     private Integer refreshTokenExpirationDays;
@@ -36,6 +38,7 @@ public class RefreshTokenService {
     public RefreshToken createRefreshToken(Member member) {
         // 기존 Refresh Token이 있다면 삭제
         refreshTokenRepository.deleteByMemberId(member.getId());
+        entityManager.flush(); // 삭제 후 변경사항 반영
         
         // 새로운 Refresh Token 생성 (UUID 기반)
         String tokenValue = UUID.randomUUID().toString();
