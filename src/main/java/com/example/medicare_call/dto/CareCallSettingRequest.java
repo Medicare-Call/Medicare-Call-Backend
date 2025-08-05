@@ -23,5 +23,14 @@ public record CareCallSettingRequest(
                 format = "partial-time"
         )
         @JsonFormat(pattern = "HH:mm")
-        LocalTime secondCallTime
+        LocalTime secondCallTime,
+
+        @Schema(
+                description = "세 번째 전화 시간",
+                example = "11:02",
+                type = "string",
+                format = "partial-time"
+        )
+        @JsonFormat(pattern = "HH:mm")
+        LocalTime thirdCallTime
 ) {}

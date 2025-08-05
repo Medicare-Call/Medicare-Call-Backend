@@ -31,6 +31,10 @@ public class CareCallSchedulerService {
             callRequestSender.sendCall(setting.getElder().getId(), CallType.SECOND);
         }
 
-        //TODO: 3차 케어콜
+        //3차 케어콜
+        List<CareCallSetting> thirdTargets = settingRepository.findBySecondCallTime(now);
+        for (CareCallSetting setting : thirdTargets) {
+            callRequestSender.sendCall(setting.getElder().getId(), CallType.THIRD);
+        }
     }
 }
