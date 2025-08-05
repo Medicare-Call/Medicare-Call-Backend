@@ -6,6 +6,7 @@ import com.example.medicare_call.domain.ElderHealthInfo;
 import com.example.medicare_call.domain.MedicationSchedule;
 import com.example.medicare_call.global.enums.CallType;
 import com.example.medicare_call.repository.*;
+import com.example.medicare_call.util.PhoneNumberUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -60,7 +61,7 @@ public class CareCallService {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
-            String normalizedPhoneNumber = normalizeKoreanPhoneNumber(phoneNumber);
+            String normalizedPhoneNumber = PhoneNumberUtil.normalizeKoreanPhoneNumber(phoneNumber);
 
             Map<String, Object> body = new HashMap<>();
             body.put("elderId", elderId);
@@ -74,20 +75,5 @@ public class CareCallService {
         } catch (Exception e) {
             System.err.println("호출 실패: " + e.getMessage());
         }
-    }
-
-    private String normalizeKoreanPhoneNumber(String phoneNumber) {
-        // 010으로 시작하는 경우 +82로 변환
-        if (phoneNumber.startsWith("010")) {
-            return "+82" + phoneNumber.substring(1);  // "01012345678" → "+821012345678"
-        }
-
-        // 이미 +82로 시작하면 그대로 반환
-        if (phoneNumber.startsWith("+82")) {
-            return phoneNumber;
-        }
-
-        log.warn("전화번호 형식이 예상과 다릅니다. 입력값: {}", phoneNumber);
-        return phoneNumber;
     }
 }
