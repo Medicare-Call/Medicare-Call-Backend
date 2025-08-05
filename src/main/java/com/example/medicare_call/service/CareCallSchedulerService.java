@@ -14,7 +14,7 @@ import java.util.List;
 public class CareCallSchedulerService {
 
     private final CareCallSettingRepository settingRepository;
-    private final CareCallService careCallService;
+    private final CareCallService callRequestSender;
 
     public void checkAndSendCalls() {
         LocalTime now = LocalTime.now().withSecond(0).withNano(0); // 초 단위 무시
@@ -22,19 +22,19 @@ public class CareCallSchedulerService {
         //1차 케어콜
         List<CareCallSetting> firstTargets = settingRepository.findByFirstCallTime(now);
         for (CareCallSetting setting : firstTargets) {
-            careCallService.sendCall(setting.getElder().getId(), CallType.FIRST);
+            callRequestSender.sendCall(setting.getElder().getId(), CallType.FIRST);
         }
 
         //2차 케어콜
         List<CareCallSetting> secondTargets = settingRepository.findBySecondCallTime(now);
         for (CareCallSetting setting : secondTargets) {
-            careCallService.sendCall(setting.getElder().getId(), CallType.SECOND);
+            callRequestSender.sendCall(setting.getElder().getId(), CallType.SECOND);
         }
 
         //3차 케어콜
         List<CareCallSetting> thirdTargets = settingRepository.findBySecondCallTime(now);
         for (CareCallSetting setting : thirdTargets) {
-            careCallService.sendCall(setting.getElder().getId(), CallType.THIRD);
+            callRequestSender.sendCall(setting.getElder().getId(), CallType.THIRD);
         }
     }
 }
