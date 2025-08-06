@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -72,9 +73,9 @@ public class CallDataService {
     private void extractHealthDataFromCall(CareCallRecord callRecord, String transcriptionText) {
         log.info("통화 내용에서 건강 데이터 추출 시작: callId={}", callRecord.getId());
         
-        String callDate = callRecord.getStartTime() != null ? 
-            callRecord.getStartTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) : 
-            LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        LocalDate callDate = callRecord.getStartTime() != null ? 
+            callRecord.getStartTime().toLocalDate() : 
+            LocalDateTime.now().toLocalDate();
         
         HealthDataExtractionRequest request = HealthDataExtractionRequest.builder()
                 .transcriptionText(transcriptionText)
@@ -90,13 +91,15 @@ public class CallDataService {
     public void saveHealthDataToDatabase(CareCallRecord callRecord, HealthDataExtractionResponse healthData) {
         log.info("건강 데이터 DB 저장 시작: callId={}", callRecord.getId());
         
-        if (healthData.getBloodSugarData() != null) {
-            bloodSugarService.saveBloodSugarData(callRecord, healthData.getBloodSugarData());
+        if (healthData != null) {
+            if (healthData.getBloodSugarData() != null) {
+                bloodSugarService.saveBloodSugarData(callRecord, healthData.getBloodSugarData());
+            }
+            if (healthData.getMedicationData() != null) {
+                medicationService.saveMedicationTakenRecord(callRecord, healthData.getMedicationData());
+            }
+            healthDataService.updateCareCallRecordWithHealthData(callRecord, healthData);
         }
-        if (healthData.getMedicationData() != null) {
-            medicationService.saveMedicationTakenRecord(callRecord, healthData.getMedicationData());
-        }
-        healthDataService.updateCareCallRecordWithHealthData(callRecord, healthData);
         
         log.info("건강 데이터 DB 저장 완료: callId={}", callRecord.getId());
     }

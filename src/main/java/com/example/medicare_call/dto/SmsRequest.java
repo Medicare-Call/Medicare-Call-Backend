@@ -1,7 +1,7 @@
 package com.example.medicare_call.dto;
 
+import com.example.medicare_call.global.annotation.ValidPhoneNumber;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,6 +13,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class SmsRequest {
     @NotBlank(message = "전화번호는 필수입니다.")
-    @Pattern(regexp = "^010\\d{8}$", message = "전화번호는 01012345678 형식이어야 합니다.")
+    @ValidPhoneNumber
     private String phone;
 }

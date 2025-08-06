@@ -31,7 +31,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.example.medicare_call.global.annotation.ValidDateRange;
+import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
@@ -351,7 +354,9 @@ public class HealthDataController {
         private String transcriptionText;
         
         @Schema(description = "통화 날짜", example = "2024-01-01")
-        private String callDate;
+        @NotNull(message = "통화 날짜는 필수입니다.")
+        @ValidDateRange
+        private LocalDate callDate;
 
         // Getters and Setters
         public Integer getElderId() { return elderId; }
@@ -363,7 +368,7 @@ public class HealthDataController {
         public String getTranscriptionText() { return transcriptionText; }
         public void setTranscriptionText(String transcriptionText) { this.transcriptionText = transcriptionText; }
         
-        public String getCallDate() { return callDate; }
-        public void setCallDate(String callDate) { this.callDate = callDate; }
+        public LocalDate getCallDate() { return callDate; }
+        public void setCallDate(LocalDate callDate) { this.callDate = callDate; }
     }
 } 

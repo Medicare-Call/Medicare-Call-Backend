@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -50,7 +51,7 @@ class OpenAiHealthDataServiceTest {
         // given
         HealthDataExtractionRequest request = HealthDataExtractionRequest.builder()
                 .transcriptionText("오늘 아침에 밥을 먹었고, 혈당을 측정했어요. 120이 나왔어요.")
-                .callDate("2024-01-01")
+                .callDate(LocalDate.of(2024, 1, 1))
                 .build();
 
         String mockOpenAiResponse = """
@@ -122,7 +123,7 @@ class OpenAiHealthDataServiceTest {
         // given
         HealthDataExtractionRequest request = HealthDataExtractionRequest.builder()
                 .transcriptionText("테스트 통화 내용")
-                .callDate("2024-01-01")
+                .callDate(LocalDate.of(2024, 1, 1))
                 .build();
 
         when(restTemplate.postForObject(eq("https://api.openai.com/v1/chat/completions"), any(HttpEntity.class), eq(OpenAiResponse.class)))
@@ -148,7 +149,7 @@ class OpenAiHealthDataServiceTest {
         // given
         HealthDataExtractionRequest request = HealthDataExtractionRequest.builder()
                 .transcriptionText("테스트 통화 내용")
-                .callDate("2024-01-01")
+                .callDate(LocalDate.of(2024, 1, 1))
                 .build();
 
         OpenAiResponse openAiResponse = OpenAiResponse.builder()
@@ -181,7 +182,7 @@ class OpenAiHealthDataServiceTest {
         // given
         HealthDataExtractionRequest request = HealthDataExtractionRequest.builder()
                 .transcriptionText("")
-                .callDate("2024-01-01")
+                .callDate(LocalDate.of(2024, 1, 1))
                 .build();
 
         OpenAiResponse openAiResponse = OpenAiResponse.builder()

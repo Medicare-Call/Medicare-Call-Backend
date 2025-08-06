@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,7 +47,7 @@ class HealthDataExtractionIntegrationTest {
                     상담사: 좋은 수치네요. 기분은 어떠세요?
                     어르신: 오늘은 기분이 좋아요. 잠도 잘 잤어요.
                     """)
-                .callDate("2024-01-01")
+                .callDate(LocalDate.of(2024, 1, 1))
                 .build();
 
         String mockOpenAiResponse = """
@@ -115,7 +116,7 @@ class HealthDataExtractionIntegrationTest {
                     상담사: 좋습니다. 컨디션은 어떠세요?
                     어르신: 오늘은 머리가 좀 아파요.
                     """)
-                .callDate("2024-01-01")
+                .callDate(LocalDate.of(2024, 1, 1))
                 .build();
 
         String mockOpenAiResponse = """
@@ -174,7 +175,7 @@ class HealthDataExtractionIntegrationTest {
         // given
         HealthDataExtractionRequest request = HealthDataExtractionRequest.builder()
                 .transcriptionText("")
-                .callDate("2024-01-01")
+                .callDate(LocalDate.of(2024, 1, 1))
                 .build();
 
         String mockOpenAiResponse = """

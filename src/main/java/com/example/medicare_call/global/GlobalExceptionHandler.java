@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.extern.slf4j.Slf4j;
 import java.util.HashMap;
 import java.util.Map;
+import jakarta.validation.ConstraintViolationException;
 
 @Slf4j
 @RestControllerAdvice(
@@ -42,6 +43,25 @@ public class GlobalExceptionHandler {
                 null
         );
         log.error(e.getMessage(), e);
+        return ResponseEntity.badRequest().body(errorResponse);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException e) {
+        Map<String, String> errors = new HashMap<>();
+        e.getConstraintViolations().forEach(violation -> {
+            String fieldName = violation.getPropertyPath().toString();
+            String message = violation.getMessage();
+            errors.put(fieldName, message);
+        });
+        
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Validation 오류",
+                "입력값이 유효하지 않습니다.",
+                errors
+        );
+        log.warn("Constraint violation: {}", errors);
         return ResponseEntity.badRequest().body(errorResponse);
     }
 
