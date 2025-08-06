@@ -1,10 +1,10 @@
 package com.example.medicare_call.service;
 
-import com.example.medicare_call.domain.Disease;
-import com.example.medicare_call.domain.Elder;
-import com.example.medicare_call.domain.ElderHealthInfo;
-import com.example.medicare_call.domain.MedicationSchedule;
+import com.example.medicare_call.domain.*;
+import com.example.medicare_call.dto.CareCallTestRequest;
 import com.example.medicare_call.global.enums.CallType;
+import com.example.medicare_call.global.enums.ElderRelation;
+import com.example.medicare_call.global.enums.ResidenceType;
 import com.example.medicare_call.repository.*;
 import com.example.medicare_call.util.PhoneNumberUtil;
 import lombok.RequiredArgsConstructor;
@@ -54,6 +54,30 @@ public class CareCallService {
         String prompt = promptGenerator.generate(elder, healthInfo, diseases, medicationSchedules);
 
         sendPrompt(elder.getId(), elder.getPhone(), prompt);
+    }
+
+    //TODO: 개발 완료 후 삭제. 테스트용 member와 elder정보이므로 DB에 저장하지 않는다.
+    public void sendTestCall(CareCallTestRequest req){
+
+        Member testMember = Member.builder()
+                .id(100)
+                .name("테스트 멤버")
+                .phone("01000000000")
+                .gender((byte) 0)
+                .plan((byte) 0)
+                .build();
+        Elder testElder = Elder.builder()
+                .id(100)
+                .name("김옥자")
+                .phone("01011111111")
+                .gender((byte)0)
+                .guardian(testMember)
+                .relationship(ElderRelation.CHILD)
+                .residenceType(ResidenceType.ALONE)
+                .build();
+
+        String testPrompt = req.prompt();
+        sendPrompt(testElder.getId(), req.phoneNumber(), testPrompt);
     }
 
     private void sendPrompt(Integer elderId, String phoneNumber, String prompt) {
