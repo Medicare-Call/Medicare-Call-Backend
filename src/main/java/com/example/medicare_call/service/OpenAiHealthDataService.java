@@ -115,7 +115,7 @@ public class OpenAiHealthDataService {
                - 혈당 상태 (식전/식후 여부를 고려하여 LOW/NORMAL/HIGH 판단)
             6. 복약 데이터
                - 약의 종류
-               - 복약 여부
+               - 복약 여부 (반드시 "복용함" 또는 "복용하지 않음"으로 응답)
                - 복용 시간
             7. 건강 징후 데이터
                - 건강 징후 상세 내용 (짧은 문장들로 요약)
@@ -143,7 +143,7 @@ public class OpenAiHealthDataService {
               },
               "medicationData": {
                 "medicationType": "약 종류",
-                "taken": "복용 여부",
+                "taken": "복용함/복용하지 않음",
                 "takenTime": "복용 시간"
               },
               "healthSigns": ["건강 징후 상세 내용 1", "건강 징후 상세 내용 2"],
