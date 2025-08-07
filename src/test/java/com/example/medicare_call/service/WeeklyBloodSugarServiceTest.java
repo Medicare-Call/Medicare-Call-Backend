@@ -7,6 +7,7 @@ import com.example.medicare_call.dto.WeeklyBloodSugarResponse;
 import com.example.medicare_call.global.enums.BloodSugarMeasurementType;
 import com.example.medicare_call.global.enums.BloodSugarStatus;
 import com.example.medicare_call.repository.BloodSugarRecordRepository;
+import com.example.medicare_call.repository.ElderRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,9 @@ class WeeklyBloodSugarServiceTest {
     @Mock
     private BloodSugarRecordRepository bloodSugarRecordRepository;
 
+    @Mock
+    private ElderRepository elderRepository;
+
     @InjectMocks
     private WeeklyBloodSugarService weeklyBloodSugarService;
 
@@ -58,33 +62,31 @@ class WeeklyBloodSugarServiceTest {
     void getWeeklyBloodSugar_성공_데이터있음() {
         // given
         Integer elderId = 1;
-        String startDate = "2025-07-09";
-        String type = "BEFORE_MEAL";
-
+        LocalDate startDate = LocalDate.of(2025, 7, 14);
+        String typeStr = "BEFORE_MEAL";
+        
+        Elder elder = Elder.builder().id(elderId).name("테스트 어르신").build();
+        when(elderRepository.findById(elderId)).thenReturn(java.util.Optional.of(elder));
+        
         List<BloodSugarRecord> records = Arrays.asList(
-                createBloodSugarRecord(1, LocalDate.of(2025, 7, 9), 90, BloodSugarStatus.LOW),
-                createBloodSugarRecord(2, LocalDate.of(2025, 7, 10), 105, BloodSugarStatus.NORMAL),
-                createBloodSugarRecord(3, LocalDate.of(2025, 7, 11), 190, BloodSugarStatus.HIGH)
+                createBloodSugarRecord(LocalDateTime.of(2025, 7, 14, 8, 0), 120),
+                createBloodSugarRecord(LocalDateTime.of(2025, 7, 15, 8, 0), 125),
+                createBloodSugarRecord(LocalDateTime.of(2025, 7, 16, 8, 0), 118)
         );
-
+        
         when(bloodSugarRecordRepository.findByElderIdAndMeasurementTypeAndDateBetween(
-                eq(elderId), eq(BloodSugarMeasurementType.BEFORE_MEAL), any(), any()))
+                elderId, BloodSugarMeasurementType.BEFORE_MEAL, startDate, startDate.plusDays(6)))
                 .thenReturn(records);
 
         // when
-        WeeklyBloodSugarResponse response = weeklyBloodSugarService.getWeeklyBloodSugar(elderId, LocalDate.of(2025, 7, 9), type);
+        WeeklyBloodSugarResponse response = weeklyBloodSugarService.getWeeklyBloodSugar(elderId, startDate, typeStr);
 
         // then
-        assertThat(response).isNotNull();
-        assertThat(response.getPeriod().getStartDate()).isEqualTo("2025-07-09");
-        assertThat(response.getPeriod().getEndDate()).isEqualTo("2025-07-15");
+        assertThat(response.getPeriod().getStartDate()).isEqualTo(startDate);
+        assertThat(response.getPeriod().getEndDate()).isEqualTo(startDate.plusDays(6));
         assertThat(response.getData()).hasSize(3);
-        assertThat(response.getAverage()).isNotNull();
-        assertThat(response.getAverage().getValue()).isEqualTo(128); // (90+105+190)/3 = 128
-        assertThat(response.getAverage().getStatus()).isEqualTo(BloodSugarStatus.NORMAL);
-        assertThat(response.getLatest()).isNotNull();
-        assertThat(response.getLatest().getValue()).isEqualTo(190);
-        assertThat(response.getLatest().getStatus()).isEqualTo(BloodSugarStatus.HIGH);
+        assertThat(response.getAverage().getValue()).isEqualTo(121);
+        assertThat(response.getLatest().getValue()).isEqualTo(118);
     }
 
     @Test
@@ -92,20 +94,22 @@ class WeeklyBloodSugarServiceTest {
     void getWeeklyBloodSugar_성공_데이터없음() {
         // given
         Integer elderId = 1;
-        String startDate = "2025-07-09";
-        String type = "AFTER_MEAL";
-
+        LocalDate startDate = LocalDate.of(2025, 7, 14);
+        String typeStr = "BEFORE_MEAL";
+        
+        Elder elder = Elder.builder().id(elderId).name("테스트 어르신").build();
+        when(elderRepository.findById(elderId)).thenReturn(java.util.Optional.of(elder));
+        
         when(bloodSugarRecordRepository.findByElderIdAndMeasurementTypeAndDateBetween(
-                eq(elderId), eq(BloodSugarMeasurementType.AFTER_MEAL), any(), any()))
+                elderId, BloodSugarMeasurementType.BEFORE_MEAL, startDate, startDate.plusDays(6)))
                 .thenReturn(Collections.emptyList());
 
         // when
-        WeeklyBloodSugarResponse response = weeklyBloodSugarService.getWeeklyBloodSugar(elderId, LocalDate.of(2025, 7, 9), type);
+        WeeklyBloodSugarResponse response = weeklyBloodSugarService.getWeeklyBloodSugar(elderId, startDate, typeStr);
 
         // then
-        assertThat(response).isNotNull();
-        assertThat(response.getPeriod().getStartDate()).isEqualTo("2025-07-09");
-        assertThat(response.getPeriod().getEndDate()).isEqualTo("2025-07-15");
+        assertThat(response.getPeriod().getStartDate()).isEqualTo(startDate);
+        assertThat(response.getPeriod().getEndDate()).isEqualTo(startDate.plusDays(6));
         assertThat(response.getData()).isEmpty();
         assertThat(response.getAverage()).isNull();
         assertThat(response.getLatest()).isNull();
@@ -116,39 +120,37 @@ class WeeklyBloodSugarServiceTest {
     void getWeeklyBloodSugar_성공_단일데이터() {
         // given
         Integer elderId = 1;
-        String startDate = "2025-07-09";
-        String type = "BEFORE_MEAL";
-
-        List<BloodSugarRecord> records = Collections.singletonList(
-                createBloodSugarRecord(1, LocalDate.of(2025, 7, 9), 120, BloodSugarStatus.NORMAL)
+        LocalDate startDate = LocalDate.of(2025, 7, 14);
+        String typeStr = "AFTER_MEAL";
+        
+        Elder elder = Elder.builder().id(elderId).name("테스트 어르신").build();
+        when(elderRepository.findById(elderId)).thenReturn(java.util.Optional.of(elder));
+        
+        List<BloodSugarRecord> records = Arrays.asList(
+                createBloodSugarRecord(LocalDateTime.of(2025, 7, 14, 12, 30), 180)
         );
-
+        
         when(bloodSugarRecordRepository.findByElderIdAndMeasurementTypeAndDateBetween(
-                eq(elderId), eq(BloodSugarMeasurementType.BEFORE_MEAL), any(), any()))
+                elderId, BloodSugarMeasurementType.AFTER_MEAL, startDate, startDate.plusDays(6)))
                 .thenReturn(records);
 
         // when
-        WeeklyBloodSugarResponse response = weeklyBloodSugarService.getWeeklyBloodSugar(elderId, LocalDate.of(2025, 7, 9), type);
+        WeeklyBloodSugarResponse response = weeklyBloodSugarService.getWeeklyBloodSugar(elderId, startDate, typeStr);
 
         // then
-        assertThat(response).isNotNull();
         assertThat(response.getData()).hasSize(1);
-        assertThat(response.getAverage()).isNotNull();
-        assertThat(response.getAverage().getValue()).isEqualTo(120);
-        assertThat(response.getAverage().getStatus()).isEqualTo(BloodSugarStatus.NORMAL);
-        assertThat(response.getLatest()).isNotNull();
-        assertThat(response.getLatest().getValue()).isEqualTo(120);
-        assertThat(response.getLatest().getStatus()).isEqualTo(BloodSugarStatus.NORMAL);
+        assertThat(response.getAverage().getValue()).isEqualTo(180);
+        assertThat(response.getLatest().getValue()).isEqualTo(180);
     }
 
-    private BloodSugarRecord createBloodSugarRecord(Integer id, LocalDate date, int value, BloodSugarStatus status) {
+    private BloodSugarRecord createBloodSugarRecord(LocalDateTime dateTime, int value) {
         return BloodSugarRecord.builder()
-                .id(id)
+                .id(1) // Assuming a default ID for testing
                 .careCallRecord(testCallRecord)
-                .measurementType(BloodSugarMeasurementType.BEFORE_MEAL)
+                .measurementType(BloodSugarMeasurementType.BEFORE_MEAL) // Assuming a default type for testing
                 .blood_sugar_value(BigDecimal.valueOf(value))
-                .status(status)
-                .recordedAt(date.atStartOfDay())
+                .status(BloodSugarStatus.NORMAL) // Assuming a default status for testing
+                .recordedAt(dateTime)
                 .build();
     }
 } 

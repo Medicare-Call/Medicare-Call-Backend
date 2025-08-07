@@ -7,6 +7,7 @@ import com.example.medicare_call.domain.Member;
 import com.example.medicare_call.dto.DailyMealResponse;
 import com.example.medicare_call.global.enums.Gender;
 import com.example.medicare_call.global.enums.MealType;
+import com.example.medicare_call.repository.ElderRepository;
 import com.example.medicare_call.repository.MealRecordRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,6 +32,9 @@ class MealRecordServiceTest {
 
     @Mock
     private MealRecordRepository mealRecordRepository;
+
+    @Mock
+    private ElderRepository elderRepository;
 
     @InjectMocks
     private MealRecordService mealRecordService;
@@ -68,6 +72,8 @@ class MealRecordServiceTest {
         LocalDate date = LocalDate.of(2025, 7, 16);
         String dateStr = "2025-07-16";
 
+        when(elderRepository.findById(1)).thenReturn(java.util.Optional.of(elder));
+
         List<MealRecord> mealRecords = Arrays.asList(
                 createMealRecord(MealType.BREAKFAST, "아침에 밥과 반찬을 드셨어요."),
                 createMealRecord(MealType.LUNCH, "점심은 간단히 드셨어요."),
@@ -93,6 +99,8 @@ class MealRecordServiceTest {
         LocalDate date = LocalDate.of(2025, 7, 16);
         String dateStr = "2025-07-16";
 
+        when(elderRepository.findById(1)).thenReturn(java.util.Optional.of(elder));
+
         List<MealRecord> mealRecords = Arrays.asList(
                 createMealRecord(MealType.BREAKFAST, "아침에 밥과 반찬을 드셨어요."),
                 createMealRecord(MealType.DINNER, "저녁은 많이 드셨어요.")
@@ -116,6 +124,8 @@ class MealRecordServiceTest {
         // given
         LocalDate date = LocalDate.of(2025, 7, 16);
         String dateStr = "2025-07-16";
+
+        when(elderRepository.findById(1)).thenReturn(java.util.Optional.of(elder));
 
         when(mealRecordRepository.findByElderIdAndDate(eq(1), eq(date)))
                 .thenReturn(Collections.emptyList());
