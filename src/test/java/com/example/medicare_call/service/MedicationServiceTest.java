@@ -21,6 +21,14 @@ import java.util.Optional;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import com.example.medicare_call.dto.DailyMedicationResponse;
+import com.example.medicare_call.global.ResourceNotFoundException;
+import com.example.medicare_call.global.enums.MedicationTakenStatus;
+import com.example.medicare_call.repository.ElderRepository;
+
+import java.time.LocalDate;
 
 @ExtendWith(MockitoExtension.class)
 class MedicationServiceTest {
@@ -33,6 +41,9 @@ class MedicationServiceTest {
 
     @Mock
     private MedicationRepository medicationRepository;
+
+    @Mock
+    private ElderRepository elderRepository;
 
     @InjectMocks
     private MedicationService medicationService;
@@ -253,5 +264,140 @@ class MedicationServiceTest {
         verify(medicationTakenRecordRepository).save(argThat(record -> 
             record.getMedicationSchedule() == null
         ));
+    }
+
+    @Test
+    @DisplayName("날짜별 복약 데이터 조회 성공")
+    void getDailyMedication_Success() {
+        // given
+        Integer elderId = 1;
+        LocalDate date = LocalDate.of(2025, 7, 16);
+
+        Elder elder = Elder.builder()
+                .id(elderId)
+                .name("테스트 어르신")
+                .build();
+
+        Medication medication1 = Medication.builder()
+                .id(1)
+                .name("당뇨약")
+                .build();
+
+        Medication medication2 = Medication.builder()
+                .id(2)
+                .name("혈압약")
+                .build();
+
+        MedicationSchedule schedule1 = MedicationSchedule.builder()
+                .id(1)
+                .elder(elder)
+                .medication(medication1)
+                .scheduleTime("MORNING")
+                .build();
+
+        MedicationSchedule schedule2 = MedicationSchedule.builder()
+                .id(2)
+                .elder(elder)
+                .medication(medication1)
+                .scheduleTime("LUNCH")
+                .build();
+
+        MedicationSchedule schedule3 = MedicationSchedule.builder()
+                .id(3)
+                .elder(elder)
+                .medication(medication1)
+                .scheduleTime("DINNER")
+                .build();
+
+        MedicationSchedule schedule4 = MedicationSchedule.builder()
+                .id(4)
+                .elder(elder)
+                .medication(medication2)
+                .scheduleTime("MORNING")
+                .build();
+
+        MedicationSchedule schedule5 = MedicationSchedule.builder()
+                .id(5)
+                .elder(elder)
+                .medication(medication2)
+                .scheduleTime("DINNER")
+                .build();
+
+        CareCallRecord callRecord = CareCallRecord.builder()
+                .id(1)
+                .elder(elder)
+                .build();
+
+        MedicationTakenRecord takenRecord1 = MedicationTakenRecord.builder()
+                .id(1)
+                .careCallRecord(callRecord)
+                .medicationSchedule(schedule1)
+                .medication(medication1)
+                .takenStatus(MedicationTakenStatus.TAKEN)
+                .build();
+
+        MedicationTakenRecord takenRecord2 = MedicationTakenRecord.builder()
+                .id(2)
+                .careCallRecord(callRecord)
+                .medicationSchedule(schedule2)
+                .medication(medication1)
+                .takenStatus(MedicationTakenStatus.TAKEN)
+                .build();
+
+        MedicationTakenRecord takenRecord3 = MedicationTakenRecord.builder()
+                .id(3)
+                .careCallRecord(callRecord)
+                .medicationSchedule(schedule4)
+                .medication(medication2)
+                .takenStatus(MedicationTakenStatus.TAKEN)
+                .build();
+
+        when(elderRepository.findById(elderId)).thenReturn(Optional.of(elder));
+        when(medicationTakenRecordRepository.findByElderIdAndDate(elderId, date))
+                .thenReturn(Arrays.asList(takenRecord1, takenRecord2, takenRecord3));
+        when(medicationScheduleRepository.findByElder(elder))
+                .thenReturn(Arrays.asList(schedule1, schedule2, schedule3, schedule4, schedule5));
+
+        // when
+        DailyMedicationResponse result = medicationService.getDailyMedication(elderId, date);
+
+        // then
+        assertThat(result.getDate()).isEqualTo(date);
+        assertThat(result.getMedications()).hasSize(2);
+
+        // 당뇨약 검증
+        DailyMedicationResponse.MedicationInfo diabetesMedication = result.getMedications().stream()
+                .filter(med -> med.getType().equals("당뇨약"))
+                .findFirst()
+                .orElse(null);
+        assertThat(diabetesMedication).isNotNull();
+        assertThat(diabetesMedication.getGoalCount()).isEqualTo(3);
+        assertThat(diabetesMedication.getTakenCount()).isEqualTo(2);
+        assertThat(diabetesMedication.getTimes()).hasSize(3);
+
+        // 혈압약 검증
+        DailyMedicationResponse.MedicationInfo bloodPressureMedication = result.getMedications().stream()
+                .filter(med -> med.getType().equals("혈압약"))
+                .findFirst()
+                .orElse(null);
+        assertThat(bloodPressureMedication).isNotNull();
+        assertThat(bloodPressureMedication.getGoalCount()).isEqualTo(2);
+        assertThat(bloodPressureMedication.getTakenCount()).isEqualTo(1);
+        assertThat(bloodPressureMedication.getTimes()).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("날짜별 복약 데이터 조회 실패 - 어르신을 찾을 수 없음")
+    void getDailyMedication_Fail_ElderNotFound() {
+        // given
+        Integer elderId = 999;
+        LocalDate date = LocalDate.of(2025, 7, 16);
+
+        when(elderRepository.findById(elderId)).thenReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> medicationService.getDailyMedication(elderId, date))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("어르신을 찾을 수 없습니다: " + elderId);
     }
 } 

@@ -1,7 +1,9 @@
 package com.example.medicare_call.service;
 
 import com.example.medicare_call.domain.*;
+import com.example.medicare_call.dto.DailyMedicationResponse;
 import com.example.medicare_call.dto.HealthDataExtractionResponse;
+import com.example.medicare_call.global.ResourceNotFoundException;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.global.enums.MedicationTakenStatus;
 import com.example.medicare_call.repository.*;
@@ -10,9 +12,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -21,6 +26,7 @@ public class MedicationService {
     private final MedicationTakenRecordRepository medicationTakenRecordRepository;
     private final MedicationScheduleRepository medicationScheduleRepository;
     private final MedicationRepository medicationRepository;
+    private final ElderRepository elderRepository;
 
     @Transactional
     public void saveMedicationTakenRecord(CareCallRecord callRecord, HealthDataExtractionResponse.MedicationData medicationData) {
@@ -80,5 +86,75 @@ public class MedicationService {
 
         // DB에 저장된 스케줄 시간에 포함되어 있는지 확인
         return scheduleTime.contains(takenTimeEnum.name());
+    }
+
+    public DailyMedicationResponse getDailyMedication(Integer elderId, LocalDate date) {
+        Elder elder = elderRepository.findById(elderId)
+                .orElseThrow(() -> new ResourceNotFoundException("어르신을 찾을 수 없습니다: " + elderId));
+
+        List<MedicationTakenRecord> takenRecords = medicationTakenRecordRepository.findByElderIdAndDate(elderId, date);
+        List<MedicationSchedule> schedules = medicationScheduleRepository.findByElder(elder);
+
+        // 약 종류별 스케줄
+        Map<String, List<MedicationSchedule>> medicationSchedules = schedules.stream()
+                .collect(Collectors.groupingBy(
+                        schedule -> schedule.getMedication().getName()
+                ));
+
+        // 약 종류별 복용 기록
+        Map<String, List<MedicationTakenRecord>> medicationTakenRecords = takenRecords.stream()
+                .collect(Collectors.groupingBy(
+                        record -> record.getMedication().getName()
+                ));
+
+        List<DailyMedicationResponse.MedicationInfo> medicationList = medicationSchedules.entrySet().stream()
+                .map(entry -> {
+                    String medicationName = entry.getKey();
+                    List<MedicationSchedule> medicationScheduleList = entry.getValue();
+                    List<MedicationTakenRecord> takenRecordList = medicationTakenRecords.getOrDefault(medicationName, List.of());
+                    
+                    int goalCount = medicationScheduleList.size();
+                    int takenCount = (int) takenRecordList.stream()
+                            .filter(record -> record.getTakenStatus() == MedicationTakenStatus.TAKEN)
+                            .count();
+
+                    List<DailyMedicationResponse.TimeInfo> timeInfos = createTimeInfos(medicationScheduleList, takenRecordList);
+                    
+                    return DailyMedicationResponse.MedicationInfo.builder()
+                            .type(medicationName)
+                            .goalCount(goalCount)
+                            .takenCount(takenCount)
+                            .times(timeInfos)
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        return DailyMedicationResponse.builder()
+                .date(date)
+                .medications(medicationList)
+                .build();
+    }
+
+    private List<DailyMedicationResponse.TimeInfo> createTimeInfos(
+            List<MedicationSchedule> schedules, 
+            List<MedicationTakenRecord> takenRecords) {
+        
+        return schedules.stream()
+                .map(schedule -> {
+                    MedicationScheduleTime scheduleTime = MedicationScheduleTime.valueOf(schedule.getScheduleTime());
+
+                    boolean taken = takenRecords.stream()
+                            .anyMatch(record -> 
+                                record.getTakenStatus() == MedicationTakenStatus.TAKEN &&
+                                record.getMedicationSchedule() != null &&
+                                record.getMedicationSchedule().getId().equals(schedule.getId())
+                            );
+                    
+                    return DailyMedicationResponse.TimeInfo.builder()
+                            .time(scheduleTime)
+                            .taken(taken)
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 } 
