@@ -118,6 +118,128 @@ class OpenAiHealthDataServiceTest {
     }
 
     @Test
+    @DisplayName("복약 데이터가 포함된 건강 데이터를 성공적으로 추출한다")
+    void extractHealthData_extractsMedicationDataSuccessfully() throws Exception {
+        // given
+        HealthDataExtractionRequest request = HealthDataExtractionRequest.builder()
+                .transcriptionText("오늘 아침에 혈압약을 복용했어요.")
+                .callDate(LocalDate.of(2024, 1, 1))
+                .build();
+
+        String mockOpenAiResponse = """
+            {
+              "date": "2024-01-01",
+              "mealData": null,
+              "sleepData": null,
+              "psychologicalState": null,
+              "bloodSugarData": null,
+              "medicationData": {
+                "medicationType": "혈압약",
+                "taken": "복용함",
+                "takenTime": "아침"
+              },
+              "healthSigns": null
+            }
+            """;
+
+        OpenAiResponse openAiResponse = OpenAiResponse.builder()
+                .choices(List.of(
+                        OpenAiResponse.Choice.builder()
+                                .message(OpenAiResponse.Message.builder()
+                                        .content(mockOpenAiResponse)
+                                        .build())
+                                .build()
+                ))
+                .build();
+
+        HealthDataExtractionResponse expectedResponse = HealthDataExtractionResponse.builder()
+                .date("2024-01-01")
+                .medicationData(HealthDataExtractionResponse.MedicationData.builder()
+                        .medicationType("혈압약")
+                        .taken("복용함")
+                        .takenTime("아침")
+                        .build())
+                .build();
+
+        when(restTemplate.postForObject(eq("https://api.openai.com/v1/chat/completions"), any(HttpEntity.class), eq(OpenAiResponse.class)))
+                .thenReturn(openAiResponse);
+        when(objectMapper.readValue(any(String.class), eq(HealthDataExtractionResponse.class)))
+                .thenReturn(expectedResponse);
+
+        // when
+        HealthDataExtractionResponse result = openAiHealthDataService.extractHealthData(request);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.getDate()).isEqualTo("2024-01-01");
+        assertThat(result.getMedicationData()).isNotNull();
+        assertThat(result.getMedicationData().getMedicationType()).isEqualTo("혈압약");
+        assertThat(result.getMedicationData().getTaken()).isEqualTo("복용함");
+        assertThat(result.getMedicationData().getTakenTime()).isEqualTo("아침");
+    }
+
+    @Test
+    @DisplayName("복용하지 않은 복약 데이터를 성공적으로 추출한다")
+    void extractHealthData_extractsNotTakenMedicationDataSuccessfully() throws Exception {
+        // given
+        HealthDataExtractionRequest request = HealthDataExtractionRequest.builder()
+                .transcriptionText("오늘 아침에 혈압약을 복용하지 않았어요.")
+                .callDate(LocalDate.of(2024, 1, 1))
+                .build();
+
+        String mockOpenAiResponse = """
+            {
+              "date": "2024-01-01",
+              "mealData": null,
+              "sleepData": null,
+              "psychologicalState": null,
+              "bloodSugarData": null,
+              "medicationData": {
+                "medicationType": "혈압약",
+                "taken": "복용하지 않음",
+                "takenTime": "아침"
+              },
+              "healthSigns": null
+            }
+            """;
+
+        OpenAiResponse openAiResponse = OpenAiResponse.builder()
+                .choices(List.of(
+                        OpenAiResponse.Choice.builder()
+                                .message(OpenAiResponse.Message.builder()
+                                        .content(mockOpenAiResponse)
+                                        .build())
+                                .build()
+                ))
+                .build();
+
+        HealthDataExtractionResponse expectedResponse = HealthDataExtractionResponse.builder()
+                .date("2024-01-01")
+                .medicationData(HealthDataExtractionResponse.MedicationData.builder()
+                        .medicationType("혈압약")
+                        .taken("복용하지 않음")
+                        .takenTime("아침")
+                        .build())
+                .build();
+
+        when(restTemplate.postForObject(eq("https://api.openai.com/v1/chat/completions"), any(HttpEntity.class), eq(OpenAiResponse.class)))
+                .thenReturn(openAiResponse);
+        when(objectMapper.readValue(any(String.class), eq(HealthDataExtractionResponse.class)))
+                .thenReturn(expectedResponse);
+
+        // when
+        HealthDataExtractionResponse result = openAiHealthDataService.extractHealthData(request);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.getDate()).isEqualTo("2024-01-01");
+        assertThat(result.getMedicationData()).isNotNull();
+        assertThat(result.getMedicationData().getMedicationType()).isEqualTo("혈압약");
+        assertThat(result.getMedicationData().getTaken()).isEqualTo("복용하지 않음");
+        assertThat(result.getMedicationData().getTakenTime()).isEqualTo("아침");
+    }
+
+    @Test
     @DisplayName("OpenAI API 응답이 비어있을 때 빈 응답을 반환한다")
     void extractHealthData_returnsEmptyResponseWhenOpenAiResponseIsNull() {
         // given
