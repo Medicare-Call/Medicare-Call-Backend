@@ -2,6 +2,7 @@ package com.example.medicare_call.service;
 
 import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.CareCallTestRequest;
+import com.example.medicare_call.global.ResourceNotFoundException;
 import com.example.medicare_call.global.enums.CallType;
 import com.example.medicare_call.global.enums.ElderRelation;
 import com.example.medicare_call.global.enums.ResidenceType;
@@ -41,7 +42,7 @@ public class CareCallService {
     public void sendCall(Integer elderId, CallType callType) {
         System.out.println("Call URL: " + callUrl);
         Elder elder = elderRepository.findById(elderId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 어르신"));
+                .orElseThrow(() -> new ResourceNotFoundException("어르신을 찾을 수 없습니다: " + elderId));
 
         ElderHealthInfo healthInfo = healthInfoRepository.findByElderId(elderId);
         List<Disease> diseases = elderDiseaseRepository.findDiseasesByElder(elder);

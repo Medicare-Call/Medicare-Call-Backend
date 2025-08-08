@@ -2,7 +2,9 @@ package com.example.medicare_call.service;
 
 import com.example.medicare_call.domain.CareCallRecord;
 import com.example.medicare_call.dto.DailySleepResponse;
+import com.example.medicare_call.global.ResourceNotFoundException;
 import com.example.medicare_call.repository.CareCallRecordRepository;
+import com.example.medicare_call.repository.ElderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,8 +22,12 @@ import java.util.List;
 public class SleepRecordService {
     
     private final CareCallRecordRepository careCallRecordRepository;
+    private final ElderRepository elderRepository;
     
     public DailySleepResponse getDailySleep(Integer elderId, LocalDate date) {
+        elderRepository.findById(elderId)
+            .orElseThrow(() -> new ResourceNotFoundException("어르신을 찾을 수 없습니다: " + elderId));
+        
         List<CareCallRecord> sleepRecords = careCallRecordRepository.findByElderIdAndDateWithSleepData(elderId, date);
         
         if (sleepRecords.isEmpty()) {

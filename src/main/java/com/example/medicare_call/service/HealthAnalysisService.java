@@ -20,7 +20,7 @@ public class HealthAnalysisService {
 
     public DailyHealthAnalysisResponse getDailyHealthAnalysis(Integer elderId, LocalDate date) {
         elderRepository.findById(elderId)
-            .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 어르신입니다."));
+            .orElseThrow(() -> new ResourceNotFoundException("어르신을 찾을 수 없습니다: " + elderId));
 
         List<CareCallRecord> healthRecords = careCallRecordRepository.findByElderIdAndDateWithHealthData(elderId, date);
 

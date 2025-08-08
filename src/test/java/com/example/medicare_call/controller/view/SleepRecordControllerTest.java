@@ -20,6 +20,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.time.LocalDate;
+import com.example.medicare_call.global.ResourceNotFoundException;
 
 @WebMvcTest(SleepRecordController.class)
 @AutoConfigureMockMvc(addFilters = false) // security 필터 비활성화
@@ -135,5 +136,24 @@ class SleepRecordControllerTest {
                 .andExpect(jsonPath("$.totalSleep.minutes").value(0))
                 .andExpect(jsonPath("$.sleepTime").isEmpty())
                 .andExpect(jsonPath("$.wakeTime").isEmpty());
+    }
+
+    @Test
+    @DisplayName("날짜별 수면 데이터 조회 실패 - 존재하지 않는 어르신")
+    void getDailySleep_NotFound() throws Exception {
+        // given
+        Integer elderId = 999999;
+        String date = "2025-07-16";
+        
+        when(sleepRecordService.getDailySleep(eq(elderId), any(LocalDate.class)))
+                .thenThrow(new ResourceNotFoundException("어르신을 찾을 수 없습니다: " + elderId));
+
+        // when & then
+        mockMvc.perform(get("/elders/{elderId}/sleep", elderId)
+                        .param("date", date))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.error").value("리소스를 찾을 수 없음"))
+                .andExpect(jsonPath("$.message").value("어르신을 찾을 수 없습니다: " + elderId));
     }
 } 

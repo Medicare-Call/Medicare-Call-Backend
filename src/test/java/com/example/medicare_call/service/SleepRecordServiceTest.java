@@ -6,6 +6,7 @@ import com.example.medicare_call.domain.Member;
 import com.example.medicare_call.dto.DailySleepResponse;
 import com.example.medicare_call.global.enums.Gender;
 import com.example.medicare_call.repository.CareCallRecordRepository;
+import com.example.medicare_call.repository.ElderRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,12 +23,16 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(MockitoExtension.class)
 class SleepRecordServiceTest {
 
     @Mock
     private CareCallRecordRepository careCallRecordRepository;
+
+    @Mock
+    private ElderRepository elderRepository;
 
     @InjectMocks
     private SleepRecordService sleepRecordService;
@@ -60,32 +65,33 @@ class SleepRecordServiceTest {
     }
 
     @Test
+    @DisplayName("수면 데이터 조회 성공 - 모든 데이터 있음")
     void getDailySleep_수면_데이터_있음() {
         // given
+        Integer elderId = 1;
         LocalDate date = LocalDate.of(2025, 7, 16);
-        String dateStr = "2025-07-16";
+        
+        Elder elder = Elder.builder().id(elderId).name("테스트 어르신").build();
+        when(elderRepository.findById(elderId)).thenReturn(java.util.Optional.of(elder));
         
         LocalDateTime sleepStart = LocalDateTime.of(2025, 7, 15, 22, 12);
         LocalDateTime sleepEnd = LocalDateTime.of(2025, 7, 16, 6, 0);
         
-        CareCallRecord sleepRecord = CareCallRecord.builder()
+        CareCallRecord record = CareCallRecord.builder()
                 .id(1)
                 .elder(elder)
                 .sleepStart(sleepStart)
                 .sleepEnd(sleepEnd)
-                .startTime(LocalDateTime.of(2025, 7, 16, 9, 0))
                 .build();
-
-        List<CareCallRecord> sleepRecords = Arrays.asList(sleepRecord);
-
-        when(careCallRecordRepository.findByElderIdAndDateWithSleepData(eq(1), eq(date)))
-                .thenReturn(sleepRecords);
+        
+        when(careCallRecordRepository.findByElderIdAndDateWithSleepData(elderId, date))
+                .thenReturn(Arrays.asList(record));
 
         // when
-        DailySleepResponse response = sleepRecordService.getDailySleep(1, date);
+        DailySleepResponse response = sleepRecordService.getDailySleep(elderId, date);
 
         // then
-        assertThat(response.getDate()).isEqualTo(dateStr);
+        assertThat(response.getDate()).isEqualTo(date);
         assertThat(response.getTotalSleep().getHours()).isEqualTo(7);
         assertThat(response.getTotalSleep().getMinutes()).isEqualTo(48);
         assertThat(response.getSleepTime()).isEqualTo("22:12");
@@ -93,31 +99,32 @@ class SleepRecordServiceTest {
     }
 
     @Test
+    @DisplayName("수면 데이터 조회 성공 - 부분 데이터 있음")
     void getDailySleep_수면_데이터_부분_있음() {
         // given
+        Integer elderId = 1;
         LocalDate date = LocalDate.of(2025, 7, 16);
-        String dateStr = "2025-07-16";
+        
+        Elder elder = Elder.builder().id(elderId).name("테스트 어르신").build();
+        when(elderRepository.findById(elderId)).thenReturn(java.util.Optional.of(elder));
         
         LocalDateTime sleepStart = LocalDateTime.of(2025, 7, 15, 22, 0);
         
-        CareCallRecord sleepRecord = CareCallRecord.builder()
+        CareCallRecord record = CareCallRecord.builder()
                 .id(1)
                 .elder(elder)
                 .sleepStart(sleepStart)
                 .sleepEnd(null)
-                .startTime(LocalDateTime.of(2025, 7, 16, 9, 0))
                 .build();
-
-        List<CareCallRecord> sleepRecords = Arrays.asList(sleepRecord);
-
-        when(careCallRecordRepository.findByElderIdAndDateWithSleepData(eq(1), eq(date)))
-                .thenReturn(sleepRecords);
+        
+        when(careCallRecordRepository.findByElderIdAndDateWithSleepData(elderId, date))
+                .thenReturn(Arrays.asList(record));
 
         // when
-        DailySleepResponse response = sleepRecordService.getDailySleep(1, date);
+        DailySleepResponse response = sleepRecordService.getDailySleep(elderId, date);
 
         // then
-        assertThat(response.getDate()).isEqualTo(dateStr);
+        assertThat(response.getDate()).isEqualTo(date);
         assertThat(response.getTotalSleep().getHours()).isEqualTo(0);
         assertThat(response.getTotalSleep().getMinutes()).isEqualTo(0);
         assertThat(response.getSleepTime()).isEqualTo("22:00");
@@ -125,19 +132,23 @@ class SleepRecordServiceTest {
     }
 
     @Test
+    @DisplayName("수면 데이터 조회 성공 - 데이터 없음")
     void getDailySleep_데이터_없음() {
         // given
+        Integer elderId = 1;
         LocalDate date = LocalDate.of(2025, 7, 16);
-        String dateStr = "2025-07-16";
-
-        when(careCallRecordRepository.findByElderIdAndDateWithSleepData(eq(1), eq(date)))
+        
+        Elder elder = Elder.builder().id(elderId).name("테스트 어르신").build();
+        when(elderRepository.findById(elderId)).thenReturn(java.util.Optional.of(elder));
+        
+        when(careCallRecordRepository.findByElderIdAndDateWithSleepData(elderId, date))
                 .thenReturn(Collections.emptyList());
 
         // when
-        DailySleepResponse response = sleepRecordService.getDailySleep(1, date);
+        DailySleepResponse response = sleepRecordService.getDailySleep(elderId, date);
 
         // then
-        assertThat(response.getDate()).isEqualTo(dateStr);
+        assertThat(response.getDate()).isEqualTo(date);
         assertThat(response.getTotalSleep().getHours()).isEqualTo(0);
         assertThat(response.getTotalSleep().getMinutes()).isEqualTo(0);
         assertThat(response.getSleepTime()).isNull();

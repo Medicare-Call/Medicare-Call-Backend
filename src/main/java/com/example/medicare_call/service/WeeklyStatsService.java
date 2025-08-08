@@ -6,6 +6,7 @@ import com.example.medicare_call.global.enums.BloodSugarMeasurementType;
 import com.example.medicare_call.global.enums.BloodSugarStatus;
 import com.example.medicare_call.global.enums.MealType;
 import com.example.medicare_call.repository.*;
+import com.example.medicare_call.global.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,7 @@ public class WeeklyStatsService {
 
         // 어르신 정보 조회
         Elder elder = elderRepository.findById(elderId)
-                .orElseThrow(() -> new RuntimeException("어르신을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("어르신을 찾을 수 없습니다: " + elderId));
 
         // 1. 식사 통계
         WeeklyStatsResponse.MealStats mealStats = getMealStats(elderId, startDate, endDate);

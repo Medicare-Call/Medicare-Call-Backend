@@ -4,7 +4,9 @@ import com.example.medicare_call.domain.BloodSugarRecord;
 import com.example.medicare_call.dto.WeeklyBloodSugarResponse;
 import com.example.medicare_call.global.enums.BloodSugarMeasurementType;
 import com.example.medicare_call.global.enums.BloodSugarStatus;
+import com.example.medicare_call.global.ResourceNotFoundException;
 import com.example.medicare_call.repository.BloodSugarRecordRepository;
+import com.example.medicare_call.repository.ElderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,8 +23,12 @@ import java.util.stream.Collectors;
 public class WeeklyBloodSugarService {
 
     private final BloodSugarRecordRepository bloodSugarRecordRepository;
+    private final ElderRepository elderRepository;
 
     public WeeklyBloodSugarResponse getWeeklyBloodSugar(Integer elderId, LocalDate startDate, String typeStr) {
+        elderRepository.findById(elderId)
+            .orElseThrow(() -> new ResourceNotFoundException("어르신을 찾을 수 없습니다: " + elderId));
+        
         LocalDate endDate = startDate.plusDays(6); // 7일간 조회
 
         BloodSugarMeasurementType measurementType = BloodSugarMeasurementType.valueOf(typeStr);

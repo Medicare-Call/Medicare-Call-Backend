@@ -4,6 +4,8 @@ import com.example.medicare_call.domain.MealRecord;
 import com.example.medicare_call.dto.DailyMealResponse;
 import com.example.medicare_call.global.enums.MealType;
 import com.example.medicare_call.repository.MealRecordRepository;
+import com.example.medicare_call.repository.ElderRepository;
+import com.example.medicare_call.global.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,8 +19,12 @@ import java.util.List;
 public class MealRecordService {
     
     private final MealRecordRepository mealRecordRepository;
+    private final ElderRepository elderRepository;
     
     public DailyMealResponse getDailyMeals(Integer elderId, LocalDate date) {
+        elderRepository.findById(elderId)
+            .orElseThrow(() -> new ResourceNotFoundException("어르신을 찾을 수 없습니다: " + elderId));
+        
         List<MealRecord> mealRecords = mealRecordRepository.findByElderIdAndDate(elderId, date);
         
         String breakfast = null;
