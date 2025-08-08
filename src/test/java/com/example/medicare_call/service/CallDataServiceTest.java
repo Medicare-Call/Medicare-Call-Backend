@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Optional;
@@ -99,6 +100,10 @@ class CallDataServiceTest {
         when(elderRepository.findById(1)).thenReturn(Optional.of(elder));
         when(careCallSettingRepository.findById(2)).thenReturn(Optional.of(setting));
         when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(expectedRecord);
+        
+        // Mock OpenAI health data service
+        when(openAiHealthDataService.extractHealthData(any(HealthDataExtractionRequest.class)))
+                .thenReturn(HealthDataExtractionResponse.builder().build());
 
         // when
         CareCallRecord result = callDataService.saveCallData(request);
@@ -115,7 +120,7 @@ class CallDataServiceTest {
         verify(careCallRecordRepository).save(any(CareCallRecord.class));
         verify(openAiHealthDataService).extractHealthData(argThat(healthRequest -> 
             healthRequest.getTranscriptionText().equals("고객: 안녕하세요, 오늘 컨디션은 어떠세요?\n어르신: 네, 오늘은 컨디션이 좋아요.") &&
-            healthRequest.getCallDate().equals("2025-01-27")
+            healthRequest.getCallDate().equals(LocalDate.of(2025, 1, 27))
         ));
     }
 
@@ -355,6 +360,10 @@ class CallDataServiceTest {
         when(elderRepository.findById(1)).thenReturn(Optional.of(elder));
         when(careCallSettingRepository.findById(2)).thenReturn(Optional.of(setting));
         when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(expectedRecord);
+        
+        // Mock OpenAI health data service
+        when(openAiHealthDataService.extractHealthData(any(HealthDataExtractionRequest.class)))
+                .thenReturn(HealthDataExtractionResponse.builder().build());
 
         // when
         CareCallRecord result = callDataService.saveCallData(request);
@@ -363,7 +372,7 @@ class CallDataServiceTest {
         assertThat(result).isNotNull();
         verify(openAiHealthDataService).extractHealthData(argThat(healthRequest -> 
             healthRequest.getTranscriptionText().equals("어르신: 오늘 아침에 밥을 먹었고, 혈당을 측정했어요. 120이 나왔어요.") &&
-            healthRequest.getCallDate().equals("2025-01-27")
+            healthRequest.getCallDate().equals(LocalDate.of(2025, 1, 27))
         ));
     }
 } 
