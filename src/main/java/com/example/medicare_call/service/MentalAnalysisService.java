@@ -27,6 +27,10 @@ public class MentalAnalysisService {
         
         List<CareCallRecord> mentalRecords = careCallRecordRepository.findByElderIdAndDateWithPsychologicalData(elderId, date);
 
+        if (mentalRecords.isEmpty()) {
+            throw new ResourceNotFoundException("해당 날짜에 심리 상태 데이터가 없습니다: " + date);
+        }
+
         List<String> commentList = new ArrayList<>();
 
         for (CareCallRecord record : mentalRecords) {

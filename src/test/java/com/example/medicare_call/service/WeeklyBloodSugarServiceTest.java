@@ -24,9 +24,13 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import com.example.medicare_call.global.ResourceNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 class WeeklyBloodSugarServiceTest {
@@ -90,8 +94,8 @@ class WeeklyBloodSugarServiceTest {
     }
 
     @Test
-    @DisplayName("주간 혈당 데이터 조회 성공 - 데이터 없음")
-    void getWeeklyBloodSugar_성공_데이터없음() {
+    @DisplayName("주간 혈당 데이터 조회 실패 - 데이터 없음")
+    void getWeeklyBloodSugar_NoData_ThrowsResourceNotFoundException() {
         // given
         Integer elderId = 1;
         LocalDate startDate = LocalDate.of(2025, 7, 14);
@@ -104,15 +108,10 @@ class WeeklyBloodSugarServiceTest {
                 elderId, BloodSugarMeasurementType.BEFORE_MEAL, startDate, startDate.plusDays(6)))
                 .thenReturn(Collections.emptyList());
 
-        // when
-        WeeklyBloodSugarResponse response = weeklyBloodSugarService.getWeeklyBloodSugar(elderId, startDate, typeStr);
-
-        // then
-        assertThat(response.getPeriod().getStartDate()).isEqualTo(startDate);
-        assertThat(response.getPeriod().getEndDate()).isEqualTo(startDate.plusDays(6));
-        assertThat(response.getData()).isEmpty();
-        assertThat(response.getAverage()).isNull();
-        assertThat(response.getLatest()).isNull();
+        // when & then
+        assertThatThrownBy(() -> weeklyBloodSugarService.getWeeklyBloodSugar(elderId, startDate, typeStr))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("해당 기간에 혈당 데이터가 없습니다: " + startDate + " ~ " + startDate.plusDays(6));
     }
 
     @Test

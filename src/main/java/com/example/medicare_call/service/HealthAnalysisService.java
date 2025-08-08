@@ -24,6 +24,10 @@ public class HealthAnalysisService {
 
         List<CareCallRecord> healthRecords = careCallRecordRepository.findByElderIdAndDateWithHealthData(elderId, date);
 
+        if (healthRecords.isEmpty()) {
+            throw new ResourceNotFoundException("해당 날짜에 건강 징후 데이터가 없습니다: " + date);
+        }
+
         CareCallRecord latestRecord = healthRecords.get(healthRecords.size() - 1);
         String healthDetails = latestRecord.getHealthDetails();
         List<String> symptomList = (healthDetails == null || healthDetails.isBlank()) ? List.of() : Arrays.stream(healthDetails.split(",")).map(String::trim).toList();
