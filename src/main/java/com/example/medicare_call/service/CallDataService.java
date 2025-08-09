@@ -49,6 +49,8 @@ public class CallDataService {
         CareCallRecord record = CareCallRecord.builder()
                 .elder(elder)
                 .setting(setting)
+                .calledAt(LocalDateTime.now())
+                .responded(request.getResponded())
                 .startTime(request.getStartTime() != null ? LocalDateTime.ofInstant(request.getStartTime(), ZoneOffset.UTC) : null)
                 .endTime(request.getEndTime() != null ? LocalDateTime.ofInstant(request.getEndTime(), ZoneOffset.UTC) : null)
                 .callStatus(request.getStatus())

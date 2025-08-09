@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CareCallService {
 
+    private final MemberRepository memberRepository;
     @Value("${care-call.url}")
     private String callUrl;
 
@@ -39,7 +41,7 @@ public class CareCallService {
 
     private final CallPromptGeneratorFactory callPromptGeneratorFactory;
 
-    public void sendCall(Integer elderId, CallType callType) {
+    public void sendCall(Integer settingId, Integer elderId, CallType callType) {
         System.out.println("Call URL: " + callUrl);
         Elder elder = elderRepository.findById(elderId)
                 .orElseThrow(() -> new ResourceNotFoundException("어르신을 찾을 수 없습니다: " + elderId));
@@ -54,7 +56,7 @@ public class CareCallService {
         // 선택된 생성기로 프롬프트 생성
         String prompt = promptGenerator.generate(elder, healthInfo, diseases, medicationSchedules);
 
-        sendPrompt(elder.getId(), elder.getPhone(), prompt);
+        sendPrompt(settingId, elder.getId(), elder.getPhone(), prompt);
     }
 
     //TODO: 개발 완료 후 삭제. 테스트용 member와 elder정보이므로 DB에 저장하지 않는다.
@@ -78,10 +80,10 @@ public class CareCallService {
                 .build();
 
         String testPrompt = req.prompt();
-        sendPrompt(testElder.getId(), req.phoneNumber(), testPrompt);
+        sendPrompt(100, testElder.getId(), req.phoneNumber(), testPrompt);
     }
 
-    private void sendPrompt(Integer elderId, String phoneNumber, String prompt) {
+    private void sendPrompt(Integer settingId, Integer elderId, String phoneNumber, String prompt) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -90,6 +92,7 @@ public class CareCallService {
 
             Map<String, Object> body = new HashMap<>();
             body.put("elderId", elderId);
+            body.put("settingId", settingId);
             body.put("phoneNumber", normalizedPhoneNumber);
             body.put("prompt", prompt);
 

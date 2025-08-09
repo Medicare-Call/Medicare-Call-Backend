@@ -22,19 +22,19 @@ public class CareCallSchedulerService {
         //1차 케어콜
         List<CareCallSetting> firstTargets = settingRepository.findByFirstCallTime(now);
         for (CareCallSetting setting : firstTargets) {
-            careCallService.sendCall(setting.getElder().getId(), CallType.FIRST);
+            careCallService.sendCall(setting.getId(), setting.getElder().getId(), CallType.FIRST);
         }
 
         //2차 케어콜
         List<CareCallSetting> secondTargets = settingRepository.findBySecondCallTime(now);
         for (CareCallSetting setting : secondTargets) {
-            careCallService.sendCall(setting.getElder().getId(), CallType.SECOND);
+            careCallService.sendCall(setting.getId(), setting.getElder().getId(), CallType.SECOND);
         }
 
         //3차 케어콜
         List<CareCallSetting> thirdTargets = settingRepository.findBySecondCallTime(now);
         for (CareCallSetting setting : thirdTargets) {
-            careCallService.sendCall(setting.getElder().getId(), CallType.THIRD);
+            careCallService.sendCall(setting.getId(), setting.getElder().getId(), CallType.THIRD);
         }
     }
 }
