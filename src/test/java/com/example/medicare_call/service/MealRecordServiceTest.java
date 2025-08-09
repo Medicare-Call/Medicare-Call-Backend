@@ -21,11 +21,18 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+
+import com.example.medicare_call.global.ResourceNotFoundException;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(MockitoExtension.class)
 class MealRecordServiceTest {
@@ -120,24 +127,34 @@ class MealRecordServiceTest {
     }
 
     @Test
-    void getDailyMeals_데이터_없음() {
+    @DisplayName("날짜별 식사 데이터 조회 실패 - 어르신 없음")
+    void getDailyMeals_NoElder_ThrowsResourceNotFoundException() {
         // given
+        Integer elderId = 999;
         LocalDate date = LocalDate.of(2025, 7, 16);
-        String dateStr = "2025-07-16";
 
-        when(elderRepository.findById(1)).thenReturn(java.util.Optional.of(elder));
+        when(elderRepository.findById(elderId)).thenReturn(Optional.empty());
 
-        when(mealRecordRepository.findByElderIdAndDate(eq(1), eq(date)))
-                .thenReturn(Collections.emptyList());
+        // when & then
+        assertThatThrownBy(() -> mealRecordService.getDailyMeals(elderId, date))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("어르신을 찾을 수 없습니다: " + elderId);
+    }
 
-        // when
-        DailyMealResponse response = mealRecordService.getDailyMeals(1, date);
+    @Test
+    @DisplayName("날짜별 식사 데이터 조회 실패 - 데이터 없음")
+    void getDailyMeals_NoData_ThrowsResourceNotFoundException() {
+        // given
+        Integer elderId = 1;
+        LocalDate date = LocalDate.of(2024, 1, 1);
+        
+        when(elderRepository.findById(elderId)).thenReturn(Optional.of(new Elder()));
+        when(mealRecordRepository.findByElderIdAndDate(elderId, date)).thenReturn(List.of());
 
-        // then
-        assertThat(response.getDate()).isEqualTo(dateStr);
-        assertThat(response.getMeals().getBreakfast()).isNull();
-        assertThat(response.getMeals().getLunch()).isNull();
-        assertThat(response.getMeals().getDinner()).isNull();
+        // when & then
+        assertThatThrownBy(() -> mealRecordService.getDailyMeals(elderId, date))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("해당 날짜에 식사 데이터가 없습니다: " + date);
     }
 
     private MealRecord createMealRecord(MealType mealType, String responseSummary) {

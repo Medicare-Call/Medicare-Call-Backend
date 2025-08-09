@@ -19,11 +19,16 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import org.junit.jupiter.api.DisplayName;
+import com.example.medicare_call.global.ResourceNotFoundException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 class SleepRecordServiceTest {
@@ -132,8 +137,8 @@ class SleepRecordServiceTest {
     }
 
     @Test
-    @DisplayName("수면 데이터 조회 성공 - 데이터 없음")
-    void getDailySleep_데이터_없음() {
+    @DisplayName("수면 데이터 조회 실패 - 데이터 없음")
+    void getDailySleep_NoData_ThrowsResourceNotFoundException() {
         // given
         Integer elderId = 1;
         LocalDate date = LocalDate.of(2025, 7, 16);
@@ -144,14 +149,9 @@ class SleepRecordServiceTest {
         when(careCallRecordRepository.findByElderIdAndDateWithSleepData(elderId, date))
                 .thenReturn(Collections.emptyList());
 
-        // when
-        DailySleepResponse response = sleepRecordService.getDailySleep(elderId, date);
-
-        // then
-        assertThat(response.getDate()).isEqualTo(date);
-        assertThat(response.getTotalSleep().getHours()).isEqualTo(0);
-        assertThat(response.getTotalSleep().getMinutes()).isEqualTo(0);
-        assertThat(response.getSleepTime()).isNull();
-        assertThat(response.getWakeTime()).isNull();
+        // when & then
+        assertThatThrownBy(() -> sleepRecordService.getDailySleep(elderId, date))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("해당 날짜에 수면 데이터가 없습니다: " + date);
     }
 } 

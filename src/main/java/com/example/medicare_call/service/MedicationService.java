@@ -93,6 +93,11 @@ public class MedicationService {
                 .orElseThrow(() -> new ResourceNotFoundException("어르신을 찾을 수 없습니다: " + elderId));
 
         List<MedicationTakenRecord> takenRecords = medicationTakenRecordRepository.findByElderIdAndDate(elderId, date);
+
+        if (takenRecords.isEmpty()) {
+            throw new ResourceNotFoundException("해당 날짜에 복용 데이터가 없습니다: " + date);
+        }
+
         List<MedicationSchedule> schedules = medicationScheduleRepository.findByElder(elder);
 
         // 약 종류별 스케줄

@@ -18,6 +18,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -399,5 +401,21 @@ class MedicationServiceTest {
         assertThatThrownBy(() -> medicationService.getDailyMedication(elderId, date))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("어르신을 찾을 수 없습니다: " + elderId);
+    }
+
+    @Test
+    @DisplayName("복약 식사 데이터 조회 실패 - 데이터 없음")
+    void getDailyMedication_ThrowsResourceNotFoundException() {
+        // given
+        Integer elderId = 1;
+        LocalDate date = LocalDate.of(2024, 1, 1);
+
+        when(elderRepository.findById(elderId)).thenReturn(Optional.of(new Elder()));
+        when(medicationTakenRecordRepository.findByElderIdAndDate(elderId, date)).thenReturn(List.of());
+
+        // when & then
+        assertThatThrownBy(() -> medicationService.getDailyMedication(elderId, date))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("해당 날짜에 복용 데이터가 없습니다: " + date);
     }
 } 

@@ -27,6 +27,10 @@ public class MealRecordService {
         
         List<MealRecord> mealRecords = mealRecordRepository.findByElderIdAndDate(elderId, date);
         
+        if (mealRecords.isEmpty()) {
+            throw new ResourceNotFoundException("해당 날짜에 식사 데이터가 없습니다: " + date);
+        }
+        
         String breakfast = null;
         String lunch = null;
         String dinner = null;

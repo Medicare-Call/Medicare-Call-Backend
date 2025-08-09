@@ -31,15 +31,7 @@ public class SleepRecordService {
         List<CareCallRecord> sleepRecords = careCallRecordRepository.findByElderIdAndDateWithSleepData(elderId, date);
         
         if (sleepRecords.isEmpty()) {
-            return DailySleepResponse.builder()
-                    .date(date)
-                    .totalSleep(DailySleepResponse.TotalSleep.builder()
-                            .hours(0)
-                            .minutes(0)
-                            .build())
-                    .sleepTime(null)
-                    .wakeTime(null)
-                    .build();
+            throw new ResourceNotFoundException("해당 날짜에 수면 데이터가 없습니다: " + date);
         }
         
         // 가장 최근 수면 기록 사용

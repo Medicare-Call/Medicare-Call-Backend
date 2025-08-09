@@ -35,6 +35,10 @@ public class WeeklyBloodSugarService {
         List<BloodSugarRecord> records = bloodSugarRecordRepository
                 .findByElderIdAndMeasurementTypeAndDateBetween(elderId, measurementType, startDate, endDate);
 
+        if (records.isEmpty()) {
+            throw new ResourceNotFoundException("해당 기간에 혈당 데이터가 없습니다: " + startDate + " ~ " + endDate);
+        }
+
         List<WeeklyBloodSugarResponse.BloodSugarData> data = records.stream()
                 .map(this::convertToBloodSugarData)
                 .collect(Collectors.toList());
