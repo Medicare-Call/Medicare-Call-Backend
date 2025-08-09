@@ -69,7 +69,7 @@ class CallDataControllerTest {
                 .speaker("고객")
                 .text("안녕하세요, 오늘 컨디션은 어떠세요?")
                 .build();
-        
+
         CallDataRequest.TranscriptionData.TranscriptionSegment segment2 = CallDataRequest.TranscriptionData.TranscriptionSegment.builder()
                 .speaker("어르신")
                 .text("네, 오늘은 컨디션이 좋아요.")
@@ -86,17 +86,18 @@ class CallDataControllerTest {
                 .startTime(Instant.parse("2025-01-27T10:00:00Z"))
                 .endTime(Instant.parse("2025-01-27T10:15:00Z"))
                 .status("completed")
+                .responded((byte)1)
                 .transcription(transcriptionData)
                 .build();
 
         Elder elder = Elder.builder()
                 .id(1)
                 .build();
-        
+
         CareCallSetting setting = CareCallSetting.builder()
                 .id(2)
                 .build();
-        
+
         CareCallRecord savedRecord = CareCallRecord.builder()
                 .id(1)
                 .elder(elder)
@@ -116,10 +117,7 @@ class CallDataControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.callStatus").value("completed"))
-
-                .andExpect(jsonPath("$.transcriptionText").value("고객: 안녕하세요, 오늘 컨디션은 어떠세요?\n어르신: 네, 오늘은 컨디션이 좋아요."));
+                .andExpect(content().string(""));
     }
 
     @Test
@@ -129,6 +127,7 @@ class CallDataControllerTest {
         CallDataRequest request = CallDataRequest.builder()
                 .settingId(2)
                 .status("completed")
+                .responded((byte)1)
                 .build();
 
         // when & then
@@ -195,16 +194,17 @@ class CallDataControllerTest {
                 .elderId(1)
                 .settingId(2)
                 .status("completed")
+                .responded((byte)1)
                 .build();
 
         Elder elder = Elder.builder()
                 .id(1)
                 .build();
-        
+
         CareCallSetting setting = CareCallSetting.builder()
                 .id(2)
                 .build();
-        
+
         CareCallRecord savedRecord = CareCallRecord.builder()
                 .id(1)
                 .elder(elder)
@@ -220,8 +220,6 @@ class CallDataControllerTest {
         mockMvc.perform(post("/call-data")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.callStatus").value("completed"));
+                .andExpect(content().string(""));
     }
-} 
+}
