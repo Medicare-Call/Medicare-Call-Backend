@@ -47,6 +47,9 @@ class WeeklyStatsServiceTest {
     @Mock
     private BloodSugarRecordRepository bloodSugarRecordRepository;
 
+    @Mock
+    private OpenAiWeeklyStatsSummaryService openAiWeeklyStatsSummaryService;
+
     @InjectMocks
     private WeeklyStatsService weeklyStatsService;
 
@@ -126,6 +129,9 @@ class WeeklyStatsServiceTest {
         when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), eq(startDate), eq(endLocalDate)))
                 .thenReturn(Collections.emptyList());
 
+        when(openAiWeeklyStatsSummaryService.getWeeklyStatsSummary(any(com.example.medicare_call.dto.WeeklySummaryDto.class)))
+                .thenReturn("AI 요약 테스트");
+
         // when
         WeeklyStatsResponse response = weeklyStatsService.getWeeklyStats(elderId, startDate);
 
@@ -150,6 +156,7 @@ class WeeklyStatsServiceTest {
         assertThat(response.getBloodSugar().getAfterMeal().getNormal()).isEqualTo(0);
         assertThat(response.getBloodSugar().getAfterMeal().getHigh()).isEqualTo(0);
         assertThat(response.getBloodSugar().getAfterMeal().getLow()).isEqualTo(0);
+        assertThat(response.getHealthSummary()).isEqualTo("AI 요약 테스트");
     }
 
     private MealRecord createMealRecord(Integer id, MealType mealType) {

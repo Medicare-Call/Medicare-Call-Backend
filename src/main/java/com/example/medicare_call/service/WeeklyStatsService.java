@@ -2,6 +2,7 @@ package com.example.medicare_call.service;
 
 import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.WeeklyStatsResponse;
+import com.example.medicare_call.dto.WeeklySummaryDto;
 import com.example.medicare_call.global.enums.BloodSugarMeasurementType;
 import com.example.medicare_call.global.enums.BloodSugarStatus;
 import com.example.medicare_call.global.enums.MealType;
@@ -32,6 +33,7 @@ public class WeeklyStatsService {
     private final MedicationTakenRecordRepository medicationTakenRecordRepository;
     private final CareCallRecordRepository careCallRecordRepository;
     private final BloodSugarRecordRepository bloodSugarRecordRepository;
+    private final OpenAiWeeklyStatsSummaryService openAiWeeklyStatsSummaryService;
 
     public WeeklyStatsResponse getWeeklyStats(Integer elderId, LocalDate startDate) {
         LocalDate endDate = startDate.plusDays(6); // 7일간 조회
@@ -59,15 +61,52 @@ public class WeeklyStatsService {
         WeeklyStatsResponse.SummaryStats summaryStats = calculateSummaryStats(
                 mealStats, medicationStats, elderId, startDate, endDate);
 
+        // 7. AI 요약 생성
+        WeeklySummaryDto weeklySummaryDto = createWeeklySummaryDto(mealStats, medicationStats, averageSleep, psychSummary, bloodSugar, summaryStats);
+        String healthSummary = openAiWeeklyStatsSummaryService.getWeeklyStatsSummary(weeklySummaryDto);
+
+
         return WeeklyStatsResponse.builder()
                 .elderName(elder.getName())
                 .summaryStats(summaryStats)
                 .mealStats(mealStats)
                 .medicationStats(medicationStats)
-                .healthSummary("TODO: AI 요약 기능 구현 필요") // TODO: AI 요약 기능 구현
+                .healthSummary(healthSummary)
                 .averageSleep(averageSleep)
                 .psychSummary(psychSummary)
                 .bloodSugar(bloodSugar)
+                .build();
+    }
+    
+    private WeeklySummaryDto createWeeklySummaryDto(
+            WeeklyStatsResponse.MealStats mealStats,
+            Map<String, WeeklyStatsResponse.MedicationStats> medicationStatsMap,
+            WeeklyStatsResponse.AverageSleep averageSleep,
+            WeeklyStatsResponse.PsychSummary psychSummary,
+            WeeklyStatsResponse.BloodSugar bloodSugar,
+            WeeklyStatsResponse.SummaryStats summaryStats) {
+
+        int totalMeals = mealStats.getBreakfast() + mealStats.getLunch() + mealStats.getDinner();
+        double avgSleepHours = averageSleep.getHours() + (averageSleep.getMinutes() / 60.0);
+
+        int totalMedicationTaken = 0;
+        int totalMedicationMissed = 0;
+        for (WeeklyStatsResponse.MedicationStats stats : medicationStatsMap.values()) {
+            totalMedicationTaken += stats.getTakenCount();
+            totalMedicationMissed += (stats.getTotalCount() - stats.getTakenCount());
+        }
+
+        return WeeklySummaryDto.builder()
+                .mealCount(totalMeals)
+                .mealRate(summaryStats.getMealRate())
+                .averageSleepHours(avgSleepHours)
+                .bloodSugar(bloodSugar)
+                .medicationTakenCount(totalMedicationTaken)
+                .medicationMissedCount(totalMedicationMissed)
+                .positivePsychologicalCount(psychSummary.getGood())
+                .negativePsychologicalCount(psychSummary.getBad())
+                .healthSignals(summaryStats.getHealthSignals())
+                .missedCalls(summaryStats.getMissedCalls())
                 .build();
     }
 
