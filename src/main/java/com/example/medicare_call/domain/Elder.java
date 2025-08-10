@@ -56,4 +56,19 @@ public class Elder {
         this.relationship = relationship;
         this.residenceType = residenceType;
     }
+
+    // setting update를 post로 구현
+    public void applySettings(String name,
+                              LocalDate birthDate,
+                              Byte gender,
+                              String phone,
+                              ElderRelation relationship,
+                              ResidenceType residenceType) {
+        this.name = name;
+        this.birthDate = birthDate;
+        this.gender = gender;
+        this.phone = phone;
+        this.relationship = relationship;
+        this.residenceType = residenceType;
+    }
 } 

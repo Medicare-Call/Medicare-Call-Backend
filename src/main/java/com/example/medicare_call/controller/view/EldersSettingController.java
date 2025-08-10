@@ -1,5 +1,6 @@
 package com.example.medicare_call.controller.view;
 
+import com.example.medicare_call.dto.ElderSettingRequest;
 import com.example.medicare_call.dto.ElderSettingResponse;
 import com.example.medicare_call.global.annotation.AuthUser;
 import com.example.medicare_call.service.ElderSettingService;
@@ -8,10 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -28,5 +26,15 @@ public class EldersSettingController {
         log.info("memberId from @AuthUser = {}", memberId);
         List<ElderSettingResponse> body = elderSettingService.getElderSetting(memberId.intValue());
         return ResponseEntity.ok(body);
+    }
+
+    @PostMapping("/{elderId}/settings")
+    public ResponseEntity<ElderSettingResponse> updateElderSettingInfo(
+            @Parameter(hidden = true) @AuthUser Long memberId,
+            @PathVariable Integer elderId,
+            ElderSettingRequest req
+    ){
+        ElderSettingResponse res = elderSettingService.updateElderSetting(memberId.intValue(), elderId, req);
+        return ResponseEntity.ok(res);
     }
 }
