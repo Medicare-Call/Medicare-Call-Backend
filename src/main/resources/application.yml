@@ -63,6 +63,17 @@ openai:
     url: ${OPENAI_API_URL}
   model: ${OPENAI_API_MODEL}
 
+naverpay:
+  client:
+    id: ${NAVERPAY_CLIENT_ID}
+    secret: ${NAVERPAY_CLIENT_SECRET}
+  chain:
+    id: ${NAVERPAY_CHAIN_ID}
+  partner:
+    id: ${NAVERPAY_PARTNER_ID}
+  api:
+    url: ${NAVERPAY_API_URL}
+
 ---
 spring:
   config:
@@ -117,3 +128,14 @@ openai:
     key: ${OPENAI_API_KEY}
     url: ${OPENAI_API_URL}
   model: ${OPENAI_API_MODEL}
+
+naverpay:
+  client:
+    id: ${NAVERPAY_CLIENT_ID}
+    secret: ${NAVERPAY_CLIENT_SECRET}
+  chain:
+    id: ${NAVERPAY_CHAIN_ID}
+  partner:
+    id: ${NAVERPAY_PARTNER_ID}
+  api:
+    url: ${NAVERPAY_API_URL}
