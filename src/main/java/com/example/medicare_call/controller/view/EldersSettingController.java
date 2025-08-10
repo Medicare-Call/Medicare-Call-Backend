@@ -23,7 +23,7 @@ public class EldersSettingController {
 
     @GetMapping("/settings")
     public ResponseEntity<List<ElderSettingResponse>> getElderSettingInfo(@Parameter(hidden = true) @AuthUser Long memberId){
-        log.info("memberId from @AuthUser = {}", memberId);
+        log.info("어르신 설정 정보 조회 요청: memberId={}", memberId);
         List<ElderSettingResponse> body = elderSettingService.getElderSetting(memberId.intValue());
         return ResponseEntity.ok(body);
     }
@@ -34,7 +34,20 @@ public class EldersSettingController {
             @PathVariable Integer elderId,
             ElderSettingRequest req
     ){
+        log.info("어르신 설정 정보 수정 요청: memberId={}, elderId={}, name={}, birthDate={}, gender={}, phone={}, relationship={}, residenceType={}",
+                memberId, elderId, req.name(), req.birthDate(), req.gender(), req.phone(), req.relationship(), req.residenceType());
+
         ElderSettingResponse res = elderSettingService.updateElderSetting(memberId.intValue(), elderId, req);
         return ResponseEntity.ok(res);
+    }
+
+    @DeleteMapping("/{elderId}/settings")
+    public ResponseEntity<Void> deleteElderSettingInfo(
+            @Parameter(hidden = true) @AuthUser Long memberId,
+            @PathVariable Integer elderId
+    ){
+        log.info("어르신 설정 정보 삭제 요청: memberId={}, elderId={}", memberId, elderId);
+        elderSettingService.deleteElderSetting(memberId.intValue(), elderId);
+        return ResponseEntity.noContent().build();
     }
 }

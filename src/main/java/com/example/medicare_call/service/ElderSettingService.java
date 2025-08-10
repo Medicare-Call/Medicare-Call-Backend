@@ -17,7 +17,6 @@ import java.util.List;
 
 @Slf4j
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class ElderSettingService {
     private final MemberRepository memberRepository;
@@ -41,6 +40,7 @@ public class ElderSettingService {
 
     }
 
+    @Transactional
     public ElderSettingResponse updateElderSetting(Integer memberId, Integer elderId, ElderSettingRequest req) {
         Elder updateElder = elderRepository.findById(elderId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 어르신입니다."));
@@ -64,5 +64,14 @@ public class ElderSettingService {
                 updateElder.getRelationship(),
                 updateElder.getResidenceType()
         );
+    }
+
+    @Transactional
+    public void deleteElderSetting(Integer memberId, Integer elderId) {
+        Elder elder = elderRepository.findById(elderId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 어르신입니다."));
+        if(!elder.getGuardian().getId().equals(memberId)) throw new AccessDeniedException("해당 어르신에 대한 권한이 없습니다.");
+
+        elderRepository.delete(elder);
     }
 }

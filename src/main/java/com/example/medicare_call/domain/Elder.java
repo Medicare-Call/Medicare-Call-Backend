@@ -6,6 +6,9 @@ import lombok.Builder;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.example.medicare_call.global.enums.ElderRelation;
 import com.example.medicare_call.global.enums.ResidenceType;
 import lombok.Setter;
@@ -44,6 +47,12 @@ public class Elder {
     @Enumerated(EnumType.STRING)
     @Column(name = "residence_type", nullable = false, length = 20)
     private ResidenceType residenceType;
+
+    @OneToMany(mappedBy = "elder", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private final List<CareCallRecord> careCallRecords = new ArrayList<>();
+
+    @OneToOne(mappedBy = "elder", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    private CareCallSetting careCallSetting;
 
     @Builder
     public Elder(Integer id, Member guardian, String name, LocalDate birthDate, Byte gender, String phone, ElderRelation relationship, ResidenceType residenceType) {
