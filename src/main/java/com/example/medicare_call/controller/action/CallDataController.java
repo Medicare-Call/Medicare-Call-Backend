@@ -25,6 +25,6 @@ public class CallDataController {
     public ResponseEntity<CareCallRecord> receiveCallData(@Valid @RequestBody CallDataRequest request) {
         log.info("통화 데이터 수신: elderId={}, settingId={}", request.getElderId(), request.getSettingId());
         CareCallRecord savedRecord = callDataService.saveCallData(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedRecord);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 } 

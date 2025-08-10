@@ -33,11 +33,15 @@ public class CallDataRequest {
     
     @Schema(description = "통화 종료 시간", example = "2025-07-27T21:45:00Z")
     private Instant endTime;
-    
+
     @Schema(description = "통화 상태", example = "completed")
     @NotBlank(message = "통화 상태는 필수입니다.")
     @Pattern(regexp = "^(completed|failed|busy|no-answer)$", message = "통화 상태는 completed, failed, busy, no-answer 중 하나여야 합니다.")
     private String status;
+
+    @Schema(description = "응답 여부", example = "1")
+    @NotNull(message = "응답 여부는 필수입니다.")
+    private Byte responded;
     
     @Schema(description = "통화 녹음 텍스트")
     private TranscriptionData transcription;
