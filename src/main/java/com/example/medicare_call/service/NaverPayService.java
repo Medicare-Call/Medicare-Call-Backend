@@ -3,6 +3,7 @@ package com.example.medicare_call.service;
 import com.example.medicare_call.domain.Order;
 import com.example.medicare_call.domain.Member;
 import com.example.medicare_call.domain.Elder;
+import com.example.medicare_call.domain.Subscription;
 import com.example.medicare_call.dto.NaverPayReserveRequest;
 import com.example.medicare_call.dto.NaverPayReserveResponse;
 import com.example.medicare_call.dto.NaverPayApplyResponse;
@@ -10,9 +11,13 @@ import com.example.medicare_call.dto.PaymentApprovalResponse;
 import com.example.medicare_call.repository.OrderRepository;
 import com.example.medicare_call.repository.MemberRepository;
 import com.example.medicare_call.repository.ElderRepository;
+import com.example.medicare_call.repository.SubscriptionRepository;
 import com.example.medicare_call.global.enums.OrderStatus;
 import com.example.medicare_call.global.enums.PaymentMethod;
+import com.example.medicare_call.global.enums.SubscriptionPlan;
+import com.example.medicare_call.global.enums.SubscriptionStatus;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +29,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,6 +42,7 @@ public class NaverPayService {
     private final OrderRepository orderRepository;
     private final MemberRepository memberRepository;
     private final ElderRepository elderRepository;
+    private final SubscriptionRepository subscriptionRepository;
     private final ObjectMapper objectMapper;
 
     @Value("${naverpay.client.id}")
@@ -202,6 +209,7 @@ public class NaverPayService {
                 entity,
                 NaverPayApplyResponse.class
             );
+            log.info("네이버페이 승인 API 응답 수신: {}", response.getBody());
 
             NaverPayApplyResponse applyResponse = response.getBody();
             
@@ -266,6 +274,9 @@ public class NaverPayService {
             orderRepository.save(order);
             log.info("주문 정보 업데이트 완료 - code: {}, naverpayPaymentId: {}", code, detail.getPaymentId());
 
+            // 구독 정보 업데이트 또는 생성
+            updateSubscriptionForOrder(order);
+
             return PaymentApprovalResponse.builder()
                     .orderCode(order.getCode())
                     .status(order.getStatus())
@@ -286,6 +297,58 @@ public class NaverPayService {
             }
             // 처리 중 발생한 예외를 다시 던져서 상위 핸들러가 처리하도록 함
             throw e;
+        }
+    }
+
+    /**
+     * 주문 정보를 바탕으로 구독 정보를 생성하거나 갱신
+     * @param order 결제가 완료된 주문 정보
+     */
+    private void updateSubscriptionForOrder(Order order) {
+        try {
+            List<Long> elderIds = objectMapper.readValue(order.getElderIds(), new TypeReference<List<Long>>() {});
+            Member member = order.getMember();
+            SubscriptionPlan plan;
+            if ("프리미엄".equals(order.getProductName())) {
+                plan = SubscriptionPlan.PREMIUM;
+            } else {
+                plan = SubscriptionPlan.STANDARD;
+            }
+
+            for (Long elderId : elderIds) {
+                Elder elder = elderRepository.findById(elderId.intValue())
+                        .orElseThrow(() -> new RuntimeException("어르신 정보를 찾을 수 없습니다: " + elderId));
+
+                Subscription subscription = subscriptionRepository.findByElderId(elderId.intValue()).orElse(null);
+
+                if (subscription != null) {
+                    // 기존 구독 갱신
+                    Subscription updatedSubscription = subscription.toBuilder()
+                            .nextBillingDate(subscription.getNextBillingDate().plusMonths(1))
+                            .status(SubscriptionStatus.ACTIVE)
+                            .plan(plan)
+                            .price(plan.getPrice())
+                            .build();
+                    subscriptionRepository.save(updatedSubscription);
+                    log.info("기존 구독 정보 갱신 - subscriptionId: {}, nextBillingDate: {}", updatedSubscription.getId(), updatedSubscription.getNextBillingDate());
+                } else {
+                    // 신규 구독 생성
+                    Subscription newSubscription = Subscription.builder()
+                            .member(member)
+                            .elder(elder)
+                            .plan(plan)
+                            .price(plan.getPrice())
+                            .status(SubscriptionStatus.ACTIVE)
+                            .startDate(LocalDate.now())
+                            .nextBillingDate(LocalDate.now().plusMonths(1))
+                            .build();
+                    subscriptionRepository.save(newSubscription);
+                    log.info("신규 구독 생성 완료 - elderId: {}", elderId);
+                }
+            }
+        } catch (JsonProcessingException e) {
+            log.error("주문 정보에서 어르신 ID 목록을 파싱하는 중 오류 발생 - orderId: {}", order.getId(), e);
+            throw new RuntimeException("어르신 ID 목록 파싱 오류", e);
         }
     }
 
