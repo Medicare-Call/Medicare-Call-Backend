@@ -3,6 +3,9 @@ package com.example.medicare_call.domain;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.Builder;
@@ -34,6 +37,9 @@ public class Member {
     @Column(name = "plan") //처음 회원가입 시 plan이 없으므로  nullable=false 조건 삭제
     private Byte plan;
 
+    @OneToMany(mappedBy = "guardian", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Elder> elders = new ArrayList<>();
+
     public Member() {}
 
     @Builder
@@ -45,5 +51,15 @@ public class Member {
         this.gender = gender;
         this.termsAgreedAt = termsAgreedAt;
         this.plan = plan;
+    }
+
+    public void addElder(Elder elder) {
+        elders.add(elder);
+        elder.setGuardian(this);
+    }
+
+    public void removeElder(Elder elder) {
+        elders.remove(elder);
+        elder.setGuardian(null);
     }
 } 

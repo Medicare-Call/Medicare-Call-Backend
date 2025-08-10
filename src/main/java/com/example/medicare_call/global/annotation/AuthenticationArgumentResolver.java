@@ -10,14 +10,14 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-//@Jwt가 붙은 파라미터에 실제 memberId를 주입하는 로직
+//@AuthUser가 붙은 파라미터에 실제 memberId를 주입하는 로직
 @Component
 public class AuthenticationArgumentResolver implements HandlerMethodArgumentResolver {
 
     //이 파라미터에 값을 바인딩할 지 결정
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.hasParameterAnnotation(AuthUser.class) && //@Jwt가 붙어있고
+        return parameter.hasParameterAnnotation(AuthUser.class) && //@AuthUser가 붙어있고
                 parameter.getParameterType().equals(Long.class); //타입이 Long인 경우 resolcer 동작
     }
 

@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import com.example.medicare_call.global.enums.ElderRelation;
 import com.example.medicare_call.global.enums.ResidenceType;
+import lombok.Setter;
 
 @Entity
 @Table(name = "Elder")
@@ -19,6 +20,7 @@ public class Elder {
     @Column(name = "id")
     private Integer id;
 
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "guardian_id", nullable = false)
     private Member guardian;
