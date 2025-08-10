@@ -103,4 +103,9 @@ public class Order {
     public void failPayment() {
         this.status = OrderStatus.PAYMENT_FAILED;
     }
+
+    // 주문 정보 변조 시 호출되는 메서드
+    public void tamper() {
+        this.status = OrderStatus.TAMPERED;
+    }
 }

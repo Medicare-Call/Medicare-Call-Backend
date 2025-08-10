@@ -9,6 +9,7 @@ public enum OrderStatus {
     PAYMENT_PENDING("결제 대기중"),
     PAYMENT_COMPLETED("결제 완료"),
     PAYMENT_FAILED("결제 실패"),
+    TAMPERED("주문 정보 변조됨"),
     CANCELLED("주문 취소");
     
     private final String description;
