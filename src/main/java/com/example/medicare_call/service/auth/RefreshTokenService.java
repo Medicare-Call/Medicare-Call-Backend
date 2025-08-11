@@ -1,4 +1,4 @@
-package com.example.medicare_call.service;
+package com.example.medicare_call.service.auth;
 
 import com.example.medicare_call.domain.Member;
 import com.example.medicare_call.domain.RefreshToken;

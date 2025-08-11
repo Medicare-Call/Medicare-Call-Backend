@@ -5,8 +5,8 @@ import com.example.medicare_call.dto.SmsVerificationResponse;
 import com.example.medicare_call.dto.SmsVerifyDto;
 import com.example.medicare_call.global.enums.MemberStatus;
 import com.example.medicare_call.global.jwt.JwtProvider;
-import com.example.medicare_call.service.AuthService;
-import com.example.medicare_call.service.SmsService;
+import com.example.medicare_call.service.auth.AuthService;
+import com.example.medicare_call.service.auth.SmsVerificationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,7 +20,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -37,7 +36,7 @@ class SmsControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private SmsService smsService;
+    private SmsVerificationService smsVerificationService;
 
     @MockBean
     private AuthService authService;
@@ -65,7 +64,7 @@ class SmsControllerTest {
         request.setPhone("01012345678");
         request.setCertificationCode("123456");
 
-        when(smsService.verifyCertificationNumber(anyString(), anyString())).thenReturn(true);
+        when(smsVerificationService.verifyCertificationNumber(anyString(), anyString())).thenReturn(true);
         when(authService.handlePhoneVerification(anyString())).thenReturn(
                 SmsVerificationResponse.builder()
                         .verified(true)
@@ -90,7 +89,7 @@ class SmsControllerTest {
         request.setPhone("01098765432");
         request.setCertificationCode("654321");
 
-        when(smsService.verifyCertificationNumber(anyString(), anyString())).thenReturn(true);
+        when(smsVerificationService.verifyCertificationNumber(anyString(), anyString())).thenReturn(true);
         when(authService.handlePhoneVerification(anyString())).thenReturn(
                 SmsVerificationResponse.builder()
                         .verified(true)
@@ -115,7 +114,7 @@ class SmsControllerTest {
         request.setPhone("01012345678");
         request.setCertificationCode("000000");
 
-        when(smsService.verifyCertificationNumber(anyString(), anyString())).thenReturn(false);
+        when(smsVerificationService.verifyCertificationNumber(anyString(), anyString())).thenReturn(false);
 
         mockMvc.perform(post("/verifications/confirmation")
                         .contentType(MediaType.APPLICATION_JSON)
