@@ -2,7 +2,10 @@ package com.example.medicare_call.controller.action;
 
 import com.example.medicare_call.dto.NaverPayReserveRequest;
 import com.example.medicare_call.dto.NaverPayReserveResponse;
+import com.example.medicare_call.dto.NaverPayApplyRequest;
+import com.example.medicare_call.dto.PaymentApprovalResponse;
 import com.example.medicare_call.global.annotation.AuthUser;
+import com.example.medicare_call.global.enums.OrderStatus;
 import com.example.medicare_call.global.jwt.JwtProvider;
 import com.example.medicare_call.repository.ElderRepository;
 import com.example.medicare_call.service.NaverPayService;
@@ -22,6 +25,7 @@ import com.example.medicare_call.global.GlobalExceptionHandler;
 import java.util.Arrays;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -125,5 +129,55 @@ class NaverPayControllerTest {
                 .andExpect(jsonPath("$.status").value(500))
                 .andExpect(jsonPath("$.error").value("서버 오류"))
                 .andExpect(jsonPath("$.message").value("주문 내역 생성 중 오류가 발생했습니다."));
+    }
+
+    @Test
+    @DisplayName("결제 승인 성공")
+    void approvePayment_success() throws Exception {
+        // given
+        NaverPayApplyRequest request = NaverPayApplyRequest.builder()
+                .paymentId("20170201NP1043587746")
+                .build();
+
+        PaymentApprovalResponse response = PaymentApprovalResponse.builder()
+                .orderCode("550e8400-e29b-41d4-a716-446655440000")
+                .status(OrderStatus.PAYMENT_COMPLETED)
+                .message("결제가 성공적으로 완료되었습니다.")
+                .build();
+
+        when(naverPayService.approvePayment(anyString()))
+                .thenReturn(response);
+
+        // when & then
+        mockMvc.perform(post("/payments/approve")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.orderCode").value("550e8400-e29b-41d4-a716-446655440000"))
+                .andExpect(jsonPath("$.status").value("PAYMENT_COMPLETED"))
+                .andExpect(jsonPath("$.message").value("결제가 성공적으로 완료되었습니다."));
+    }
+
+    @Test
+    @DisplayName("결제 승인 실패")
+    void approvePayment_failure() throws Exception {
+        // given
+        NaverPayApplyRequest request = NaverPayApplyRequest.builder()
+                .paymentId("20170201NP1043587746")
+                .build();
+
+        when(naverPayService.approvePayment(anyString()))
+                .thenThrow(new RuntimeException("네이버페이 결제 승인 중 오류가 발생했습니다. 고객센터로 문의해 주세요."));
+
+        // when & then
+        mockMvc.perform(post("/payments/approve")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(500))
+                .andExpect(jsonPath("$.error").value("서버 오류"))
+                .andExpect(jsonPath("$.message").value("네이버페이 결제 승인 중 오류가 발생했습니다. 고객센터로 문의해 주세요."));
     }
 }
