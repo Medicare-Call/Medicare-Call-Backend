@@ -55,14 +55,4 @@ public class Member {
         this.termsAgreedAt = termsAgreedAt;
         this.plan = plan;
     }
-
-    public void addElder(Elder elder) {
-        elders.add(elder);
-        elder.setGuardian(this);
-    }
-
-    public void removeElder(Elder elder) {
-        elders.remove(elder);
-        elder.setGuardian(null);
-    }
 } 
