@@ -14,6 +14,7 @@ import com.example.medicare_call.repository.ElderRepository;
 import com.example.medicare_call.repository.MealRecordRepository;
 import com.example.medicare_call.repository.MedicationScheduleRepository;
 import com.example.medicare_call.repository.MedicationTakenRecordRepository;
+import com.example.medicare_call.service.OpenAiHomeSummaryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -56,6 +57,9 @@ class HomeServiceTest {
     @Mock
     private CareCallRecordRepository careCallRecordRepository;
 
+    @Mock
+    private OpenAiHomeSummaryService openAiHomeSummaryService;
+
     @InjectMocks
     private HomeService homeService;
 
@@ -92,6 +96,7 @@ class HomeServiceTest {
                 .thenReturn(Collections.emptyList());
         when(careCallRecordRepository.findByElderIdAndDateWithPsychologicalData(eq(elderId), any(LocalDate.class)))
                 .thenReturn(Collections.emptyList());
+        when(openAiHomeSummaryService.getHomeSummary(any(com.example.medicare_call.dto.HomeSummaryDto.class))).thenReturn("AI 요약 테스트");
 
         // when
         HomeResponse response = homeService.getHomeData(elderId);
@@ -99,7 +104,7 @@ class HomeServiceTest {
         // then
         assertThat(response).isNotNull();
         assertThat(response.getElderName()).isEqualTo("김옥자");
-        assertThat(response.getAISummary()).isEqualTo("TODO: AI 요약 기능 구현 필요");
+        assertThat(response.getAISummary()).isEqualTo("AI 요약 테스트");
         assertThat(response.getMealStatus()).isNotNull();
         assertThat(response.getMealStatus().getBreakfast()).isFalse();
         assertThat(response.getMealStatus().getLunch()).isFalse();

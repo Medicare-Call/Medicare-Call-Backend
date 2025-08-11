@@ -16,6 +16,7 @@ import com.example.medicare_call.repository.ElderRepository;
 import com.example.medicare_call.repository.MealRecordRepository;
 import com.example.medicare_call.repository.MedicationScheduleRepository;
 import com.example.medicare_call.repository.MedicationTakenRecordRepository;
+import com.example.medicare_call.dto.HomeSummaryDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -43,6 +44,7 @@ public class HomeService {
     private final MedicationTakenRecordRepository medicationTakenRecordRepository;
     private final BloodSugarRecordRepository bloodSugarRecordRepository;
     private final CareCallRecordRepository careCallRecordRepository;
+    private final OpenAiHomeSummaryService openAiHomeSummaryService;
 
     public HomeResponse getHomeData(Integer elderId) {
         LocalDate today = LocalDate.now();
@@ -70,15 +72,40 @@ public class HomeService {
         // 혈당 정보 조회
         HomeResponse.BloodSugar bloodSugar = getBloodSugarInfo(elderId, today);
 
+        // AI 요약 생성
+        HomeSummaryDto summaryDto = createHomeSummaryDto(mealStatus, medicationStatus, sleep, healthStatus, mentalStatus, bloodSugar);
+        String aiSummary = openAiHomeSummaryService.getHomeSummary(summaryDto);
+
         return HomeResponse.builder()
                 .elderName(elder.getName())
-                .AISummary("TODO: AI 요약 기능 구현 필요") // TODO: AI 요약 기능 구현
+                .AISummary(aiSummary)
                 .mealStatus(mealStatus)
                 .medicationStatus(medicationStatus)
                 .sleep(sleep)
                 .healthStatus(healthStatus)
                 .mentalStatus(mentalStatus)
                 .bloodSugar(bloodSugar)
+                .build();
+    }
+
+    private HomeSummaryDto createHomeSummaryDto(HomeResponse.MealStatus mealStatus,
+                                                HomeResponse.MedicationStatus medicationStatus,
+                                                HomeResponse.Sleep sleep,
+                                                String healthStatus,
+                                                String mentalStatus,
+                                                HomeResponse.BloodSugar bloodSugar) {
+        return HomeSummaryDto.builder()
+                .breakfast(mealStatus != null ? mealStatus.getBreakfast() : false)
+                .lunch(mealStatus != null ? mealStatus.getLunch() : false)
+                .dinner(mealStatus != null ? mealStatus.getDinner() : false)
+                .totalTakenMedication(medicationStatus != null ? medicationStatus.getTotalTaken() : 0)
+                .totalGoalMedication(medicationStatus != null ? medicationStatus.getTotalGoal() : 0)
+                .nextMedicationTime(medicationStatus != null ? medicationStatus.getNextMedicationTime() : null)
+                .sleepHours(sleep != null ? sleep.getMeanHours() : 0)
+                .sleepMinutes(sleep != null ? sleep.getMeanMinutes() : 0)
+                .healthStatus(healthStatus)
+                .mentalStatus(mentalStatus)
+                .averageBloodSugar(bloodSugar != null ? bloodSugar.getMeanValue() : 0)
                 .build();
     }
 
