@@ -18,7 +18,7 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ElderSettingService {
+public class ElderService {
     private final MemberRepository memberRepository;
     private final ElderRepository elderRepository;
 
