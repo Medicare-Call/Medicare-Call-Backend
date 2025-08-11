@@ -3,17 +3,20 @@ package com.example.medicare_call.service;
 import com.example.medicare_call.domain.Order;
 import com.example.medicare_call.domain.Member;
 import com.example.medicare_call.domain.Elder;
+import com.example.medicare_call.domain.Subscription;
 import com.example.medicare_call.dto.NaverPayReserveRequest;
 import com.example.medicare_call.dto.NaverPayReserveResponse;
 import com.example.medicare_call.dto.NaverPayApplyResponse;
 import com.example.medicare_call.repository.OrderRepository;
 import com.example.medicare_call.repository.MemberRepository;
 import com.example.medicare_call.repository.ElderRepository;
+import com.example.medicare_call.repository.SubscriptionRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -23,6 +26,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -31,9 +35,13 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import com.example.medicare_call.global.enums.PaymentMethod;
 import com.example.medicare_call.global.enums.OrderStatus;
+import com.example.medicare_call.global.enums.SubscriptionPlan;
+import com.example.medicare_call.global.enums.SubscriptionStatus;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.example.medicare_call.dto.PaymentApprovalResponse;
 
@@ -51,6 +59,9 @@ class NaverPayServiceTest {
 
     @Mock
     private ElderRepository elderRepository;
+
+    @Mock
+    private SubscriptionRepository subscriptionRepository;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -190,7 +201,7 @@ class NaverPayServiceTest {
         String paymentId = "20170201NP1043587746";
         
         // 네이버페이 API 응답
-        NaverPayApplyResponse mockResponse = createMockApplyResponse();
+        NaverPayApplyResponse mockResponse = createMockApplyResponse("메디케어콜 스탠다드 플랜", 19000);
         ResponseEntity<NaverPayApplyResponse> responseEntity = new ResponseEntity<>(mockResponse, HttpStatus.OK);
         
         when(restTemplate.exchange(
@@ -201,9 +212,30 @@ class NaverPayServiceTest {
         )).thenReturn(responseEntity);
 
         // 주문 조회
-        Order order = createMockOrder();
+        Order order = createMockOrder("메디케어콜 스탠다드 플랜", 19000);
         when(orderRepository.findByCode("550e8400-e29b-41d4-a716-446655440000")).thenReturn(Optional.of(order));
         when(orderRepository.save(any(Order.class))).thenReturn(order);
+
+        Elder elder1 = Elder.builder().id(1).name("김옥자").build();
+        Elder elder2 = Elder.builder().id(2).name("박막례").build();
+        when(elderRepository.findById(1)).thenReturn(Optional.of(elder1));
+        when(elderRepository.findById(2)).thenReturn(Optional.of(elder2));
+
+        // 구독 정보 조회 (어르신 1: 신규, 어르신 2: 기존)
+        when(subscriptionRepository.findByElderId(1)).thenReturn(Optional.empty());
+
+        Subscription existingSubscription = Subscription.builder()
+                .id(1L)
+                .member(order.getMember())
+                .elder(elder2)
+                .plan(SubscriptionPlan.STANDARD)
+                .price(19000)
+                .status(SubscriptionStatus.ACTIVE)
+                .startDate(LocalDate.now().minusMonths(1))
+                .nextBillingDate(LocalDate.now().plusDays(1))
+                .build();
+        when(subscriptionRepository.findByElderId(2)).thenReturn(Optional.of(existingSubscription));
+        LocalDate expectedNextBillingDate = existingSubscription.getNextBillingDate().plusMonths(1);
 
         // when
         PaymentApprovalResponse result = naverPayService.approvePayment(paymentId);
@@ -214,6 +246,60 @@ class NaverPayServiceTest {
         assertThat(result.getStatus()).isEqualTo(OrderStatus.PAYMENT_COMPLETED);
         assertThat(result.getMessage()).isEqualTo("결제가 성공적으로 완료되었습니다.");
         assertThat(order.getStatus()).isEqualTo(OrderStatus.PAYMENT_COMPLETED);
+
+        // subscriptionRepository.save가 2번 호출되었는지 검증
+        ArgumentCaptor<Subscription> subscriptionCaptor = ArgumentCaptor.forClass(Subscription.class);
+        verify(subscriptionRepository, times(2)).save(subscriptionCaptor.capture());
+
+        List<Subscription> savedSubscriptions = subscriptionCaptor.getAllValues();
+
+        // 신규 구독 생성 검증 (elderId: 1)
+        Subscription newSub = savedSubscriptions.stream().filter(s -> s.getElder().getId().equals(1)).findFirst().orElseThrow();
+        assertThat(newSub.getStatus()).isEqualTo(SubscriptionStatus.ACTIVE);
+        assertThat(newSub.getPlan()).isEqualTo(SubscriptionPlan.STANDARD);
+        assertThat(newSub.getStartDate()).isEqualTo(LocalDate.now());
+
+        // 기존 구독 갱신 검증 (elderId: 2)
+        Subscription updatedSub = savedSubscriptions.stream().filter(s -> s.getElder().getId().equals(2)).findFirst().orElseThrow();
+        assertThat(updatedSub.getStatus()).isEqualTo(SubscriptionStatus.ACTIVE);
+        assertThat(updatedSub.getPlan()).isEqualTo(SubscriptionPlan.STANDARD);
+        assertThat(updatedSub.getNextBillingDate()).isEqualTo(expectedNextBillingDate);
+    }
+
+    @Test
+    @DisplayName("결제 승인 성공 - 프리미엄 플랜")
+    void approvePayment_success_premiumPlan() {
+        // given
+        String paymentId = "20170201NP1043587747";
+
+        // 네이버페이 API 응답 (프리미엄 플랜)
+        NaverPayApplyResponse mockResponse = createMockApplyResponse("프리미엄", 29000);
+        ResponseEntity<NaverPayApplyResponse> responseEntity = new ResponseEntity<>(mockResponse, HttpStatus.OK);
+
+        when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(NaverPayApplyResponse.class)))
+                .thenReturn(responseEntity);
+
+        // 주문 조회 (프리미엄 플랜, 어르신 1명)
+        Order order = createMockOrder("프리미엄", 29000, "[1]");
+        when(orderRepository.findByCode("550e8400-e29b-41d4-a716-446655440000")).thenReturn(Optional.of(order));
+        when(orderRepository.save(any(Order.class))).thenReturn(order);
+
+        Elder elder1 = Elder.builder().id(1).name("김옥자").build();
+        when(elderRepository.findById(1)).thenReturn(Optional.of(elder1));
+        when(subscriptionRepository.findByElderId(1)).thenReturn(Optional.empty());
+
+        // when
+        naverPayService.approvePayment(paymentId);
+
+        // then
+        // 프리미엄 플랜으로 구독이 생성되었는지 검증
+        ArgumentCaptor<Subscription> subscriptionCaptor = ArgumentCaptor.forClass(Subscription.class);
+        verify(subscriptionRepository).save(subscriptionCaptor.capture());
+        Subscription savedSubscription = subscriptionCaptor.getValue();
+
+        assertThat(savedSubscription.getElder().getId()).isEqualTo(1);
+        assertThat(savedSubscription.getPlan()).isEqualTo(SubscriptionPlan.PREMIUM);
+        assertThat(savedSubscription.getPrice()).isEqualTo(29000);
     }
 
     @Test
@@ -223,7 +309,7 @@ class NaverPayServiceTest {
         String paymentId = "20170201NP1043587746";
         
         // 변조된 네이버페이 API 응답 (금액이 다름)
-        NaverPayApplyResponse mockResponse = createMockApplyResponse();
+        NaverPayApplyResponse mockResponse = createMockApplyResponse("메디케어콜 스탠다드 플랜", 19000);
         mockResponse.getBody().getDetail().setTotalPayAmount(5000); // 원래 값인 19000원에서 5000원으로 변조
         
         ResponseEntity<NaverPayApplyResponse> responseEntity = new ResponseEntity<>(mockResponse, HttpStatus.OK);
@@ -235,7 +321,7 @@ class NaverPayServiceTest {
             eq(NaverPayApplyResponse.class)
         )).thenReturn(responseEntity);
 
-        Order order = createMockOrder();
+        Order order = createMockOrder("메디케어콜 스탠다드 플랜", 19000);
         when(orderRepository.findByCode("550e8400-e29b-41d4-a716-446655440000")).thenReturn(Optional.of(order));
 
         // when & then
@@ -254,7 +340,7 @@ class NaverPayServiceTest {
         // given
         String paymentId = "20170201NP1043587746";
 
-        NaverPayApplyResponse mockResponse = createMockApplyResponse();
+        NaverPayApplyResponse mockResponse = createMockApplyResponse("메디케어콜 스탠다드 플랜", 19000);
         ResponseEntity<NaverPayApplyResponse> responseEntity = new ResponseEntity<>(mockResponse, HttpStatus.OK);
 
         when(restTemplate.exchange(
@@ -265,7 +351,7 @@ class NaverPayServiceTest {
         )).thenReturn(responseEntity);
 
         // 이미 실패한 주문
-        Order order = createMockOrder();
+        Order order = createMockOrder("메디케어콜 스탠다드 플랜", 19000);
         order.failPayment(); // 상태를 PAYMENT_FAILED로 설정
         when(orderRepository.findByCode("550e8400-e29b-41d4-a716-446655440000")).thenReturn(Optional.of(order));
 
@@ -286,7 +372,7 @@ class NaverPayServiceTest {
         String paymentId = "20170201NP1043587746";
         
         // 네이버페이 API 응답
-        NaverPayApplyResponse mockResponse = createMockApplyResponse();
+        NaverPayApplyResponse mockResponse = createMockApplyResponse("메디케어콜 스탠다드 플랜", 19000);
         ResponseEntity<NaverPayApplyResponse> responseEntity = new ResponseEntity<>(mockResponse, HttpStatus.OK);
         
         when(restTemplate.exchange(
@@ -390,6 +476,61 @@ class NaverPayServiceTest {
                 .status(OrderStatus.CREATED)
                 .member(member)
                 .elderIds("[1,2]")
+                .paymentMethod(PaymentMethod.NAVER_PAY)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+    }
+
+    private NaverPayApplyResponse createMockApplyResponse(String productName, int amount) {
+        NaverPayApplyResponse.PaymentDetail detail = NaverPayApplyResponse.PaymentDetail.builder()
+                .paymentId("20170201NP1043587746")
+                .merchantPayKey("550e8400-e29b-41d4-a716-446655440000")
+                .productName(productName)
+                .totalPayAmount(amount)
+                .admissionState("SUCCESS")
+                .payHistId("20170201NP1043587781")
+                .admissionYmdt("20170201151722")
+                .build();
+
+        NaverPayApplyResponse.ApplyBody body = NaverPayApplyResponse.ApplyBody.builder()
+                .paymentId("20170201NP1043587746")
+                .detail(detail)
+                .build();
+
+        return NaverPayApplyResponse.builder()
+                .code("Success")
+                .message("성공")
+                .body(body)
+                .build();
+    }
+
+    private Order createMockOrder(String productName, int amount) {
+        return createMockOrder(productName, amount, "[1,2]");
+    }
+
+    private Order createMockOrder(String productName, int amount, String elderIdsJson) {
+        Member member = Member.builder()
+                .id(1)
+                .name("테스트 회원")
+                .phone("010-1234-5678")
+                .gender((byte) 1)
+                .termsAgreedAt(LocalDateTime.now())
+                .plan((byte) 0)
+                .build();
+
+        return Order.builder()
+                .id(1L)
+                .code("550e8400-e29b-41d4-a716-446655440000")
+                .productName(productName)
+                .productCount(1)
+                .totalPayAmount(amount)
+                .taxScopeAmount(amount)
+                .taxExScopeAmount(0)
+                .naverpayReserveId("ORDER_123456789")
+                .status(OrderStatus.CREATED)
+                .member(member)
+                .elderIds(elderIdsJson)
                 .paymentMethod(PaymentMethod.NAVER_PAY)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
