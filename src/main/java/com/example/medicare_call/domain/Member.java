@@ -40,6 +40,9 @@ public class Member {
     @Column(name = "plan") //처음 회원가입 시 plan이 없으므로  nullable=false 조건 삭제
     private Byte plan;
 
+    @OneToMany(mappedBy = "guardian", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Elder> elders = new ArrayList<>();
+
     public Member() {}
 
     @Builder
