@@ -1,4 +1,4 @@
-package com.example.medicare_call.service;
+package com.example.medicare_call.service.auth;
 
 import com.example.medicare_call.repository.SmsRepository;
 import com.example.medicare_call.util.SmsUtil;
@@ -13,7 +13,7 @@ import java.util.Random;
 @RequiredArgsConstructor
 @Transactional
 @Slf4j
-public class SmsService {
+public class SmsVerificationService {
 
     private final SmsRepository smsRepository;
     private final SmsUtil smsUtil;

@@ -1,4 +1,4 @@
-package com.example.medicare_call.service;
+package com.example.medicare_call.service.auth;
 
 import com.example.medicare_call.domain.Member;
 import com.example.medicare_call.domain.RefreshToken;
@@ -23,7 +23,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)

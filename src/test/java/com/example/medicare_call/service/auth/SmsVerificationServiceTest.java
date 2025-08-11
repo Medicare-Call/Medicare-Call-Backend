@@ -1,4 +1,4 @@
-package com.example.medicare_call.service;
+package com.example.medicare_call.service.auth;
 
 import com.example.medicare_call.repository.SmsRepository;
 import com.example.medicare_call.util.SmsUtil;
@@ -14,7 +14,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class SmsServiceTest {
+class SmsVerificationServiceTest {
 
     @Mock
     private SmsRepository smsRepository;
@@ -23,7 +23,7 @@ class SmsServiceTest {
     private SmsUtil smsUtil;
 
     @InjectMocks
-    private SmsService smsService;
+    private SmsVerificationService smsVerificationService;
 
     @Test
     @DisplayName("SMS 인증번호 발송 성공")
@@ -33,7 +33,7 @@ class SmsServiceTest {
         doNothing().when(smsUtil).sendSMS(anyString(), anyString());
         doNothing().when(smsRepository).createSmsCertification(anyString(), anyString());
 
-        smsService.sendCertificationNumber(phone);
+        smsVerificationService.sendCertificationNumber(phone);
 
         verify(smsUtil, times(1)).sendSMS(eq(phone), anyString());
         verify(smsRepository, times(1)).createSmsCertification(eq(phone), anyString());
@@ -49,7 +49,7 @@ class SmsServiceTest {
         when(smsRepository.getSmsCertification(phone)).thenReturn(certificationNumber);
         doNothing().when(smsRepository).deleteSmsCertification(phone);
 
-        boolean result = smsService.verifyCertificationNumber(phone, certificationNumber);
+        boolean result = smsVerificationService.verifyCertificationNumber(phone, certificationNumber);
 
         assertThat(result).isTrue();
         verify(smsRepository, times(1)).hasKey(phone);
@@ -65,7 +65,7 @@ class SmsServiceTest {
 
         when(smsRepository.hasKey(phone)).thenReturn(false);
 
-        boolean result = smsService.verifyCertificationNumber(phone, certificationNumber);
+        boolean result = smsVerificationService.verifyCertificationNumber(phone, certificationNumber);
 
         assertThat(result).isFalse();
         verify(smsRepository, times(1)).hasKey(phone);
@@ -83,7 +83,7 @@ class SmsServiceTest {
         when(smsRepository.hasKey(phone)).thenReturn(true);
         when(smsRepository.getSmsCertification(phone)).thenReturn(certificationNumber);
 
-        boolean result = smsService.verifyCertificationNumber(phone, wrongCode);
+        boolean result = smsVerificationService.verifyCertificationNumber(phone, wrongCode);
 
         assertThat(result).isFalse();
         verify(smsRepository, times(1)).hasKey(phone);
@@ -100,7 +100,7 @@ class SmsServiceTest {
         when(smsRepository.hasKey(phone)).thenReturn(true);
         when(smsRepository.getSmsCertification(phone)).thenReturn(null);
 
-        boolean result = smsService.verifyCertificationNumber(phone, certificationNumber);
+        boolean result = smsVerificationService.verifyCertificationNumber(phone, certificationNumber);
 
         assertThat(result).isFalse();
         verify(smsRepository, times(1)).hasKey(phone);

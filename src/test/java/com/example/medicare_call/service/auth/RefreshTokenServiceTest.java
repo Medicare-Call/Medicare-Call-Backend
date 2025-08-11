@@ -1,4 +1,4 @@
-package com.example.medicare_call.service;
+package com.example.medicare_call.service.auth;
 
 import com.example.medicare_call.domain.Member;
 import com.example.medicare_call.domain.RefreshToken;
@@ -16,7 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import jakarta.persistence.EntityManager;
-import java.time.LocalDate;
+
 import java.time.LocalDateTime;
 import java.util.Optional;
 
