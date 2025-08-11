@@ -19,6 +19,9 @@ public class Member {
     @Column(name = "id")
     private Integer id;
 
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Subscription> subscriptions = new ArrayList<>();
+
     @Column(name = "name", nullable = false, length = 100)
     private String name;
 

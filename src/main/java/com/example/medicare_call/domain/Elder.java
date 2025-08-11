@@ -23,6 +23,9 @@ public class Elder {
     @Column(name = "id")
     private Integer id;
 
+    @OneToOne(mappedBy = "elder", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Subscription subscription;
+
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "guardian_id", nullable = false)
