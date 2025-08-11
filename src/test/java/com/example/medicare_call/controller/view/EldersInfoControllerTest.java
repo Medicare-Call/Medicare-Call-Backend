@@ -1,7 +1,7 @@
 package com.example.medicare_call.controller.view;
 
 import com.example.medicare_call.controller.action.ElderController;
-import com.example.medicare_call.dto.ElderSettingResponse;
+import com.example.medicare_call.dto.ElderInfoResponse;
 import com.example.medicare_call.dto.ElderUpdateRequest;
 import com.example.medicare_call.global.annotation.AuthUser;
 import com.example.medicare_call.global.enums.ElderRelation;
@@ -44,7 +44,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(ElderController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
-class EldersSettingControllerTest {
+class EldersInfoControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -95,8 +95,8 @@ class EldersSettingControllerTest {
     void getElderSettingInfo_success() throws Exception {
         // given
         Long memberId = 1L;
-        List<ElderSettingResponse> responseList = Arrays.asList(
-                new ElderSettingResponse(
+        List<ElderInfoResponse> responseList = Arrays.asList(
+                new ElderInfoResponse(
                         1,
                         "김옥자",
                         LocalDate.of(1945, 8, 15),
@@ -151,7 +151,7 @@ class EldersSettingControllerTest {
                 ElderRelation.SIBLING,
                 ResidenceType.WITH_FAMILY
         );
-        ElderSettingResponse response = new ElderSettingResponse(
+        ElderInfoResponse response = new ElderInfoResponse(
                 elderId,
                 "김철수",
                 LocalDate.of(1950, 1, 1),

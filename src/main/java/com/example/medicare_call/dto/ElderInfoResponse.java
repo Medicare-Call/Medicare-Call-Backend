@@ -10,8 +10,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 
 
-@Schema(description = "어르신 개인정보 설정 응답")
-public record ElderSettingResponse(
+@Schema(description = "어르신 개인정보 응답")
+public record ElderInfoResponse(
 
         @Schema(description = "어르신 ID", example = "1")
         Integer elderId,
