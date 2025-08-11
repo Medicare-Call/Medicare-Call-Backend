@@ -19,7 +19,7 @@ import java.util.List;
 @RequestMapping("/elders")
 @RequiredArgsConstructor
 @Tag(name = "Elder Setting", description = "어르신 개인정보 설정 API")
-public class EldersSettingController {
+public class ElderController {
     private final ElderSettingService elderSettingService;
 
     @Operation(
