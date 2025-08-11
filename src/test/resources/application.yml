@@ -34,3 +34,14 @@ openai:
     url: https://api.openai.com/v1/chat/completions
   model: gpt-4
 
+
+naverpay:
+  client:
+    id: test-client-id
+    secret: test-client-secret
+  chain:
+    id: test-chain-id
+  partner:
+    id: test-partner-id
+  api:
+    url: https://example.com
