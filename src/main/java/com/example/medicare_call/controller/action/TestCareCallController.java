@@ -1,9 +1,8 @@
 package com.example.medicare_call.controller.action;
 
 import com.example.medicare_call.dto.CareCallTestRequest;
-import com.example.medicare_call.service.carecall.CareCallService;
+import com.example.medicare_call.service.carecall.CareCallRequestSenderService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,12 +18,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/test-care-call")
 @RequiredArgsConstructor
 public class TestCareCallController {
-    private final CareCallService careCallService;
+    private final CareCallRequestSenderService careCallRequestSenderService;
 
     @Operation(summary = "프롬프트 테스트", description = "케어콜에 전송하는 프롬프트를 직접 작성하여 전화 품질을 테스트합니다.")
     @PostMapping("")
     public ResponseEntity<String> testCareCall(@Valid @RequestBody CareCallTestRequest req) {
-        careCallService.sendTestCall(req);
+        careCallRequestSenderService.sendTestCall(req);
         return ResponseEntity.ok(req.prompt());
     }
 

@@ -8,11 +8,8 @@ import com.example.medicare_call.global.enums.ResidenceType;
 import com.example.medicare_call.repository.CareCallSettingRepository;
 import com.example.medicare_call.repository.ElderRepository;
 import com.example.medicare_call.repository.MemberRepository;
-import com.example.medicare_call.scheduler.CareCallScheduler;
 import com.example.medicare_call.service.carecall.CareCallSchedulerService;
-import com.example.medicare_call.service.carecall.CareCallService;
-import com.example.medicare_call.service.ElderService;
-import org.junit.jupiter.api.BeforeEach;
+import com.example.medicare_call.service.carecall.CareCallRequestSenderService;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +36,7 @@ class CareCallIntegrationTest {
     private ElderRepository elderRepository;
 
     @Autowired
-    private CareCallService careCallService;
+    private CareCallRequestSenderService careCallRequestSenderService;
 
     @Autowired
     private MemberRepository memberRepository;

@@ -4,16 +4,13 @@ import com.example.medicare_call.domain.CareCallRecord;
 import com.example.medicare_call.domain.CareCallSetting;
 import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.dto.CallDataRequest;
-import com.example.medicare_call.domain.Member;
 import com.example.medicare_call.global.jwt.JwtProvider;
-import com.example.medicare_call.global.jwt.JwtUserDetails;
 import com.example.medicare_call.repository.CareCallRecordRepository;
 import com.example.medicare_call.repository.CareCallSettingRepository;
 import com.example.medicare_call.repository.ElderRepository;
 import com.example.medicare_call.repository.MemberRepository;
-import com.example.medicare_call.service.carecall.CallDataService;
+import com.example.medicare_call.service.carecall.CareCallDataProcessingService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +19,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
@@ -46,7 +42,7 @@ class CallDataControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private CallDataService callDataService;
+    private CareCallDataProcessingService careCallDataProcessingService;
 
     @MockBean
     private ElderRepository elderRepository;
@@ -112,7 +108,7 @@ class CallDataControllerTest {
                 .healthDetails(null)
                 .build();
 
-        when(callDataService.saveCallData(any(CallDataRequest.class))).thenReturn(savedRecord);
+        when(careCallDataProcessingService.saveCallData(any(CallDataRequest.class))).thenReturn(savedRecord);
 
         // when & then
         mockMvc.perform(post("/call-data")
@@ -216,7 +212,7 @@ class CallDataControllerTest {
                 .healthDetails(null)
                 .build();
 
-        when(callDataService.saveCallData(any(CallDataRequest.class))).thenReturn(savedRecord);
+        when(careCallDataProcessingService.saveCallData(any(CallDataRequest.class))).thenReturn(savedRecord);
 
         // when & then
         mockMvc.perform(post("/call-data")
