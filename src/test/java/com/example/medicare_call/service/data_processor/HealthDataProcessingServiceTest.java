@@ -1,4 +1,4 @@
-package com.example.medicare_call.service;
+package com.example.medicare_call.service.data_processor;
 
 import com.example.medicare_call.domain.CareCallRecord;
 import com.example.medicare_call.domain.Elder;
@@ -23,7 +23,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class HealthDataServiceTest {
+public class HealthDataProcessingServiceTest {
 
     @Mock
     private CareCallRecordRepository careCallRecordRepository;
@@ -32,7 +32,7 @@ class HealthDataServiceTest {
     private MealRecordRepository mealRecordRepository;
 
     @InjectMocks
-    private HealthDataService healthDataService;
+    private HealthDataProcessingService healthDataProcessingService;
 
     private CareCallRecord callRecord;
     private Elder elder;
@@ -71,7 +71,7 @@ class HealthDataServiceTest {
         when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(callRecord);
 
         // when
-        healthDataService.updateCareCallRecordWithHealthData(callRecord, healthData);
+        healthDataProcessingService.updateCareCallRecordWithHealthData(callRecord, healthData);
 
         // then
         verify(mealRecordRepository).save(any(MealRecord.class));
@@ -91,7 +91,7 @@ class HealthDataServiceTest {
         when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(callRecord);
 
         // when
-        healthDataService.updateCareCallRecordWithHealthData(callRecord, healthData);
+        healthDataProcessingService.updateCareCallRecordWithHealthData(callRecord, healthData);
 
         // then
         verify(careCallRecordRepository).save(argThat(record -> 
@@ -114,7 +114,7 @@ class HealthDataServiceTest {
         when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(callRecord);
 
         // when
-        healthDataService.updateCareCallRecordWithHealthData(callRecord, healthData);
+        healthDataProcessingService.updateCareCallRecordWithHealthData(callRecord, healthData);
 
         // then
         verify(careCallRecordRepository).save(argThat(record -> 
@@ -141,7 +141,7 @@ class HealthDataServiceTest {
         when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(callRecord);
 
         // when
-        healthDataService.updateCareCallRecordWithHealthData(callRecord, healthData);
+        healthDataProcessingService.updateCareCallRecordWithHealthData(callRecord, healthData);
 
         // then
         verify(careCallRecordRepository).save(argThat(record -> 
@@ -164,7 +164,7 @@ class HealthDataServiceTest {
         when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(callRecord);
 
         // when
-        healthDataService.updateCareCallRecordWithHealthData(callRecord, healthData);
+        healthDataProcessingService.updateCareCallRecordWithHealthData(callRecord, healthData);
 
         // then
         verify(mealRecordRepository, never()).save(any(MealRecord.class));

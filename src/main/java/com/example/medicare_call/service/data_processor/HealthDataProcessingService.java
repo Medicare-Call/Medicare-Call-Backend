@@ -1,4 +1,4 @@
-package com.example.medicare_call.service;
+package com.example.medicare_call.service.data_processor;
 
 import com.example.medicare_call.domain.CareCallRecord;
 import com.example.medicare_call.domain.MealRecord;
@@ -20,7 +20,7 @@ import java.time.LocalTime;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class HealthDataService {
+public class HealthDataProcessingService {
     private final CareCallRecordRepository careCallRecordRepository;
     private final MealRecordRepository mealRecordRepository;
 

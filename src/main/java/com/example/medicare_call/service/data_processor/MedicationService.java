@@ -1,4 +1,4 @@
-package com.example.medicare_call.service;
+package com.example.medicare_call.service.data_processor;
 
 import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.DailyMedicationResponse;

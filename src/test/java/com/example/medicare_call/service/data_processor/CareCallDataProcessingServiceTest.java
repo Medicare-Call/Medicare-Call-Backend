@@ -1,4 +1,4 @@
-package com.example.medicare_call.service.carecall;
+package com.example.medicare_call.service.data_processor;
 
 import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.CallDataRequest;
@@ -6,7 +6,7 @@ import com.example.medicare_call.dto.HealthDataExtractionRequest;
 import com.example.medicare_call.dto.HealthDataExtractionResponse;
 import com.example.medicare_call.global.ResourceNotFoundException;
 import com.example.medicare_call.repository.*;
-import com.example.medicare_call.service.OpenAiHealthDataService;
+import com.example.medicare_call.service.data_processor.ai.AiHealthDataExtractorService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,7 +41,7 @@ class CareCallDataProcessingServiceTest {
     private CareCallSettingRepository careCallSettingRepository;
 
     @Mock
-    private OpenAiHealthDataService openAiHealthDataService;
+    private AiHealthDataExtractorService aiHealthDataExtractorService;
 
     @InjectMocks
     private CareCallDataProcessingService careCallDataProcessingService;
@@ -99,7 +99,7 @@ class CareCallDataProcessingServiceTest {
         when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(expectedRecord);
         
         // Mock OpenAI health data service
-        when(openAiHealthDataService.extractHealthData(any(HealthDataExtractionRequest.class)))
+        when(aiHealthDataExtractorService.extractHealthData(any(HealthDataExtractionRequest.class)))
                 .thenReturn(HealthDataExtractionResponse.builder().build());
 
         // when
@@ -115,7 +115,7 @@ class CareCallDataProcessingServiceTest {
         verify(elderRepository).findById(1);
         verify(careCallSettingRepository).findById(2);
         verify(careCallRecordRepository).save(any(CareCallRecord.class));
-        verify(openAiHealthDataService).extractHealthData(argThat(healthRequest -> 
+        verify(aiHealthDataExtractorService).extractHealthData(argThat(healthRequest ->
             healthRequest.getTranscriptionText().equals("고객: 안녕하세요, 오늘 컨디션은 어떠세요?\n어르신: 네, 오늘은 컨디션이 좋아요.") &&
             healthRequest.getCallDate().equals(LocalDate.of(2025, 1, 27))
         ));
@@ -165,7 +165,7 @@ class CareCallDataProcessingServiceTest {
         verify(elderRepository).findById(1);
         verify(careCallSettingRepository).findById(2);
         verify(careCallRecordRepository).save(any(CareCallRecord.class));
-        verify(openAiHealthDataService, never()).extractHealthData(any());
+        verify(aiHealthDataExtractorService, never()).extractHealthData(any());
     }
 
     @Test
@@ -215,7 +215,7 @@ class CareCallDataProcessingServiceTest {
         verify(elderRepository).findById(1);
         verify(careCallSettingRepository).findById(2);
         verify(careCallRecordRepository).save(any(CareCallRecord.class));
-        verify(openAiHealthDataService, never()).extractHealthData(any());
+        verify(aiHealthDataExtractorService, never()).extractHealthData(any());
     }
 
     @Test
@@ -237,7 +237,7 @@ class CareCallDataProcessingServiceTest {
         
         verify(elderRepository).findById(999);
         verify(careCallSettingRepository, never()).findById(any());
-        verify(openAiHealthDataService, never()).extractHealthData(any());
+        verify(aiHealthDataExtractorService, never()).extractHealthData(any());
     }
 
     @Test
@@ -264,7 +264,7 @@ class CareCallDataProcessingServiceTest {
         
         verify(elderRepository).findById(1);
         verify(careCallSettingRepository).findById(999);
-        verify(openAiHealthDataService, never()).extractHealthData(any());
+        verify(aiHealthDataExtractorService, never()).extractHealthData(any());
     }
 
     @Test
@@ -311,7 +311,7 @@ class CareCallDataProcessingServiceTest {
         verify(elderRepository).findById(1);
         verify(careCallSettingRepository).findById(2);
         verify(careCallRecordRepository).save(any(CareCallRecord.class));
-        verify(openAiHealthDataService, never()).extractHealthData(any());
+        verify(aiHealthDataExtractorService, never()).extractHealthData(any());
     }
 
     @Test
@@ -359,7 +359,7 @@ class CareCallDataProcessingServiceTest {
         when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(expectedRecord);
         
         // Mock OpenAI health data service
-        when(openAiHealthDataService.extractHealthData(any(HealthDataExtractionRequest.class)))
+        when(aiHealthDataExtractorService.extractHealthData(any(HealthDataExtractionRequest.class)))
                 .thenReturn(HealthDataExtractionResponse.builder().build());
 
         // when
@@ -367,7 +367,7 @@ class CareCallDataProcessingServiceTest {
 
         // then
         assertThat(result).isNotNull();
-        verify(openAiHealthDataService).extractHealthData(argThat(healthRequest -> 
+        verify(aiHealthDataExtractorService).extractHealthData(argThat(healthRequest ->
             healthRequest.getTranscriptionText().equals("어르신: 오늘 아침에 밥을 먹었고, 혈당을 측정했어요. 120이 나왔어요.") &&
             healthRequest.getCallDate().equals(LocalDate.of(2025, 1, 27))
         ));
