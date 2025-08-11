@@ -67,7 +67,7 @@ public class ElderSettingService {
     }
 
     @Transactional
-    public void deleteElderSetting(Integer memberId, Integer elderId) {
+    public void deleteElder(Integer memberId, Integer elderId) {
         Elder elder = elderRepository.findById(elderId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 어르신입니다."));
         if(!elder.getGuardian().getId().equals(memberId)) throw new AccessDeniedException("해당 어르신에 대한 권한이 없습니다.");
