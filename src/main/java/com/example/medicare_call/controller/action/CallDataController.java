@@ -2,7 +2,7 @@ package com.example.medicare_call.controller.action;
 
 import com.example.medicare_call.domain.CareCallRecord;
 import com.example.medicare_call.dto.CallDataRequest;
-import com.example.medicare_call.service.CallDataService;
+import com.example.medicare_call.service.carecall.CallDataService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

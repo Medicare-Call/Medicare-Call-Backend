@@ -1,10 +1,9 @@
-package com.example.medicare_call.service;
+package com.example.medicare_call.service.carecall.prompt;
 
 import com.example.medicare_call.domain.Disease;
 import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.domain.ElderHealthInfo;
 import com.example.medicare_call.domain.MedicationSchedule;
-import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

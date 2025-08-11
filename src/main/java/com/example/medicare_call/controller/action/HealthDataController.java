@@ -18,7 +18,7 @@ import com.example.medicare_call.repository.ElderRepository;
 import com.example.medicare_call.repository.MemberRepository;
 import com.example.medicare_call.repository.MedicationRepository;
 import com.example.medicare_call.repository.MedicationScheduleRepository;
-import com.example.medicare_call.service.CallDataService;
+import com.example.medicare_call.service.carecall.CallDataService;
 import com.example.medicare_call.service.OpenAiHealthDataService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

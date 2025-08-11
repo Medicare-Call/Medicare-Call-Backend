@@ -1,10 +1,10 @@
-package com.example.medicare_call.service;
+package com.example.medicare_call.service.carecall.prompt;
 
 import com.example.medicare_call.global.enums.CallType;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
+@Component
 @RequiredArgsConstructor
 public class CallPromptGeneratorFactory {
     private final FirstCallPromptGenerator firstStrategy;

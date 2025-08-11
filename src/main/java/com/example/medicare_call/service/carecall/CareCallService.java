@@ -1,4 +1,4 @@
-package com.example.medicare_call.service;
+package com.example.medicare_call.service.carecall;
 
 import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.CareCallTestRequest;
@@ -8,6 +8,8 @@ import com.example.medicare_call.global.enums.ElderRelation;
 import com.example.medicare_call.global.enums.ResidenceType;
 import com.example.medicare_call.repository.*;
 import com.example.medicare_call.util.PhoneNumberUtil;
+import com.example.medicare_call.service.carecall.prompt.CallPromptGenerator;
+import com.example.medicare_call.service.carecall.prompt.CallPromptGeneratorFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,7 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
