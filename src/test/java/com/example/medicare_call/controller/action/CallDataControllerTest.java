@@ -9,7 +9,7 @@ import com.example.medicare_call.repository.CareCallRecordRepository;
 import com.example.medicare_call.repository.CareCallSettingRepository;
 import com.example.medicare_call.repository.ElderRepository;
 import com.example.medicare_call.repository.MemberRepository;
-import com.example.medicare_call.service.carecall.CareCallDataProcessingService;
+import com.example.medicare_call.service.data_processor.CareCallDataProcessingService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -1,4 +1,4 @@
-package com.example.medicare_call.service;
+package com.example.medicare_call.service.data_processor.ai;
 
 import com.example.medicare_call.dto.HealthDataExtractionRequest;
 import com.example.medicare_call.dto.HealthDataExtractionResponse;
@@ -20,7 +20,7 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class OpenAiHealthDataService {
+public class AiHealthDataExtractorService {
     
     private static final int JSON_CODE_BLOCK_MARKER_LENGTH = 7; // "```json"
     private static final int CODE_BLOCK_MARKER_LENGTH = 3; // "```"

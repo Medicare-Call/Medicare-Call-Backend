@@ -1,8 +1,7 @@
-package com.example.medicare_call.service;
+package com.example.medicare_call.service.data_processor.ai;
 
 import com.example.medicare_call.dto.HealthDataExtractionRequest;
 import com.example.medicare_call.dto.HealthDataExtractionResponse;
-import com.example.medicare_call.dto.OpenAiRequest;
 import com.example.medicare_call.dto.OpenAiResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,8 +12,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
 
@@ -27,7 +24,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class OpenAiHealthDataServiceTest {
+class AiHealthDataExtractorServiceTest {
 
     @Mock
     private RestTemplate restTemplate;
@@ -36,13 +33,13 @@ class OpenAiHealthDataServiceTest {
     private ObjectMapper objectMapper;
 
     @InjectMocks
-    private OpenAiHealthDataService openAiHealthDataService;
+    private AiHealthDataExtractorService aiHealthDataExtractorService;
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(openAiHealthDataService, "openaiApiKey", "test-api-key");
-        ReflectionTestUtils.setField(openAiHealthDataService, "openaiApiUrl", "https://api.openai.com/v1/chat/completions");
-        ReflectionTestUtils.setField(openAiHealthDataService, "openaiModel", "gpt-4");
+        ReflectionTestUtils.setField(aiHealthDataExtractorService, "openaiApiKey", "test-api-key");
+        ReflectionTestUtils.setField(aiHealthDataExtractorService, "openaiApiUrl", "https://api.openai.com/v1/chat/completions");
+        ReflectionTestUtils.setField(aiHealthDataExtractorService, "openaiModel", "gpt-4");
     }
 
     @Test
@@ -107,7 +104,7 @@ class OpenAiHealthDataServiceTest {
                 .thenReturn(expectedResponse);
 
         // when
-        HealthDataExtractionResponse result = openAiHealthDataService.extractHealthData(request);
+        HealthDataExtractionResponse result = aiHealthDataExtractorService.extractHealthData(request);
 
         // then
         assertThat(result).isNotNull();
@@ -167,7 +164,7 @@ class OpenAiHealthDataServiceTest {
                 .thenReturn(expectedResponse);
 
         // when
-        HealthDataExtractionResponse result = openAiHealthDataService.extractHealthData(request);
+        HealthDataExtractionResponse result = aiHealthDataExtractorService.extractHealthData(request);
 
         // then
         assertThat(result).isNotNull();
@@ -228,7 +225,7 @@ class OpenAiHealthDataServiceTest {
                 .thenReturn(expectedResponse);
 
         // when
-        HealthDataExtractionResponse result = openAiHealthDataService.extractHealthData(request);
+        HealthDataExtractionResponse result = aiHealthDataExtractorService.extractHealthData(request);
 
         // then
         assertThat(result).isNotNull();
@@ -252,7 +249,7 @@ class OpenAiHealthDataServiceTest {
                 .thenReturn(null);
 
         // when
-        HealthDataExtractionResponse result = openAiHealthDataService.extractHealthData(request);
+        HealthDataExtractionResponse result = aiHealthDataExtractorService.extractHealthData(request);
 
         // then
         assertThat(result).isNotNull();
@@ -290,7 +287,7 @@ class OpenAiHealthDataServiceTest {
                 .thenThrow(new RuntimeException("JSON 파싱 오류"));
 
         // when
-        HealthDataExtractionResponse result = openAiHealthDataService.extractHealthData(request);
+        HealthDataExtractionResponse result = aiHealthDataExtractorService.extractHealthData(request);
 
         // then
         assertThat(result).isNotNull();
@@ -333,7 +330,7 @@ class OpenAiHealthDataServiceTest {
                 .thenReturn(expectedResponse);
 
         // when
-        HealthDataExtractionResponse result = openAiHealthDataService.extractHealthData(request);
+        HealthDataExtractionResponse result = aiHealthDataExtractorService.extractHealthData(request);
 
         // then
         assertThat(result).isNotNull();

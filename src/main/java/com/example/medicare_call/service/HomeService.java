@@ -17,6 +17,7 @@ import com.example.medicare_call.repository.MealRecordRepository;
 import com.example.medicare_call.repository.MedicationScheduleRepository;
 import com.example.medicare_call.repository.MedicationTakenRecordRepository;
 import com.example.medicare_call.dto.HomeSummaryDto;
+import com.example.medicare_call.service.data_processor.ai.AiSummaryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -44,7 +45,7 @@ public class HomeService {
     private final MedicationTakenRecordRepository medicationTakenRecordRepository;
     private final BloodSugarRecordRepository bloodSugarRecordRepository;
     private final CareCallRecordRepository careCallRecordRepository;
-    private final OpenAiHomeSummaryService openAiHomeSummaryService;
+    private final AiSummaryService aiSummaryService;
 
     public HomeResponse getHomeData(Integer elderId) {
         LocalDate today = LocalDate.now();
@@ -74,7 +75,7 @@ public class HomeService {
 
         // AI 요약 생성
         HomeSummaryDto summaryDto = createHomeSummaryDto(mealStatus, medicationStatus, sleep, healthStatus, mentalStatus, bloodSugar);
-        String aiSummary = openAiHomeSummaryService.getHomeSummary(summaryDto);
+        String aiSummary = aiSummaryService.getHomeSummary(summaryDto);
 
         return HomeResponse.builder()
                 .elderName(elder.getName())
