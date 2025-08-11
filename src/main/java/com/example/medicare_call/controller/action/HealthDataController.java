@@ -18,7 +18,7 @@ import com.example.medicare_call.repository.ElderRepository;
 import com.example.medicare_call.repository.MemberRepository;
 import com.example.medicare_call.repository.MedicationRepository;
 import com.example.medicare_call.repository.MedicationScheduleRepository;
-import com.example.medicare_call.service.carecall.CallDataService;
+import com.example.medicare_call.service.carecall.CareCallDataProcessingService;
 import com.example.medicare_call.service.OpenAiHealthDataService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -33,10 +33,9 @@ import org.springframework.web.bind.annotation.*;
 
 import com.example.medicare_call.global.annotation.ValidDateRange;
 import jakarta.validation.constraints.NotNull;
-import java.time.Instant;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 
 @Slf4j
 @RestController
@@ -46,7 +45,7 @@ import java.time.ZoneOffset;
 public class HealthDataController {
     
     private final OpenAiHealthDataService openAiHealthDataService;
-    private final CallDataService callDataService;
+    private final CareCallDataProcessingService careCallDataProcessingService;
     private final ElderRepository elderRepository;
     private final CareCallSettingRepository careCallSettingRepository;
     private final CareCallRecordRepository careCallRecordRepository;
@@ -139,7 +138,7 @@ public class HealthDataController {
         HealthDataExtractionResponse healthData = openAiHealthDataService.extractHealthData(extractionRequest);
         
         // 건강 데이터를 DB에 저장
-        callDataService.saveHealthDataToDatabase(savedCallRecord, healthData);
+        careCallDataProcessingService.saveHealthDataToDatabase(savedCallRecord, healthData);
         
         return ResponseEntity.ok(savedCallRecord);
     }
@@ -194,7 +193,7 @@ public class HealthDataController {
         HealthDataExtractionResponse healthData = openAiHealthDataService.extractHealthData(extractionRequest);
         
         // 건강 데이터를 DB에 저장
-        callDataService.saveHealthDataToDatabase(savedCallRecord, healthData);
+        careCallDataProcessingService.saveHealthDataToDatabase(savedCallRecord, healthData);
         
         return ResponseEntity.ok(savedCallRecord);
     }
@@ -249,7 +248,7 @@ public class HealthDataController {
         HealthDataExtractionResponse healthData = openAiHealthDataService.extractHealthData(extractionRequest);
         
         // 건강 데이터를 DB에 저장
-        callDataService.saveHealthDataToDatabase(savedCallRecord, healthData);
+        careCallDataProcessingService.saveHealthDataToDatabase(savedCallRecord, healthData);
         
         return ResponseEntity.ok(savedCallRecord);
     }

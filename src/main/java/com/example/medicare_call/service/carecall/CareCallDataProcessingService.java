@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CallDataService {
+public class CareCallDataProcessingService {
     private final CareCallRecordRepository careCallRecordRepository;
     private final ElderRepository elderRepository;
     private final CareCallSettingRepository careCallSettingRepository;

@@ -29,7 +29,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class CallDataServiceTest {
+class CareCallDataProcessingServiceTest {
 
     @Mock
     private CareCallRecordRepository careCallRecordRepository;
@@ -44,7 +44,7 @@ class CallDataServiceTest {
     private OpenAiHealthDataService openAiHealthDataService;
 
     @InjectMocks
-    private CallDataService callDataService;
+    private CareCallDataProcessingService careCallDataProcessingService;
 
     @Test
     @DisplayName("통화 데이터 저장 성공 - 모든 필드 포함")
@@ -103,7 +103,7 @@ class CallDataServiceTest {
                 .thenReturn(HealthDataExtractionResponse.builder().build());
 
         // when
-        CareCallRecord result = callDataService.saveCallData(request);
+        CareCallRecord result = careCallDataProcessingService.saveCallData(request);
 
         // then
         assertThat(result).isNotNull();
@@ -153,7 +153,7 @@ class CallDataServiceTest {
         when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(expectedRecord);
 
         // when
-        CareCallRecord result = callDataService.saveCallData(request);
+        CareCallRecord result = careCallDataProcessingService.saveCallData(request);
 
         // then
         assertThat(result).isNotNull();
@@ -204,7 +204,7 @@ class CallDataServiceTest {
         when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(expectedRecord);
 
         // when
-        CareCallRecord result = callDataService.saveCallData(request);
+        CareCallRecord result = careCallDataProcessingService.saveCallData(request);
 
         // then
         assertThat(result).isNotNull();
@@ -231,7 +231,7 @@ class CallDataServiceTest {
         when(elderRepository.findById(999)).thenReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> callDataService.saveCallData(request))
+        assertThatThrownBy(() -> careCallDataProcessingService.saveCallData(request))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("어르신을 찾을 수 없습니다: 999");
         
@@ -258,7 +258,7 @@ class CallDataServiceTest {
         when(careCallSettingRepository.findById(999)).thenReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> callDataService.saveCallData(request))
+        assertThatThrownBy(() -> careCallDataProcessingService.saveCallData(request))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("통화 설정을 찾을 수 없습니다: 999");
         
@@ -299,7 +299,7 @@ class CallDataServiceTest {
         when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(expectedRecord);
 
         // when
-        CareCallRecord result = callDataService.saveCallData(request);
+        CareCallRecord result = careCallDataProcessingService.saveCallData(request);
 
         // then
         assertThat(result).isNotNull();
@@ -363,7 +363,7 @@ class CallDataServiceTest {
                 .thenReturn(HealthDataExtractionResponse.builder().build());
 
         // when
-        CareCallRecord result = callDataService.saveCallData(request);
+        CareCallRecord result = careCallDataProcessingService.saveCallData(request);
 
         // then
         assertThat(result).isNotNull();
