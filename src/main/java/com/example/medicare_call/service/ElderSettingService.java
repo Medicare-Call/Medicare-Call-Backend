@@ -41,7 +41,7 @@ public class ElderSettingService {
     }
 
     @Transactional
-    public ElderSettingResponse updateElderSetting(Integer memberId, Integer elderId, ElderUpdateRequest req) {
+    public ElderSettingResponse updateElder(Integer memberId, Integer elderId, ElderUpdateRequest req) {
         Elder updateElder = elderRepository.findById(elderId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 어르신입니다."));
         if(!updateElder.getGuardian().getId().equals(memberId)) throw new AccessDeniedException("해당 어르신에 대한 권한이 없습니다.");
