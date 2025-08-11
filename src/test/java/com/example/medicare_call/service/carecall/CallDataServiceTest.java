@@ -1,15 +1,12 @@
-package com.example.medicare_call.service;
+package com.example.medicare_call.service.carecall;
 
-import com.example.medicare_call.domain.CareCallRecord;
-import com.example.medicare_call.domain.CareCallSetting;
-import com.example.medicare_call.domain.Elder;
+import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.CallDataRequest;
 import com.example.medicare_call.dto.HealthDataExtractionRequest;
 import com.example.medicare_call.dto.HealthDataExtractionResponse;
 import com.example.medicare_call.global.ResourceNotFoundException;
-import com.example.medicare_call.repository.CareCallRecordRepository;
-import com.example.medicare_call.repository.CareCallSettingRepository;
-import com.example.medicare_call.repository.ElderRepository;
+import com.example.medicare_call.repository.*;
+import com.example.medicare_call.service.OpenAiHealthDataService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

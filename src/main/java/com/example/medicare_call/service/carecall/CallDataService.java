@@ -1,4 +1,4 @@
-package com.example.medicare_call.service;
+package com.example.medicare_call.service.carecall;
 
 import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.CallDataRequest;
@@ -6,6 +6,10 @@ import com.example.medicare_call.dto.HealthDataExtractionRequest;
 import com.example.medicare_call.dto.HealthDataExtractionResponse;
 import com.example.medicare_call.global.ResourceNotFoundException;
 import com.example.medicare_call.repository.*;
+import com.example.medicare_call.service.BloodSugarService;
+import com.example.medicare_call.service.HealthDataService;
+import com.example.medicare_call.service.MedicationService;
+import com.example.medicare_call.service.OpenAiHealthDataService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.stream.Collectors;
 
 @Slf4j
