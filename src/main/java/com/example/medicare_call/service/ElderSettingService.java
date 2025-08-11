@@ -22,7 +22,7 @@ public class ElderSettingService {
     private final MemberRepository memberRepository;
     private final ElderRepository elderRepository;
 
-    public List<ElderSettingResponse> getElderSetting(Integer memberId){
+    public List<ElderSettingResponse> getElder(Integer memberId){
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
 
