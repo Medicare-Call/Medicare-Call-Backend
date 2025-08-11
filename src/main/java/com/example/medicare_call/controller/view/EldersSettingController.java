@@ -1,6 +1,6 @@
 package com.example.medicare_call.controller.view;
 
-import com.example.medicare_call.dto.ElderSettingRequest;
+import com.example.medicare_call.dto.ElderUpdateRequest;
 import com.example.medicare_call.dto.ElderSettingResponse;
 import com.example.medicare_call.global.annotation.AuthUser;
 import com.example.medicare_call.service.ElderSettingService;
@@ -23,10 +23,10 @@ public class EldersSettingController {
     private final ElderSettingService elderSettingService;
 
     @Operation(
-            summary = "어르신 개인정보 설정 조회",
+            summary = "어르신 개인정보 조회",
             description = "로그인한 유저가 등록한 모든 어르신의 개인정보를 조회합니다."
     )
-    @GetMapping("/settings")
+    @GetMapping("")
     public ResponseEntity<List<ElderSettingResponse>> getElderSettingInfo(@Parameter(hidden = true) @AuthUser Long memberId){
         log.info("어르신 설정 정보 조회 요청: memberId={}", memberId);
         List<ElderSettingResponse> body = elderSettingService.getElderSetting(memberId.intValue());
@@ -34,14 +34,14 @@ public class EldersSettingController {
     }
 
     @Operation(
-            summary = "어르신 개인정보 설정 수정",
+            summary = "어르신 개인정보 수정",
             description = "어르신 정보 전체를 요청받아 값을 수정합니다."
     )
-    @PostMapping("/{elderId}/settings")
+    @PostMapping("/{elderId}")
     public ResponseEntity<ElderSettingResponse> updateElderSettingInfo(
             @Parameter(hidden = true) @AuthUser Long memberId,
             @PathVariable Integer elderId,
-            ElderSettingRequest req
+            ElderUpdateRequest req
     ){
         log.info("어르신 설정 정보 수정 요청: memberId={}, elderId={}, name={}, birthDate={}, gender={}, phone={}, relationship={}, residenceType={}",
                 memberId, elderId, req.name(), req.birthDate(), req.gender(), req.phone(), req.relationship(), req.residenceType());
@@ -51,10 +51,10 @@ public class EldersSettingController {
     }
 
     @Operation(
-            summary = "어르신 개인정보 설정 삭제",
+            summary = "어르신 개인정보 삭제",
             description = "선택한 어르신의 개인정보를 삭제합니다."
     )
-    @DeleteMapping("/{elderId}/settings")
+    @DeleteMapping("/{elderId}")
     public ResponseEntity<Void> deleteElderSettingInfo(
             @Parameter(hidden = true) @AuthUser Long memberId,
             @PathVariable Integer elderId

@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 
 @Schema(description = "어르신 개인정보 설정 응답")
-public record ElderSettingRequest(
+public record ElderUpdateRequest(
         @Schema(description = "어르신 이름", example = "홍길동")
         String name,
 

@@ -2,7 +2,7 @@ package com.example.medicare_call.service;
 
 import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.domain.Member;
-import com.example.medicare_call.dto.ElderSettingRequest;
+import com.example.medicare_call.dto.ElderUpdateRequest;
 import com.example.medicare_call.dto.ElderSettingResponse;
 import com.example.medicare_call.global.enums.Gender;
 import com.example.medicare_call.repository.ElderRepository;
@@ -41,7 +41,7 @@ public class ElderSettingService {
     }
 
     @Transactional
-    public ElderSettingResponse updateElderSetting(Integer memberId, Integer elderId, ElderSettingRequest req) {
+    public ElderSettingResponse updateElderSetting(Integer memberId, Integer elderId, ElderUpdateRequest req) {
         Elder updateElder = elderRepository.findById(elderId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 어르신입니다."));
         if(!updateElder.getGuardian().getId().equals(memberId)) throw new AccessDeniedException("해당 어르신에 대한 권한이 없습니다.");
