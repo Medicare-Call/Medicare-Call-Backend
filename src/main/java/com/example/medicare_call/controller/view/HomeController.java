@@ -1,7 +1,7 @@
 package com.example.medicare_call.controller.view;
 
 import com.example.medicare_call.dto.HomeResponse;
-import com.example.medicare_call.service.HomeService;
+import com.example.medicare_call.service.report.HomeReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Home", description = "홈 화면 데이터 조회 API")
 public class HomeController {
 
-    private final HomeService homeService;
+    private final HomeReportService homeReportService;
 
     @Operation(
         summary = "홈 화면 데이터 조회",
@@ -55,7 +55,7 @@ public class HomeController {
     ) {
         log.info("홈 화면 데이터 조회 요청: elderId={}", elderId);
 
-        HomeResponse response = homeService.getHomeData(elderId);
+        HomeResponse response = homeReportService.getHomeReport(elderId);
 
         return ResponseEntity.ok(response);
     }

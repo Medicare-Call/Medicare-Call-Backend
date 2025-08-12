@@ -3,7 +3,7 @@ package com.example.medicare_call.controller.view;
 import com.example.medicare_call.dto.HomeResponse;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.global.jwt.JwtProvider;
-import com.example.medicare_call.service.HomeService;
+import com.example.medicare_call.service.report.HomeReportService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,7 +30,7 @@ class HomeControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private HomeService homeService;
+    private HomeReportService homeReportService;
 
     @MockBean
     private JwtProvider jwtProvider;
@@ -77,7 +77,7 @@ class HomeControllerTest {
                 .bloodSugar(bloodSugar)
                 .build();
 
-        when(homeService.getHomeData(eq(elderId)))
+        when(homeReportService.getHomeReport(eq(elderId)))
                 .thenReturn(expectedResponse);
 
         // when & then

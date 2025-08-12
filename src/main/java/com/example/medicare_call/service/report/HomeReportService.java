@@ -1,4 +1,4 @@
-package com.example.medicare_call.service;
+package com.example.medicare_call.service.report;
 
 import com.example.medicare_call.domain.BloodSugarRecord;
 import com.example.medicare_call.domain.CareCallRecord;
@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class HomeService {
+public class HomeReportService {
 
     private final ElderRepository elderRepository;
     private final MealRecordRepository mealRecordRepository;
@@ -47,7 +47,7 @@ public class HomeService {
     private final CareCallRecordRepository careCallRecordRepository;
     private final AiSummaryService aiSummaryService;
 
-    public HomeResponse getHomeData(Integer elderId) {
+    public HomeResponse getHomeReport(Integer elderId) {
         LocalDate today = LocalDate.now();
 
         // 어르신 정보 조회

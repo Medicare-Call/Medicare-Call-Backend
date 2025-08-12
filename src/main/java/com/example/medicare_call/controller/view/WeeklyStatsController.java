@@ -1,7 +1,7 @@
 package com.example.medicare_call.controller.view;
 
 import com.example.medicare_call.dto.WeeklyStatsResponse;
-import com.example.medicare_call.service.WeeklyStatsService;
+import com.example.medicare_call.service.report.WeeklyReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -27,7 +27,7 @@ import java.time.LocalDate;
 @Tag(name = "Weekly Stats", description = "주간 통계 조회 API")
 public class WeeklyStatsController {
 
-    private final WeeklyStatsService weeklyStatsService;
+    private final WeeklyReportService weeklyReportService;
 
     @Operation(
         summary = "주간 통계 데이터 조회",
@@ -61,7 +61,7 @@ public class WeeklyStatsController {
     ) {
         log.info("주간 통계 데이터 조회 요청: elderId={}, startDate={}", elderId, startDate);
 
-        WeeklyStatsResponse response = weeklyStatsService.getWeeklyStats(elderId, startDate);
+        WeeklyStatsResponse response = weeklyReportService.getWeeklyReport(elderId, startDate);
 
         return ResponseEntity.ok(response);
     }
