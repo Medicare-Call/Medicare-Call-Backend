@@ -1,4 +1,4 @@
-package com.example.medicare_call.service;
+package com.example.medicare_call.service.report;
 
 import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.WeeklyStatsResponse;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class WeeklyStatsService {
+public class WeeklyReportService {
 
     private final ElderRepository elderRepository;
     private final MealRecordRepository mealRecordRepository;
@@ -33,7 +33,7 @@ public class WeeklyStatsService {
     private final BloodSugarRecordRepository bloodSugarRecordRepository;
     private final AiSummaryService aiSummaryService;
 
-    public WeeklyStatsResponse getWeeklyStats(Integer elderId, LocalDate startDate) {
+    public WeeklyStatsResponse getWeeklyReport(Integer elderId, LocalDate startDate) {
         LocalDate endDate = startDate.plusDays(6); // 7일간 조회
 
         // 어르신 정보 조회

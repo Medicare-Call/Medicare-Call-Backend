@@ -2,7 +2,7 @@ package com.example.medicare_call.controller.view;
 
 import com.example.medicare_call.dto.WeeklyStatsResponse;
 import com.example.medicare_call.global.jwt.JwtProvider;
-import com.example.medicare_call.service.WeeklyStatsService;
+import com.example.medicare_call.service.report.WeeklyReportService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,7 @@ class WeeklyStatsControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private WeeklyStatsService weeklyStatsService;
+    private WeeklyReportService weeklyReportService;
 
     @MockBean
     private JwtProvider jwtProvider;
@@ -108,7 +108,7 @@ class WeeklyStatsControllerTest {
                 .bloodSugar(bloodSugar)
                 .build();
 
-        when(weeklyStatsService.getWeeklyStats(eq(elderId), eq(startDate)))
+        when(weeklyReportService.getWeeklyReport(eq(elderId), eq(startDate)))
                 .thenReturn(expectedResponse);
 
         // when & then

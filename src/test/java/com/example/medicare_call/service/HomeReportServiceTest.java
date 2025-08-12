@@ -14,6 +14,7 @@ import com.example.medicare_call.repository.MedicationScheduleRepository;
 import com.example.medicare_call.repository.MedicationTakenRecordRepository;
 import com.example.medicare_call.dto.HomeSummaryDto;
 import com.example.medicare_call.service.data_processor.ai.AiSummaryService;
+import com.example.medicare_call.service.report.HomeReportService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,7 +38,7 @@ import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
-class HomeServiceTest {
+class HomeReportServiceTest {
 
     @Mock
     private ElderRepository elderRepository;
@@ -60,7 +61,7 @@ class HomeServiceTest {
     private AiSummaryService aiSummaryService;
 
     @InjectMocks
-    private HomeService homeService;
+    private HomeReportService homeReportService;
 
     private Elder testElder;
     private LocalDate testDate;
@@ -76,7 +77,7 @@ class HomeServiceTest {
 
     @Test
     @DisplayName("홈 화면 데이터 조회 성공")
-    void getHomeData_성공() {
+    void getHomeReport_성공() {
         // given
         Integer elderId = 1;
         LocalDate today = LocalDate.now();
@@ -99,7 +100,7 @@ class HomeServiceTest {
         when(aiSummaryService.getHomeSummary(any(HomeSummaryDto.class))).thenReturn("AI 요약");
 
         // when
-        HomeResponse response = homeService.getHomeData(elderId);
+        HomeResponse response = homeReportService.getHomeReport(elderId);
 
         // then
         assertThat(response).isNotNull();
@@ -120,21 +121,21 @@ class HomeServiceTest {
 
     @Test
     @DisplayName("홈 화면 데이터 조회 실패 - 어르신을 찾을 수 없음")
-    void getHomeData_실패_어르신없음() {
+    void getHomeReport_실패_어르신없음() {
         // given
         Integer elderId = 999;
 
         when(elderRepository.findById(elderId)).thenReturn(java.util.Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> homeService.getHomeData(elderId))
+        assertThatThrownBy(() -> homeReportService.getHomeReport(elderId))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("어르신을 찾을 수 없습니다: 999");
     }
 
                     @Test
                 @DisplayName("홈 화면 데이터 조회 성공 - 식사 데이터 있음")
-                void getHomeData_성공_식사데이터있음() {
+                void getHomeReport_성공_식사데이터있음() {
                     // given
                     Integer elderId = 1;
 
@@ -159,7 +160,7 @@ class HomeServiceTest {
                             .thenReturn(Collections.emptyList());
 
                     // when
-                    HomeResponse response = homeService.getHomeData(elderId);
+                    HomeResponse response = homeReportService.getHomeReport(elderId);
 
                     // then
                     assertThat(response.getMealStatus().getBreakfast()).isTrue();
@@ -169,7 +170,7 @@ class HomeServiceTest {
 
                 @Test
                 @DisplayName("홈 화면 데이터 조회 성공 - 복약 스케줄 있음")
-                void getHomeData_성공_복약스케줄있음() {
+                void getHomeReport_성공_복약스케줄있음() {
                     // given
                     Integer elderId = 1;
 
@@ -195,7 +196,7 @@ class HomeServiceTest {
                             .thenReturn(Collections.emptyList());
 
                     // when
-                    HomeResponse response = homeService.getHomeData(elderId);
+                    HomeResponse response = homeReportService.getHomeReport(elderId);
 
                     // then
                     assertThat(response.getMedicationStatus()).isNotNull();
