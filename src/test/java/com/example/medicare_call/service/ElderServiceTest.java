@@ -54,14 +54,13 @@ class ElderServiceTest {
         req.setPhone("01012345678");
         req.setRelationship(ElderRelation.GRANDCHILD);
         req.setResidenceType(ResidenceType.ALONE);
-        req.setGuardianId(1);
 
         Elder saved = Elder.builder()
             .name(req.getName())
             .build();
         when(elderRepository.save(any(Elder.class))).thenReturn(saved);
 
-        Elder result = elderService.registerElder(req);
+        Elder result = elderService.registerElder(1, req);
         assertThat(result.getName()).isEqualTo("홍길동");
     }
 
@@ -76,12 +75,11 @@ class ElderServiceTest {
         req.setPhone("01012345678");
         req.setRelationship(ElderRelation.GRANDCHILD);
         req.setResidenceType(ResidenceType.ALONE);
-        req.setGuardianId(999);
 
         when(memberRepository.findById(999)).thenReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> elderService.registerElder(req))
+        assertThatThrownBy(() -> elderService.registerElder(999, req))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("보호자를 찾을 수 없습니다: 999");
     }

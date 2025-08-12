@@ -28,8 +28,10 @@ public class ElderController {
 
     @Operation(summary = "어르신 등록", description = "이름, 생년월일, 성별, 휴대폰, 관계, 거주방식 정보를 입력받아 어르신을 등록합니다.")
     @PostMapping
-    public ResponseEntity<ElderResponse> registerElder(@Valid @RequestBody ElderRegisterRequest request) {
-        Elder elder = elderService.registerElder(request);
+    public ResponseEntity<ElderResponse> registerElder(
+            @Parameter(hidden = true) @AuthUser Long memberId,
+            @Valid @RequestBody ElderRegisterRequest request) {
+        Elder elder = elderService.registerElder(memberId.intValue(), request);
         ElderResponse response = ElderResponse.builder()
             .id(elder.getId())
             .name(elder.getName())
