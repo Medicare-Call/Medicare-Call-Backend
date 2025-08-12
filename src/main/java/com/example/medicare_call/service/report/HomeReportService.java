@@ -6,7 +6,7 @@ import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.domain.MealRecord;
 import com.example.medicare_call.domain.MedicationSchedule;
 import com.example.medicare_call.domain.MedicationTakenRecord;
-import com.example.medicare_call.dto.HomeResponse;
+import com.example.medicare_call.dto.HomeReportResponse;
 import com.example.medicare_call.global.ResourceNotFoundException;
 import com.example.medicare_call.global.enums.MealType;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
@@ -47,7 +47,7 @@ public class HomeReportService {
     private final CareCallRecordRepository careCallRecordRepository;
     private final AiSummaryService aiSummaryService;
 
-    public HomeResponse getHomeReport(Integer elderId) {
+    public HomeReportResponse getHomeReport(Integer elderId) {
         LocalDate today = LocalDate.now();
 
         // 어르신 정보 조회
@@ -56,28 +56,28 @@ public class HomeReportService {
 
         // 오늘의 식사 기록 조회
         List<MealRecord> todayMeals = mealRecordRepository.findByElderIdAndDate(elderId, today);
-        HomeResponse.MealStatus mealStatus = getMealStatus(todayMeals);
+        HomeReportResponse.MealStatus mealStatus = getMealStatus(todayMeals);
 
         // 복약 정보 조회
         List<MedicationSchedule> medicationSchedules = medicationScheduleRepository.findByElder(elder);
         List<MedicationTakenRecord> todayMedications = medicationTakenRecordRepository.findByElderIdAndDate(elderId, today);
-        HomeResponse.MedicationStatus medicationStatus = getMedicationStatus(medicationSchedules, todayMedications);
+        HomeReportResponse.MedicationStatus medicationStatus = getMedicationStatus(medicationSchedules, todayMedications);
 
         // 수면 정보 조회
-        HomeResponse.Sleep sleep = getSleepInfo(elderId, today);
+        HomeReportResponse.Sleep sleep = getSleepInfo(elderId, today);
 
         // 건강 상태 및 심리 상태 조회
         String healthStatus = getHealthStatus(elderId, today);
         String mentalStatus = getMentalStatus(elderId, today);
 
         // 혈당 정보 조회
-        HomeResponse.BloodSugar bloodSugar = getBloodSugarInfo(elderId, today);
+        HomeReportResponse.BloodSugar bloodSugar = getBloodSugarInfo(elderId, today);
 
         // AI 요약 생성
         HomeSummaryDto summaryDto = createHomeSummaryDto(mealStatus, medicationStatus, sleep, healthStatus, mentalStatus, bloodSugar);
         String aiSummary = aiSummaryService.getHomeSummary(summaryDto);
 
-        return HomeResponse.builder()
+        return HomeReportResponse.builder()
                 .elderName(elder.getName())
                 .AISummary(aiSummary)
                 .mealStatus(mealStatus)
@@ -89,12 +89,12 @@ public class HomeReportService {
                 .build();
     }
 
-    private HomeSummaryDto createHomeSummaryDto(HomeResponse.MealStatus mealStatus,
-                                                HomeResponse.MedicationStatus medicationStatus,
-                                                HomeResponse.Sleep sleep,
+    private HomeSummaryDto createHomeSummaryDto(HomeReportResponse.MealStatus mealStatus,
+                                                HomeReportResponse.MedicationStatus medicationStatus,
+                                                HomeReportResponse.Sleep sleep,
                                                 String healthStatus,
                                                 String mentalStatus,
-                                                HomeResponse.BloodSugar bloodSugar) {
+                                                HomeReportResponse.BloodSugar bloodSugar) {
         return HomeSummaryDto.builder()
                 .breakfast(mealStatus != null ? mealStatus.getBreakfast() : false)
                 .lunch(mealStatus != null ? mealStatus.getLunch() : false)
@@ -110,7 +110,7 @@ public class HomeReportService {
                 .build();
     }
 
-    private HomeResponse.MealStatus getMealStatus(List<MealRecord> todayMeals) {
+    private HomeReportResponse.MealStatus getMealStatus(List<MealRecord> todayMeals) {
         boolean breakfast = false;
         boolean lunch = false;
         boolean dinner = false;
@@ -132,14 +132,14 @@ public class HomeReportService {
             }
         }
 
-        return HomeResponse.MealStatus.builder()
+        return HomeReportResponse.MealStatus.builder()
                 .breakfast(breakfast)
                 .lunch(lunch)
                 .dinner(dinner)
                 .build();
     }
 
-    private HomeResponse.MedicationStatus getMedicationStatus(List<MedicationSchedule> schedules, List<MedicationTakenRecord> todayMedications) {
+    private HomeReportResponse.MedicationStatus getMedicationStatus(List<MedicationSchedule> schedules, List<MedicationTakenRecord> todayMedications) {
         int totalTaken = todayMedications.size();
         
         // 약 종류별로 스케줄을 그룹화하여 목표 복용 횟수 계산
@@ -155,7 +155,7 @@ public class HomeReportService {
                         Collectors.counting()
                 ));
 
-        List<HomeResponse.MedicationInfo> medicationList = medicationSchedules.entrySet().stream()
+        List<HomeReportResponse.MedicationInfo> medicationList = medicationSchedules.entrySet().stream()
                 .map(entry -> {
                     String medicationName = entry.getKey();
                     List<MedicationSchedule> medicationScheduleList = entry.getValue();
@@ -167,7 +167,7 @@ public class HomeReportService {
                     // 다음 복약 시간 계산 (해당 약의 스케줄 중 가장 가까운 시간)
                     MedicationScheduleTime nextTime = calculateNextMedicationTimeForMedication(medicationScheduleList);
 
-                    return HomeResponse.MedicationInfo.builder()
+                    return HomeReportResponse.MedicationInfo.builder()
                             .type(medicationName)
                             .taken(taken)
                             .goal(goal)
@@ -182,7 +182,7 @@ public class HomeReportService {
         // 전체 다음 복약 시간 계산 (모든 약 중 가장 가까운 시간)
         MedicationScheduleTime nextTime = calculateNextMedicationTime(schedules);
 
-        return HomeResponse.MedicationStatus.builder()
+        return HomeReportResponse.MedicationStatus.builder()
                 .totalTaken(totalTaken)
                 .totalGoal(totalGoal)
                 .nextMedicationTime(nextTime)
@@ -224,7 +224,7 @@ public class HomeReportService {
         return calculateNextMedicationTimeFrom(medicationSchedules);
     }
 
-    private HomeResponse.Sleep getSleepInfo(Integer elderId, LocalDate date) {
+    private HomeReportResponse.Sleep getSleepInfo(Integer elderId, LocalDate date) {
         List<CareCallRecord> sleepRecords = careCallRecordRepository.findByElderIdAndDateWithSleepData(elderId, date);
         
         if (sleepRecords.isEmpty()) {
@@ -259,7 +259,7 @@ public class HomeReportService {
         int hours = (int) (averageMinutes / 60);
         int minutes = (int) (averageMinutes % 60);
 
-        return HomeResponse.Sleep.builder()
+        return HomeReportResponse.Sleep.builder()
                 .meanHours(hours)
                 .meanMinutes(minutes)
                 .build();
@@ -289,7 +289,7 @@ public class HomeReportService {
         return latestRecord.getPsychologicalDetails();
     }
 
-    private HomeResponse.BloodSugar getBloodSugarInfo(Integer elderId, LocalDate date) {
+    private HomeReportResponse.BloodSugar getBloodSugarInfo(Integer elderId, LocalDate date) {
         List<BloodSugarRecord> bloodSugarRecords = bloodSugarRecordRepository.findByElderIdAndDate(elderId, date);
         
         if (bloodSugarRecords.isEmpty()) {
@@ -308,7 +308,7 @@ public class HomeReportService {
 
         BigDecimal average = sum.divide(BigDecimal.valueOf(bloodSugarRecords.size()), 0, RoundingMode.HALF_UP);
 
-        return HomeResponse.BloodSugar.builder()
+        return HomeReportResponse.BloodSugar.builder()
                 .meanValue(average.intValue())
                 .build();
     }

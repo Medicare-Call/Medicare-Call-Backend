@@ -1,8 +1,8 @@
 package com.example.medicare_call.controller.action;
 
-import com.example.medicare_call.dto.SmsRequest;
+import com.example.medicare_call.dto.SmsSendRequest;
 import com.example.medicare_call.dto.SmsVerificationResponse;
-import com.example.medicare_call.dto.SmsVerifyDto;
+import com.example.medicare_call.dto.SmsVerificationRequest;
 import com.example.medicare_call.global.enums.MemberStatus;
 import com.example.medicare_call.global.jwt.JwtProvider;
 import com.example.medicare_call.service.auth.AuthService;
@@ -48,7 +48,7 @@ class SmsControllerTest {
     @Test
     @DisplayName("SMS 발송 실패 - 전화번호 누락")
     void sendSms_fail_validation() throws Exception {
-        SmsRequest request = new SmsRequest();
+        SmsSendRequest request = new SmsSendRequest();
         request.setPhone(""); // 전화번호 누락
 
         mockMvc.perform(post("/verifications")
@@ -60,7 +60,7 @@ class SmsControllerTest {
     @Test
     @DisplayName("SMS 인증 성공 - 기존 회원")
     void verifySms_success_existingMember() throws Exception {
-        SmsVerifyDto request = new SmsVerifyDto();
+        SmsVerificationRequest request = new SmsVerificationRequest();
         request.setPhone("01012345678");
         request.setCertificationCode("123456");
 
@@ -85,7 +85,7 @@ class SmsControllerTest {
     @Test
     @DisplayName("SMS 인증 성공 - 신규 회원")
     void verifySms_success_newMember() throws Exception {
-        SmsVerifyDto request = new SmsVerifyDto();
+        SmsVerificationRequest request = new SmsVerificationRequest();
         request.setPhone("01098765432");
         request.setCertificationCode("654321");
 
@@ -110,7 +110,7 @@ class SmsControllerTest {
     @Test
     @DisplayName("SMS 인증 실패 - 잘못된 인증번호")
     void verifySms_fail_wrongCode() throws Exception {
-        SmsVerifyDto request = new SmsVerifyDto();
+        SmsVerificationRequest request = new SmsVerificationRequest();
         request.setPhone("01012345678");
         request.setCertificationCode("000000");
 

@@ -1,7 +1,7 @@
 package com.example.medicare_call.service.report;
 
 import com.example.medicare_call.domain.*;
-import com.example.medicare_call.dto.WeeklyStatsResponse;
+import com.example.medicare_call.dto.WeeklyReportResponse;
 import com.example.medicare_call.dto.WeeklySummaryDto;
 import com.example.medicare_call.global.enums.BloodSugarMeasurementType;
 import com.example.medicare_call.global.enums.BloodSugarStatus;
@@ -33,7 +33,7 @@ public class WeeklyReportService {
     private final BloodSugarRecordRepository bloodSugarRecordRepository;
     private final AiSummaryService aiSummaryService;
 
-    public WeeklyStatsResponse getWeeklyReport(Integer elderId, LocalDate startDate) {
+    public WeeklyReportResponse getWeeklyReport(Integer elderId, LocalDate startDate) {
         LocalDate endDate = startDate.plusDays(6); // 7일간 조회
 
         // 어르신 정보 조회
@@ -41,22 +41,22 @@ public class WeeklyReportService {
                 .orElseThrow(() -> new ResourceNotFoundException("어르신을 찾을 수 없습니다: " + elderId));
 
         // 1. 식사 통계
-        WeeklyStatsResponse.MealStats mealStats = getMealStats(elderId, startDate, endDate);
+        WeeklyReportResponse.MealStats mealStats = getMealStats(elderId, startDate, endDate);
 
         // 2. 복약 통계
-        Map<String, WeeklyStatsResponse.MedicationStats> medicationStats = getMedicationStats(elderId, startDate, endDate);
+        Map<String, WeeklyReportResponse.MedicationStats> medicationStats = getMedicationStats(elderId, startDate, endDate);
 
         // 3. 수면 통계
-        WeeklyStatsResponse.AverageSleep averageSleep = getAverageSleep(elderId, startDate, endDate);
+        WeeklyReportResponse.AverageSleep averageSleep = getAverageSleep(elderId, startDate, endDate);
 
         // 4. 심리 상태 통계
-        WeeklyStatsResponse.PsychSummary psychSummary = getPsychSummary(elderId, startDate, endDate);
+        WeeklyReportResponse.PsychSummary psychSummary = getPsychSummary(elderId, startDate, endDate);
 
         // 5. 혈당 통계
-        WeeklyStatsResponse.BloodSugar bloodSugar = getBloodSugarStats(elderId, startDate, endDate);
+        WeeklyReportResponse.BloodSugar bloodSugar = getBloodSugarStats(elderId, startDate, endDate);
 
         // 6. 요약 통계 계산
-        WeeklyStatsResponse.SummaryStats summaryStats = calculateSummaryStats(
+        WeeklyReportResponse.SummaryStats summaryStats = calculateSummaryStats(
                 mealStats, medicationStats, elderId, startDate, endDate);
 
         // 7. AI 요약 생성
@@ -64,7 +64,7 @@ public class WeeklyReportService {
         String healthSummary = aiSummaryService.getWeeklyStatsSummary(weeklySummaryDto);
 
 
-        return WeeklyStatsResponse.builder()
+        return WeeklyReportResponse.builder()
                 .elderName(elder.getName())
                 .summaryStats(summaryStats)
                 .mealStats(mealStats)
@@ -77,19 +77,19 @@ public class WeeklyReportService {
     }
     
     private WeeklySummaryDto createWeeklySummaryDto(
-            WeeklyStatsResponse.MealStats mealStats,
-            Map<String, WeeklyStatsResponse.MedicationStats> medicationStatsMap,
-            WeeklyStatsResponse.AverageSleep averageSleep,
-            WeeklyStatsResponse.PsychSummary psychSummary,
-            WeeklyStatsResponse.BloodSugar bloodSugar,
-            WeeklyStatsResponse.SummaryStats summaryStats) {
+            WeeklyReportResponse.MealStats mealStats,
+            Map<String, WeeklyReportResponse.MedicationStats> medicationStatsMap,
+            WeeklyReportResponse.AverageSleep averageSleep,
+            WeeklyReportResponse.PsychSummary psychSummary,
+            WeeklyReportResponse.BloodSugar bloodSugar,
+            WeeklyReportResponse.SummaryStats summaryStats) {
 
         int totalMeals = mealStats.getBreakfast() + mealStats.getLunch() + mealStats.getDinner();
         double avgSleepHours = averageSleep.getHours() + (averageSleep.getMinutes() / 60.0);
 
         int totalMedicationTaken = 0;
         int totalMedicationMissed = 0;
-        for (WeeklyStatsResponse.MedicationStats stats : medicationStatsMap.values()) {
+        for (WeeklyReportResponse.MedicationStats stats : medicationStatsMap.values()) {
             totalMedicationTaken += stats.getTakenCount();
             totalMedicationMissed += (stats.getTotalCount() - stats.getTakenCount());
         }
@@ -108,7 +108,7 @@ public class WeeklyReportService {
                 .build();
     }
 
-    private WeeklyStatsResponse.MealStats getMealStats(Integer elderId, LocalDate startDate, LocalDate endDate) {
+    private WeeklyReportResponse.MealStats getMealStats(Integer elderId, LocalDate startDate, LocalDate endDate) {
         List<MealRecord> mealRecords = mealRecordRepository.findByElderIdAndDateBetween(elderId, startDate, endDate);
 
         int breakfast = 0, lunch = 0, dinner = 0;
@@ -130,14 +130,14 @@ public class WeeklyReportService {
             }
         }
 
-        return WeeklyStatsResponse.MealStats.builder()
+        return WeeklyReportResponse.MealStats.builder()
                 .breakfast(breakfast)
                 .lunch(lunch)
                 .dinner(dinner)
                 .build();
     }
 
-    private Map<String, WeeklyStatsResponse.MedicationStats> getMedicationStats(Integer elderId, LocalDate startDate, LocalDate endDate) {
+    private Map<String, WeeklyReportResponse.MedicationStats> getMedicationStats(Integer elderId, LocalDate startDate, LocalDate endDate) {
         // 약물별 스케줄 조회
         List<MedicationSchedule> schedules = medicationScheduleRepository.findByElderId(elderId);
         Map<String, List<MedicationSchedule>> medicationSchedules = schedules.stream()
@@ -151,7 +151,7 @@ public class WeeklyReportService {
                         Collectors.counting()
                 ));
 
-        Map<String, WeeklyStatsResponse.MedicationStats> result = new HashMap<>();
+        Map<String, WeeklyReportResponse.MedicationStats> result = new HashMap<>();
 
         for (Map.Entry<String, List<MedicationSchedule>> entry : medicationSchedules.entrySet()) {
             String medicationName = entry.getKey();
@@ -160,7 +160,7 @@ public class WeeklyReportService {
             int totalCount = medicationScheduleList.size() * 7;
             int takenCount = takenCounts.getOrDefault(medicationName, 0L).intValue();
 
-            result.put(medicationName, WeeklyStatsResponse.MedicationStats.builder()
+            result.put(medicationName, WeeklyReportResponse.MedicationStats.builder()
                     .totalCount(totalCount)
                     .takenCount(takenCount)
                     .build());
@@ -169,11 +169,11 @@ public class WeeklyReportService {
         return result;
     }
 
-    private WeeklyStatsResponse.AverageSleep getAverageSleep(Integer elderId, LocalDate startDate, LocalDate endDate) {
+    private WeeklyReportResponse.AverageSleep getAverageSleep(Integer elderId, LocalDate startDate, LocalDate endDate) {
         List<CareCallRecord> sleepRecords = careCallRecordRepository.findByElderIdAndDateBetweenWithSleepData(elderId, startDate, endDate);
 
         if (sleepRecords.isEmpty()) {
-            return WeeklyStatsResponse.AverageSleep.builder()
+            return WeeklyReportResponse.AverageSleep.builder()
                     .hours(0)
                     .minutes(0)
                     .build();
@@ -193,7 +193,7 @@ public class WeeklyReportService {
         }
 
         if (validRecords == 0) {
-            return WeeklyStatsResponse.AverageSleep.builder()
+            return WeeklyReportResponse.AverageSleep.builder()
                     .hours(0)
                     .minutes(0)
                     .build();
@@ -203,13 +203,13 @@ public class WeeklyReportService {
         int hours = (int) (averageMinutes / 60);
         int minutes = (int) (averageMinutes % 60);
 
-        return WeeklyStatsResponse.AverageSleep.builder()
+        return WeeklyReportResponse.AverageSleep.builder()
                 .hours(hours)
                 .minutes(minutes)
                 .build();
     }
 
-    private WeeklyStatsResponse.PsychSummary getPsychSummary(Integer elderId, LocalDate startDate, LocalDate endDate) {
+    private WeeklyReportResponse.PsychSummary getPsychSummary(Integer elderId, LocalDate startDate, LocalDate endDate) {
         List<CareCallRecord> mentalRecords = careCallRecordRepository.findByElderIdAndDateBetweenWithPsychologicalData(elderId, startDate, endDate);
 
         int good = 0, normal = 0, bad = 0;
@@ -226,14 +226,14 @@ public class WeeklyReportService {
             }
         }
 
-        return WeeklyStatsResponse.PsychSummary.builder()
+        return WeeklyReportResponse.PsychSummary.builder()
                 .good(good)
                 .normal(normal)
                 .bad(bad)
                 .build();
     }
 
-    private WeeklyStatsResponse.BloodSugar getBloodSugarStats(Integer elderId, LocalDate startDate, LocalDate endDate) {
+    private WeeklyReportResponse.BloodSugar getBloodSugarStats(Integer elderId, LocalDate startDate, LocalDate endDate) {
         List<BloodSugarRecord> bloodSugarRecords = bloodSugarRecordRepository.findByElderIdAndDateBetween(elderId, startDate, endDate);
 
         Map<BloodSugarMeasurementType, Map<BloodSugarStatus, Integer>> stats = new HashMap<>();
@@ -250,27 +250,27 @@ public class WeeklyReportService {
             }
         }
 
-        WeeklyStatsResponse.BloodSugarType beforeMeal = WeeklyStatsResponse.BloodSugarType.builder()
+        WeeklyReportResponse.BloodSugarType beforeMeal = WeeklyReportResponse.BloodSugarType.builder()
                 .normal(stats.get(BloodSugarMeasurementType.BEFORE_MEAL).getOrDefault(BloodSugarStatus.NORMAL, 0))
                 .high(stats.get(BloodSugarMeasurementType.BEFORE_MEAL).getOrDefault(BloodSugarStatus.HIGH, 0))
                 .low(stats.get(BloodSugarMeasurementType.BEFORE_MEAL).getOrDefault(BloodSugarStatus.LOW, 0))
                 .build();
 
-        WeeklyStatsResponse.BloodSugarType afterMeal = WeeklyStatsResponse.BloodSugarType.builder()
+        WeeklyReportResponse.BloodSugarType afterMeal = WeeklyReportResponse.BloodSugarType.builder()
                 .normal(stats.get(BloodSugarMeasurementType.AFTER_MEAL).getOrDefault(BloodSugarStatus.NORMAL, 0))
                 .high(stats.get(BloodSugarMeasurementType.AFTER_MEAL).getOrDefault(BloodSugarStatus.HIGH, 0))
                 .low(stats.get(BloodSugarMeasurementType.AFTER_MEAL).getOrDefault(BloodSugarStatus.LOW, 0))
                 .build();
 
-        return WeeklyStatsResponse.BloodSugar.builder()
+        return WeeklyReportResponse.BloodSugar.builder()
                 .beforeMeal(beforeMeal)
                 .afterMeal(afterMeal)
                 .build();
     }
 
-    private WeeklyStatsResponse.SummaryStats calculateSummaryStats(
-            WeeklyStatsResponse.MealStats mealStats,
-            Map<String, WeeklyStatsResponse.MedicationStats> medicationStats,
+    private WeeklyReportResponse.SummaryStats calculateSummaryStats(
+            WeeklyReportResponse.MealStats mealStats,
+            Map<String, WeeklyReportResponse.MedicationStats> medicationStats,
             Integer elderId, LocalDate startDate, LocalDate endDate) {
 
         // 식사율 계산 (7일 * 3끼 = 21끼 중 실제 식사한 횟수), 소숫점 버림
@@ -280,7 +280,7 @@ public class WeeklyReportService {
         // 복약률 계산
         int totalMedicationCount = 0;
         int totalTakenCount = 0;
-        for (WeeklyStatsResponse.MedicationStats stats : medicationStats.values()) {
+        for (WeeklyReportResponse.MedicationStats stats : medicationStats.values()) {
             totalMedicationCount += stats.getTotalCount();
             totalTakenCount += stats.getTakenCount();
         }
@@ -299,7 +299,7 @@ public class WeeklyReportService {
                 .filter(record -> "failed".equals(record.getCallStatus()))
                 .count();
 
-        return WeeklyStatsResponse.SummaryStats.builder()
+        return WeeklyReportResponse.SummaryStats.builder()
                 .mealRate(mealRate)
                 .medicationRate(medicationRate)
                 .healthSignals(healthSignals)

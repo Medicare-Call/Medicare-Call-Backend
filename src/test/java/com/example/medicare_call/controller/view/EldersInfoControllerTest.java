@@ -1,7 +1,7 @@
 package com.example.medicare_call.controller.view;
 
 import com.example.medicare_call.controller.action.ElderController;
-import com.example.medicare_call.dto.ElderInfoResponse;
+import com.example.medicare_call.dto.ElderResponse;
 import com.example.medicare_call.dto.ElderUpdateRequest;
 import com.example.medicare_call.global.annotation.AuthUser;
 import com.example.medicare_call.global.enums.ElderRelation;
@@ -95,8 +95,8 @@ class EldersInfoControllerTest {
     void getElderSettingInfo_success() throws Exception {
         // given
         Long memberId = 1L;
-        List<ElderInfoResponse> responseList = Arrays.asList(
-                new ElderInfoResponse(
+        List<ElderResponse> responseList = Arrays.asList(
+                new ElderResponse(
                         1,
                         "김옥자",
                         LocalDate.of(1945, 8, 15),
@@ -151,7 +151,7 @@ class EldersInfoControllerTest {
                 ElderRelation.SIBLING,
                 ResidenceType.WITH_FAMILY
         );
-        ElderInfoResponse response = new ElderInfoResponse(
+        ElderResponse response = new ElderResponse(
                 elderId,
                 "김철수",
                 LocalDate.of(1950, 1, 1),

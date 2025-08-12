@@ -1,7 +1,7 @@
 package com.example.medicare_call.service;
 
 import com.example.medicare_call.domain.*;
-import com.example.medicare_call.dto.ElderHealthRegisterRequest;
+import com.example.medicare_call.dto.ElderHealthInfoCreateRequest;
 import com.example.medicare_call.global.ResourceNotFoundException;
 import com.example.medicare_call.global.enums.ElderHealthNoteType;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
@@ -43,11 +43,11 @@ class ElderHealthInfoServiceTest {
         when(medicationRepository.findByName("당뇨약")).thenReturn(Optional.empty());
         when(medicationRepository.save(any(Medication.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        ElderHealthRegisterRequest.MedicationScheduleRequest msReq = ElderHealthRegisterRequest.MedicationScheduleRequest.builder()
+        ElderHealthInfoCreateRequest.MedicationScheduleRequest msReq = ElderHealthInfoCreateRequest.MedicationScheduleRequest.builder()
                 .medicationName("당뇨약")
                 .scheduleTimes(List.of(MedicationScheduleTime.MORNING, MedicationScheduleTime.DINNER))
                 .build();
-        ElderHealthRegisterRequest request = ElderHealthRegisterRequest.builder()
+        ElderHealthInfoCreateRequest request = ElderHealthInfoCreateRequest.builder()
                 .diseaseNames(List.of("당뇨"))
                 .medicationSchedules(List.of(msReq))
                 .notes(List.of(ElderHealthNoteType.INSOMNIA))
@@ -63,7 +63,7 @@ class ElderHealthInfoServiceTest {
     @Test
     void registerElderHealthInfo_fail_elderNotFound() {
         // given
-        ElderHealthRegisterRequest request = ElderHealthRegisterRequest.builder()
+        ElderHealthInfoCreateRequest request = ElderHealthInfoCreateRequest.builder()
                 .diseaseNames(List.of("당뇨"))
                 .medicationSchedules(List.of())
                 .notes(List.of())

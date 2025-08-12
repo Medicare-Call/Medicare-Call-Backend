@@ -3,7 +3,7 @@ package com.example.medicare_call.service.data_processor.ai;
 import com.example.medicare_call.dto.HomeSummaryDto;
 import com.example.medicare_call.dto.OpenAiRequest;
 import com.example.medicare_call.dto.OpenAiResponse;
-import com.example.medicare_call.dto.WeeklyStatsResponse;
+import com.example.medicare_call.dto.WeeklyReportResponse;
 import com.example.medicare_call.dto.WeeklySummaryDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -198,7 +198,7 @@ public class AiSummaryService {
         );
     }
 
-    private String formatBloodSugarStats(WeeklyStatsResponse.BloodSugarType bloodSugarType) {
+    private String formatBloodSugarStats(WeeklyReportResponse.BloodSugarType bloodSugarType) {
         if (bloodSugarType == null) {
             return "측정 기록 없음";
         }

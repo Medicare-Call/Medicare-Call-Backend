@@ -1,8 +1,8 @@
 package com.example.medicare_call.controller.action;
 
-import com.example.medicare_call.dto.SmsRequest;
+import com.example.medicare_call.dto.SmsSendRequest;
 import com.example.medicare_call.dto.SmsVerificationResponse;
-import com.example.medicare_call.dto.SmsVerifyDto;
+import com.example.medicare_call.dto.SmsVerificationRequest;
 import com.example.medicare_call.service.auth.AuthService;
 import com.example.medicare_call.service.auth.SmsVerificationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,7 +31,7 @@ public class SmsController {
     // 인증번호 발송
     @PostMapping("")
     @Operation(summary = "인증번호 발송", description = "입력된 전화번호로 6자리 인증번호를 발송합니다.")
-    public ResponseEntity<Map<String, String>> sendSms(@Valid @RequestBody SmsRequest request) {
+    public ResponseEntity<Map<String, String>> sendSms(@Valid @RequestBody SmsSendRequest request) {
         Map<String, String> response = new HashMap<>();
 
         try {
@@ -48,7 +48,7 @@ public class SmsController {
 
     @PostMapping("/confirmation")
     @Operation(summary = "SMS 인증 및 회원 상태 확인", description = "인증번호 검증 후 회원 상태에 따른 다음 단계를 안내합니다.")
-    public ResponseEntity<SmsVerificationResponse> verifySms(@Valid @RequestBody SmsVerifyDto request) {
+    public ResponseEntity<SmsVerificationResponse> verifySms(@Valid @RequestBody SmsVerificationRequest request) {
 
         boolean isVerified = smsVerificationService.verifyCertificationNumber(request.getPhone(), request.getCertificationCode());
 

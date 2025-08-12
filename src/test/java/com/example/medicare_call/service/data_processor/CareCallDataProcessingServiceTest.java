@@ -1,7 +1,7 @@
 package com.example.medicare_call.service.data_processor;
 
 import com.example.medicare_call.domain.*;
-import com.example.medicare_call.dto.CallDataRequest;
+import com.example.medicare_call.dto.CareCallDataProcessRequest;
 import com.example.medicare_call.dto.HealthDataExtractionRequest;
 import com.example.medicare_call.dto.HealthDataExtractionResponse;
 import com.example.medicare_call.global.ResourceNotFoundException;
@@ -50,22 +50,22 @@ class CareCallDataProcessingServiceTest {
     @DisplayName("통화 데이터 저장 성공 - 모든 필드 포함")
     void saveCallData_success_withAllFields() {
         // given
-        CallDataRequest.TranscriptionData.TranscriptionSegment segment1 = CallDataRequest.TranscriptionData.TranscriptionSegment.builder()
+        CareCallDataProcessRequest.TranscriptionData.TranscriptionSegment segment1 = CareCallDataProcessRequest.TranscriptionData.TranscriptionSegment.builder()
                 .speaker("고객")
                 .text("안녕하세요, 오늘 컨디션은 어떠세요?")
                 .build();
         
-        CallDataRequest.TranscriptionData.TranscriptionSegment segment2 = CallDataRequest.TranscriptionData.TranscriptionSegment.builder()
+        CareCallDataProcessRequest.TranscriptionData.TranscriptionSegment segment2 = CareCallDataProcessRequest.TranscriptionData.TranscriptionSegment.builder()
                 .speaker("어르신")
                 .text("네, 오늘은 컨디션이 좋아요.")
                 .build();
 
-        CallDataRequest.TranscriptionData transcriptionData = CallDataRequest.TranscriptionData.builder()
+        CareCallDataProcessRequest.TranscriptionData transcriptionData = CareCallDataProcessRequest.TranscriptionData.builder()
                 .language("ko")
                 .fullText(Arrays.asList(segment1, segment2))
                 .build();
 
-        CallDataRequest request = CallDataRequest.builder()
+        CareCallDataProcessRequest request = CareCallDataProcessRequest.builder()
                 .elderId(1)
                 .settingId(2)
                 .startTime(Instant.parse("2025-01-27T10:00:00Z"))
@@ -125,7 +125,7 @@ class CareCallDataProcessingServiceTest {
     @DisplayName("통화 데이터 저장 성공 - 녹음 텍스트 없음")
     void saveCallData_success_withoutTranscription() {
         // given
-        CallDataRequest request = CallDataRequest.builder()
+        CareCallDataProcessRequest request = CareCallDataProcessRequest.builder()
                 .elderId(1)
                 .settingId(2)
                 .status("failed")
@@ -172,10 +172,10 @@ class CareCallDataProcessingServiceTest {
     @DisplayName("통화 데이터 저장 성공 - 녹음 텍스트 없음")
     void saveCallData_success_transcriptionTextOnly() {
         // given
-        CallDataRequest.TranscriptionData transcriptionData = CallDataRequest.TranscriptionData.builder()
+        CareCallDataProcessRequest.TranscriptionData transcriptionData = CareCallDataProcessRequest.TranscriptionData.builder()
                 .build();
 
-        CallDataRequest request = CallDataRequest.builder()
+        CareCallDataProcessRequest request = CareCallDataProcessRequest.builder()
                 .elderId(1)
                 .settingId(2)
                 .status("busy")
@@ -222,7 +222,7 @@ class CareCallDataProcessingServiceTest {
     @DisplayName("통화 데이터 저장 실패 - 어르신을 찾을 수 없음")
     void saveCallData_fail_elderNotFound() {
         // given
-        CallDataRequest request = CallDataRequest.builder()
+        CareCallDataProcessRequest request = CareCallDataProcessRequest.builder()
                 .elderId(999)
                 .settingId(2)
                 .status("completed")
@@ -244,7 +244,7 @@ class CareCallDataProcessingServiceTest {
     @DisplayName("통화 데이터 저장 실패 - 통화 설정을 찾을 수 없음")
     void saveCallData_fail_settingNotFound() {
         // given
-        CallDataRequest request = CallDataRequest.builder()
+        CareCallDataProcessRequest request = CareCallDataProcessRequest.builder()
                 .elderId(1)
                 .settingId(999)
                 .status("completed")
@@ -271,7 +271,7 @@ class CareCallDataProcessingServiceTest {
     @DisplayName("통화 데이터 저장 성공 - 시간 정보 없음")
     void saveCallData_success_noTimeInfo() {
         // given
-        CallDataRequest request = CallDataRequest.builder()
+        CareCallDataProcessRequest request = CareCallDataProcessRequest.builder()
                 .elderId(1)
                 .settingId(2)
                 .status("no-answer")
@@ -318,16 +318,16 @@ class CareCallDataProcessingServiceTest {
     @DisplayName("통화 데이터 저장 시 OpenAI 건강 데이터 추출 서비스가 호출된다")
     void saveCallData_callsOpenAiHealthDataService() {
         // given
-        CallDataRequest.TranscriptionData.TranscriptionSegment segment = CallDataRequest.TranscriptionData.TranscriptionSegment.builder()
+        CareCallDataProcessRequest.TranscriptionData.TranscriptionSegment segment = CareCallDataProcessRequest.TranscriptionData.TranscriptionSegment.builder()
                 .speaker("어르신")
                 .text("오늘 아침에 밥을 먹었고, 혈당을 측정했어요. 120이 나왔어요.")
                 .build();
 
-        CallDataRequest.TranscriptionData transcriptionData = CallDataRequest.TranscriptionData.builder()
+        CareCallDataProcessRequest.TranscriptionData transcriptionData = CareCallDataProcessRequest.TranscriptionData.builder()
                 .fullText(Arrays.asList(segment))
                 .build();
 
-        CallDataRequest request = CallDataRequest.builder()
+        CareCallDataProcessRequest request = CareCallDataProcessRequest.builder()
                 .elderId(1)
                 .settingId(2)
                 .startTime(Instant.parse("2025-01-27T10:00:00Z"))

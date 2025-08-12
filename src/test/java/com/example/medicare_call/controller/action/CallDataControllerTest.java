@@ -3,7 +3,7 @@ package com.example.medicare_call.controller.action;
 import com.example.medicare_call.domain.CareCallRecord;
 import com.example.medicare_call.domain.CareCallSetting;
 import com.example.medicare_call.domain.Elder;
-import com.example.medicare_call.dto.CallDataRequest;
+import com.example.medicare_call.dto.CareCallDataProcessRequest;
 import com.example.medicare_call.global.jwt.JwtProvider;
 import com.example.medicare_call.repository.CareCallRecordRepository;
 import com.example.medicare_call.repository.CareCallSettingRepository;
@@ -63,22 +63,22 @@ class CallDataControllerTest {
     @DisplayName("통화 데이터 수신 성공")
     void receiveCallData_success() throws Exception {
         // given
-        CallDataRequest.TranscriptionData.TranscriptionSegment segment1 = CallDataRequest.TranscriptionData.TranscriptionSegment.builder()
+        CareCallDataProcessRequest.TranscriptionData.TranscriptionSegment segment1 = CareCallDataProcessRequest.TranscriptionData.TranscriptionSegment.builder()
                 .speaker("고객")
                 .text("안녕하세요, 오늘 컨디션은 어떠세요?")
                 .build();
 
-        CallDataRequest.TranscriptionData.TranscriptionSegment segment2 = CallDataRequest.TranscriptionData.TranscriptionSegment.builder()
+        CareCallDataProcessRequest.TranscriptionData.TranscriptionSegment segment2 = CareCallDataProcessRequest.TranscriptionData.TranscriptionSegment.builder()
                 .speaker("어르신")
                 .text("네, 오늘은 컨디션이 좋아요.")
                 .build();
 
-        CallDataRequest.TranscriptionData transcriptionData = CallDataRequest.TranscriptionData.builder()
+        CareCallDataProcessRequest.TranscriptionData transcriptionData = CareCallDataProcessRequest.TranscriptionData.builder()
                 .language("ko")
                 .fullText(Arrays.asList(segment1, segment2))
                 .build();
 
-        CallDataRequest request = CallDataRequest.builder()
+        CareCallDataProcessRequest request = CareCallDataProcessRequest.builder()
                 .elderId(1)
                 .settingId(2)
                 .startTime(Instant.parse("2025-01-27T10:00:00Z"))
@@ -108,7 +108,7 @@ class CallDataControllerTest {
                 .healthDetails(null)
                 .build();
 
-        when(careCallDataProcessingService.saveCallData(any(CallDataRequest.class))).thenReturn(savedRecord);
+        when(careCallDataProcessingService.saveCallData(any(CareCallDataProcessRequest.class))).thenReturn(savedRecord);
 
         // when & then
         mockMvc.perform(post("/call-data")
@@ -122,7 +122,7 @@ class CallDataControllerTest {
     @DisplayName("통화 데이터 수신 실패 - 어르신 ID 누락")
     void receiveCallData_fail_missingElderId() throws Exception {
         // given
-        CallDataRequest request = CallDataRequest.builder()
+        CareCallDataProcessRequest request = CareCallDataProcessRequest.builder()
                 .settingId(2)
                 .status("completed")
                 .responded((byte)1)
@@ -139,7 +139,7 @@ class CallDataControllerTest {
     @DisplayName("통화 데이터 수신 실패 - 통화 설정 ID 누락")
     void receiveCallData_fail_missingSettingId() throws Exception {
         // given
-        CallDataRequest request = CallDataRequest.builder()
+        CareCallDataProcessRequest request = CareCallDataProcessRequest.builder()
                 .elderId(1)
                 .status("completed")
                 .build();
@@ -155,7 +155,7 @@ class CallDataControllerTest {
     @DisplayName("통화 데이터 수신 실패 - 통화 상태 누락")
     void receiveCallData_fail_missingStatus() throws Exception {
         // given
-        CallDataRequest request = CallDataRequest.builder()
+        CareCallDataProcessRequest request = CareCallDataProcessRequest.builder()
                 .elderId(1)
                 .settingId(2)
                 .build();
@@ -171,7 +171,7 @@ class CallDataControllerTest {
     @DisplayName("통화 데이터 수신 실패 - 잘못된 통화 상태")
     void receiveCallData_fail_invalidStatus() throws Exception {
         // given
-        CallDataRequest request = CallDataRequest.builder()
+        CareCallDataProcessRequest request = CareCallDataProcessRequest.builder()
                 .elderId(1)
                 .settingId(2)
                 .status("invalid-status")
@@ -188,7 +188,7 @@ class CallDataControllerTest {
     @DisplayName("통화 데이터 수신 성공 - 녹음 텍스트 없음")
     void receiveCallData_success_noTranscription() throws Exception {
         // given
-        CallDataRequest request = CallDataRequest.builder()
+        CareCallDataProcessRequest request = CareCallDataProcessRequest.builder()
                 .elderId(1)
                 .settingId(2)
                 .status("completed")
@@ -212,7 +212,7 @@ class CallDataControllerTest {
                 .healthDetails(null)
                 .build();
 
-        when(careCallDataProcessingService.saveCallData(any(CallDataRequest.class))).thenReturn(savedRecord);
+        when(careCallDataProcessingService.saveCallData(any(CareCallDataProcessRequest.class))).thenReturn(savedRecord);
 
         // when & then
         mockMvc.perform(post("/call-data")

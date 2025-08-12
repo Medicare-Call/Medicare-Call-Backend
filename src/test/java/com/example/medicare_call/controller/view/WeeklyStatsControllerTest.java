@@ -1,6 +1,6 @@
 package com.example.medicare_call.controller.view;
 
-import com.example.medicare_call.dto.WeeklyStatsResponse;
+import com.example.medicare_call.dto.WeeklyReportResponse;
 import com.example.medicare_call.global.jwt.JwtProvider;
 import com.example.medicare_call.service.report.WeeklyReportService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -46,58 +46,58 @@ class WeeklyStatsControllerTest {
         Integer elderId = 1;
         LocalDate startDate = LocalDate.of(2025, 7, 15);
 
-        WeeklyStatsResponse.SummaryStats summaryStats = WeeklyStatsResponse.SummaryStats.builder()
+        WeeklyReportResponse.SummaryStats summaryStats = WeeklyReportResponse.SummaryStats.builder()
                 .mealRate(65)
                 .medicationRate(57)
                 .healthSignals(3)
                 .missedCalls(8)
                 .build();
 
-        WeeklyStatsResponse.MealStats mealStats = WeeklyStatsResponse.MealStats.builder()
+        WeeklyReportResponse.MealStats mealStats = WeeklyReportResponse.MealStats.builder()
                 .breakfast(7)
                 .lunch(5)
                 .dinner(0)
                 .build();
 
-        Map<String, WeeklyStatsResponse.MedicationStats> medicationStats = new HashMap<>();
-        medicationStats.put("혈압약", WeeklyStatsResponse.MedicationStats.builder()
+        Map<String, WeeklyReportResponse.MedicationStats> medicationStats = new HashMap<>();
+        medicationStats.put("혈압약", WeeklyReportResponse.MedicationStats.builder()
                 .totalCount(14)
                 .takenCount(0)
                 .build());
-        medicationStats.put("영양제", WeeklyStatsResponse.MedicationStats.builder()
+        medicationStats.put("영양제", WeeklyReportResponse.MedicationStats.builder()
                 .totalCount(7)
                 .takenCount(4)
                 .build());
 
-        WeeklyStatsResponse.AverageSleep averageSleep = WeeklyStatsResponse.AverageSleep.builder()
+        WeeklyReportResponse.AverageSleep averageSleep = WeeklyReportResponse.AverageSleep.builder()
                 .hours(7)
                 .minutes(12)
                 .build();
 
-        WeeklyStatsResponse.PsychSummary psychSummary = WeeklyStatsResponse.PsychSummary.builder()
+        WeeklyReportResponse.PsychSummary psychSummary = WeeklyReportResponse.PsychSummary.builder()
                 .good(4)
                 .normal(4)
                 .bad(4)
                 .build();
 
-        WeeklyStatsResponse.BloodSugarType beforeMeal = WeeklyStatsResponse.BloodSugarType.builder()
+        WeeklyReportResponse.BloodSugarType beforeMeal = WeeklyReportResponse.BloodSugarType.builder()
                 .normal(5)
                 .high(2)
                 .low(1)
                 .build();
 
-        WeeklyStatsResponse.BloodSugarType afterMeal = WeeklyStatsResponse.BloodSugarType.builder()
+        WeeklyReportResponse.BloodSugarType afterMeal = WeeklyReportResponse.BloodSugarType.builder()
                 .normal(5)
                 .high(0)
                 .low(2)
                 .build();
 
-        WeeklyStatsResponse.BloodSugar bloodSugar = WeeklyStatsResponse.BloodSugar.builder()
+        WeeklyReportResponse.BloodSugar bloodSugar = WeeklyReportResponse.BloodSugar.builder()
                 .beforeMeal(beforeMeal)
                 .afterMeal(afterMeal)
                 .build();
 
-        WeeklyStatsResponse expectedResponse = WeeklyStatsResponse.builder()
+        WeeklyReportResponse expectedResponse = WeeklyReportResponse.builder()
                 .elderName("김옥자")
                 .summaryStats(summaryStats)
                 .mealStats(mealStats)
