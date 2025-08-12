@@ -24,9 +24,9 @@ public class ElderService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public Elder registerElder(@Valid ElderRegisterRequest request) {
-        Member guardian = memberRepository.findById(request.getGuardianId())
-            .orElseThrow(() -> new ResourceNotFoundException("보호자를 찾을 수 없습니다: " + request.getGuardianId()));
+    public Elder registerElder(Integer memberId, @Valid ElderRegisterRequest request) {
+        Member guardian = memberRepository.findById(memberId)
+            .orElseThrow(() -> new ResourceNotFoundException("보호자를 찾을 수 없습니다: " + memberId));
         Elder elder = Elder.builder()
             .name(request.getName())
             .birthDate(request.getBirthDate())

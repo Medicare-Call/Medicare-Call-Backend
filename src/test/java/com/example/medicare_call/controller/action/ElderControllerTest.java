@@ -20,6 +20,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import com.example.medicare_call.repository.MemberRepository;
 import com.example.medicare_call.domain.Member;
+import com.example.medicare_call.global.annotation.AuthUser;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import com.example.medicare_call.global.GlobalExceptionHandler;
+
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -33,7 +39,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 class ElderControllerTest {
 
-    @Autowired
     private MockMvc mockMvc;
 
     @Autowired
@@ -48,8 +53,28 @@ class ElderControllerTest {
     @MockBean
     private JwtProvider jwtProvider;
 
+    private static class TestAuthUserArgumentResolver implements HandlerMethodArgumentResolver {
+        @Override
+        public boolean supportsParameter(org.springframework.core.MethodParameter parameter) {
+            return parameter.hasParameterAnnotation(AuthUser.class);
+        }
+
+        @Override
+        public Object resolveArgument(org.springframework.core.MethodParameter parameter,
+                                      org.springframework.web.method.support.ModelAndViewContainer mavContainer,
+                                      org.springframework.web.context.request.NativeWebRequest webRequest,
+                                      org.springframework.web.bind.support.WebDataBinderFactory binderFactory) {
+            return 1L; // 테스트용 고정 memberId
+        }
+    }
+
     @BeforeEach
-    void setUp() {
+    void setUp(WebApplicationContext webApplicationContext) {
+        mockMvc = MockMvcBuilders
+                .standaloneSetup(new ElderController(elderService))
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .setCustomArgumentResolvers(new TestAuthUserArgumentResolver())
+                .build();
         Member member = Member.builder()
             .name("테스트보호자")
             .phone("01000000000")
@@ -70,9 +95,8 @@ class ElderControllerTest {
         req.setPhone("01012345678");
         req.setRelationship(ElderRelation.GRANDCHILD);
         req.setResidenceType(ResidenceType.ALONE);
-        req.setGuardianId(1);
 
-        when(elderService.registerElder(any())).thenReturn(
+        when(elderService.registerElder(any(Integer.class), any(ElderRegisterRequest.class))).thenReturn(
             Elder.builder()
                     .id(1)
                     .name("홍길동")
@@ -108,7 +132,6 @@ class ElderControllerTest {
         req.setPhone("01012345678");
         req.setRelationship(ElderRelation.GRANDCHILD);
         req.setResidenceType(ResidenceType.ALONE);
-        req.setGuardianId(1);
 
         mockMvc.perform(post("/elders")
                 .contentType(MediaType.APPLICATION_JSON)
