@@ -1,7 +1,7 @@
 package com.example.medicare_call.service;
 
 import com.example.medicare_call.domain.*;
-import com.example.medicare_call.dto.WeeklyStatsResponse;
+import com.example.medicare_call.dto.WeeklyReportResponse;
 import com.example.medicare_call.global.enums.MealType;
 import com.example.medicare_call.repository.*;
 import com.example.medicare_call.service.data_processor.ai.AiSummaryService;
@@ -132,7 +132,7 @@ class WeeklyReportServiceTest {
         when(aiSummaryService.getWeeklyStatsSummary(any(com.example.medicare_call.dto.WeeklySummaryDto.class))).thenReturn("주간 AI 요약");
 
         // when
-        WeeklyStatsResponse response = weeklyReportService.getWeeklyReport(elderId, startDate);
+        WeeklyReportResponse response = weeklyReportService.getWeeklyReport(elderId, startDate);
 
         // then
         assertThat(response).isNotNull();

@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SmsRequest {
+public class SmsSendRequest {
     @NotBlank(message = "전화번호는 필수입니다.")
     @ValidPhoneNumber
     private String phone;

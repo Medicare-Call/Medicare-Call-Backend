@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ElderHealthRegisterRequest {
+public class ElderHealthInfoCreateRequest {
     private List<String> diseaseNames;
     private List<MedicationScheduleRequest> medicationSchedules;
     @Schema(

@@ -2,7 +2,7 @@ package com.example.medicare_call.service.auth;
 
 import com.example.medicare_call.domain.Member;
 import com.example.medicare_call.domain.RefreshToken;
-import com.example.medicare_call.dto.RegisterRequest;
+import com.example.medicare_call.dto.MemberRegisterRequest;
 import com.example.medicare_call.dto.SmsVerificationResponse;
 import com.example.medicare_call.dto.TokenResponse;
 import com.example.medicare_call.global.enums.Gender;
@@ -44,7 +44,7 @@ class AuthServiceTest {
     @DisplayName("회원가입 성공 - 새로운 전화번호")
     void register_success() {
         String phone = "01012345678";
-        RegisterRequest request = new RegisterRequest();
+        MemberRegisterRequest request = new MemberRegisterRequest();
         request.setName("홍길동");
         request.setBirthDate(LocalDate.of(1990, 1, 1));
         request.setGender(Gender.MALE);
@@ -82,7 +82,7 @@ class AuthServiceTest {
     @DisplayName("회원가입 실패 - 이미 등록된 전화번호")
     void register_fail_duplicatePhone() {
         String phone = "01012345678";
-        RegisterRequest request = new RegisterRequest();
+        MemberRegisterRequest request = new MemberRegisterRequest();
         request.setName("홍길동");
         request.setBirthDate(LocalDate.of(1990, 1, 1));
         request.setGender(Gender.MALE);

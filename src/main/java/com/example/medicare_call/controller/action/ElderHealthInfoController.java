@@ -4,8 +4,8 @@ import com.example.medicare_call.dto.CareCallSettingRequest;
 import com.example.medicare_call.dto.ElderHealthRegisterRequest;
 import com.example.medicare_call.dto.ElderHealthResponse;
 import com.example.medicare_call.global.annotation.AuthUser;
+import com.example.medicare_call.dto.ElderHealthInfoCreateRequest;
 import com.example.medicare_call.service.ElderHealthInfoService;
-import com.example.medicare_call.service.ElderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,7 +26,7 @@ public class ElderHealthInfoController {
 
     @Operation(summary = "어르신 건강정보 등록", description = "질환, 복약주기, 특이사항을 등록합니다.")
     @PostMapping("/{elderId}/health-info")
-    public ResponseEntity<Void> registerElderHealthInfo(@PathVariable Integer elderId, @Valid @RequestBody ElderHealthRegisterRequest request) {
+    public ResponseEntity<Void> registerElderHealthInfo(@PathVariable Integer elderId, @Valid @RequestBody ElderHealthInfoCreateRequest request) {
         elderHealthInfoService.registerElderHealthInfo(elderId, request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }

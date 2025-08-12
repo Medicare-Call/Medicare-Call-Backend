@@ -1,12 +1,11 @@
 package com.example.medicare_call.service;
 
-import com.example.medicare_call.dto.ElderHealthRegisterRequest;
+import com.example.medicare_call.dto.ElderHealthInfoCreateRequest;
 import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.ElderHealthResponse;
 import com.example.medicare_call.global.ResourceNotFoundException;
 import com.example.medicare_call.global.enums.FrequencyType;
 import com.example.medicare_call.repository.*;
-import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +25,7 @@ public class ElderHealthInfoService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public void registerElderHealthInfo(Integer elderId, ElderHealthRegisterRequest request) {
+    public void registerElderHealthInfo(Integer elderId, ElderHealthInfoCreateRequest request) {
         // TODO : 이쪽 Exception에 대한 Monitoring 추가 필요. 데이터의 무결성이 깨졌을 확률이 높다
        Elder elder = elderRepository.findById(elderId)
                .orElseThrow(() -> new ResourceNotFoundException("어르신을 찾을 수 없습니다. elderId: " + elderId));
@@ -45,7 +44,7 @@ public class ElderHealthInfoService {
        }
 
        // 복약 주기 등록
-       for (ElderHealthRegisterRequest.MedicationScheduleRequest msReq : request.getMedicationSchedules()) {
+       for (ElderHealthInfoCreateRequest.MedicationScheduleRequest msReq : request.getMedicationSchedules()) {
            // 기획 변경: 사용자의 입력을 그대로 받는 방식으로 (데이터의 중복만 최소화하자)
            Medication medication = medicationRepository.findByName(msReq.getMedicationName())
                    .orElseGet(() -> medicationRepository.save(Medication.builder().name(msReq.getMedicationName()).build()));

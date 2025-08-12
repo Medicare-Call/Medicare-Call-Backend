@@ -1,13 +1,11 @@
 package com.example.medicare_call.controller.action;
 
-import com.example.medicare_call.dto.CareCallSettingRequest;
-import com.example.medicare_call.dto.ElderHealthRegisterRequest;
+import com.example.medicare_call.dto.ElderHealthInfoCreateRequest;
 import com.example.medicare_call.global.enums.ElderHealthNoteType;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.global.jwt.JwtProvider;
 import com.example.medicare_call.service.carecall.CareCallSettingService;
 import com.example.medicare_call.service.ElderHealthInfoService;
-import com.example.medicare_call.service.ElderService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,11 +32,11 @@ class ElderHealthInfoControllerTest {
 
     @Test
     void registerElderHealthInfo_success() throws Exception {
-        ElderHealthRegisterRequest.MedicationScheduleRequest msReq = ElderHealthRegisterRequest.MedicationScheduleRequest.builder()
+        ElderHealthInfoCreateRequest.MedicationScheduleRequest msReq = ElderHealthInfoCreateRequest.MedicationScheduleRequest.builder()
                 .medicationName("당뇨약")
                 .scheduleTimes(List.of(MedicationScheduleTime.MORNING, MedicationScheduleTime.DINNER))
                 .build();
-        ElderHealthRegisterRequest request = ElderHealthRegisterRequest.builder()
+        ElderHealthInfoCreateRequest request = ElderHealthInfoCreateRequest.builder()
                 .diseaseNames(List.of("당뇨"))
                 .medicationSchedules(List.of(msReq))
                 .notes(List.of(ElderHealthNoteType.INSOMNIA))
