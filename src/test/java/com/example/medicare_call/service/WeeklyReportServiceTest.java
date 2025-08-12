@@ -5,6 +5,7 @@ import com.example.medicare_call.dto.WeeklyStatsResponse;
 import com.example.medicare_call.global.enums.MealType;
 import com.example.medicare_call.repository.*;
 import com.example.medicare_call.service.data_processor.ai.AiSummaryService;
+import com.example.medicare_call.service.report.WeeklyReportService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class WeeklyStatsServiceTest {
+class WeeklyReportServiceTest {
 
     @Mock
     private ElderRepository elderRepository;
@@ -50,7 +51,7 @@ class WeeklyStatsServiceTest {
     private AiSummaryService aiSummaryService;
 
     @InjectMocks
-    private WeeklyStatsService weeklyStatsService;
+    private WeeklyReportService weeklyReportService;
 
     private Elder testElder;
     private CareCallRecord testCallRecord;
@@ -84,7 +85,7 @@ class WeeklyStatsServiceTest {
 
     @Test
     @DisplayName("주간 통계 조회 성공")
-    void getWeeklyStats_success() {
+    void getWeeklyReport_success() {
         // given
         Integer elderId = 1;
         LocalDate startDate = LocalDate.of(2025, 7, 15);
@@ -131,7 +132,7 @@ class WeeklyStatsServiceTest {
         when(aiSummaryService.getWeeklyStatsSummary(any(com.example.medicare_call.dto.WeeklySummaryDto.class))).thenReturn("주간 AI 요약");
 
         // when
-        WeeklyStatsResponse response = weeklyStatsService.getWeeklyStats(elderId, startDate);
+        WeeklyStatsResponse response = weeklyReportService.getWeeklyReport(elderId, startDate);
 
         // then
         assertThat(response).isNotNull();
