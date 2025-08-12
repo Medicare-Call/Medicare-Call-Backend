@@ -1,11 +1,13 @@
 package com.example.medicare_call.controller.action;
 
+import com.example.medicare_call.dto.CareCallSettingRequest;
 import com.example.medicare_call.dto.ElderHealthRegisterRequest;
 import com.example.medicare_call.global.enums.ElderHealthNoteType;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.global.jwt.JwtProvider;
-import com.example.medicare_call.service.CareCallSettingService;
+import com.example.medicare_call.service.carecall.CareCallSettingService;
 import com.example.medicare_call.service.ElderHealthInfoService;
+import com.example.medicare_call.service.ElderService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

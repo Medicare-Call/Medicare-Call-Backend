@@ -1,4 +1,4 @@
-package com.example.medicare_call.service;
+package com.example.medicare_call.service.carecall.prompt;
 
 import com.example.medicare_call.domain.Disease;
 import com.example.medicare_call.domain.Elder;
