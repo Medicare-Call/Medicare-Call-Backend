@@ -38,7 +38,6 @@ class ValidationTest {
         request.setPhone("01012345678");
         request.setRelationship(ElderRelation.GRANDCHILD);
         request.setResidenceType(ResidenceType.ALONE);
-        request.setGuardianId(1);
 
         // when
         Set<ConstraintViolation<ElderRegisterRequest>> violations = validator.validate(request);
@@ -58,7 +57,6 @@ class ValidationTest {
         request.setPhone("01012345678");
         request.setRelationship(ElderRelation.GRANDCHILD);
         request.setResidenceType(ResidenceType.ALONE);
-        request.setGuardianId(1);
 
         // when
         Set<ConstraintViolation<ElderRegisterRequest>> violations = validator.validate(request);
@@ -82,7 +80,6 @@ class ValidationTest {
         request.setPhone("01012345678");
         request.setRelationship(ElderRelation.GRANDCHILD);
         request.setResidenceType(ResidenceType.ALONE);
-        request.setGuardianId(1);
 
         // when
         Set<ConstraintViolation<ElderRegisterRequest>> violations = validator.validate(request);
@@ -106,7 +103,6 @@ class ValidationTest {
         request.setPhone("01012345678");
         request.setRelationship(ElderRelation.GRANDCHILD);
         request.setResidenceType(ResidenceType.ALONE);
-        request.setGuardianId(1);
 
         // when
         Set<ConstraintViolation<ElderRegisterRequest>> violations = validator.validate(request);
@@ -126,7 +122,6 @@ class ValidationTest {
         request.setPhone("010-1234-5678"); // 하이픈 포함
         request.setRelationship(ElderRelation.GRANDCHILD);
         request.setResidenceType(ResidenceType.ALONE);
-        request.setGuardianId(1);
 
         // when
         Set<ConstraintViolation<ElderRegisterRequest>> violations = validator.validate(request);
@@ -150,7 +145,6 @@ class ValidationTest {
         request.setPhone("01112345678"); // 011로 시작
         request.setRelationship(ElderRelation.GRANDCHILD);
         request.setResidenceType(ResidenceType.ALONE);
-        request.setGuardianId(1);
 
         // when
         Set<ConstraintViolation<ElderRegisterRequest>> violations = validator.validate(request);

@@ -38,8 +38,4 @@ public class ElderRegisterRequest {
     @Schema(description = "어르신 거주방식 (ALONE: 혼자 계세요, WITH_FAMILY: 가족과 함께 살아요)", example = "ALONE")
     @NotNull(message = "어르신 거주방식은 필수입니다.")
     private ResidenceType residenceType;
-
-    @Schema(description = "보호자 ID", example = "1")
-    @NotNull(message = "보호자 ID는 필수입니다.")
-    private Integer guardianId;
 }
