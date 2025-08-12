@@ -2,7 +2,7 @@ package com.example.medicare_call.service.carecall;
 
 import com.example.medicare_call.domain.CareCallSetting;
 import com.example.medicare_call.domain.Elder;
-import com.example.medicare_call.dto.CareCallSettingRequest;
+import com.example.medicare_call.dto.carecall.CareCallSettingRequest;
 import com.example.medicare_call.global.enums.CallRecurrenceType;
 import com.example.medicare_call.repository.CareCallSettingRepository;
 import com.example.medicare_call.repository.ElderRepository;

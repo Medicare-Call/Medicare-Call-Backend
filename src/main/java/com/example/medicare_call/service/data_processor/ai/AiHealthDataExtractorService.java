@@ -1,9 +1,9 @@
 package com.example.medicare_call.service.data_processor.ai;
 
-import com.example.medicare_call.dto.HealthDataExtractionRequest;
-import com.example.medicare_call.dto.HealthDataExtractionResponse;
-import com.example.medicare_call.dto.OpenAiRequest;
-import com.example.medicare_call.dto.OpenAiResponse;
+import com.example.medicare_call.dto.data_processor.HealthDataExtractionRequest;
+import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
+import com.example.medicare_call.dto.data_processor.ai.OpenAiRequest;
+import com.example.medicare_call.dto.data_processor.ai.OpenAiResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;

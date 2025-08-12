@@ -1,6 +1,6 @@
 package com.example.medicare_call.controller.view;
 
-import com.example.medicare_call.dto.WeeklyReportResponse;
+import com.example.medicare_call.dto.report.WeeklyReportResponse;
 import com.example.medicare_call.service.report.WeeklyReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

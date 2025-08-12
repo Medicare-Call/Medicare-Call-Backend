@@ -5,7 +5,7 @@ import com.example.medicare_call.dto.ElderHealthRegisterRequest;
 import com.example.medicare_call.dto.ElderHealthResponse;
 import com.example.medicare_call.global.annotation.AuthUser;
 import com.example.medicare_call.dto.ElderHealthInfoCreateRequest;
-import com.example.medicare_call.service.ElderHealthInfoService;
+import com.example.medicare_call.service.report.ElderHealthInfoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;

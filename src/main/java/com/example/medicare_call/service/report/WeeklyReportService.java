@@ -1,8 +1,8 @@
 package com.example.medicare_call.service.report;
 
 import com.example.medicare_call.domain.*;
-import com.example.medicare_call.dto.WeeklyReportResponse;
-import com.example.medicare_call.dto.WeeklySummaryDto;
+import com.example.medicare_call.dto.report.WeeklyReportResponse;
+import com.example.medicare_call.dto.report.WeeklySummaryDto;
 import com.example.medicare_call.global.enums.BloodSugarMeasurementType;
 import com.example.medicare_call.global.enums.BloodSugarStatus;
 import com.example.medicare_call.global.enums.MealType;

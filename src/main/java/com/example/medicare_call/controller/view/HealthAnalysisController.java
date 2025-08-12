@@ -1,8 +1,8 @@
 package com.example.medicare_call.controller.view;
 
-import com.example.medicare_call.dto.DailyHealthAnalysisResponse;
+import com.example.medicare_call.dto.report.DailyHealthAnalysisResponse;
 import com.example.medicare_call.global.ErrorResponse;
-import com.example.medicare_call.service.HealthAnalysisService;
+import com.example.medicare_call.service.report.HealthAnalysisService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;

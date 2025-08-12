@@ -2,7 +2,7 @@ package com.example.medicare_call.service.data_processor;
 
 import com.example.medicare_call.domain.CareCallRecord;
 import com.example.medicare_call.domain.MealRecord;
-import com.example.medicare_call.dto.HealthDataExtractionResponse;
+import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
 import com.example.medicare_call.global.enums.HealthStatus;
 import com.example.medicare_call.global.enums.MealEatenStatus;
 import com.example.medicare_call.global.enums.MealType;

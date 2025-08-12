@@ -1,7 +1,7 @@
 package com.example.medicare_call.controller.action;
 
 import com.example.medicare_call.domain.CareCallRecord;
-import com.example.medicare_call.dto.CareCallDataProcessRequest;
+import com.example.medicare_call.dto.data_processor.CareCallDataProcessRequest;
 import com.example.medicare_call.service.data_processor.CareCallDataProcessingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
