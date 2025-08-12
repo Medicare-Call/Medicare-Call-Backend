@@ -56,6 +56,15 @@ public class Elder {
     @OneToOne(mappedBy = "elder", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private CareCallSetting careCallSetting;
 
+    @OneToMany(mappedBy = "elder")
+    private final List<MedicationSchedule> medicationSchedules = new ArrayList<>();
+
+    @OneToMany(mappedBy = "elder")
+    private final List<ElderDisease> elderDiseases = new ArrayList<>();
+
+    @OneToOne(mappedBy = "elder", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private ElderHealthInfo elderHealthInfo;
+
     @Builder
     public Elder(Integer id, Member guardian, String name, LocalDate birthDate, Byte gender, String phone, ElderRelation relationship, ResidenceType residenceType) {
         this.id = id;
