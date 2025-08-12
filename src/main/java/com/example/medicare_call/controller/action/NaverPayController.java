@@ -1,11 +1,10 @@
 package com.example.medicare_call.controller.action;
 
-import com.example.medicare_call.dto.NaverPayReserveRequest;
-import com.example.medicare_call.dto.NaverPayReserveResponse;
-import com.example.medicare_call.dto.NaverPayApplyRequest;
-import com.example.medicare_call.dto.NaverPayApplyResponse;
-import com.example.medicare_call.dto.PaymentApprovalResponse;
-import com.example.medicare_call.service.NaverPayService;
+import com.example.medicare_call.dto.payment.NaverPayReserveRequest;
+import com.example.medicare_call.dto.payment.NaverPayReserveResponse;
+import com.example.medicare_call.dto.payment.NaverPayApplyRequest;
+import com.example.medicare_call.dto.payment.PaymentApprovalResponse;
+import com.example.medicare_call.service.payment.NaverPayService;
 import com.example.medicare_call.global.annotation.AuthUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

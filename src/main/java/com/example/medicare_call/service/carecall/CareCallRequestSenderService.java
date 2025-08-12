@@ -1,7 +1,7 @@
 package com.example.medicare_call.service.carecall;
 
 import com.example.medicare_call.domain.*;
-import com.example.medicare_call.dto.CareCallTestRequest;
+import com.example.medicare_call.dto.carecall.CareCallTestRequest;
 import com.example.medicare_call.global.ResourceNotFoundException;
 import com.example.medicare_call.global.enums.CallType;
 import com.example.medicare_call.global.enums.ElderRelation;

@@ -1,6 +1,6 @@
 package com.example.medicare_call.controller.action;
 
-import com.example.medicare_call.dto.CareCallSettingRequest;
+import com.example.medicare_call.dto.carecall.CareCallSettingRequest;
 import com.example.medicare_call.service.carecall.CareCallSettingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

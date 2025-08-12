@@ -1,6 +1,6 @@
 package com.example.medicare_call.controller.view;
 
-import com.example.medicare_call.dto.DailyMedicationResponse;
+import com.example.medicare_call.dto.report.DailyMedicationResponse;
 import com.example.medicare_call.global.ResourceNotFoundException;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.service.data_processor.MedicationService;

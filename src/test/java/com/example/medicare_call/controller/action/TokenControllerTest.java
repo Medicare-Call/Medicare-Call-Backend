@@ -1,6 +1,6 @@
 package com.example.medicare_call.controller.action;
 
-import com.example.medicare_call.dto.TokenResponse;
+import com.example.medicare_call.dto.auth.TokenResponse;
 import com.example.medicare_call.global.jwt.JwtProvider;
 import com.example.medicare_call.service.auth.RefreshTokenService;
 import com.fasterxml.jackson.databind.ObjectMapper;

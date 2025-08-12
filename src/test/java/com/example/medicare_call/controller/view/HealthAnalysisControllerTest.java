@@ -1,9 +1,9 @@
 package com.example.medicare_call.controller.view;
 
-import com.example.medicare_call.dto.DailyHealthAnalysisResponse;
+import com.example.medicare_call.dto.report.DailyHealthAnalysisResponse;
 import com.example.medicare_call.global.jwt.JwtProvider;
 import com.example.medicare_call.repository.CareCallRecordRepository;
-import com.example.medicare_call.service.HealthAnalysisService;
+import com.example.medicare_call.service.report.HealthAnalysisService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

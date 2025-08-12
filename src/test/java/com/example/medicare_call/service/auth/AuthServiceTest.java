@@ -2,9 +2,9 @@ package com.example.medicare_call.service.auth;
 
 import com.example.medicare_call.domain.Member;
 import com.example.medicare_call.domain.RefreshToken;
-import com.example.medicare_call.dto.MemberRegisterRequest;
-import com.example.medicare_call.dto.SmsVerificationResponse;
-import com.example.medicare_call.dto.TokenResponse;
+import com.example.medicare_call.dto.auth.MemberRegisterRequest;
+import com.example.medicare_call.dto.auth.SmsVerificationResponse;
+import com.example.medicare_call.dto.auth.TokenResponse;
 import com.example.medicare_call.global.enums.Gender;
 import com.example.medicare_call.global.enums.MemberStatus;
 import com.example.medicare_call.global.jwt.JwtProvider;

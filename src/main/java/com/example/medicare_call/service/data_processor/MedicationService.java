@@ -1,8 +1,8 @@
 package com.example.medicare_call.service.data_processor;
 
 import com.example.medicare_call.domain.*;
-import com.example.medicare_call.dto.DailyMedicationResponse;
-import com.example.medicare_call.dto.HealthDataExtractionResponse;
+import com.example.medicare_call.dto.report.DailyMedicationResponse;
+import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
 import com.example.medicare_call.global.ResourceNotFoundException;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.global.enums.MedicationTakenStatus;

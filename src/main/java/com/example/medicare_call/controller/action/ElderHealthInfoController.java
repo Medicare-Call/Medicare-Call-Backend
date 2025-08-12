@@ -1,7 +1,7 @@
 package com.example.medicare_call.controller.action;
 
 import com.example.medicare_call.dto.ElderHealthInfoCreateRequest;
-import com.example.medicare_call.service.ElderHealthInfoService;
+import com.example.medicare_call.service.report.ElderHealthInfoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
