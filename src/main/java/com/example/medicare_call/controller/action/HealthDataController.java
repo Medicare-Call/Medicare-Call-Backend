@@ -316,7 +316,6 @@ public class HealthDataController {
                             .medication(medication)
                             .elder(elder)
                             .scheduleTime("MORNING")
-                            .frequencyType(FrequencyType.DAILY)
                             .build();
                     return medicationScheduleRepository.save(newSchedule);
                 });

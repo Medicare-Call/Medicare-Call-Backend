@@ -29,19 +29,14 @@ public class MedicationSchedule {
     private String scheduleTime;
 
     @Column(name = "notes", length = 500)
-    private String notes;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "frequency_type", nullable = false, columnDefinition = "VARCHAR(20)")
-    private FrequencyType frequencyType;
+    private String notes;;
 
     @Builder
-    public MedicationSchedule(Integer id, Elder elder, Medication medication, String scheduleTime, String notes, FrequencyType frequencyType) {
+    public MedicationSchedule(Integer id, Elder elder, Medication medication, String scheduleTime, String notes) {
         this.id = id;
         this.elder = elder;
         this.medication = medication;
         this.scheduleTime = scheduleTime;
         this.notes = notes;
-        this.frequencyType = frequencyType;
     }
 } 
