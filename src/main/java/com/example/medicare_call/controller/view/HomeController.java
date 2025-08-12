@@ -1,6 +1,6 @@
 package com.example.medicare_call.controller.view;
 
-import com.example.medicare_call.dto.HomeResponse;
+import com.example.medicare_call.dto.HomeReportResponse;
 import com.example.medicare_call.service.report.HomeReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -36,7 +36,7 @@ public class HomeController {
             description = "홈 화면 데이터 조회 성공",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = HomeResponse.class)
+                schema = @Schema(implementation = HomeReportResponse.class)
             )
         ),
         @ApiResponse(
@@ -49,13 +49,13 @@ public class HomeController {
         )
     })
     @GetMapping("/{elderId}/home")
-    public ResponseEntity<HomeResponse> getHomeData(
+    public ResponseEntity<HomeReportResponse> getHomeData(
         @Parameter(description = "조회할 어르신의 식별자", required = true, example = "1")
         @PathVariable("elderId") Integer elderId
     ) {
         log.info("홈 화면 데이터 조회 요청: elderId={}", elderId);
 
-        HomeResponse response = homeReportService.getHomeReport(elderId);
+        HomeReportResponse response = homeReportService.getHomeReport(elderId);
 
         return ResponseEntity.ok(response);
     }

@@ -2,7 +2,7 @@ package com.example.medicare_call.service;
 
 import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.DailyMealResponse;
-import com.example.medicare_call.dto.HomeResponse;
+import com.example.medicare_call.dto.HomeReportResponse;
 import com.example.medicare_call.global.ResourceNotFoundException;
 import com.example.medicare_call.global.enums.Gender;
 import com.example.medicare_call.global.enums.MealType;
@@ -100,7 +100,7 @@ class HomeReportServiceTest {
         when(aiSummaryService.getHomeSummary(any(HomeSummaryDto.class))).thenReturn("AI 요약");
 
         // when
-        HomeResponse response = homeReportService.getHomeReport(elderId);
+        HomeReportResponse response = homeReportService.getHomeReport(elderId);
 
         // then
         assertThat(response).isNotNull();
@@ -160,7 +160,7 @@ class HomeReportServiceTest {
                             .thenReturn(Collections.emptyList());
 
                     // when
-                    HomeResponse response = homeReportService.getHomeReport(elderId);
+                    HomeReportResponse response = homeReportService.getHomeReport(elderId);
 
                     // then
                     assertThat(response.getMealStatus().getBreakfast()).isTrue();
@@ -196,7 +196,7 @@ class HomeReportServiceTest {
                             .thenReturn(Collections.emptyList());
 
                     // when
-                    HomeResponse response = homeReportService.getHomeReport(elderId);
+                    HomeReportResponse response = homeReportService.getHomeReport(elderId);
 
                     // then
                     assertThat(response.getMedicationStatus()).isNotNull();
@@ -204,7 +204,7 @@ class HomeReportServiceTest {
                     assertThat(response.getMedicationStatus().getTotalTaken()).isEqualTo(0);
                     assertThat(response.getMedicationStatus().getMedicationList()).hasSize(1);
                     
-                    HomeResponse.MedicationInfo medicationInfo = response.getMedicationStatus().getMedicationList().get(0);
+                    HomeReportResponse.MedicationInfo medicationInfo = response.getMedicationStatus().getMedicationList().get(0);
                     assertThat(medicationInfo.getType()).isEqualTo("혈압약");
                     assertThat(medicationInfo.getGoal()).isEqualTo(3); // 하루 3회 복용 목표
                     assertThat(medicationInfo.getTaken()).isEqualTo(0);

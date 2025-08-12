@@ -10,7 +10,7 @@ import java.util.List;
 @Getter
 @Builder
 @Schema(description = "홈 화면 데이터 조회 응답")
-public class HomeResponse {
+public class HomeReportResponse {
 
     @Schema(description = "어르신 이름", example = "김옥자")
     private String elderName;

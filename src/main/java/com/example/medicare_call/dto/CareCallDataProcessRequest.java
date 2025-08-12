@@ -1,7 +1,6 @@
 package com.example.medicare_call.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -18,7 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "통화 데이터 요청")
-public class CallDataRequest {
+public class CareCallDataProcessRequest {
     
     @Schema(description = "어르신 ID", example = "1")
     @NotNull(message = "어르신 ID는 필수입니다.")

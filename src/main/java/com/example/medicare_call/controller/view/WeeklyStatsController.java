@@ -1,6 +1,6 @@
 package com.example.medicare_call.controller.view;
 
-import com.example.medicare_call.dto.WeeklyStatsResponse;
+import com.example.medicare_call.dto.WeeklyReportResponse;
 import com.example.medicare_call.service.report.WeeklyReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -39,7 +39,7 @@ public class WeeklyStatsController {
             description = "주간 통계 데이터 조회 성공",
             content = @Content(
                 mediaType = "application/json",
-                schema = @Schema(implementation = WeeklyStatsResponse.class)
+                schema = @Schema(implementation = WeeklyReportResponse.class)
             )
         ),
         @ApiResponse(
@@ -52,7 +52,7 @@ public class WeeklyStatsController {
         )
     })
     @GetMapping("/{elderId}/weekly-stats")
-    public ResponseEntity<WeeklyStatsResponse> getWeeklyStats(
+    public ResponseEntity<WeeklyReportResponse> getWeeklyStats(
         @Parameter(description = "어르신 식별자", required = true, example = "1")
         @PathVariable("elderId") Integer elderId,
 
@@ -61,7 +61,7 @@ public class WeeklyStatsController {
     ) {
         log.info("주간 통계 데이터 조회 요청: elderId={}, startDate={}", elderId, startDate);
 
-        WeeklyStatsResponse response = weeklyReportService.getWeeklyReport(elderId, startDate);
+        WeeklyReportResponse response = weeklyReportService.getWeeklyReport(elderId, startDate);
 
         return ResponseEntity.ok(response);
     }

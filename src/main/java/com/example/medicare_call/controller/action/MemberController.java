@@ -1,6 +1,6 @@
 package com.example.medicare_call.controller.action;
 
-import com.example.medicare_call.dto.RegisterRequest;
+import com.example.medicare_call.dto.MemberRegisterRequest;
 import com.example.medicare_call.dto.TokenResponse;
 import com.example.medicare_call.global.annotation.AuthPhone;
 import com.example.medicare_call.service.auth.AuthService;
@@ -24,7 +24,7 @@ public class MemberController {
 
     @PostMapping("")
     public ResponseEntity<TokenResponse> register(@Parameter(hidden = true) @AuthPhone String phone,
-                                           @Valid @RequestBody RegisterRequest signUpDto) {
+                                           @Valid @RequestBody MemberRegisterRequest signUpDto) {
         TokenResponse tokenResponse = authService.register(phone,signUpDto);
         return ResponseEntity.ok(tokenResponse);
     }

@@ -9,7 +9,7 @@ import java.util.Map;
 @Getter
 @Builder
 @Schema(description = "주간 통계 데이터 조회 응답")
-public class WeeklyStatsResponse {
+public class WeeklyReportResponse {
 
     @Schema(description = "어르신 이름", example = "김옥자")
     private String elderName;

@@ -2,7 +2,7 @@ package com.example.medicare_call.service.auth;
 
 import com.example.medicare_call.domain.Member;
 import com.example.medicare_call.domain.RefreshToken;
-import com.example.medicare_call.dto.RegisterRequest;
+import com.example.medicare_call.dto.MemberRegisterRequest;
 import com.example.medicare_call.dto.SmsVerificationResponse;
 import com.example.medicare_call.dto.TokenResponse;
 import com.example.medicare_call.global.jwt.JwtProvider;
@@ -24,7 +24,7 @@ public class AuthService {
     private final JwtProvider jwtProvider;
     private final RefreshTokenService refreshTokenService;
 
-    public TokenResponse register(String phone, RegisterRequest req) {
+    public TokenResponse register(String phone, MemberRegisterRequest req) {
 
         if (memberRepository.existsByPhone(phone)) {
             throw new IllegalArgumentException("이미 등록된 전화번호입니다.");

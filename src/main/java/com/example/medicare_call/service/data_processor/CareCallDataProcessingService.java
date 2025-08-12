@@ -1,7 +1,7 @@
 package com.example.medicare_call.service.data_processor;
 
 import com.example.medicare_call.domain.*;
-import com.example.medicare_call.dto.CallDataRequest;
+import com.example.medicare_call.dto.CareCallDataProcessRequest;
 import com.example.medicare_call.dto.HealthDataExtractionRequest;
 import com.example.medicare_call.dto.HealthDataExtractionResponse;
 import com.example.medicare_call.global.ResourceNotFoundException;
@@ -30,7 +30,7 @@ public class CareCallDataProcessingService {
     private final HealthDataProcessingService healthDataProcessingService;
 
     @Transactional
-    public CareCallRecord saveCallData(CallDataRequest request) {
+    public CareCallRecord saveCallData(CareCallDataProcessRequest request) {
         log.info("통화 데이터 저장 시작: elderId={}, settingId={}", request.getElderId(), request.getSettingId());
         
         Elder elder = elderRepository.findById(request.getElderId())
