@@ -18,8 +18,8 @@ import com.example.medicare_call.repository.ElderRepository;
 import com.example.medicare_call.repository.MemberRepository;
 import com.example.medicare_call.repository.MedicationRepository;
 import com.example.medicare_call.repository.MedicationScheduleRepository;
-import com.example.medicare_call.service.carecall.CareCallDataProcessingService;
-import com.example.medicare_call.service.OpenAiHealthDataService;
+import com.example.medicare_call.service.data_processor.CareCallDataProcessingService;
+import com.example.medicare_call.service.data_processor.ai.AiHealthDataExtractorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -44,7 +44,7 @@ import java.time.LocalDateTime;
 @Tag(name = "Health Data", description = "건강 데이터 추출 API")
 public class HealthDataController {
     
-    private final OpenAiHealthDataService openAiHealthDataService;
+    private final AiHealthDataExtractorService aiHealthDataExtractorService;
     private final CareCallDataProcessingService careCallDataProcessingService;
     private final ElderRepository elderRepository;
     private final CareCallSettingRepository careCallSettingRepository;
@@ -84,7 +84,7 @@ public class HealthDataController {
         ) HealthDataExtractionRequest request
     ) {
         log.info("건강 데이터 추출 요청: {}", request);
-        HealthDataExtractionResponse response = openAiHealthDataService.extractHealthData(request);
+        HealthDataExtractionResponse response = aiHealthDataExtractorService.extractHealthData(request);
         return ResponseEntity.ok(response);
     }
 
@@ -135,7 +135,7 @@ public class HealthDataController {
                 .callDate(request.getCallDate())
                 .build();
         
-        HealthDataExtractionResponse healthData = openAiHealthDataService.extractHealthData(extractionRequest);
+        HealthDataExtractionResponse healthData = aiHealthDataExtractorService.extractHealthData(extractionRequest);
         
         // 건강 데이터를 DB에 저장
         careCallDataProcessingService.saveHealthDataToDatabase(savedCallRecord, healthData);
@@ -190,7 +190,7 @@ public class HealthDataController {
                 .callDate(request.getCallDate())
                 .build();
         
-        HealthDataExtractionResponse healthData = openAiHealthDataService.extractHealthData(extractionRequest);
+        HealthDataExtractionResponse healthData = aiHealthDataExtractorService.extractHealthData(extractionRequest);
         
         // 건강 데이터를 DB에 저장
         careCallDataProcessingService.saveHealthDataToDatabase(savedCallRecord, healthData);
@@ -245,7 +245,7 @@ public class HealthDataController {
                 .callDate(request.getCallDate())
                 .build();
         
-        HealthDataExtractionResponse healthData = openAiHealthDataService.extractHealthData(extractionRequest);
+        HealthDataExtractionResponse healthData = aiHealthDataExtractorService.extractHealthData(extractionRequest);
         
         // 건강 데이터를 DB에 저장
         careCallDataProcessingService.saveHealthDataToDatabase(savedCallRecord, healthData);

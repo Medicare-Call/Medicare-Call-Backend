@@ -3,7 +3,7 @@ package com.example.medicare_call.controller.view;
 import com.example.medicare_call.dto.DailyMedicationResponse;
 import com.example.medicare_call.global.ResourceNotFoundException;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
-import com.example.medicare_call.service.MedicationService;
+import com.example.medicare_call.service.data_processor.MedicationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,7 +17,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;

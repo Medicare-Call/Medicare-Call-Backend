@@ -2,6 +2,7 @@ package com.example.medicare_call.service;
 
 import com.example.medicare_call.dto.HealthDataExtractionRequest;
 import com.example.medicare_call.dto.HealthDataExtractionResponse;
+import com.example.medicare_call.service.data_processor.ai.AiHealthDataExtractorService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,8 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestTemplate;
 
@@ -21,13 +20,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@Transactional
 class HealthDataExtractionIntegrationTest {
 
     @Autowired
-    private OpenAiHealthDataService openAiHealthDataService;
+    private AiHealthDataExtractorService aiHealthDataExtractorService;
 
     @MockBean
     private RestTemplate restTemplate;
@@ -77,7 +78,7 @@ class HealthDataExtractionIntegrationTest {
                 .thenReturn(createMockOpenAiResponse(mockOpenAiResponse));
 
         // when
-        HealthDataExtractionResponse result = openAiHealthDataService.extractHealthData(request);
+        HealthDataExtractionResponse result = aiHealthDataExtractorService.extractHealthData(request);
 
         // then
         assertThat(result).isNotNull();
@@ -146,7 +147,7 @@ class HealthDataExtractionIntegrationTest {
                 .thenReturn(createMockOpenAiResponse(mockOpenAiResponse));
 
         // when
-        HealthDataExtractionResponse result = openAiHealthDataService.extractHealthData(request);
+        HealthDataExtractionResponse result = aiHealthDataExtractorService.extractHealthData(request);
 
         // then
         assertThat(result).isNotNull();
@@ -197,7 +198,7 @@ class HealthDataExtractionIntegrationTest {
                 .thenReturn(createMockOpenAiResponse(mockOpenAiResponse));
 
         // when
-        HealthDataExtractionResponse result = openAiHealthDataService.extractHealthData(request);
+        HealthDataExtractionResponse result = aiHealthDataExtractorService.extractHealthData(request);
 
         // then
         assertThat(result).isNotNull();

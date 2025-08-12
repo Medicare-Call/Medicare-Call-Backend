@@ -2,10 +2,9 @@ package com.example.medicare_call.service;
 
 import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.WeeklyStatsResponse;
-import com.example.medicare_call.global.enums.BloodSugarMeasurementType;
-import com.example.medicare_call.global.enums.BloodSugarStatus;
 import com.example.medicare_call.global.enums.MealType;
 import com.example.medicare_call.repository.*;
+import com.example.medicare_call.service.data_processor.ai.AiSummaryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,7 +13,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -22,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -48,7 +47,7 @@ class WeeklyStatsServiceTest {
     private BloodSugarRecordRepository bloodSugarRecordRepository;
 
     @Mock
-    private OpenAiWeeklyStatsSummaryService openAiWeeklyStatsSummaryService;
+    private AiSummaryService aiSummaryService;
 
     @InjectMocks
     private WeeklyStatsService weeklyStatsService;
@@ -84,8 +83,8 @@ class WeeklyStatsServiceTest {
     }
 
     @Test
-    @DisplayName("주간 통계 데이터 조회 성공")
-    void getWeeklyStats_성공() {
+    @DisplayName("주간 통계 조회 성공")
+    void getWeeklyStats_success() {
         // given
         Integer elderId = 1;
         LocalDate startDate = LocalDate.of(2025, 7, 15);
@@ -129,8 +128,7 @@ class WeeklyStatsServiceTest {
         when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), eq(startDate), eq(endLocalDate)))
                 .thenReturn(Collections.emptyList());
 
-        when(openAiWeeklyStatsSummaryService.getWeeklyStatsSummary(any(com.example.medicare_call.dto.WeeklySummaryDto.class)))
-                .thenReturn("AI 요약 테스트");
+        when(aiSummaryService.getWeeklyStatsSummary(any(com.example.medicare_call.dto.WeeklySummaryDto.class))).thenReturn("주간 AI 요약");
 
         // when
         WeeklyStatsResponse response = weeklyStatsService.getWeeklyStats(elderId, startDate);
@@ -156,7 +154,7 @@ class WeeklyStatsServiceTest {
         assertThat(response.getBloodSugar().getAfterMeal().getNormal()).isEqualTo(0);
         assertThat(response.getBloodSugar().getAfterMeal().getHigh()).isEqualTo(0);
         assertThat(response.getBloodSugar().getAfterMeal().getLow()).isEqualTo(0);
-        assertThat(response.getHealthSummary()).isEqualTo("AI 요약 테스트");
+        assertEquals("주간 AI 요약", response.getHealthSummary());
     }
 
     private MealRecord createMealRecord(Integer id, MealType mealType) {

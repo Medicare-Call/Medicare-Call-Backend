@@ -8,14 +8,12 @@ import com.example.medicare_call.global.enums.BloodSugarStatus;
 import com.example.medicare_call.global.enums.MealType;
 import com.example.medicare_call.repository.*;
 import com.example.medicare_call.global.ResourceNotFoundException;
+import com.example.medicare_call.service.data_processor.ai.AiSummaryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
@@ -33,7 +31,7 @@ public class WeeklyStatsService {
     private final MedicationTakenRecordRepository medicationTakenRecordRepository;
     private final CareCallRecordRepository careCallRecordRepository;
     private final BloodSugarRecordRepository bloodSugarRecordRepository;
-    private final OpenAiWeeklyStatsSummaryService openAiWeeklyStatsSummaryService;
+    private final AiSummaryService aiSummaryService;
 
     public WeeklyStatsResponse getWeeklyStats(Integer elderId, LocalDate startDate) {
         LocalDate endDate = startDate.plusDays(6); // 7일간 조회
@@ -63,7 +61,7 @@ public class WeeklyStatsService {
 
         // 7. AI 요약 생성
         WeeklySummaryDto weeklySummaryDto = createWeeklySummaryDto(mealStats, medicationStats, averageSleep, psychSummary, bloodSugar, summaryStats);
-        String healthSummary = openAiWeeklyStatsSummaryService.getWeeklyStatsSummary(weeklySummaryDto);
+        String healthSummary = aiSummaryService.getWeeklyStatsSummary(weeklySummaryDto);
 
 
         return WeeklyStatsResponse.builder()

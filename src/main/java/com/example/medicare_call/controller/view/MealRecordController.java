@@ -1,7 +1,7 @@
 package com.example.medicare_call.controller.view;
 
 import com.example.medicare_call.dto.DailyMealResponse;
-import com.example.medicare_call.service.MealRecordService;
+import com.example.medicare_call.service.MentalAnalysisService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -28,7 +28,7 @@ import java.time.LocalDate;
 @Tag(name = "Meal Record", description = "식사 기록 조회 API")
 public class MealRecordController {
     
-    private final MealRecordService mealRecordService;
+    private final MentalAnalysisService.MealRecordService mealRecordService;
     
     @Operation(
         summary = "날짜별 식사 데이터 조회",

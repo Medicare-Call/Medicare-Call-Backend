@@ -1,4 +1,4 @@
-package com.example.medicare_call.service.carecall;
+package com.example.medicare_call.service.data_processor;
 
 import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.CallDataRequest;
@@ -6,10 +6,7 @@ import com.example.medicare_call.dto.HealthDataExtractionRequest;
 import com.example.medicare_call.dto.HealthDataExtractionResponse;
 import com.example.medicare_call.global.ResourceNotFoundException;
 import com.example.medicare_call.repository.*;
-import com.example.medicare_call.service.BloodSugarService;
-import com.example.medicare_call.service.HealthDataService;
-import com.example.medicare_call.service.MedicationService;
-import com.example.medicare_call.service.OpenAiHealthDataService;
+import com.example.medicare_call.service.data_processor.ai.AiHealthDataExtractorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,10 +24,10 @@ public class CareCallDataProcessingService {
     private final CareCallRecordRepository careCallRecordRepository;
     private final ElderRepository elderRepository;
     private final CareCallSettingRepository careCallSettingRepository;
-    private final OpenAiHealthDataService openAiHealthDataService;
+    private final AiHealthDataExtractorService aiHealthDataExtractorService;
     private final BloodSugarService bloodSugarService;
     private final MedicationService medicationService;
-    private final HealthDataService healthDataService;
+    private final HealthDataProcessingService healthDataProcessingService;
 
     @Transactional
     public CareCallRecord saveCallData(CallDataRequest request) {
@@ -87,7 +84,7 @@ public class CareCallDataProcessingService {
                 .callDate(callDate)
                 .build();
         
-        HealthDataExtractionResponse healthData = openAiHealthDataService.extractHealthData(request);
+        HealthDataExtractionResponse healthData = aiHealthDataExtractorService.extractHealthData(request);
         saveHealthDataToDatabase(callRecord, healthData);
 
         log.info("추출된 건강 데이터: {}", healthData);
@@ -103,7 +100,7 @@ public class CareCallDataProcessingService {
             if (healthData.getMedicationData() != null) {
                 medicationService.saveMedicationTakenRecord(callRecord, healthData.getMedicationData());
             }
-            healthDataService.updateCareCallRecordWithHealthData(callRecord, healthData);
+            healthDataProcessingService.updateCareCallRecordWithHealthData(callRecord, healthData);
         }
         
         log.info("건강 데이터 DB 저장 완료: callId={}", callRecord.getId());
