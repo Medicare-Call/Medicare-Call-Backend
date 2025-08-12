@@ -3,7 +3,7 @@ package com.example.medicare_call.controller.action;
 import com.example.medicare_call.dto.RegisterRequest;
 import com.example.medicare_call.dto.TokenResponse;
 import com.example.medicare_call.global.annotation.AuthPhone;
-import com.example.medicare_call.service.AuthService;
+import com.example.medicare_call.service.auth.AuthService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

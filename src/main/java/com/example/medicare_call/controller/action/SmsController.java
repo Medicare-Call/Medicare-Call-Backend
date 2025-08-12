@@ -3,9 +3,8 @@ package com.example.medicare_call.controller.action;
 import com.example.medicare_call.dto.SmsRequest;
 import com.example.medicare_call.dto.SmsVerificationResponse;
 import com.example.medicare_call.dto.SmsVerifyDto;
-import com.example.medicare_call.service.AuthService;
-import com.example.medicare_call.service.MemberService;
-import com.example.medicare_call.service.SmsService;
+import com.example.medicare_call.service.auth.AuthService;
+import com.example.medicare_call.service.auth.SmsVerificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -26,7 +25,7 @@ import java.util.Map;
 @RequestMapping("/verifications")
 public class SmsController {
 
-    private final SmsService smsService;
+    private final SmsVerificationService smsVerificationService;
     private final AuthService authService;
 
     // 인증번호 발송
@@ -37,7 +36,7 @@ public class SmsController {
 
         try {
 
-            smsService.sendCertificationNumber(request.getPhone());
+            smsVerificationService.sendCertificationNumber(request.getPhone());
             response.put("message", "인증번호가 발송되었습니다.");
             return ResponseEntity.ok(response);
 
@@ -51,7 +50,7 @@ public class SmsController {
     @Operation(summary = "SMS 인증 및 회원 상태 확인", description = "인증번호 검증 후 회원 상태에 따른 다음 단계를 안내합니다.")
     public ResponseEntity<SmsVerificationResponse> verifySms(@Valid @RequestBody SmsVerifyDto request) {
 
-        boolean isVerified = smsService.verifyCertificationNumber(request.getPhone(), request.getCertificationCode());
+        boolean isVerified = smsVerificationService.verifyCertificationNumber(request.getPhone(), request.getCertificationCode());
 
         if (isVerified) {
             SmsVerificationResponse res = authService.handlePhoneVerification(request.getPhone());

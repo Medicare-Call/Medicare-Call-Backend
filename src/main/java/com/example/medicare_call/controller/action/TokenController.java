@@ -2,7 +2,7 @@ package com.example.medicare_call.controller.action;
 
 import com.example.medicare_call.dto.TokenResponse;
 import com.example.medicare_call.global.jwt.JwtProvider;
-import com.example.medicare_call.service.RefreshTokenService;
+import com.example.medicare_call.service.auth.RefreshTokenService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
