@@ -28,7 +28,7 @@ import java.util.Map;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CareCallService {
+public class CareCallRequestSenderService {
 
     private final MemberRepository memberRepository;
     @Value("${care-call.url}")

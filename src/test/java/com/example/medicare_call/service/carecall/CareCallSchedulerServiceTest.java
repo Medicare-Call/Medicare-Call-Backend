@@ -22,7 +22,7 @@ public class CareCallSchedulerServiceTest {
     private CareCallSettingRepository careCallSettingRepository;
 
     @Mock
-    private CareCallService callService;
+    private CareCallRequestSenderService callService;
 
     @InjectMocks
     private CareCallSchedulerService schedulerService;
