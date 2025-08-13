@@ -22,7 +22,7 @@ import java.util.List;
 public class ElderHealthInfoController {
     private final ElderHealthInfoService elderHealthInfoService;
 
-    @Operation(summary = "어르신 건강정보 등록", description = "질환, 복약주기, 특이사항을 등록합니다.")
+    @Operation(summary = "어르신 건강정보 등록 및 수정", description = "질환, 복약주기, 특이사항을 등록 및 수정합니다.")
     @PostMapping("/{elderId}/health-info")
     public ResponseEntity<Void> registerElderHealthInfo(@PathVariable Integer elderId, @Valid @RequestBody ElderHealthInfoCreateRequest request) {
         elderHealthInfoService.registerElderHealthInfo(elderId, request);
