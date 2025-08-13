@@ -2,9 +2,8 @@ package com.example.medicare_call.service.report;
 
 import com.example.medicare_call.dto.ElderHealthInfoCreateRequest;
 import com.example.medicare_call.domain.*;
-import com.example.medicare_call.dto.ElderHealthResponse;
+import com.example.medicare_call.dto.ElderHealthInfoResponse;
 import com.example.medicare_call.global.ResourceNotFoundException;
-import com.example.medicare_call.global.enums.FrequencyType;
 import com.example.medicare_call.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -71,12 +70,12 @@ public class ElderHealthInfoService {
        elderHealthInfoRepository.save(healthInfo);
     }
 
-    public List<ElderHealthResponse> getElderHealth(Integer memberId){
+    public List<ElderHealthInfoResponse> getElderHealth(Integer memberId){
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new ResourceNotFoundException("멤버를 찾을 수 없습니다. memberId + " +memberId));
+                .orElseThrow(() -> new ResourceNotFoundException("보호자를 찾을 수 없습니다. memberId + " +memberId));
         List<Elder> elders = elderRepository.findByGuardian(member);
 
-        List<ElderHealthResponse> responses = new ArrayList<>();
+        List<ElderHealthInfoResponse> responses = new ArrayList<>();
 
         for(Elder elder : elders){
 
@@ -89,9 +88,9 @@ public class ElderHealthInfoService {
             Map<String, List<String>> medications = getMedicationsInfo(elder);
 
             // 특이사항 정보 추출
-            List<String> specialNotes = new ArrayList<>();
+            List<String> notes = new ArrayList<>();
             if (elder.getElderHealthInfo() != null && elder.getElderHealthInfo().getNotes() != null) {
-                specialNotes = Arrays.stream(elder.getElderHealthInfo().getNotes().split("\\n"))
+                notes = Arrays.stream(elder.getElderHealthInfo().getNotes().split(","))
                         .map(String::trim)
                         .filter(note -> !note.isBlank())
                         .collect(Collectors.toList());
@@ -99,12 +98,12 @@ public class ElderHealthInfoService {
 
 
             // 모든 정보를 ElderHealthResponse 객체로 조합
-            ElderHealthResponse response = new ElderHealthResponse(
+            ElderHealthInfoResponse response = new ElderHealthInfoResponse(
                     elder.getId(),
                     elder.getName(),
                     diseases,
                     medications,
-                    specialNotes
+                    notes
             );
 
             responses.add(response);
@@ -118,19 +117,20 @@ public class ElderHealthInfoService {
     public Map<String, List<String>> getMedicationsInfo(Elder elder) {
         Map<String, List<String>> medications = new HashMap<>();
 
-        // MedicationSchedule 값을 순회하며 Map 초기화
-        for (MedicationSchedule time : elder.getMedicationSchedules()) {
-            medications.put(time.getScheduleTime(), new ArrayList<>());
-        }
-
-        // Elder 엔티티의 medicationSchedules 리스트를 순회
         for (MedicationSchedule schedule : elder.getMedicationSchedules()) {
-            String frequency = schedule.getScheduleTime();
-            String medicationName = schedule.getMedication().getName();
+            String scheduleTime = schedule.getScheduleTime();
+            Medication medication = schedule.getMedication();
 
-            // 맵에 약 이름 추가
-            if (medications.containsKey(frequency)) {
-                medications.get(frequency).add(medicationName);
+            if (medication == null) {
+                continue; // 약 정보가 없는 경우 스킵
+            }
+
+            String medicationName = medication.getName();
+
+            String[] times = scheduleTime.split(",");
+            for (String time : times) {
+                String trimmedTime = time.trim();
+                medications.computeIfAbsent(trimmedTime, k -> new ArrayList<>()).add(medicationName);
             }
         }
         return medications;

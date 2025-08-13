@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface ElderRepository extends JpaRepository<Elder, Integer> {
-    List<Elder> findByGuardian(Member guardian);
+    List<Elder> findByGuardian(Member member);
 
 } 

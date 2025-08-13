@@ -1,13 +1,12 @@
 package com.example.medicare_call.dto;
 
-import com.example.medicare_call.domain.Disease;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
 import java.util.Map;
 
 @Schema(description = "어르신 건강 정보 응답 DTO")
-public record ElderHealthResponse(
+public record ElderHealthInfoResponse(
         @Schema(description = "어르신 고유 ID", example = "1")
         Integer elderId,
 
@@ -22,6 +21,6 @@ public record ElderHealthResponse(
         Map<String, List<String>> medications,
 
         @Schema(description = "특이사항 목록", example = "[\"INSOMNIA\", \"WALKING_DIFFICULTY\"]")
-        List<String> specialNotes
+        List<String> notes
 ) {
 }
