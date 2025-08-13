@@ -12,4 +12,6 @@ public interface ElderDiseaseRepository extends JpaRepository<ElderDisease, Obje
 
     @Query("SELECT ed.disease FROM ElderDisease ed WHERE ed.elder = :elder")
     List<Disease> findDiseasesByElder(Elder elder);
+
+    void deleteAllByElder(Elder elder);
 }

@@ -26,50 +26,72 @@ public class ElderHealthInfoService {
     @Transactional
     public void registerElderHealthInfo(Integer elderId, ElderHealthInfoCreateRequest request) {
         // TODO : 이쪽 Exception에 대한 Monitoring 추가 필요. 데이터의 무결성이 깨졌을 확률이 높다
-       Elder elder = elderRepository.findById(elderId)
-               .orElseThrow(() -> new ResourceNotFoundException("어르신을 찾을 수 없습니다. elderId: " + elderId));
+        Elder elder = elderRepository.findById(elderId)
+                .orElseThrow(() -> new ResourceNotFoundException("어르신을 찾을 수 없습니다. elderId: " + elderId));
 
-       // 질환 등록
-       for (String diseaseName : request.getDiseaseNames()) {
-           // 기획 변경: 사용자의 입력을 그대로 받는 방식으로 (데이터의 중복만 최소화하자)
-           Disease disease = diseaseRepository.findByName(diseaseName)
-                   .orElseGet(() -> diseaseRepository.save(Disease.builder().name(diseaseName).build()));
+        // 질환 등록
+        if (request.getDiseaseNames() != null && !request.getDiseaseNames().isEmpty()) {
+            elderDiseaseRepository.deleteAllByElder(elder);
+            for (String diseaseName : request.getDiseaseNames()) {
+                // 기획 변경: 사용자의 입력을 그대로 받는 방식으로 (데이터의 중복만 최소화하자)
+                Disease disease = diseaseRepository.findByName(diseaseName)
+                        .orElseGet(() -> diseaseRepository.save(Disease.builder().name(diseaseName).build()));
 
-           ElderDisease elderDisease = ElderDisease.builder()
-                   .elder(elder)
-                   .disease(disease)
-                   .build();
-           elderDiseaseRepository.save(elderDisease);
-       }
+                ElderDisease elderDisease = ElderDisease.builder()
+                        .elder(elder)
+                        .disease(disease)
+                        .build();
+                elderDiseaseRepository.save(elderDisease);
+            }
+        }
 
-       // 복약 주기 등록
-       for (ElderHealthInfoCreateRequest.MedicationScheduleRequest msReq : request.getMedicationSchedules()) {
-           // 기획 변경: 사용자의 입력을 그대로 받는 방식으로 (데이터의 중복만 최소화하자)
-           Medication medication = medicationRepository.findByName(msReq.getMedicationName())
-                   .orElseGet(() -> medicationRepository.save(Medication.builder().name(msReq.getMedicationName()).build()));
+        // 복약 주기 등록
+        if (request.getMedicationSchedules() != null && !request.getMedicationSchedules().isEmpty()) {
+            medicationScheduleRepository.deleteAllByElder(elder);
+            for (ElderHealthInfoCreateRequest.MedicationScheduleRequest msReq : request.getMedicationSchedules()) {
+                // 기획 변경: 사용자의 입력을 그대로 받는 방식으로 (데이터의 중복만 최소화하자)
+                Medication medication = medicationRepository.findByName(msReq.getMedicationName())
+                        .orElseGet(() -> medicationRepository.save(Medication.builder().name(msReq.getMedicationName()).build()));
 
-           String scheduleTime = msReq.getScheduleTimes().stream()
-                   .map(Enum::name)
-                   .collect(Collectors.joining(","));
+                String scheduleTime = msReq.getScheduleTimes().stream()
+                        .map(Enum::name)
+                        .collect(Collectors.joining(","));
 
-           MedicationSchedule schedule = MedicationSchedule.builder()
-                   .elder(elder)
-                   .medication(medication)
-                   .scheduleTime(scheduleTime)
-                   .build();
-           medicationScheduleRepository.save(schedule);
-       }
+                MedicationSchedule schedule = MedicationSchedule.builder()
+                        .elder(elder)
+                        .medication(medication)
+                        .scheduleTime(scheduleTime)
+                        .build();
+                medicationScheduleRepository.save(schedule);
+            }
+        }
 
-       // 특이사항 등록 (notes는 Enum 여러 개를 콤마로 join해서 저장)
-       String notes = request.getNotes() != null ?
-               request.getNotes().stream().map(Enum::name).collect(Collectors.joining(",")) : null;
-       ElderHealthInfo healthInfo = ElderHealthInfo.builder()
-               .elder(elder)
-               .notes(notes)
-               .build();
-       elderHealthInfoRepository.save(healthInfo);
+        // 특이사항 등록 (notes는 Enum 여러 개를 콤마로 join해서 저장)
+        String notes = request.getNotes() != null && !request.getNotes().isEmpty() ?
+                request.getNotes().stream().map(Enum::name).collect(Collectors.joining(",")) : null;
+
+        if (notes != null) {
+            elderHealthInfoRepository.findByElder(elder)
+                    .ifPresentOrElse(
+                            existingHealthInfo -> {
+                                // 기존 데이터가 있으면 업데이트
+                                existingHealthInfo.setNotes(notes);
+                                elderHealthInfoRepository.save(existingHealthInfo);
+                            },
+                            () -> {
+                                // 기존 데이터가 없으면 새로 생성
+                                ElderHealthInfo healthInfo = ElderHealthInfo.builder()
+                                        .elder(elder)
+                                        .notes(notes)
+                                        .build();
+                                elderHealthInfoRepository.save(healthInfo);
+                            }
+                    );
+        } else {
+            // 요청에 특이사항이 없으면 기존 데이터 삭제
+            elderHealthInfoRepository.deleteAllByElder(elder);
+        }
     }
-
     public List<ElderHealthInfoResponse> getElderHealth(Integer memberId){
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new ResourceNotFoundException("보호자를 찾을 수 없습니다. memberId + " +memberId));
