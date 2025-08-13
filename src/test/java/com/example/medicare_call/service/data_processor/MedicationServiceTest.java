@@ -1,7 +1,7 @@
 package com.example.medicare_call.service.data_processor;
 
 import com.example.medicare_call.domain.*;
-import com.example.medicare_call.dto.HealthDataExtractionResponse;
+import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
 import com.example.medicare_call.repository.MedicationRepository;
 import com.example.medicare_call.repository.MedicationScheduleRepository;
 import com.example.medicare_call.repository.MedicationTakenRecordRepository;
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.example.medicare_call.dto.DailyMedicationResponse;
+import com.example.medicare_call.dto.report.DailyMedicationResponse;
 import com.example.medicare_call.global.ResourceNotFoundException;
 import com.example.medicare_call.global.enums.MedicationTakenStatus;
 import com.example.medicare_call.repository.ElderRepository;

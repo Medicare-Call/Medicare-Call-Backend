@@ -1,7 +1,7 @@
 package com.example.medicare_call.controller.action;
 
-import com.example.medicare_call.dto.MemberRegisterRequest;
-import com.example.medicare_call.dto.TokenResponse;
+import com.example.medicare_call.dto.auth.MemberRegisterRequest;
+import com.example.medicare_call.dto.auth.TokenResponse;
 import com.example.medicare_call.global.annotation.AuthPhone;
 import com.example.medicare_call.service.auth.AuthService;
 import io.swagger.v3.oas.annotations.Parameter;

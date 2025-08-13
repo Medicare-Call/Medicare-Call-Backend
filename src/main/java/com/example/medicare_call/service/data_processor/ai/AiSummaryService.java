@@ -1,10 +1,10 @@
 package com.example.medicare_call.service.data_processor.ai;
 
-import com.example.medicare_call.dto.HomeSummaryDto;
-import com.example.medicare_call.dto.OpenAiRequest;
-import com.example.medicare_call.dto.OpenAiResponse;
-import com.example.medicare_call.dto.WeeklyReportResponse;
-import com.example.medicare_call.dto.WeeklySummaryDto;
+import com.example.medicare_call.dto.report.HomeSummaryDto;
+import com.example.medicare_call.dto.data_processor.ai.OpenAiRequest;
+import com.example.medicare_call.dto.data_processor.ai.OpenAiResponse;
+import com.example.medicare_call.dto.report.WeeklyReportResponse;
+import com.example.medicare_call.dto.report.WeeklySummaryDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

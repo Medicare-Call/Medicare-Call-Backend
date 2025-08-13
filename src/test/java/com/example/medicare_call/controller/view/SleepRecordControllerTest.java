@@ -1,8 +1,8 @@
 package com.example.medicare_call.controller.view;
 
-import com.example.medicare_call.dto.DailySleepResponse;
+import com.example.medicare_call.dto.report.DailySleepResponse;
 import com.example.medicare_call.global.jwt.JwtProvider;
-import com.example.medicare_call.service.SleepRecordService;
+import com.example.medicare_call.service.report.SleepRecordService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

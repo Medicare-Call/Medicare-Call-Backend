@@ -6,6 +6,7 @@ import com.example.medicare_call.global.ResourceNotFoundException;
 import com.example.medicare_call.global.enums.ElderHealthNoteType;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.repository.*;
+import com.example.medicare_call.service.report.ElderHealthInfoService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -26,7 +27,8 @@ class ElderHealthInfoServiceTest {
     @Mock DiseaseRepository diseaseRepository;
     @Mock MedicationRepository medicationRepository;
     @Mock MedicationScheduleRepository medicationScheduleRepository;
-    @InjectMocks ElderHealthInfoService elderHealthInfoService;
+    @InjectMocks
+    ElderHealthInfoService elderHealthInfoService;
 
     @BeforeEach
     void setUp() { MockitoAnnotations.openMocks(this); }

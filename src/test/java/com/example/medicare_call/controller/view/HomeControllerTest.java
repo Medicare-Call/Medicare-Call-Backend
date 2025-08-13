@@ -1,6 +1,6 @@
 package com.example.medicare_call.controller.view;
 
-import com.example.medicare_call.dto.HomeReportResponse;
+import com.example.medicare_call.dto.report.HomeReportResponse;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.global.jwt.JwtProvider;
 import com.example.medicare_call.service.report.HomeReportService;

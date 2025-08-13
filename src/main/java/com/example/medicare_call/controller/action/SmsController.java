@@ -1,8 +1,8 @@
 package com.example.medicare_call.controller.action;
 
-import com.example.medicare_call.dto.SmsSendRequest;
-import com.example.medicare_call.dto.SmsVerificationResponse;
-import com.example.medicare_call.dto.SmsVerificationRequest;
+import com.example.medicare_call.dto.auth.SmsSendRequest;
+import com.example.medicare_call.dto.auth.SmsVerificationResponse;
+import com.example.medicare_call.dto.auth.SmsVerificationRequest;
 import com.example.medicare_call.service.auth.AuthService;
 import com.example.medicare_call.service.auth.SmsVerificationService;
 import io.swagger.v3.oas.annotations.Operation;

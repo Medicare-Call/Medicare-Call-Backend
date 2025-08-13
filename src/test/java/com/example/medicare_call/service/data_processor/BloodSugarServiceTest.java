@@ -2,7 +2,7 @@ package com.example.medicare_call.service.data_processor;
 
 import com.example.medicare_call.domain.BloodSugarRecord;
 import com.example.medicare_call.domain.CareCallRecord;
-import com.example.medicare_call.dto.HealthDataExtractionResponse;
+import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
 import com.example.medicare_call.global.enums.BloodSugarMeasurementType;
 import com.example.medicare_call.global.enums.BloodSugarStatus;
 import com.example.medicare_call.repository.BloodSugarRecordRepository;

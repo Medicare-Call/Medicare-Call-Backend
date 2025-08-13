@@ -3,7 +3,7 @@ package com.example.medicare_call.controller.action;
 import com.example.medicare_call.domain.CareCallRecord;
 import com.example.medicare_call.domain.CareCallSetting;
 import com.example.medicare_call.domain.Elder;
-import com.example.medicare_call.dto.CareCallDataProcessRequest;
+import com.example.medicare_call.dto.data_processor.CareCallDataProcessRequest;
 import com.example.medicare_call.global.jwt.JwtProvider;
 import com.example.medicare_call.repository.CareCallRecordRepository;
 import com.example.medicare_call.repository.CareCallSettingRepository;
