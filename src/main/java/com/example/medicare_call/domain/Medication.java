@@ -6,6 +6,9 @@ import lombok.Builder;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "Medication")
 @Getter
@@ -18,6 +21,9 @@ public class Medication {
 
     @Column(name = "name", nullable = false, length = 200)
     private String name;
+
+    @OneToMany(mappedBy = "medication")
+    private final List<MedicationSchedule> medicationSchedules = new ArrayList<>();
 
     @Builder
     public Medication(Integer id, String name) {

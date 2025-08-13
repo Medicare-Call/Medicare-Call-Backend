@@ -14,7 +14,6 @@ public record CareCallSettingRequest(
                 format = "partial-time"
         )
         @JsonFormat(pattern = "HH:mm")
-//        Integer elderId,
         @NotNull(message = "첫 번째 통화 시간은 필수입니다.")
         LocalTime firstCallTime,
 
