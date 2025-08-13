@@ -2,10 +2,6 @@ package com.example.medicare_call.controller.action;
 
 import com.example.medicare_call.dto.ElderHealthResponse;
 import com.example.medicare_call.global.annotation.AuthUser;
-import com.example.medicare_call.dto.CareCallSettingRequest;
-import com.example.medicare_call.dto.ElderHealthRegisterRequest;
-import com.example.medicare_call.dto.ElderHealthResponse;
-import com.example.medicare_call.global.annotation.AuthUser;
 import com.example.medicare_call.dto.ElderHealthInfoCreateRequest;
 import com.example.medicare_call.service.report.ElderHealthInfoService;
 import io.swagger.v3.oas.annotations.Operation;
