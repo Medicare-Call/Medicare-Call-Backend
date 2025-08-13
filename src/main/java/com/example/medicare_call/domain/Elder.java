@@ -56,10 +56,10 @@ public class Elder {
     @OneToOne(mappedBy = "elder", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private CareCallSetting careCallSetting;
 
-    @OneToMany(mappedBy = "elder")
+    @OneToMany(mappedBy = "elder", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private final List<MedicationSchedule> medicationSchedules = new ArrayList<>();
 
-    @OneToMany(mappedBy = "elder")
+    @OneToMany(mappedBy = "elder", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private final List<ElderDisease> elderDiseases = new ArrayList<>();
 
     @OneToOne(mappedBy = "elder", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
