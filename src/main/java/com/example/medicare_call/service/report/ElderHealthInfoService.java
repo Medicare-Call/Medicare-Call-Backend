@@ -24,7 +24,7 @@ public class ElderHealthInfoService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public void registerElderHealthInfo(Integer elderId, ElderHealthInfoCreateRequest request) {
+    public void upsertElderHealthInfo(Integer elderId, ElderHealthInfoCreateRequest request) {
         // TODO : 이쪽 Exception에 대한 Monitoring 추가 필요. 데이터의 무결성이 깨졌을 확률이 높다
         Elder elder = elderRepository.findById(elderId)
                 .orElseThrow(() -> new ResourceNotFoundException("어르신을 찾을 수 없습니다. elderId: " + elderId));
