@@ -77,4 +77,17 @@ class SubscriptionControllerTest {
                 .andExpect(jsonPath("$[0].nextBillingDate").value("2025-07-10"))
                 .andExpect(jsonPath("$[0].startDate").value("2025-05-10"));
     }
+
+    @Test
+    @DisplayName("GET /elders/subscriptions - 회원의 구독 정보 조회 성공 (구독 정보 없음)")
+    void getSubscriptions_Success_Empty() throws Exception {
+        // given
+        given(subscriptionService.getSubscriptionsByMember(anyLong())).willReturn(Collections.emptyList());
+
+        // when & then
+        mockMvc.perform(get("/elders/subscriptions"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$").isEmpty());
+    }
 }

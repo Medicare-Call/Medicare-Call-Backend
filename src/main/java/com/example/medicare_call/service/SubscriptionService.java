@@ -24,14 +24,8 @@ public class SubscriptionService {
             throw new ResourceNotFoundException("해당 ID의 회원을 찾을 수 없습니다: " + memberId);
         }
 
-        List<SubscriptionResponse> subscriptions = subscriptionRepository.findByMemberId(memberId.intValue()).stream()
+        return subscriptionRepository.findByMemberId(memberId.intValue()).stream()
                 .map(SubscriptionResponse::from)
                 .collect(Collectors.toList());
-
-        if (subscriptions.isEmpty()) {
-            throw new ResourceNotFoundException("해당 회원의 구독 정보를 찾을 수 없습니다.");
-        }
-
-        return subscriptions;
     }
 }

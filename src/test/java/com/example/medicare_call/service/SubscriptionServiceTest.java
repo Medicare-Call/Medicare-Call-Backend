@@ -82,16 +82,18 @@ class SubscriptionServiceTest {
     }
 
     @Test
-    @DisplayName("구독 정보 조회 실패 - 구독 정보 없음")
-    void getSubscriptions_Fail_NoSubscriptions() {
+    @DisplayName("구독 정보 조회 성공 - 구독 정보 없음")
+    void getSubscriptions_Success_NoSubscriptions() {
         // given
         Long memberId = 1L;
         given(memberRepository.existsById(memberId.intValue())).willReturn(true);
         given(subscriptionRepository.findByMemberId(memberId.intValue())).willReturn(Collections.emptyList());
 
-        // when & then
-        assertThatThrownBy(() -> subscriptionService.getSubscriptionsByMember(memberId))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("해당 회원의 구독 정보를 찾을 수 없습니다.");
+        // when
+        List<SubscriptionResponse> responses = subscriptionService.getSubscriptionsByMember(memberId);
+
+        // then
+        assertThat(responses).isNotNull();
+        assertThat(responses).isEmpty();
     }
 }
