@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Builder;
 
 import jakarta.persistence.*;
+import lombok.Setter;
 
 @Entity
 @Table(name = "ElderHealthInfo")
@@ -20,6 +21,7 @@ public class ElderHealthInfo {
     @JoinColumn(name = "elder_id", nullable = false, unique = true)
     private Elder elder;
 
+    @Setter
     @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
 

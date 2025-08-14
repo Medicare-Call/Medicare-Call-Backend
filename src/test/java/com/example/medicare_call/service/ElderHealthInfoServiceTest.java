@@ -55,7 +55,7 @@ class ElderHealthInfoServiceTest {
                 .notes(List.of(ElderHealthNoteType.INSOMNIA))
                 .build();
 
-        elderHealthInfoService.registerElderHealthInfo(1, request);
+        elderHealthInfoService.upsertElderHealthInfo(1, request);
 
         verify(elderDiseaseRepository, times(1)).save(any(ElderDisease.class));
         verify(medicationScheduleRepository, times(1)).save(any(MedicationSchedule.class));
@@ -74,7 +74,7 @@ class ElderHealthInfoServiceTest {
         when(elderRepository.findById(999)).thenReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> elderHealthInfoService.registerElderHealthInfo(999, request))
+        assertThatThrownBy(() -> elderHealthInfoService.upsertElderHealthInfo(999, request))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("어르신을 찾을 수 없습니다. elderId: 999");
     }
