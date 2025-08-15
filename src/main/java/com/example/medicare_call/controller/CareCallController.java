@@ -29,10 +29,10 @@ public class CareCallController {
     private final CareCallDataProcessingService careCallDataProcessingService;
     private final CareCallRequestSenderService careCallRequestSenderService;
 
-    @Operation(summary = "어르신 전화 시간대 등록", description = "3번의 케어콜 시간대를 저장합니다.")
+    @Operation(summary = "어르신 전화 시간대 등록 및 수정", description = "3번의 케어콜 시간대를 저장 및 수정합니다.")
     @PostMapping("/elders/{elderId}/care-call-setting")
-    public ResponseEntity<Void> createCareCallSetting(@Parameter(hidden = true) @AuthUser Long memberId, @PathVariable Integer elderId, @Valid @RequestBody CareCallSettingRequest request) {
-        careCallSettingService.createCareCallSetting(memberId.intValue(), elderId, request);
+    public ResponseEntity<Void> upsertCareCallSetting(@Parameter(hidden = true) @AuthUser Long memberId, @PathVariable Integer elderId, @Valid @RequestBody CareCallSettingRequest request) {
+        careCallSettingService.upsertCareCallSetting(memberId.intValue(), elderId, request);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

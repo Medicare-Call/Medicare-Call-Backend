@@ -20,22 +20,31 @@ public class CareCallSettingService {
     private final ElderRepository elderRepository;
 
     @Transactional
-    public void createCareCallSetting(Integer memberId, Integer elderId, CareCallSettingRequest request){
+    public void upsertCareCallSetting(Integer memberId, Integer elderId, CareCallSettingRequest request){
         Elder elder = elderRepository.findById(elderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ELDER_NOT_FOUND));
 
         if(!elder.getGuardian().getId().equals(memberId))
             throw new CustomException(ErrorCode.HANDLE_ACCESS_DENIED);
 
-        CareCallSetting newCareCall = CareCallSetting.builder()
-                .elder(elder)
-                .firstCallTime(request.firstCallTime())
-                .secondCallTime(request.secondCallTime())
-                .thirdCallTime(request.thirdCallTime())
-                .recurrence(CallRecurrenceType.DAILY.getValue()) //TODO: MVP 단계에서는 daily로 고정
-                .build();
-
-        careCallSettingRepository.save(newCareCall);
+        careCallSettingRepository.findByElder(elder)
+                .ifPresentOrElse(
+                        careCallSetting -> careCallSetting.update(
+                                request.firstCallTime(),
+                                request.secondCallTime(),
+                                request.thirdCallTime()
+                        ),
+                        () -> {
+                            CareCallSetting newCareCall = CareCallSetting.builder()
+                                    .elder(elder)
+                                    .firstCallTime(request.firstCallTime())
+                                    .secondCallTime(request.secondCallTime())
+                                    .thirdCallTime(request.thirdCallTime())
+                                    .recurrence(CallRecurrenceType.DAILY.getValue()) //TODO: MVP 단계에서는 daily로 고정
+                                    .build();
+                            careCallSettingRepository.save(newCareCall);
+                        }
+                );
     }
 
     @Transactional(readOnly = true)
