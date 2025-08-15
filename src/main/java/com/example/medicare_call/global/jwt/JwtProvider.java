@@ -5,6 +5,7 @@ import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SecurityException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -58,11 +59,25 @@ public class JwtProvider {
                     .build()
                     .parseClaimsJws(token);
             return true;
+        } catch (SecurityException | MalformedJwtException e) {
+            log.error("JWT 서명 검증 실패 - Token: [{}], Error: {}",
+                    token, e.getMessage(), e);
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
         } catch (ExpiredJwtException e) {
-            log.error("JWT 토큰 만료 - Token: [{}]", token);
+            log.error("JWT 토큰 만료 - Token: [{}], ExpiredAt: {}",
+                    token, e.getClaims().getExpiration(), e);
             throw new CustomException(ErrorCode.ACCESS_TOKEN_EXPIRED);
-        } catch (JwtException | IllegalArgumentException e) {
-            log.error("유효하지 않은 JWT 토큰 - Token: [{}], Error: {}", token, e.getMessage());
+        } catch (UnsupportedJwtException e) {
+            log.error("지원하지 않는 JWT 토큰 - Token: [{}], Error: {}",
+                    token, e.getMessage(), e);
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
+        } catch (IllegalArgumentException e) {
+            log.error("잘못된 JWT 토큰 형식 - Token: [{}], Error: {}",
+                    token, e.getMessage(), e);
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
+        } catch (Exception e) {
+            log.error("JWT 검증 중 예상치 못한 오류 - Token: [{}], Error: {}",
+                    token, e.getMessage(), e);
             throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
     }
