@@ -5,6 +5,7 @@ import com.example.medicare_call.dto.data_processor.ai.OpenAiResponse;
 import com.example.medicare_call.dto.report.WeeklyReportResponse;
 import com.example.medicare_call.dto.report.WeeklySummaryDto;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -108,5 +109,43 @@ class AiSummaryServiceTest {
 
         // then
         assertEquals(expectedSummary, actualSummary);
+    }
+
+    @Test
+    @DisplayName("OpenAI API 응답 JSON 파싱 테스트 - 알 수 없는 필드 무시")
+    void openAiResponseJsonParsing_ignoreUnknownProperties() throws Exception {
+        // given - OpenAI API의 실제 응답 형태를 시뮬레이트
+        String jsonResponse = """
+                {
+                    "id": "chatcmpl-123",
+                    "object": "chat.completion",
+                    "created": 1692901427,
+                    "model": "gpt-3.5-turbo-0613",
+                    "choices": [
+                        {
+                            "index": 0,
+                            "message": {
+                                "role": "assistant",
+                                "content": "테스트 응답입니다."
+                            },
+                            "finish_reason": "stop"
+                        }
+                    ],
+                    "usage": {
+                        "prompt_tokens": 100,
+                        "completion_tokens": 20,
+                        "total_tokens": 120
+                    }
+                }
+                """;
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        // when - JSON을 OpenAiResponse 객체로 파싱
+        OpenAiResponse response = objectMapper.readValue(jsonResponse, OpenAiResponse.class);
+
+        // then - 필요한 필드만 제대로 파싱되고 알 수 없는 필드는 무시됨
+        assertEquals(1, response.getChoices().size());
+        assertEquals("테스트 응답입니다.", response.getChoices().get(0).getMessage().getContent());
     }
 }

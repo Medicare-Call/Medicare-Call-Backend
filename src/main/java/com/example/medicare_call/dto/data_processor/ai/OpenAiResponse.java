@@ -1,5 +1,6 @@
 package com.example.medicare_call.dto.data_processor.ai;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,6 +12,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class OpenAiResponse {
     private List<Choice> choices;
 
@@ -18,6 +20,7 @@ public class OpenAiResponse {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Choice {
         private Message message;
     }
@@ -26,6 +29,7 @@ public class OpenAiResponse {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Message {
         private String content;
     }
