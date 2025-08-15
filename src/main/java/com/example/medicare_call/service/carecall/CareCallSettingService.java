@@ -3,6 +3,7 @@ package com.example.medicare_call.service.carecall;
 import com.example.medicare_call.domain.CareCallSetting;
 import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.dto.carecall.CareCallSettingRequest;
+import com.example.medicare_call.dto.carecall.CareCallSettingResponse;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.global.enums.CallRecurrenceType;
@@ -35,5 +36,23 @@ public class CareCallSettingService {
                 .build();
 
         careCallSettingRepository.save(newCareCall);
+    }
+
+    @Transactional(readOnly = true)
+    public CareCallSettingResponse getCareCallSetting(Integer memberId, Integer elderId) {
+        Elder elder = elderRepository.findById(elderId)
+                .orElseThrow(() -> new CustomException(ErrorCode.ELDER_NOT_FOUND));
+
+        if(!elder.getGuardian().getId().equals(memberId))
+            throw new CustomException(ErrorCode.HANDLE_ACCESS_DENIED);
+
+        CareCallSetting setting = careCallSettingRepository.findByElder(elder)
+                .orElseThrow(() -> new CustomException(ErrorCode.CARE_CALL_SETTING_NOT_FOUND));
+
+        return new CareCallSettingResponse(
+                setting.getFirstCallTime(),
+                setting.getSecondCallTime(),
+                setting.getThirdCallTime()
+        );
     }
 }

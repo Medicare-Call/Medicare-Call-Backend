@@ -5,6 +5,7 @@ import com.example.medicare_call.domain.CareCallSetting;
 import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.domain.Member;
 import com.example.medicare_call.dto.carecall.CareCallSettingRequest;
+import com.example.medicare_call.dto.carecall.CareCallSettingResponse;
 import com.example.medicare_call.dto.carecall.CareCallTestRequest;
 import com.example.medicare_call.dto.data_processor.CareCallDataProcessRequest;
 import com.example.medicare_call.global.exception.CustomException;
@@ -40,6 +41,7 @@ import java.util.Optional;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -321,5 +323,83 @@ class CareCallControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(request.prompt()));
+    }
+
+    @Test
+    @DisplayName("케어콜 시간 설정 조회 성공")
+    void getCareCallSetting_success() throws Exception {
+        // given
+        CareCallSettingResponse response = new CareCallSettingResponse(
+                LocalTime.of(10, 58),
+                LocalTime.of(11, 0),
+                LocalTime.of(11, 2)
+        );
+
+        // JWT 인증 설정
+        JwtTokenAuthentication auth = new JwtTokenAuthentication(1L);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        when(careCallSettingService.getCareCallSetting(any(Integer.class), any(Integer.class))).thenReturn(response);
+
+        // when & then
+        mockMvc.perform(get("/elders/1/care-call-setting")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstCallTime").value("10:58"))
+                .andExpect(jsonPath("$.secondCallTime").value("11:00"))
+                .andExpect(jsonPath("$.thirdCallTime").value("11:02"));
+    }
+
+    @Test
+    @DisplayName("케어콜 시간 설정 조회 실패 - 어르신 없음")
+    void getCareCallSetting_fail_elderNotFound() throws Exception {
+        // given
+        // JWT 인증 설정
+        JwtTokenAuthentication auth = new JwtTokenAuthentication(1L);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        when(careCallSettingService.getCareCallSetting(any(Integer.class), any(Integer.class)))
+                .thenThrow(new CustomException(ErrorCode.ELDER_NOT_FOUND));
+
+        // when & then
+        mockMvc.perform(get("/elders/999/care-call-setting")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("어르신을 찾을 수 없습니다."));
+    }
+
+    @Test
+    @DisplayName("케어콜 시간 설정 조회 실패 - 설정 없음")
+    void getCareCallSetting_fail_settingNotFound() throws Exception {
+        // given
+        // JWT 인증 설정
+        JwtTokenAuthentication auth = new JwtTokenAuthentication(1L);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        when(careCallSettingService.getCareCallSetting(any(Integer.class), any(Integer.class)))
+                .thenThrow(new CustomException(ErrorCode.CARE_CALL_SETTING_NOT_FOUND));
+
+        // when & then
+        mockMvc.perform(get("/elders/1/care-call-setting")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("케어콜 시간 설정 조회 실패 - 접근 권한 없음")
+    void getCareCallSetting_fail_accessDenied() throws Exception {
+        // given
+        // JWT 인증 설정
+        JwtTokenAuthentication auth = new JwtTokenAuthentication(1L);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        when(careCallSettingService.getCareCallSetting(any(Integer.class), any(Integer.class)))
+                .thenThrow(new CustomException(ErrorCode.HANDLE_ACCESS_DENIED));
+
+        // when & then
+        mockMvc.perform(get("/elders/1/care-call-setting")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message").value("해당 작업에 대한 권한이 없습니다."));
     }
 }
