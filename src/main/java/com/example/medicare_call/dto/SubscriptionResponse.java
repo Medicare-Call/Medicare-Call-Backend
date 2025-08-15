@@ -3,13 +3,17 @@ package com.example.medicare_call.dto;
 import com.example.medicare_call.domain.Subscription;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Schema(description = "구독 정보 응답")
 public class SubscriptionResponse {
 
@@ -40,7 +44,6 @@ public class SubscriptionResponse {
                 .plan(subscription.getPlan().getPlanName())
                 .price(subscription.getPrice())
                 .nextBillingDate(subscription.getNextBillingDate())
-                .startDate(subscription.getStartDate())
                 .build();
     }
 }

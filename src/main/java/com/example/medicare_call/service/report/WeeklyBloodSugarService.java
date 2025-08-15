@@ -4,7 +4,8 @@ import com.example.medicare_call.domain.BloodSugarRecord;
 import com.example.medicare_call.dto.report.WeeklyBloodSugarResponse;
 import com.example.medicare_call.global.enums.BloodSugarMeasurementType;
 import com.example.medicare_call.global.enums.BloodSugarStatus;
-import com.example.medicare_call.global.ResourceNotFoundException;
+import com.example.medicare_call.global.exception.CustomException;
+import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.BloodSugarRecordRepository;
 import com.example.medicare_call.repository.ElderRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,16 +28,15 @@ public class WeeklyBloodSugarService {
 
     public WeeklyBloodSugarResponse getWeeklyBloodSugar(Integer elderId, LocalDate startDate, String typeStr) {
         elderRepository.findById(elderId)
-            .orElseThrow(() -> new ResourceNotFoundException("어르신을 찾을 수 없습니다: " + elderId));
+            .orElseThrow(() -> new CustomException(ErrorCode.ELDER_NOT_FOUND));
         
-        LocalDate endDate = startDate.plusDays(6); // 7일간 조회
-
-        BloodSugarMeasurementType measurementType = BloodSugarMeasurementType.valueOf(typeStr);
-        List<BloodSugarRecord> records = bloodSugarRecordRepository
-                .findByElderIdAndMeasurementTypeAndDateBetween(elderId, measurementType, startDate, endDate);
+        BloodSugarMeasurementType type = BloodSugarMeasurementType.valueOf(typeStr.toUpperCase());
+        LocalDate endDate = startDate.plusDays(6);
+        
+        List<BloodSugarRecord> records = bloodSugarRecordRepository.findByElderIdAndMeasurementTypeAndDateBetween(elderId, type, startDate, endDate);
 
         if (records.isEmpty()) {
-            throw new ResourceNotFoundException("해당 기간에 혈당 데이터가 없습니다: " + startDate + " ~ " + endDate);
+            return WeeklyBloodSugarResponse.empty(startDate, endDate);
         }
 
         List<WeeklyBloodSugarResponse.BloodSugarData> data = records.stream()

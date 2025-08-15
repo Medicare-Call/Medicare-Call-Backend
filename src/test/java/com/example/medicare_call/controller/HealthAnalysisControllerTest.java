@@ -23,7 +23,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import com.example.medicare_call.global.ResourceNotFoundException;
+import com.example.medicare_call.global.exception.CustomException;
+import com.example.medicare_call.global.exception.ErrorCode;
 
 @WebMvcTest(HealthAnalysisController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -75,34 +76,31 @@ class HealthAnalysisControllerTest {
         LocalDate date = LocalDate.of(2024, 1, 1);
 
         when(healthAnalysisService.getDailyHealthAnalysis(eq(elderId), any(LocalDate.class)))
-                .thenThrow(new ResourceNotFoundException("어르신을 찾을 수 없습니다: " + elderId));
+                .thenThrow(new CustomException(ErrorCode.ELDER_NOT_FOUND));
 
         // when & then
         mockMvc.perform(get("/elders/{elderId}/health-analysis", elderId)
-                        .param("date", "2024-01-01"))
+                        .param("date", date.toString()))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.status").value(404))
-                .andExpect(jsonPath("$.error").value("리소스를 찾을 수 없음"))
-                .andExpect(jsonPath("$.message").value("어르신을 찾을 수 없습니다: " + elderId));
+                .andExpect(jsonPath("$.message").value("어르신을 찾을 수 없습니다."));
     }
 
     @Test
     @DisplayName("날짜별 건강 징후 데이터 조회 실패 - 데이터 없음")
-    void getDailyHealthAnalysis_NoData_Returns404() throws Exception {
+    void getDailyHealthAnalysis_NoData_ReturnsEmptyCollection() throws Exception {
         // given
         Integer elderId = 1;
         LocalDate date = LocalDate.of(2024, 1, 1);
         
         when(healthAnalysisService.getDailyHealthAnalysis(eq(elderId), any(LocalDate.class)))
-                .thenThrow(new ResourceNotFoundException("해당 날짜에 건강 징후 데이터가 없습니다: " + date));
+                .thenReturn(DailyHealthAnalysisResponse.empty(date));
 
         // when & then
         mockMvc.perform(get("/elders/{elderId}/health-analysis", elderId)
                         .param("date", "2024-01-01"))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.status").value(404))
-                .andExpect(jsonPath("$.error").value("리소스를 찾을 수 없음"))
-                .andExpect(jsonPath("$.message").value("해당 날짜에 건강 징후 데이터가 없습니다: " + date));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.symptomList").isArray())
+                .andExpect(jsonPath("$.symptomList").isEmpty());
     }
 
     @Test
@@ -114,6 +112,6 @@ class HealthAnalysisControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.error").value("Bad Request"));
+                .andExpect(jsonPath("$.message").value("Invalid value 'invalid-date' for parameter 'date'."));
     }
 } 

@@ -6,8 +6,9 @@ import com.example.medicare_call.dto.report.WeeklySummaryDto;
 import com.example.medicare_call.global.enums.BloodSugarMeasurementType;
 import com.example.medicare_call.global.enums.BloodSugarStatus;
 import com.example.medicare_call.global.enums.MealType;
+import com.example.medicare_call.global.exception.CustomException;
+import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.*;
-import com.example.medicare_call.global.ResourceNotFoundException;
 import com.example.medicare_call.service.data_processor.ai.AiSummaryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +39,7 @@ public class WeeklyReportService {
 
         // 어르신 정보 조회
         Elder elder = elderRepository.findById(elderId)
-                .orElseThrow(() -> new ResourceNotFoundException("어르신을 찾을 수 없습니다: " + elderId));
+                .orElseThrow(() -> new CustomException(ErrorCode.ELDER_NOT_FOUND));
 
         // 1. 식사 통계
         WeeklyReportResponse.MealStats mealStats = getMealStats(elderId, startDate, endDate);

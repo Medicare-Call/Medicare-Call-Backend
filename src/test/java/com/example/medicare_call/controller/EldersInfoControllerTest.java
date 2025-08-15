@@ -6,6 +6,8 @@ import com.example.medicare_call.global.annotation.AuthUser;
 import com.example.medicare_call.global.enums.ElderRelation;
 import com.example.medicare_call.global.enums.Gender;
 import com.example.medicare_call.global.enums.ResidenceType;
+import com.example.medicare_call.global.exception.CustomException;
+import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.global.jwt.JwtProvider;
 import com.example.medicare_call.service.ElderService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -127,13 +129,13 @@ class EldersInfoControllerTest {
         // given
         Long memberId = 1L;
         when(elderSettingService.getElder(memberId.intValue()))
-                .thenThrow(new IllegalArgumentException("회원이 존재하지 않습니다."));
+                .thenThrow(new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
         // when & then
         mockMvc.perform(get("/elders")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("회원이 존재하지 않습니다."));
+                .andExpect(jsonPath("$.message").value("회원정보를 찾을 수 없습니다."));
     }
 
     @Test
@@ -193,14 +195,14 @@ class EldersInfoControllerTest {
         );
 
         when(elderSettingService.updateElder(anyInt(), eq(elderId), any(ElderUpdateRequest.class)))
-                .thenThrow(new IllegalArgumentException("존재하지 않는 어르신입니다."));
+                .thenThrow(new CustomException(ErrorCode.ELDER_NOT_FOUND));
 
         // when & then
         mockMvc.perform(post("/elders/{elderId}", elderId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("존재하지 않는 어르신입니다."));
+                .andExpect(jsonPath("$.message").value("어르신을 찾을 수 없습니다."));
     }
 
     @Test
@@ -219,14 +221,14 @@ class EldersInfoControllerTest {
         );
 
         when(elderSettingService.updateElder(anyInt(), eq(elderId), any(ElderUpdateRequest.class)))
-                .thenThrow(new AccessDeniedException("해당 어르신에 대한 권한이 없습니다."));
+                .thenThrow(new CustomException(ErrorCode.HANDLE_ACCESS_DENIED));
 
         // when & then
         mockMvc.perform(post("/elders/{elderId}", elderId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.message").value("해당 어르신에 대한 권한이 없습니다."));
+                .andExpect(jsonPath("$.message").value("해당 작업에 대한 권한이 없습니다."));
     }
 
     @Test
@@ -250,13 +252,13 @@ class EldersInfoControllerTest {
         // given
         Long memberId = 1L;
         Integer elderId = 999;
-        doThrow(new IllegalArgumentException("존재하지 않는 어르신입니다."))
+        doThrow(new CustomException(ErrorCode.ELDER_NOT_FOUND))
                 .when(elderSettingService).deleteElder(memberId.intValue(), elderId);
 
         // when & then
         mockMvc.perform(delete("/elders/{elderId}", elderId))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("존재하지 않는 어르신입니다."));
+                .andExpect(jsonPath("$.message").value("어르신을 찾을 수 없습니다."));
     }
 
     @Test
@@ -265,12 +267,12 @@ class EldersInfoControllerTest {
         // given
         Long memberId = 1L;
         Integer elderId = 2; // 다른 보호자의 어르신
-        doThrow(new AccessDeniedException("해당 어르신에 대한 권한이 없습니다."))
+        doThrow(new CustomException(ErrorCode.HANDLE_ACCESS_DENIED))
                 .when(elderSettingService).deleteElder(memberId.intValue(), elderId);
 
         // when & then
         mockMvc.perform(delete("/elders/{elderId}", elderId))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.message").value("해당 어르신에 대한 권한이 없습니다."));
+                .andExpect(jsonPath("$.message").value("해당 작업에 대한 권한이 없습니다."));
     }
 }

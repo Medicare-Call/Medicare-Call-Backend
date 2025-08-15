@@ -1,7 +1,6 @@
 package com.example.medicare_call.domain;
 
-import com.example.medicare_call.global.enums.FrequencyType;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Builder;
 
@@ -9,7 +8,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "MedicationSchedule")
-@Getter
+@Data
 @NoArgsConstructor
 public class MedicationSchedule {
     @Id

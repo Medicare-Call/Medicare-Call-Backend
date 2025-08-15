@@ -1,8 +1,10 @@
 package com.example.medicare_call.service.report;
 
 import com.example.medicare_call.domain.CareCallRecord;
+import com.example.medicare_call.dto.report.DailyMentalAnalysisResponse;
 import com.example.medicare_call.dto.report.DailySleepResponse;
-import com.example.medicare_call.global.ResourceNotFoundException;
+import com.example.medicare_call.global.exception.CustomException;
+import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.CareCallRecordRepository;
 import com.example.medicare_call.repository.ElderRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,12 +27,12 @@ public class SleepRecordService {
     
     public DailySleepResponse getDailySleep(Integer elderId, LocalDate date) {
         elderRepository.findById(elderId)
-            .orElseThrow(() -> new ResourceNotFoundException("어르신을 찾을 수 없습니다: " + elderId));
+            .orElseThrow(() -> new CustomException(ErrorCode.ELDER_NOT_FOUND));
         
         List<CareCallRecord> sleepRecords = careCallRecordRepository.findByElderIdAndDateWithSleepData(elderId, date);
         
         if (sleepRecords.isEmpty()) {
-            throw new ResourceNotFoundException("해당 날짜에 수면 데이터가 없습니다: " + date);
+            return DailySleepResponse.empty(date);
         }
         
         // 가장 최근 수면 기록 사용

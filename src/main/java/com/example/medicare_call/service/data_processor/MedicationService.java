@@ -1,9 +1,9 @@
 package com.example.medicare_call.service.data_processor;
 
 import com.example.medicare_call.domain.*;
+import com.example.medicare_call.dto.report.DailyHealthAnalysisResponse;
 import com.example.medicare_call.dto.report.DailyMedicationResponse;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
-import com.example.medicare_call.global.ResourceNotFoundException;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.global.enums.MedicationTakenStatus;
 import com.example.medicare_call.repository.*;
@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import com.example.medicare_call.global.exception.CustomException;
+import com.example.medicare_call.global.exception.ErrorCode;
 
 @Slf4j
 @Service
@@ -31,13 +33,8 @@ public class MedicationService {
     @Transactional
     public void saveMedicationTakenRecord(CareCallRecord callRecord, HealthDataExtractionResponse.MedicationData medicationData) {
         // 약 이름으로 Medication 찾기
-        Optional<Medication> medicationOpt = medicationRepository.findByName(medicationData.getMedicationType());
-        if (medicationOpt.isEmpty()) {
-            log.warn("약을 찾을 수 없습니다: {}", medicationData.getMedicationType());
-            return;
-        }
-
-        Medication medication = medicationOpt.get();
+        Medication medication = medicationRepository.findByName(medicationData.getMedicationType())
+                .orElseThrow(() -> new CustomException(ErrorCode.MEDICATION_NOT_FOUND, "약을 찾을 수 없습니다: " + medicationData.getMedicationType()));
 
         // 해당 어르신의 복약 스케줄에서 매칭되는 것 찾기
         List<MedicationSchedule> schedules = medicationScheduleRepository.findByElder(callRecord.getElder());
@@ -90,12 +87,12 @@ public class MedicationService {
 
     public DailyMedicationResponse getDailyMedication(Integer elderId, LocalDate date) {
         Elder elder = elderRepository.findById(elderId)
-                .orElseThrow(() -> new ResourceNotFoundException("어르신을 찾을 수 없습니다: " + elderId));
+                .orElseThrow(() -> new CustomException(ErrorCode.ELDER_NOT_FOUND));
 
         List<MedicationTakenRecord> takenRecords = medicationTakenRecordRepository.findByElderIdAndDate(elderId, date);
 
         if (takenRecords.isEmpty()) {
-            throw new ResourceNotFoundException("해당 날짜에 복용 데이터가 없습니다: " + date);
+            return DailyMedicationResponse.empty(date);
         }
 
         List<MedicationSchedule> schedules = medicationScheduleRepository.findByElder(elder);

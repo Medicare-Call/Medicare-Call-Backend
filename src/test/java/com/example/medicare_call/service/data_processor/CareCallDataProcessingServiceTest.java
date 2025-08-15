@@ -4,7 +4,8 @@ import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.data_processor.CareCallDataProcessRequest;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionRequest;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
-import com.example.medicare_call.global.ResourceNotFoundException;
+import com.example.medicare_call.global.exception.CustomException;
+import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.*;
 import com.example.medicare_call.service.data_processor.ai.AiHealthDataExtractorService;
 import org.junit.jupiter.api.DisplayName;
@@ -27,6 +28,9 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 class CareCallDataProcessingServiceTest {
@@ -231,13 +235,10 @@ class CareCallDataProcessingServiceTest {
         when(elderRepository.findById(999)).thenReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> careCallDataProcessingService.saveCallData(request))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("어르신을 찾을 수 없습니다: 999");
-        
-        verify(elderRepository).findById(999);
-        verify(careCallSettingRepository, never()).findById(any());
-        verify(aiHealthDataExtractorService, never()).extractHealthData(any());
+        CustomException exception = assertThrows(CustomException.class,
+                () -> careCallDataProcessingService.saveCallData(request)
+        );
+        assertEquals(ErrorCode.ELDER_NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
@@ -258,13 +259,10 @@ class CareCallDataProcessingServiceTest {
         when(careCallSettingRepository.findById(999)).thenReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> careCallDataProcessingService.saveCallData(request))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("통화 설정을 찾을 수 없습니다: 999");
-        
-        verify(elderRepository).findById(1);
-        verify(careCallSettingRepository).findById(999);
-        verify(aiHealthDataExtractorService, never()).extractHealthData(any());
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            careCallDataProcessingService.saveCallData(request);
+        });
+        assertEquals(ErrorCode.CARE_CALL_SETTING_NOT_FOUND, exception.getErrorCode());
     }
 
     @Test

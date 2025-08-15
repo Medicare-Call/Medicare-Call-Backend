@@ -1,6 +1,8 @@
 package com.example.medicare_call.global.jwt;
 
 import com.example.medicare_call.domain.Member;
+import com.example.medicare_call.global.exception.CustomException;
+import com.example.medicare_call.global.exception.ErrorCode;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
@@ -55,33 +57,14 @@ public class JwtProvider {
                     .setSigningKey(secretKey)
                     .build()
                     .parseClaimsJws(token);
-        } catch (SecurityException | MalformedJwtException e) {
-            log.error("JWT 서명 검증 실패 - Token: [{}], Error: {}",
-                    token, e.getMessage(), e);
-            throw new IllegalArgumentException("JWT 검증 중 오류가 발생했습니다.");
-
+            return true;
         } catch (ExpiredJwtException e) {
-            log.error("JWT 토큰 만료 - Token: [{}], ExpiredAt: {}",
-                    token, e.getClaims().getExpiration(), e);
-            throw new IllegalArgumentException("JWT 검증 중 오류가 발생했습니다.");
-
-        } catch (UnsupportedJwtException e) {
-            log.error("지원하지 않는 JWT 토큰 - Token: [{}], Error: {}",
-                    token, e.getMessage(), e);
-            throw new IllegalArgumentException("JWT 검증 중 오류가 발생했습니다.");
-
-        } catch (IllegalArgumentException e) {
-            log.error("잘못된 JWT 토큰 형식 - Token: [{}], Error: {}",
-                    token, e.getMessage(), e);
-            throw new IllegalArgumentException("JWT 검증 중 오류가 발생했습니다.");
-
-        } catch (Exception e) {
-            log.error("JWT 검증 중 예상치 못한 오류 - Token: [{}], Error: {}",
-                    token, e.getMessage(), e);
-            throw new IllegalArgumentException("JWT 검증 중 오류가 발생했습니다.");
+            log.error("JWT 토큰 만료 - Token: [{}]", token);
+            throw new CustomException(ErrorCode.ACCESS_TOKEN_EXPIRED);
+        } catch (JwtException | IllegalArgumentException e) {
+            log.error("유효하지 않은 JWT 토큰 - Token: [{}], Error: {}", token, e.getMessage());
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
-
-        return true;
     }
 
     public Claims getClaims(String token) {
@@ -95,15 +78,15 @@ public class JwtProvider {
     public Long getMemberId(String token) {
         return Long.parseLong(getClaims(token).get("id").toString());
     }
-    
+
     public String getPhone(String token) {
         return getClaims(token).get("phone").toString();
     }
-    
+
     public String getTokenCategory(String token) {
         return getClaims(token).get("category").toString();
     }
-    
+
     public boolean isAccessToken(String token) {
         try {
             return "access".equals(getTokenCategory(token));
@@ -111,7 +94,7 @@ public class JwtProvider {
             return false;
         }
     }
-    
+
     public Long getAccessTokenExpirationMillis() {
         return ACCESS_TOKEN_EXPIRE_MILLIS;
     }

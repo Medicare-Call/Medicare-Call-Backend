@@ -4,7 +4,8 @@ import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.data_processor.CareCallDataProcessRequest;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionRequest;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
-import com.example.medicare_call.global.ResourceNotFoundException;
+import com.example.medicare_call.global.exception.CustomException;
+import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.*;
 import com.example.medicare_call.service.data_processor.ai.AiHealthDataExtractorService;
 import lombok.RequiredArgsConstructor;
@@ -32,12 +33,12 @@ public class CareCallDataProcessingService {
     @Transactional
     public CareCallRecord saveCallData(CareCallDataProcessRequest request) {
         log.info("통화 데이터 저장 시작: elderId={}, settingId={}", request.getElderId(), request.getSettingId());
-        
+
         Elder elder = elderRepository.findById(request.getElderId())
-                .orElseThrow(() -> new ResourceNotFoundException("어르신을 찾을 수 없습니다: " + request.getElderId()));
-        
+                .orElseThrow(() -> new CustomException(ErrorCode.ELDER_NOT_FOUND));
+
         CareCallSetting setting = careCallSettingRepository.findById(request.getSettingId())
-                .orElseThrow(() -> new ResourceNotFoundException("통화 설정을 찾을 수 없습니다: " + request.getSettingId()));
+                .orElseThrow(() -> new CustomException(ErrorCode.CARE_CALL_SETTING_NOT_FOUND));
         
         String transcriptionText = null;
         if (request.getTranscription() != null && request.getTranscription().getFullText() != null) {

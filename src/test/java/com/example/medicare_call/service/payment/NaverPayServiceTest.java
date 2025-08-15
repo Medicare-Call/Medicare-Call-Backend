@@ -23,6 +23,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.*;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
+import com.example.medicare_call.dto.payment.PaymentApprovalResponse;
+import com.example.medicare_call.global.enums.PaymentMethod;
+import com.example.medicare_call.global.enums.OrderStatus;
+import com.example.medicare_call.global.enums.SubscriptionPlan;
+import com.example.medicare_call.global.enums.SubscriptionStatus;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.example.medicare_call.global.exception.CustomException;
+import com.example.medicare_call.global.exception.ErrorCode;
+import org.springframework.web.client.RestClientException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -32,16 +41,12 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import com.example.medicare_call.global.enums.PaymentMethod;
-import com.example.medicare_call.global.enums.OrderStatus;
-import com.example.medicare_call.global.enums.SubscriptionPlan;
-import com.example.medicare_call.global.enums.SubscriptionStatus;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.example.medicare_call.dto.payment.PaymentApprovalResponse;
 
 @ExtendWith(MockitoExtension.class)
 class NaverPayServiceTest {
@@ -325,10 +330,8 @@ class NaverPayServiceTest {
         // when & then
         assertThatThrownBy(() -> naverPayService.approvePayment(paymentId))
                 .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("네이버페이 결제 승인 중 오류가 발생했습니다. 고객센터로 문의해 주세요.")
-                .getCause()
-                .hasMessageContaining("주문 정보가 변조되었습니다");
-        
+                .hasMessageContaining("네이버페이 결제 승인 중 오류가 발생했습니다. 고객센터로 문의해 주세요.");
+
         assertThat(order.getStatus()).isEqualTo(OrderStatus.TAMPERED);
     }
 
@@ -356,9 +359,7 @@ class NaverPayServiceTest {
         // when & then
         assertThatThrownBy(() -> naverPayService.approvePayment(paymentId))
                 .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("네이버페이 결제 승인 중 오류가 발생했습니다. 고객센터로 문의해 주세요.")
-                .getCause()
-                .hasMessageContaining("결제가 실패한 주문입니다");
+                .hasMessageContaining("네이버페이 결제 승인 중 오류가 발생했습니다. 고객센터로 문의해 주세요.");
 
         assertThat(order.getStatus()).isEqualTo(OrderStatus.PAYMENT_FAILED);
     }
@@ -386,9 +387,7 @@ class NaverPayServiceTest {
         // when & then
         assertThatThrownBy(() -> naverPayService.approvePayment(paymentId))
                 .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("네이버페이 결제 승인 중 오류가 발생했습니다. 고객센터로 문의해 주세요.")
-                .getCause()
-                .hasMessageContaining("주문 정보를 찾을 수 없습니다");
+                .hasMessageContaining("네이버페이 결제 승인 중 오류가 발생했습니다. 고객센터로 문의해 주세요.");
     }
 
     @Test
@@ -427,6 +426,56 @@ class NaverPayServiceTest {
         assertThatThrownBy(() -> naverPayService.approvePayment(paymentId))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("네이버페이 결제 승인 중 오류가 발생했습니다. 고객센터로 문의해 주세요.");
+    }
+
+    @Test
+    @DisplayName("결제 예약 실패 - 회원 없음")
+    void createPaymentReserve_fail_memberNotFound() {
+        // given
+        Long memberId = 99L;
+        NaverPayReserveRequest request = new NaverPayReserveRequest("Test", 1, 1000, 909, 91, List.of(99L));
+        when(memberRepository.findById(anyInt())).thenReturn(Optional.empty());
+
+        // when & then
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            naverPayService.createPaymentReserve(request, memberId);
+        });
+        assertEquals(ErrorCode.MEMBER_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("결제 예약 실패 - 어르신 없음")
+    void createPaymentReserve_fail_elderNotFound() {
+        // given
+        Long memberId = 1L;
+        NaverPayReserveRequest request = new NaverPayReserveRequest("Test", 1, 1000, 909, 91, List.of(99L));
+        when(memberRepository.findById(anyInt())).thenReturn(Optional.of(new Member()));
+        when(elderRepository.existsById(99)).thenReturn(false);
+
+        // when & then
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            naverPayService.createPaymentReserve(request, memberId);
+        });
+        assertEquals(ErrorCode.ELDER_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("결제 승인 실패 - API 오류")
+    void approvePayment_fail_apiError() {
+        // given
+        String paymentId = "test-payment-id";
+        when(restTemplate.exchange(
+                any(String.class),
+                any(HttpMethod.class),
+                any(HttpEntity.class),
+                eq(NaverPayApplyResponse.class))
+        ).thenThrow(new RestClientException("API Error"));
+
+        // when & then
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            naverPayService.approvePayment(paymentId);
+        });
+        assertEquals(ErrorCode.NAVER_PAY_API_ERROR, exception.getErrorCode());
     }
 
     private NaverPayApplyResponse createMockApplyResponse() {

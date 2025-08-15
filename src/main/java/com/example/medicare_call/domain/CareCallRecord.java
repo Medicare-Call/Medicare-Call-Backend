@@ -1,14 +1,18 @@
 package com.example.medicare_call.domain;
 
+import com.example.medicare_call.dto.data_processor.CareCallDataProcessRequest;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "CareCallRecord")
-@Getter
+@Data
 @NoArgsConstructor
 public class CareCallRecord {
     @Id

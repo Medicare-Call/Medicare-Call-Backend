@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 
 @Getter
@@ -63,5 +64,17 @@ public class WeeklyBloodSugarResponse {
 
         @Schema(description = "판정 상태", example = "NORMAL")
         private BloodSugarStatus status;
+    }
+
+    public static WeeklyBloodSugarResponse empty(LocalDate startDate, LocalDate endDate) {
+        return WeeklyBloodSugarResponse.builder()
+                .period(Period.builder()
+                        .startDate(startDate)
+                        .endDate(endDate)
+                        .build())
+                .data(Collections.emptyList())
+                .average(null)
+                .latest(null)
+                .build();
     }
 } 

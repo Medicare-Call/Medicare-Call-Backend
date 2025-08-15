@@ -1,6 +1,9 @@
 package com.example.medicare_call.controller;
 
+import com.example.medicare_call.dto.report.DailyMentalAnalysisResponse;
 import com.example.medicare_call.dto.report.DailySleepResponse;
+import com.example.medicare_call.global.exception.CustomException;
+import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.global.jwt.JwtProvider;
 import com.example.medicare_call.service.report.SleepRecordService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,7 +23,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.time.LocalDate;
-import com.example.medicare_call.global.ResourceNotFoundException;
 
 @WebMvcTest(SleepRecordController.class)
 @AutoConfigureMockMvc(addFilters = false) // security 필터 비활성화
@@ -146,33 +148,33 @@ class SleepRecordControllerTest {
         String date = "2025-07-16";
         
         when(sleepRecordService.getDailySleep(eq(elderId), any(LocalDate.class)))
-                .thenThrow(new ResourceNotFoundException("어르신을 찾을 수 없습니다: " + elderId));
+                .thenThrow(new CustomException(ErrorCode.ELDER_NOT_FOUND));
 
         // when & then
         mockMvc.perform(get("/elders/{elderId}/sleep", elderId)
                         .param("date", date))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.status").value(404))
-                .andExpect(jsonPath("$.error").value("리소스를 찾을 수 없음"))
-                .andExpect(jsonPath("$.message").value("어르신을 찾을 수 없습니다: " + elderId));
+                .andExpect(jsonPath("$.message").value("어르신을 찾을 수 없습니다."));
     }
 
     @Test
-    @DisplayName("날짜별 수면 데이터 조회 실패 - 데이터 없음")
-    void getDailySleep_NoData_Returns404() throws Exception {
+    @DisplayName("날짜별 수면 데이터 조회 성공 - 데이터 없음")
+    void getDailySleep_NoData_ReturnsEmpty() throws Exception {
         // given
         Integer elderId = 1;
         LocalDate date = LocalDate.of(2024, 1, 1);
         
         when(sleepRecordService.getDailySleep(eq(elderId), any(LocalDate.class)))
-                .thenThrow(new ResourceNotFoundException("해당 날짜에 수면 데이터가 없습니다: " + date));
+                .thenReturn(DailySleepResponse.empty(LocalDate.of(2024, 1, 1)));
 
         // when & then
         mockMvc.perform(get("/elders/{elderId}/sleep", elderId)
                         .param("date", "2024-01-01"))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.status").value(404))
-                .andExpect(jsonPath("$.error").value("리소스를 찾을 수 없음"))
-                .andExpect(jsonPath("$.message").value("해당 날짜에 수면 데이터가 없습니다: " + date));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.date").value("2024-01-01"))
+                .andExpect(jsonPath("$.totalSleep.hours").isEmpty())
+                .andExpect(jsonPath("$.totalSleep.minutes").isEmpty())
+                .andExpect(jsonPath("$.sleepTime").isEmpty())
+                .andExpect(jsonPath("$.wakeTime").isEmpty());
     }
 } 

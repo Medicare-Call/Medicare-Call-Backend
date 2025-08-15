@@ -4,12 +4,18 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.Collections;
 
-@Getter
+@Data
 @Builder
-@Schema(description = "날짜별 식사 데이터 조회 응답")
+@AllArgsConstructor
+@NoArgsConstructor
+@Schema(description = "일일 식사 기록 리포트")
 public class DailyMealResponse {
     
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -31,5 +37,16 @@ public class DailyMealResponse {
         
         @Schema(description = "저녁 식사 내용", example = "저녁은 간단히 드셨어요.")
         private String dinner;
+    }
+
+    public static DailyMealResponse empty(LocalDate date) {
+        return DailyMealResponse.builder()
+                .date(date)
+                .meals(Meals.builder()
+                        .breakfast(null)
+                        .lunch(null)
+                        .dinner(null)
+                        .build())
+                .build();
     }
 } 

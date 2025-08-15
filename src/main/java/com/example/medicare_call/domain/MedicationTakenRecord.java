@@ -1,7 +1,7 @@
 package com.example.medicare_call.domain;
 
 import com.example.medicare_call.global.enums.MedicationTakenStatus;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Builder;
 
@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "MedicationTakenRecord")
-@Getter
+@Data
 @NoArgsConstructor
 public class MedicationTakenRecord {
     @Id
