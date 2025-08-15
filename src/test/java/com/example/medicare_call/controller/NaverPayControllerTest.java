@@ -180,6 +180,6 @@ class NaverPayControllerTest {
                 .andExpect(status().isInternalServerError())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(500))
-                .andExpect(jsonPath("$.message").value("NaverPay API error"));
+                .andExpect(jsonPath("$.message").value("네이버페이 오류가 발생했습니다."));
     }
 }
