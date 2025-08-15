@@ -65,7 +65,7 @@ public class ElderController {
     public ResponseEntity<ElderResponse> updateElder(
             @Parameter(hidden = true) @AuthUser Long memberId,
             @PathVariable Integer elderId,
-            ElderUpdateRequest req
+            @Valid @RequestBody ElderUpdateRequest req
     ){
         log.info("어르신 설정 정보 수정 요청: memberId={}, elderId={}, name={}, birthDate={}, gender={}, phone={}, relationship={}, residenceType={}",
                 memberId, elderId, req.name(), req.birthDate(), req.gender(), req.phone(), req.relationship(), req.residenceType());
