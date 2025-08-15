@@ -13,11 +13,13 @@ import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
+@Tag(name = "CareCall", description = "케어콜 설정, 데이터 수신, 테스트 API")
 @RestController
 @RequiredArgsConstructor
 public class CareCallController {
