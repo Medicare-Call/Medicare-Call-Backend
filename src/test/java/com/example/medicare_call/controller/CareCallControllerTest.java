@@ -237,7 +237,7 @@ class CareCallControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("어르신을 찾을 수 없습니다."));
+                .andExpect(jsonPath("$.message").value("등록되지 않은 어르신입니다."));
     }
 
     @Test
@@ -365,7 +365,7 @@ class CareCallControllerTest {
         mockMvc.perform(get("/elders/999/care-call-setting")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("어르신을 찾을 수 없습니다."));
+                .andExpect(jsonPath("$.message").value("등록되지 않은 어르신입니다."));
     }
 
     @Test

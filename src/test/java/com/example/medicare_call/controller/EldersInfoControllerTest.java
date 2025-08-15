@@ -135,7 +135,7 @@ class EldersInfoControllerTest {
         mockMvc.perform(get("/elders")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("회원정보를 찾을 수 없습니다."));
+                .andExpect(jsonPath("$.message").value("존재하지 않는 회원입니다."));
     }
 
     @Test
@@ -202,7 +202,7 @@ class EldersInfoControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("어르신을 찾을 수 없습니다."));
+                .andExpect(jsonPath("$.message").value("등록되지 않은 어르신입니다."));
     }
 
     @Test
@@ -258,7 +258,7 @@ class EldersInfoControllerTest {
         // when & then
         mockMvc.perform(delete("/elders/{elderId}", elderId))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("어르신을 찾을 수 없습니다."));
+                .andExpect(jsonPath("$.message").value("등록되지 않은 어르신입니다."));
     }
 
     @Test

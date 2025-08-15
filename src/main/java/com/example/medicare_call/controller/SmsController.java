@@ -58,7 +58,7 @@ public class SmsController {
         } else {
             SmsVerificationResponse errorResponse = SmsVerificationResponse.builder()
                     .verified(false)
-                    .message("인증번호가 올바르지 않거나 만료되었습니다.")
+                    .message("인증번호가 올바르지 않거나 만료되었습니다. 다시 확인해 주세요.")
                     .build();
             return ResponseEntity.badRequest().body(errorResponse);
         }
