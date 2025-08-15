@@ -2,6 +2,7 @@ package com.example.medicare_call.controller;
 
 import com.example.medicare_call.domain.CareCallRecord;
 import com.example.medicare_call.dto.carecall.CareCallSettingRequest;
+import com.example.medicare_call.dto.carecall.CareCallSettingResponse;
 import com.example.medicare_call.dto.carecall.CareCallTestRequest;
 import com.example.medicare_call.dto.data_processor.CareCallDataProcessRequest;
 import com.example.medicare_call.global.annotation.AuthUser;
@@ -33,6 +34,13 @@ public class CareCallController {
     public ResponseEntity<Void> createCareCallSetting(@Parameter(hidden = true) @AuthUser Long memberId, @PathVariable Integer elderId, @Valid @RequestBody CareCallSettingRequest request) {
         careCallSettingService.createCareCallSetting(memberId.intValue(), elderId, request);
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @Operation(summary = "어르신 전화 시간대 조회", description = "등록된 케어콜 시간대를 조회합니다.")
+    @GetMapping("/elders/{elderId}/care-call-setting")
+    public ResponseEntity<CareCallSettingResponse> getCareCallSetting(@Parameter(hidden = true) @AuthUser Long memberId, @PathVariable Integer elderId) {
+        CareCallSettingResponse response = careCallSettingService.getCareCallSetting(memberId.intValue(), elderId);
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "통화 데이터 수신", description = "외부 서버로부터 통화 데이터를 받아서 저장합니다.")
