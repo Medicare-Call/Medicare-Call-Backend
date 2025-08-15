@@ -44,6 +44,7 @@ public class SubscriptionResponse {
                 .plan(subscription.getPlan().getPlanName())
                 .price(subscription.getPrice())
                 .nextBillingDate(subscription.getNextBillingDate())
+                .startDate(subscription.getStartDate())
                 .build();
     }
 }
