@@ -1,6 +1,6 @@
 package com.example.medicare_call.domain;
 
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Builder;
 
@@ -8,7 +8,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "MedicationSchedule")
-@Data
+@Getter
 @NoArgsConstructor
 public class MedicationSchedule {
     @Id
