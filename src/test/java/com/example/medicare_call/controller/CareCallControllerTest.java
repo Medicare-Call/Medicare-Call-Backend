@@ -43,6 +43,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
@@ -287,8 +288,8 @@ class CareCallControllerTest {
     }
 
     @Test
-    @DisplayName("케어콜 시간 설정 성공")
-    void createCareCallSetting_success() throws Exception {
+    @DisplayName("케어콜 시간 설정 및 수정 성공")
+    void upsertCareCallSetting_success() throws Exception {
         // given
         CareCallSettingRequest request = new CareCallSettingRequest(
                 LocalTime.of(9, 0),
@@ -300,7 +301,7 @@ class CareCallControllerTest {
         JwtTokenAuthentication auth = new JwtTokenAuthentication(1L);
         SecurityContextHolder.getContext().setAuthentication(auth);
 
-        doNothing().when(careCallSettingService).createCareCallSetting(any(Integer.class), any(Integer.class), any(CareCallSettingRequest.class));
+        doNothing().when(careCallSettingService).upsertCareCallSetting(any(Integer.class), any(Integer.class), any(CareCallSettingRequest.class));
 
         // when & then
         mockMvc.perform(post("/elders/1/care-call-setting")

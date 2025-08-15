@@ -42,7 +42,7 @@ public class CareCallSettingServiceTest {
 
     @Test
     @DisplayName("케어콜 설정 생성 성공")
-    void createCareCallSetting_success() {
+    void upsertCareCallSetting_create_success() {
         // given
         Integer memberId = 1;
         Integer elderId = 1;
@@ -51,12 +51,40 @@ public class CareCallSettingServiceTest {
         CareCallSettingRequest request = new CareCallSettingRequest(LocalTime.of(9, 0), null, null);
 
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(elder));
+        when(careCallSettingRepository.findByElder(elder)).thenReturn(Optional.empty());
 
         // when
-        careCallSettingService.createCareCallSetting(memberId, elderId, request);
+        careCallSettingService.upsertCareCallSetting(memberId, elderId, request);
 
         // then
         verify(careCallSettingRepository).save(any(CareCallSetting.class));
+    }
+
+    @Test
+    @DisplayName("케어콜 설정 수정 성공")
+    void upsertCareCallSetting_update_success() {
+        // given
+        Integer memberId = 1;
+        Integer elderId = 1;
+        Member member = createMember(memberId);
+        Elder elder = createElder(elderId, member);
+        CareCallSettingRequest request = new CareCallSettingRequest(LocalTime.of(10, 0), LocalTime.of(15, 0), null);
+        CareCallSetting existingSetting = CareCallSetting.builder()
+                .elder(elder)
+                .firstCallTime(LocalTime.of(9, 0))
+                .build();
+
+        when(elderRepository.findById(elderId)).thenReturn(Optional.of(elder));
+        when(careCallSettingRepository.findByElder(elder)).thenReturn(Optional.of(existingSetting));
+
+        // when
+        careCallSettingService.upsertCareCallSetting(memberId, elderId, request);
+
+        // then
+        assertEquals(LocalTime.of(10, 0), existingSetting.getFirstCallTime());
+        assertEquals(LocalTime.of(15, 0), existingSetting.getSecondCallTime());
+        assertNull(existingSetting.getThirdCallTime());
+        verify(careCallSettingRepository, never()).save(any(CareCallSetting.class));
     }
 }
 

@@ -42,4 +42,10 @@ public class CareCallSetting {
         this.thirdCallTime = thirdCallTime;
         this.recurrence = recurrence;
     }
+
+    public void update(LocalTime firstCallTime, LocalTime secondCallTime, LocalTime thirdCallTime) {
+        this.firstCallTime = firstCallTime;
+        this.secondCallTime = secondCallTime;
+        this.thirdCallTime = thirdCallTime;
+    }
 } 
