@@ -3,6 +3,7 @@ package com.example.medicare_call.service.report;
 import com.example.medicare_call.domain.CareCallRecord;
 import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.domain.Member;
+import com.example.medicare_call.dto.report.DailyMentalAnalysisResponse;
 import com.example.medicare_call.dto.report.DailySleepResponse;
 import com.example.medicare_call.global.enums.Gender;
 import com.example.medicare_call.repository.CareCallRecordRepository;
@@ -18,17 +19,20 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import org.junit.jupiter.api.DisplayName;
-import com.example.medicare_call.global.ResourceNotFoundException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import com.example.medicare_call.global.exception.CustomException;
+import com.example.medicare_call.global.exception.ErrorCode;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("SleepRecordService Test")
 class SleepRecordServiceTest {
 
     @Mock
@@ -147,9 +151,28 @@ class SleepRecordServiceTest {
         when(careCallRecordRepository.findByElderIdAndDateWithSleepData(elderId, date))
                 .thenReturn(Collections.emptyList());
 
-        // when & then
-        assertThatThrownBy(() -> sleepRecordService.getDailySleep(elderId, date))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("해당 날짜에 수면 데이터가 없습니다: " + date);
+        DailySleepResponse response = sleepRecordService.getDailySleep(elderId, date);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getDate()).isEqualTo(date);
+        assertThat(response.getTotalSleep()).isNotNull();
+        assertThat(response.getTotalSleep().getHours()).isNull();
+        assertThat(response.getTotalSleep().getMinutes()).isNull();
+        assertThat(response.getSleepTime()).isNull();
+        assertThat(response.getWakeTime()).isNull();
+    }
+
+    @Test
+    @DisplayName("데이터 없음 - 어르신 ID를 찾을 수 없음")
+    void getDailySleep_ThrowsResourceNotFoundException_ElderNotFound() {
+        // given
+        when(elderRepository.findById(any(Integer.class))).thenReturn(Optional.empty());
+
+        // when, then
+        CustomException exception = assertThrows(CustomException.class,
+                () -> sleepRecordService.getDailySleep(1, LocalDate.now())
+        );
+        assertEquals(ErrorCode.ELDER_NOT_FOUND, exception.getErrorCode());
     }
 } 

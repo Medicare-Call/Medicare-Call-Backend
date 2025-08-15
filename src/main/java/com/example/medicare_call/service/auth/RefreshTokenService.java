@@ -3,7 +3,8 @@ package com.example.medicare_call.service.auth;
 import com.example.medicare_call.domain.Member;
 import com.example.medicare_call.domain.RefreshToken;
 import com.example.medicare_call.dto.auth.TokenResponse;
-import com.example.medicare_call.global.ResourceNotFoundException;
+import com.example.medicare_call.global.exception.CustomException;
+import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.global.jwt.JwtProvider;
 import com.example.medicare_call.repository.MemberRepository;
 import com.example.medicare_call.repository.RefreshTokenRepository;
@@ -59,17 +60,17 @@ public class RefreshTokenService {
     public TokenResponse refreshAccessToken(String refreshTokenValue) {
         // Refresh Token 조회
         RefreshToken refreshToken = refreshTokenRepository.findByToken(refreshTokenValue)
-                .orElseThrow(() -> new ResourceNotFoundException("유효하지 않은 Refresh Token입니다."));
-        
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_TOKEN, "유효하지 않은 Refresh Token 입니다."));
+
         // 만료시 SMS 재인증 필요
         if (refreshToken.isExpired()) {
             refreshTokenRepository.delete(refreshToken);
-            throw new IllegalArgumentException("만료된 Refresh Token입니다.");
+            throw new CustomException(ErrorCode.REFRESH_TOKEN_EXPIRED, "만료된 Refresh Token 입니다. 다시 로그인해 주세요");
         }
         
         // Member 조회
         Member member = memberRepository.findById(refreshToken.getMemberId())
-                .orElseThrow(() -> new ResourceNotFoundException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND, "가입된 회원 정보를 찾을 수 없습니다."));
         
         // 새로운 Access Token 생성
         String newAccessToken = jwtProvider.createAccessToken(member);

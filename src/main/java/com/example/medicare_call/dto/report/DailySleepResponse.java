@@ -35,4 +35,16 @@ public class DailySleepResponse {
         @Schema(description = "수면 시간 (분)", example = "12")
         private Integer minutes;
     }
+
+    public static DailySleepResponse empty(LocalDate date) {
+        return DailySleepResponse.builder()
+                .date(date)
+                .totalSleep(TotalSleep.builder()
+                        .hours(null)
+                        .minutes(null)
+                        .build())
+                .sleepTime(null)
+                .wakeTime(null)
+                .build();
+    }
 } 

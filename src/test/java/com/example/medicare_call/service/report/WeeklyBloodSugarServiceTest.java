@@ -3,6 +3,7 @@ package com.example.medicare_call.service.report;
 import com.example.medicare_call.domain.BloodSugarRecord;
 import com.example.medicare_call.domain.CareCallRecord;
 import com.example.medicare_call.domain.Elder;
+import com.example.medicare_call.dto.report.DailyMentalAnalysisResponse;
 import com.example.medicare_call.dto.report.WeeklyBloodSugarResponse;
 import com.example.medicare_call.global.enums.BloodSugarMeasurementType;
 import com.example.medicare_call.global.enums.BloodSugarStatus;
@@ -22,17 +23,19 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import com.example.medicare_call.global.ResourceNotFoundException;
+import com.example.medicare_call.global.exception.CustomException;
+import com.example.medicare_call.global.exception.ErrorCode;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("WeeklyBloodSugarService Test")
 class WeeklyBloodSugarServiceTest {
 
     @Mock
@@ -108,10 +111,18 @@ class WeeklyBloodSugarServiceTest {
                 elderId, BloodSugarMeasurementType.BEFORE_MEAL, startDate, startDate.plusDays(6)))
                 .thenReturn(Collections.emptyList());
 
-        // when & then
-        assertThatThrownBy(() -> weeklyBloodSugarService.getWeeklyBloodSugar(elderId, startDate, typeStr))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("해당 기간에 혈당 데이터가 없습니다: " + startDate + " ~ " + startDate.plusDays(6));
+        // when
+        WeeklyBloodSugarResponse response = weeklyBloodSugarService.getWeeklyBloodSugar(elderId, startDate, typeStr);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getPeriod()).isNotNull();
+        assertThat(response.getPeriod().getStartDate()).isEqualTo(startDate);
+        assertThat(response.getPeriod().getEndDate()).isEqualTo(startDate.plusDays(6));
+        assertThat(response.getData()).isNotNull();
+        assertThat(response.getData()).isEmpty();
+        assertThat(response.getAverage()).isNull();
+        assertThat(response.getLatest()).isNull();
     }
 
     @Test
@@ -140,6 +151,19 @@ class WeeklyBloodSugarServiceTest {
         assertThat(response.getData()).hasSize(1);
         assertThat(response.getAverage().getValue()).isEqualTo(180);
         assertThat(response.getLatest().getValue()).isEqualTo(180);
+    }
+
+    @Test
+    @DisplayName("데이터 없음 - 어르신 ID를 찾을 수 없음")
+    void getWeeklyBloodSugar_ThrowsResourceNotFoundException_ElderNotFound() {
+        // given
+        when(elderRepository.findById(any(Integer.class))).thenReturn(Optional.empty());
+
+        // when, then
+        CustomException exception = assertThrows(CustomException.class,
+                () -> weeklyBloodSugarService.getWeeklyBloodSugar(1, LocalDate.now(), "empty")
+        );
+        assertEquals(ErrorCode.ELDER_NOT_FOUND, exception.getErrorCode());
     }
 
     private BloodSugarRecord createBloodSugarRecord(LocalDateTime dateTime, int value) {

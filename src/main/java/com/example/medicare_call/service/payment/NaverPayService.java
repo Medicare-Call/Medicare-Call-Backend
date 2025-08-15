@@ -8,14 +8,16 @@ import com.example.medicare_call.dto.payment.NaverPayReserveRequest;
 import com.example.medicare_call.dto.payment.NaverPayReserveResponse;
 import com.example.medicare_call.dto.payment.NaverPayApplyResponse;
 import com.example.medicare_call.dto.payment.PaymentApprovalResponse;
-import com.example.medicare_call.repository.OrderRepository;
-import com.example.medicare_call.repository.MemberRepository;
-import com.example.medicare_call.repository.ElderRepository;
-import com.example.medicare_call.repository.SubscriptionRepository;
 import com.example.medicare_call.global.enums.OrderStatus;
 import com.example.medicare_call.global.enums.PaymentMethod;
 import com.example.medicare_call.global.enums.SubscriptionPlan;
 import com.example.medicare_call.global.enums.SubscriptionStatus;
+import com.example.medicare_call.global.exception.CustomException;
+import com.example.medicare_call.global.exception.ErrorCode;
+import com.example.medicare_call.repository.OrderRepository;
+import com.example.medicare_call.repository.MemberRepository;
+import com.example.medicare_call.repository.ElderRepository;
+import com.example.medicare_call.repository.SubscriptionRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
@@ -87,7 +90,7 @@ public class NaverPayService {
         
         // 회원 정보 조회
         Member member = memberRepository.findById(memberId.intValue())
-            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다: " + memberId));
+            .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
         
         // 어르신 정보 검증
         validateElderIds(request.getElderIds());
@@ -164,7 +167,7 @@ public class NaverPayService {
     private void validateElderIds(List<Long> elderIds) {
         for (Long elderId : elderIds) {
             if (!elderRepository.existsById(elderId.intValue())) {
-                throw new IllegalArgumentException("존재하지 않는 어르신입니다: " + elderId);
+                throw new CustomException(ErrorCode.ELDER_NOT_FOUND, "존재하지 않는 어르신 ID: " + elderId);
             }
         }
     }
@@ -219,12 +222,15 @@ public class NaverPayService {
             } else {
                 log.error("네이버페이 결제 승인 실패 - paymentId: {}, response: {}", paymentId, applyResponse);
                 // 실패 시에는 대상 주문에 대해 특정할 수 없으므로, code 없이 실패 응답 반환
-                throw new RuntimeException("네이버페이 결제 승인이 실패했습니다. 고객센터로 문의해 주세요.");
+                throw new CustomException(ErrorCode.NAVER_PAY_API_ERROR, "네이버페이 결제 승인이 실패했습니다. 고객센터로 문의해 주세요.");
             }
 
+        } catch (RestClientException e) {
+            log.error("네이버페이 API 호출 실패 - paymentId: {}, error: {}", paymentId, e.getMessage(), e);
+            throw new CustomException(ErrorCode.NAVER_PAY_API_ERROR, "네이버페이 API 연동 중 오류가 발생했습니다.");
         } catch (Exception e) {
-            log.error("네이버페이 결제 승인 실패 - paymentId: {}, error: {}", paymentId, e.getMessage(), e);
-            throw new RuntimeException("네이버페이 결제 승인 중 오류가 발생했습니다. 고객센터로 문의해 주세요.", e);
+            log.error("네이버페이 결제 승인 중 알 수 없는 오류 발생 - paymentId: {}, error: {}", paymentId, e.getMessage(), e);
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "네이버페이 결제 승인 중 오류가 발생했습니다. 고객센터로 문의해 주세요.");
         }
     }
 
@@ -249,21 +255,17 @@ public class NaverPayService {
 
         // DB에서 주문 정보 조회
         Order order = orderRepository.findByCode(code)
-            .orElseThrow(() -> new RuntimeException("주문 정보를 찾을 수 없습니다: " + code));
+            .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND, "주문 코드를 찾을 수 없습니다: " + code));
 
         try {
             // 주문 상태 확인
             if (order.getStatus() == OrderStatus.PAYMENT_COMPLETED) {
                 log.warn("이미 결제가 완료된 주문입니다: {}", code);
-                return PaymentApprovalResponse.builder()
-                        .orderCode(order.getCode())
-                        .status(order.getStatus())
-                        .message("이미 결제가 완료된 주문입니다.")
-                        .build();
+                throw new CustomException(ErrorCode.ORDER_ALREADY_PROCESSED);
             }
 
             if (order.getStatus() == OrderStatus.PAYMENT_FAILED) {
-                throw new RuntimeException("결제가 실패한 주문입니다: " + code);
+                throw new CustomException(ErrorCode.ORDER_ALREADY_PROCESSED, "결제가 실패했던 주문입니다: " + code);
             }
 
             // 주문 정보 변조 검증
@@ -285,18 +287,20 @@ public class NaverPayService {
 
         } catch (RuntimeException e) {
             // 주문 정보 변조 예외 처리
+            if (e instanceof CustomException) throw e; // 이미 CustomException이면 그대로 던짐
+
             if (e.getMessage().startsWith("주문 정보가 변조되었습니다")) {
                 order.tamper();
                 orderRepository.save(order);
                 log.error("주문 정보 변조 감지로 결제 실패 처리 - code: {}, reason: {}", code, e.getMessage());
+                throw new CustomException(ErrorCode.NAVER_PAY_API_ERROR, e.getMessage());
             } else {
                 // 그 외 검증 실패 시 주문 상태를 '결제 실패'로 변경하고 저장
                 order.failPayment();
                 orderRepository.save(order);
                 log.error("주문 정보 검증 실패로 결제 실패 처리 - code: {}, reason: {}", code, e.getMessage());
+                throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
             }
-            // 처리 중 발생한 예외를 다시 던져서 상위 핸들러가 처리하도록 함
-            throw e;
         }
     }
 
@@ -317,7 +321,7 @@ public class NaverPayService {
 
             for (Long elderId : elderIds) {
                 Elder elder = elderRepository.findById(elderId.intValue())
-                        .orElseThrow(() -> new RuntimeException("어르신 정보를 찾을 수 없습니다: " + elderId));
+                        .orElseThrow(() -> new CustomException(ErrorCode.ELDER_NOT_FOUND, "구독 처리 중 어르신 정보를 찾을 수 없습니다: " + elderId));
 
                 Subscription subscription = subscriptionRepository.findByElderId(elderId.intValue()).orElse(null);
 
@@ -348,7 +352,7 @@ public class NaverPayService {
             }
         } catch (JsonProcessingException e) {
             log.error("주문 정보에서 어르신 ID 목록을 파싱하는 중 오류 발생 - orderId: {}", order.getId(), e);
-            throw new RuntimeException("어르신 ID 목록 파싱 오류", e);
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "주문 정보 파싱 오류");
         }
     }
 

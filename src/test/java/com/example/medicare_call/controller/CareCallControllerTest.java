@@ -3,15 +3,21 @@ package com.example.medicare_call.controller;
 import com.example.medicare_call.domain.CareCallRecord;
 import com.example.medicare_call.domain.CareCallSetting;
 import com.example.medicare_call.domain.Elder;
+import com.example.medicare_call.domain.Member;
 import com.example.medicare_call.dto.carecall.CareCallSettingRequest;
 import com.example.medicare_call.dto.carecall.CareCallTestRequest;
 import com.example.medicare_call.dto.data_processor.CareCallDataProcessRequest;
+import com.example.medicare_call.global.exception.CustomException;
+import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.global.jwt.JwtProvider;
+import com.example.medicare_call.global.jwt.JwtTokenAuthentication;
 import com.example.medicare_call.repository.MemberRepository;
 import com.example.medicare_call.service.carecall.CareCallRequestSenderService;
 import com.example.medicare_call.service.carecall.CareCallSettingService;
 import com.example.medicare_call.service.data_processor.CareCallDataProcessingService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,21 +25,24 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Arrays;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import com.example.medicare_call.global.ResourceNotFoundException;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @WebMvcTest(CareCallController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -219,13 +228,14 @@ class CareCallControllerTest {
                 .build();
 
         when(careCallDataProcessingService.saveCallData(any(CareCallDataProcessRequest.class)))
-                .thenThrow(new ResourceNotFoundException("해당 어르신을 찾을 수 없습니다."));
+                .thenThrow(new CustomException(ErrorCode.ELDER_NOT_FOUND));
 
         // when & then
         mockMvc.perform(post("/call-data")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("어르신을 찾을 수 없습니다."));
     }
 
     @Test
@@ -242,7 +252,7 @@ class CareCallControllerTest {
                 .build();
         
         when(careCallDataProcessingService.saveCallData(any(CareCallDataProcessRequest.class)))
-                .thenThrow(new ResourceNotFoundException("해당 케어콜 설정을 찾을 수 없습니다."));
+                .thenThrow(new CustomException(ErrorCode.CARE_CALL_SETTING_NOT_FOUND));
 
         // when & then
         mockMvc.perform(post("/call-data")
@@ -274,18 +284,21 @@ class CareCallControllerTest {
                 .andExpect(status().isInternalServerError());
     }
 
-    // From CareCallSettingController
     @Test
     @DisplayName("케어콜 시간 설정 성공")
-    void settingCarCallInfo_success() throws Exception {
+    void createCareCallSetting_success() throws Exception {
         // given
         CareCallSettingRequest request = new CareCallSettingRequest(
                 LocalTime.of(9, 0),
                 LocalTime.of(14, 0),
                 LocalTime.of(19, 0)
         );
+        
+        // JWT 인증 설정
+        JwtTokenAuthentication auth = new JwtTokenAuthentication(1L);
+        SecurityContextHolder.getContext().setAuthentication(auth);
 
-        doNothing().when(careCallSettingService).settingCareCall(any(Integer.class), any(CareCallSettingRequest.class));
+        doNothing().when(careCallSettingService).createCareCallSetting(any(Integer.class), any(Integer.class), any(CareCallSettingRequest.class));
 
         // when & then
         mockMvc.perform(post("/elders/1/care-call-setting")
@@ -294,7 +307,6 @@ class CareCallControllerTest {
                 .andExpect(status().isOk());
     }
 
-    // From TestCareCallController
     @Test
     @DisplayName("테스트 케어콜 발송 성공")
     void testCareCall_success() throws Exception {

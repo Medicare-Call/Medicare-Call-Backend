@@ -6,13 +6,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.Builder;
+import lombok.*;
 
 @Entity
 @Table(name = "Member")
 @Getter
+@NoArgsConstructor
 public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,8 +41,6 @@ public class Member {
 
     @OneToMany(mappedBy = "guardian", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Elder> elders = new ArrayList<>();
-
-    public Member() {}
 
     @Builder
     public Member(Integer id, String name, String phone, LocalDate birthDate, Byte gender, LocalDateTime termsAgreedAt, Byte plan) {

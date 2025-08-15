@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 
 @Getter
@@ -28,4 +29,12 @@ public class DailyMedicationResponse {
         private MedicationScheduleTime time;
         private Boolean taken;
     }
+
+    public static DailyMedicationResponse empty(LocalDate date) {
+        return DailyMedicationResponse.builder()
+                .date(date)
+                .medications(Collections.emptyList())
+                .build();
+    }
+
 } 

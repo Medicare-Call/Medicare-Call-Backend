@@ -4,7 +4,8 @@ import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.domain.Member;
 import com.example.medicare_call.domain.Subscription;
 import com.example.medicare_call.dto.SubscriptionResponse;
-import com.example.medicare_call.global.ResourceNotFoundException;
+import com.example.medicare_call.global.exception.CustomException;
+import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.global.enums.SubscriptionPlan;
 import com.example.medicare_call.global.enums.SubscriptionStatus;
 import com.example.medicare_call.repository.MemberRepository;
@@ -21,21 +22,23 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Subscription 서비스 테스트")
-class SubscriptionServiceTest {
-
-    @InjectMocks
-    private SubscriptionService subscriptionService;
+public class SubscriptionServiceTest {
 
     @Mock
     private SubscriptionRepository subscriptionRepository;
 
     @Mock
     private MemberRepository memberRepository;
+
+    @InjectMocks
+    private SubscriptionService subscriptionService;
 
     @Test
     @DisplayName("구독 정보 조회 성공")
@@ -76,9 +79,10 @@ class SubscriptionServiceTest {
         given(memberRepository.existsById(memberId.intValue())).willReturn(false);
 
         // when & then
-        assertThatThrownBy(() -> subscriptionService.getSubscriptionsByMember(memberId))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("해당 ID의 회원을 찾을 수 없습니다:");
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            subscriptionService.getSubscriptionsByMember(memberId);
+        });
+        assertEquals(ErrorCode.MEMBER_NOT_FOUND, exception.getErrorCode());
     }
 
     @Test

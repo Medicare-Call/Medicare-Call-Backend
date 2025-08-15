@@ -4,7 +4,8 @@ import com.example.medicare_call.dto.ElderRegisterRequest;
 import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.dto.ElderResponse;
 import com.example.medicare_call.dto.ElderUpdateRequest;
-import com.example.medicare_call.global.ResourceNotFoundException;
+import com.example.medicare_call.global.exception.CustomException;
+import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.global.enums.Gender;
 import com.example.medicare_call.repository.ElderRepository;
 import com.example.medicare_call.repository.MemberRepository;
@@ -26,7 +27,7 @@ public class ElderService {
     @Transactional
     public Elder registerElder(Integer memberId, @Valid ElderRegisterRequest request) {
         Member guardian = memberRepository.findById(memberId)
-            .orElseThrow(() -> new ResourceNotFoundException("보호자를 찾을 수 없습니다: " + memberId));
+            .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
         Elder elder = Elder.builder()
             .name(request.getName())
             .birthDate(request.getBirthDate())
@@ -41,7 +42,7 @@ public class ElderService {
 
     public List<ElderResponse> getElder(Integer memberId){
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
         return member.getElders().stream()
                 .map(elder -> new ElderResponse(
@@ -60,8 +61,8 @@ public class ElderService {
     @Transactional
     public ElderResponse updateElder(Integer memberId, Integer elderId, ElderUpdateRequest req) {
         Elder updateElder = elderRepository.findById(elderId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 어르신입니다."));
-        if(!updateElder.getGuardian().getId().equals(memberId)) throw new AccessDeniedException("해당 어르신에 대한 권한이 없습니다.");
+                .orElseThrow(() -> new CustomException(ErrorCode.ELDER_NOT_FOUND));
+        if(!updateElder.getGuardian().getId().equals(memberId)) throw new CustomException(ErrorCode.HANDLE_ACCESS_DENIED);
 
         updateElder.applySettings(
                 req.name(),
@@ -86,8 +87,8 @@ public class ElderService {
     @Transactional
     public void deleteElder(Integer memberId, Integer elderId) {
         Elder elder = elderRepository.findById(elderId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 어르신입니다."));
-        if(!elder.getGuardian().getId().equals(memberId)) throw new AccessDeniedException("해당 어르신에 대한 권한이 없습니다.");
+                .orElseThrow(() -> new CustomException(ErrorCode.ELDER_NOT_FOUND));
+        if(!elder.getGuardian().getId().equals(memberId)) throw new CustomException(ErrorCode.HANDLE_ACCESS_DENIED);
 
         elderRepository.delete(elder);
     }

@@ -1,8 +1,11 @@
 package com.example.medicare_call.controller;
 
+import com.example.medicare_call.dto.report.DailyMealResponse;
 import com.example.medicare_call.dto.report.DailyMedicationResponse;
-import com.example.medicare_call.global.ResourceNotFoundException;
+import com.example.medicare_call.dto.report.DailyMentalAnalysisResponse;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
+import com.example.medicare_call.global.exception.CustomException;
+import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.service.data_processor.MedicationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -101,33 +104,31 @@ class MedicationControllerTest {
         String date = "2025-07-16";
 
         when(medicationService.getDailyMedication(eq(elderId), any(LocalDate.class)))
-                .thenThrow(new ResourceNotFoundException("어르신을 찾을 수 없습니다: " + elderId));
+                .thenThrow(new CustomException(ErrorCode.ELDER_NOT_FOUND));
 
         // when & then
         mockMvc.perform(get("/elders/{elderId}/medication", elderId)
                         .param("date", date))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.status").value(404))
-                .andExpect(jsonPath("$.error").value("리소스를 찾을 수 없음"))
-                .andExpect(jsonPath("$.message").value("어르신을 찾을 수 없습니다: " + elderId));
+                .andExpect(jsonPath("$.message").value("어르신을 찾을 수 없습니다."));
     }
 
     @Test
-    @DisplayName("날짜별 복약 데이터 조회 실패 - 데이터 없음")
-    void getDailyMedication_NoData_Returns404() throws Exception {
+    @DisplayName("날짜별 복약 데이터 조회 성공 - 데이터 없음")
+    void getDailyMedication_NoData_ReturnsEmpty() throws Exception {
         // given
         Integer elderId = 1;
         LocalDate date = LocalDate.of(2024, 1, 1);
 
         when(medicationService.getDailyMedication(eq(elderId), any(LocalDate.class)))
-                .thenThrow(new ResourceNotFoundException("해당 날짜에 복약 데이터가 없습니다: " + date));
+                .thenReturn(DailyMedicationResponse.empty(LocalDate.of(2024, 1, 1)));
 
         // when & then
         mockMvc.perform(get("/elders/{elderId}/medication", elderId)
                         .param("date", "2024-01-01"))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.status").value(404))
-                .andExpect(jsonPath("$.error").value("리소스를 찾을 수 없음"))
-                .andExpect(jsonPath("$.message").value("해당 날짜에 복약 데이터가 없습니다: " + date));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.date").value("2024-01-01"))
+                .andExpect(jsonPath("$.medications").isArray())
+                .andExpect(jsonPath("$.medications").isEmpty());
     }
 } 

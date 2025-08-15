@@ -2,9 +2,9 @@ package com.example.medicare_call.service.data_processor;
 
 import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
-import com.example.medicare_call.repository.MedicationRepository;
-import com.example.medicare_call.repository.MedicationScheduleRepository;
-import com.example.medicare_call.repository.MedicationTakenRecordRepository;
+import com.example.medicare_call.global.exception.CustomException;
+import com.example.medicare_call.global.exception.ErrorCode;
+import com.example.medicare_call.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,22 +17,20 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.example.medicare_call.dto.report.DailyMedicationResponse;
-import com.example.medicare_call.global.ResourceNotFoundException;
 import com.example.medicare_call.global.enums.MedicationTakenStatus;
 import com.example.medicare_call.repository.ElderRepository;
 
 import java.time.LocalDate;
 
 @ExtendWith(MockitoExtension.class)
-class MedicationServiceTest {
+public class MedicationServiceTest {
 
     @Mock
     private MedicationTakenRecordRepository medicationTakenRecordRepository;
@@ -158,6 +156,7 @@ class MedicationServiceTest {
     @DisplayName("복약 데이터 저장 실패 - 약을 찾을 수 없음")
     void saveMedicationTakenRecord_fail_medicationNotFound() {
         // given
+        CareCallRecord record = new CareCallRecord();
         HealthDataExtractionResponse.MedicationData medicationData = HealthDataExtractionResponse.MedicationData.builder()
                 .medicationType("존재하지 않는 약")
                 .taken("복용함")
@@ -166,13 +165,11 @@ class MedicationServiceTest {
 
         when(medicationRepository.findByName("존재하지 않는 약")).thenReturn(Optional.empty());
 
-        // when
-        medicationService.saveMedicationTakenRecord(callRecord, medicationData);
-
-        // then
-        verify(medicationRepository).findByName("존재하지 않는 약");
-        verify(medicationScheduleRepository, never()).findByElder(any());
-        verify(medicationTakenRecordRepository, never()).save(any());
+        // when & then
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            medicationService.saveMedicationTakenRecord(record, medicationData);
+        });
+        assertEquals(ErrorCode.MEDICATION_NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
@@ -397,24 +394,27 @@ class MedicationServiceTest {
         when(elderRepository.findById(elderId)).thenReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> medicationService.getDailyMedication(elderId, date))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("어르신을 찾을 수 없습니다: " + elderId);
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            medicationService.getDailyMedication(elderId, date);
+        });
+        assertEquals(ErrorCode.ELDER_NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
-    @DisplayName("복약 식사 데이터 조회 실패 - 데이터 없음")
+    @DisplayName("복약 데이터 조회 성공 - 데이터 없음")
     void getDailyMedication_ThrowsResourceNotFoundException() {
         // given
         Integer elderId = 1;
-        LocalDate date = LocalDate.of(2024, 1, 1);
+        LocalDate date = LocalDate.of(2025, 7, 16);
 
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(new Elder()));
-        when(medicationTakenRecordRepository.findByElderIdAndDate(elderId, date)).thenReturn(List.of());
 
-        // when & then
-        assertThatThrownBy(() -> medicationService.getDailyMedication(elderId, date))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("해당 날짜에 복용 데이터가 없습니다: " + date);
+        // when
+        DailyMedicationResponse response = medicationService.getDailyMedication(elderId, date);
+
+        // then
+        assertThat(response).isNotNull();
+        assertEquals(date, response.getDate());
+        assertTrue(response.getMedications().isEmpty());
     }
 } 

@@ -2,7 +2,6 @@ package com.example.medicare_call.service.carecall;
 
 import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.carecall.CareCallTestRequest;
-import com.example.medicare_call.global.ResourceNotFoundException;
 import com.example.medicare_call.global.enums.CallType;
 import com.example.medicare_call.global.enums.ElderRelation;
 import com.example.medicare_call.global.enums.ResidenceType;
@@ -23,6 +22,8 @@ import org.springframework.web.client.RestTemplate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.example.medicare_call.global.exception.CustomException;
+import com.example.medicare_call.global.exception.ErrorCode;
 
 
 @Slf4j
@@ -45,7 +46,7 @@ public class CareCallRequestSenderService {
     public void sendCall(Integer settingId, Integer elderId, CallType callType) {
         System.out.println("Call URL: " + callUrl);
         Elder elder = elderRepository.findById(elderId)
-                .orElseThrow(() -> new ResourceNotFoundException("어르신을 찾을 수 없습니다: " + elderId));
+                .orElseThrow(() -> new CustomException(ErrorCode.ELDER_NOT_FOUND, "케어콜 발송 대상 어르신을 찾을 수 없습니다. ID: " + elderId));
 
         ElderHealthInfo healthInfo = healthInfoRepository.findByElderId(elderId);
         List<Disease> diseases = elderDiseaseRepository.findDiseasesByElder(elder);

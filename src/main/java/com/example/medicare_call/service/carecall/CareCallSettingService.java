@@ -3,10 +3,11 @@ package com.example.medicare_call.service.carecall;
 import com.example.medicare_call.domain.CareCallSetting;
 import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.dto.carecall.CareCallSettingRequest;
+import com.example.medicare_call.global.exception.CustomException;
+import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.global.enums.CallRecurrenceType;
 import com.example.medicare_call.repository.CareCallSettingRepository;
 import com.example.medicare_call.repository.ElderRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,9 +19,12 @@ public class CareCallSettingService {
     private final ElderRepository elderRepository;
 
     @Transactional
-    public void settingCareCall(Integer elderId, CareCallSettingRequest request){
+    public void createCareCallSetting(Integer memberId, Integer elderId, CareCallSettingRequest request){
         Elder elder = elderRepository.findById(elderId)
-                .orElseThrow(() -> new EntityNotFoundException("해당 ID로 등록된 어르신을 찾을 수 없습니다.: " + elderId));
+                .orElseThrow(() -> new CustomException(ErrorCode.ELDER_NOT_FOUND));
+
+        if(!elder.getGuardian().getId().equals(memberId))
+            throw new CustomException(ErrorCode.HANDLE_ACCESS_DENIED);
 
         CareCallSetting newCareCall = CareCallSetting.builder()
                 .elder(elder)

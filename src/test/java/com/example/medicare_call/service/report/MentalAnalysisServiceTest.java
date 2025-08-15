@@ -21,15 +21,10 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-import com.example.medicare_call.global.ResourceNotFoundException;
-
 @ExtendWith(MockitoExtension.class)
+@DisplayName("MentalAnalysisService Test")
 class MentalAnalysisServiceTest {
 
     @Mock
@@ -116,10 +111,13 @@ class MentalAnalysisServiceTest {
         when(careCallRecordRepository.findByElderIdAndDateWithPsychologicalData(elderId, date))
                 .thenReturn(Collections.emptyList());
 
-        // when & then
-        assertThatThrownBy(() -> mentalAnalysisService.getDailyMentalAnalysis(elderId, date))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("해당 날짜에 심리 상태 데이터가 없습니다: " + date);
+        // when
+        DailyMentalAnalysisResponse response = mentalAnalysisService.getDailyMentalAnalysis(elderId, date);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getDate()).isEqualTo(date);
+        assertThat(response.getCommentList()).isEmpty();
     }
 
     @Test

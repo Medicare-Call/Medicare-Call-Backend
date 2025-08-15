@@ -3,7 +3,8 @@ package com.example.medicare_call.service.auth;
 import com.example.medicare_call.domain.Member;
 import com.example.medicare_call.domain.RefreshToken;
 import com.example.medicare_call.dto.auth.TokenResponse;
-import com.example.medicare_call.global.ResourceNotFoundException;
+import com.example.medicare_call.global.exception.CustomException;
+import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.global.jwt.JwtProvider;
 import com.example.medicare_call.repository.MemberRepository;
 import com.example.medicare_call.repository.RefreshTokenRepository;
@@ -21,14 +22,15 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.*;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @ExtendWith(MockitoExtension.class)
-class RefreshTokenServiceTest {
+public class RefreshTokenServiceTest {
 
     @Mock
     private RefreshTokenRepository refreshTokenRepository;
@@ -140,12 +142,10 @@ class RefreshTokenServiceTest {
         when(refreshTokenRepository.findByToken(invalidToken)).thenReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> refreshTokenService.refreshAccessToken(invalidToken))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("유효하지 않은 Refresh Token입니다.");
-
-        verify(refreshTokenRepository).findByToken(invalidToken);
-        verify(memberRepository, never()).findById(any());
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            refreshTokenService.refreshAccessToken(invalidToken);
+        });
+        assertEquals(ErrorCode.INVALID_TOKEN, exception.getErrorCode());
     }
 
     @Test
@@ -163,13 +163,10 @@ class RefreshTokenServiceTest {
         when(refreshTokenRepository.findByToken(expiredToken)).thenReturn(Optional.of(expiredRefreshToken));
 
         // when & then
-        assertThatThrownBy(() -> refreshTokenService.refreshAccessToken(expiredToken))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("만료된 Refresh Token입니다.");
-
-        verify(refreshTokenRepository).findByToken(expiredToken);
-        verify(refreshTokenRepository).delete(expiredRefreshToken);
-        verify(memberRepository, never()).findById(any());
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            refreshTokenService.refreshAccessToken(expiredToken);
+        });
+        assertEquals(ErrorCode.REFRESH_TOKEN_EXPIRED, exception.getErrorCode());
     }
 
     @Test

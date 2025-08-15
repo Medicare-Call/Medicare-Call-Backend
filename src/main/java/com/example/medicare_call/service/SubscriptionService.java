@@ -1,7 +1,8 @@
 package com.example.medicare_call.service;
 
 import com.example.medicare_call.dto.SubscriptionResponse;
-import com.example.medicare_call.global.ResourceNotFoundException;
+import com.example.medicare_call.global.exception.CustomException;
+import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.MemberRepository;
 import com.example.medicare_call.repository.SubscriptionRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,7 @@ public class SubscriptionService {
 
     public List<SubscriptionResponse> getSubscriptionsByMember(Long memberId) {
         if (!memberRepository.existsById(memberId.intValue())) {
-            throw new ResourceNotFoundException("해당 ID의 회원을 찾을 수 없습니다: " + memberId);
+            throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
         }
 
         return subscriptionRepository.findByMemberId(memberId.intValue()).stream()

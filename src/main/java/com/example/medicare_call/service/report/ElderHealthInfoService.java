@@ -1,9 +1,10 @@
 package com.example.medicare_call.service.report;
 
-import com.example.medicare_call.dto.ElderHealthInfoCreateRequest;
 import com.example.medicare_call.domain.*;
+import com.example.medicare_call.dto.ElderHealthInfoCreateRequest;
 import com.example.medicare_call.dto.ElderHealthInfoResponse;
-import com.example.medicare_call.global.ResourceNotFoundException;
+import com.example.medicare_call.global.exception.CustomException;
+import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,7 @@ public class ElderHealthInfoService {
     public void upsertElderHealthInfo(Integer elderId, ElderHealthInfoCreateRequest request) {
         // TODO : 이쪽 Exception에 대한 Monitoring 추가 필요. 데이터의 무결성이 깨졌을 확률이 높다
         Elder elder = elderRepository.findById(elderId)
-                .orElseThrow(() -> new ResourceNotFoundException("어르신을 찾을 수 없습니다. elderId: " + elderId));
+                .orElseThrow(() -> new CustomException(ErrorCode.ELDER_NOT_FOUND));
 
         // 질환 등록
         if (request.getDiseaseNames() != null && !request.getDiseaseNames().isEmpty()) {
@@ -94,7 +95,7 @@ public class ElderHealthInfoService {
     }
     public List<ElderHealthInfoResponse> getElderHealth(Integer memberId){
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new ResourceNotFoundException("보호자를 찾을 수 없습니다. memberId + " +memberId));
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
         List<Elder> elders = elderRepository.findByGuardian(member);
 
         List<ElderHealthInfoResponse> responses = new ArrayList<>();
@@ -132,8 +133,6 @@ public class ElderHealthInfoService {
         }
 
         return responses;
-
-
     }
 
     public Map<String, List<String>> getMedicationsInfo(Elder elder) {
