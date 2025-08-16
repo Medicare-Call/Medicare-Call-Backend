@@ -51,6 +51,14 @@ public class CareCallController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    // TODO [DEMO] 데모데이 시연용 임시 코드 → 정식 버전 구현 시 제거 필요
+    @Operation(summary = "즉시 케어콜 발송", description = "memberId를 통해 해당 보호자의 첫 번째 어르신에게 즉시 케어콜을 발송합니다.")
+    @PostMapping("/care-call/immediate")
+    public ResponseEntity<String> sendImmediateCareCall(@Parameter(hidden = true) @AuthUser Long authMemberId) {
+        String result = careCallRequestSenderService.sendImmediateCallToFirstElder(authMemberId.intValue());
+        return ResponseEntity.ok(result);
+    }
+
     //TODO: 개발 완료 후 삭제
     @Operation(summary = "[테스트용] 프롬프트 테스트", description = "케어콜에 전송하는 프롬프트를 직접 작성하여 전화 품질을 테스트합니다.")
     @PostMapping("/test-care-call")

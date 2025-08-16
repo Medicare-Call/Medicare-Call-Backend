@@ -1,0 +1,145 @@
+package com.example.medicare_call.controller;
+
+import com.example.medicare_call.domain.Elder;
+import com.example.medicare_call.domain.Member;
+import com.example.medicare_call.global.enums.ElderRelation;
+import com.example.medicare_call.global.enums.ResidenceType;
+import com.example.medicare_call.global.jwt.JwtProvider;
+import com.example.medicare_call.repository.ElderRepository;
+import com.example.medicare_call.repository.MemberRepository;
+import com.example.medicare_call.service.carecall.CareCallRequestSenderService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import com.example.medicare_call.service.carecall.CareCallSettingService;
+import com.example.medicare_call.service.data_processor.CareCallDataProcessingService;
+import com.example.medicare_call.repository.CareCallSettingRepository;
+import com.example.medicare_call.global.annotation.AuthenticationArgumentResolver;
+import com.example.medicare_call.global.exception.CustomException;
+import com.example.medicare_call.global.exception.ErrorCode;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@WebMvcTest(controllers = CareCallController.class, 
+    excludeAutoConfiguration = {org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class})
+@Import(TestConfig.class)
+@DisplayName("즉시 케어콜 컨트롤러 테스트")
+class CareCallControllerImmediateTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private CareCallRequestSenderService careCallRequestSenderService;
+
+    @MockBean
+    private CareCallSettingService careCallSettingService;
+
+    @MockBean
+    private CareCallDataProcessingService careCallDataProcessingService;
+
+    @MockBean
+    private MemberRepository memberRepository;
+
+    @MockBean
+    private ElderRepository elderRepository;
+
+    @MockBean
+    private CareCallSettingRepository careCallSettingRepository;
+
+    @MockBean
+    private JwtProvider jwtProvider;
+
+    @MockBean
+    private AuthenticationArgumentResolver authenticationArgumentResolver;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    private Member testMember;
+    private Elder testElder1;
+    private Elder testElder2;
+
+    @BeforeEach
+    void setUp() {
+        testMember = Member.builder()
+                .id(1)
+                .name("김보호자")
+                .phone("01012345678")
+                .gender((byte) 1)
+                .termsAgreedAt(LocalDateTime.now())
+                .plan((byte) 1)
+                .build();
+
+        testElder1 = Elder.builder()
+                .id(1)
+                .guardian(testMember)
+                .name("김할머니")
+                .birthDate(LocalDate.of(1940, 1, 1))
+                .gender((byte) 0)
+                .phone("01087654321")
+                .relationship(ElderRelation.GRANDCHILD)
+                .residenceType(ResidenceType.ALONE)
+                .build();
+
+        testElder2 = Elder.builder()
+                .id(2)
+                .guardian(testMember)
+                .name("박할아버지")
+                .birthDate(LocalDate.of(1938, 5, 15))
+                .gender((byte) 1)
+                .phone("01098765432")
+                .relationship(ElderRelation.CHILD)
+                .residenceType(ResidenceType.ALONE)
+                .build();
+
+        // Member의 elders 리스트 설정
+        testMember.getElders().addAll(Arrays.asList(testElder1, testElder2));
+    }
+
+    @Test
+    @DisplayName("토큰의 memberId로 첫 번째 어르신에게 즉시 케어콜 발송 - 성공")
+    void sendImmediateCareCall_Success() throws Exception {
+        // given
+        Integer memberId = 1; // TestConfig에서 @AuthUser는 항상 1L을 반환
+        String expectedResult = "김할머니 어르신께 즉시 케어콜 발송이 완료되었습니다.";
+        
+        when(careCallRequestSenderService.sendImmediateCallToFirstElder(memberId))
+                .thenReturn(expectedResult);
+
+        // when & then
+        mockMvc.perform(post("/care-call/immediate")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(expectedResult));
+    }
+
+    @Test
+    @DisplayName("등록된 어르신이 없는 경우")
+    void sendImmediateCareCall_NoElders() throws Exception {
+        // given
+        Integer memberId = 1; // TestConfig에서 @AuthUser는 항상 1L을 반환
+        
+        when(careCallRequestSenderService.sendImmediateCallToFirstElder(memberId))
+                .thenThrow(new CustomException(ErrorCode.ELDER_NOT_FOUND));
+
+        // when & then
+        mockMvc.perform(post("/care-call/immediate")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+}
