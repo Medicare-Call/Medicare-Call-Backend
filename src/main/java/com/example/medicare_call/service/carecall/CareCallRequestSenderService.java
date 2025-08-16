@@ -19,9 +19,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 
@@ -40,6 +42,7 @@ public class CareCallRequestSenderService {
     private final ElderHealthInfoRepository healthInfoRepository;
     private final ElderDiseaseRepository elderDiseaseRepository;
     private final MedicationScheduleRepository medicationScheduleRepository;
+    private final CareCallSettingRepository careCallSettingRepository;
 
     private final CallPromptGeneratorFactory callPromptGeneratorFactory;
 
@@ -59,6 +62,54 @@ public class CareCallRequestSenderService {
         String prompt = promptGenerator.generate(elder, healthInfo, diseases, medicationSchedules);
 
         sendPrompt(settingId, elder.getId(), elder.getPhone(), prompt);
+    }
+
+    /**
+     * // TODO [DEMO] 데모데이 시연용 임시 코드 → 정식 버전 구현 시 제거 필요
+     * memberId를 통해 해당 보호자의 첫 번째 어르신에게 즉시 케어콜 발송
+     */
+    public String sendImmediateCallToFirstElder(Integer memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND, "보호자를 찾을 수 없습니다. ID: " + memberId));
+
+        List<Elder> elders = member.getElders();
+        if (elders.isEmpty()) {
+            throw new CustomException(ErrorCode.ELDER_NOT_FOUND);
+        }
+
+        Elder firstElder = elders.get(0);
+        
+        try {
+            CareCallSetting setting = getOrCreateImmediateSetting(firstElder);
+            sendCall(setting.getId(), firstElder.getId(), CallType.FIRST);
+            return String.format("%s 어르신께 즉시 케어콜 발송이 완료되었습니다.", firstElder.getName());
+        } catch (Exception e) {
+            log.error("즉시 케어콜 발송 실패 - elderId: {}, error: {}", firstElder.getId(), e.getMessage());
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "케어콜 발송 중 오류가 발생했습니다: " + e.getMessage());
+        }
+    }
+
+    /**
+     * // TODO [DEMO] 데모데이 시연용 임시 코드 → 정식 버전 구현 시 제거 필요
+     * 즉시 전화를 위한 CareCallSetting 생성 또는 업데이트
+     */
+    private CareCallSetting getOrCreateImmediateSetting(Elder elder) {
+        LocalTime currentTime = LocalTime.now().withSecond(0).withNano(0);
+        
+        Optional<CareCallSetting> existingSetting = careCallSettingRepository.findByElder(elder);
+        
+        if (existingSetting.isPresent()) {
+            CareCallSetting setting = existingSetting.get();
+            setting.update(currentTime, setting.getSecondCallTime(), setting.getThirdCallTime());
+            return careCallSettingRepository.save(setting);
+        } else {
+            CareCallSetting newSetting = CareCallSetting.builder()
+                    .elder(elder)
+                    .firstCallTime(currentTime)
+                    .recurrence((byte) 0)
+                    .build();
+            return careCallSettingRepository.save(newSetting);
+        }
     }
 
     //TODO: 개발 완료 후 삭제. 테스트용 member와 elder정보이므로 DB에 저장하지 않는다.
