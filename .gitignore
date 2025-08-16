@@ -39,5 +39,5 @@ out/
 ### Credentials ###
 .env
 
-### Test Coveraage ###
+### Test Coverage ###
 /htmlReport/
