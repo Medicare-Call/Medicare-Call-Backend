@@ -15,6 +15,7 @@ public enum ErrorCode {
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "C004", "일시적인 서버 오류가 발생했습니다. 잠시 후 다시 시도해 주세요."),
     INVALID_TYPE_VALUE(HttpStatus.BAD_REQUEST, "C005", "입력 형식이 올바르지 않습니다. 올바른 형식으로 입력해 주세요."),
     HANDLE_ACCESS_DENIED(HttpStatus.FORBIDDEN, "C006", "해당 작업에 대한 권한이 없습니다."),
+    METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "C007", "지원하지 않는 요청 방식입니다. 올바른 방식으로 다시 시도해 주세요."),
 
     // Auth
     ACCESS_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "A003", "로그인이 만료되었습니다. 다시 로그인해 주세요."),
