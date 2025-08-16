@@ -73,10 +73,6 @@ naverpay:
     id: ${NAVERPAY_PARTNER_ID}
   api:
     url: ${NAVERPAY_API_URL}
-  sdk:
-    mode: ${NAVERPAY_SDK_MODE}
-
-base-url: ${LOCAL_BASE_URL}
 
 ---
 spring:
@@ -143,7 +139,3 @@ naverpay:
     id: ${NAVERPAY_PARTNER_ID}
   api:
     url: ${NAVERPAY_API_URL}
-  sdk:
-    mode: ${NAVERPAY_SDK_MODE:production}
-
-base-url: ${APP_BASE_URL}
