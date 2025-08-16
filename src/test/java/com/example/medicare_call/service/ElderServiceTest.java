@@ -3,6 +3,7 @@ package com.example.medicare_call.service;
 import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.dto.ElderRegisterRequest;
 import com.example.medicare_call.global.enums.ElderRelation;
+import com.example.medicare_call.global.enums.ElderStatus;
 import com.example.medicare_call.global.enums.ResidenceType;
 import com.example.medicare_call.global.enums.Gender;
 import com.example.medicare_call.repository.ElderRepository;
@@ -25,6 +26,8 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -157,5 +160,27 @@ class ElderServiceTest {
             elderService.deleteElder(memberId, elderId);
         });
         assertEquals(ErrorCode.HANDLE_ACCESS_DENIED, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("어르신 정보 삭제 성공 (soft delete)")
+    void deleteElder_success_softDelete() {
+        // given
+        Integer memberId = 1;
+        Integer elderId = 1;
+
+        Member guardian = Member.builder().id(memberId).build();
+        Elder elder = Elder.builder()
+                .id(elderId)
+                .guardian(guardian)
+                .status(ElderStatus.ACTIVATED)
+                .build();
+        when(elderRepository.findById(elderId)).thenReturn(Optional.of(elder));
+
+        // when
+        elderService.deleteElder(memberId, elderId);
+
+        // then
+        verify(elderRepository, times(1)).delete(elder);
     }
 } 
