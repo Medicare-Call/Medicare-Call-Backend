@@ -45,3 +45,7 @@ naverpay:
     id: test-partner-id
   api:
     url: https://example.com
+  sdk:
+    mode: test
+
+base-url: https://example.com
