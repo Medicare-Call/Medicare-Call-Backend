@@ -9,35 +9,37 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
 
     // Common
-    INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "C001", "잘못된 입력 값입니다."),
-    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "C004", "서버에서 알 수 없는 오류가 발생하였습니다. 고객센터에 문의해 주세요."),
-    INVALID_TYPE_VALUE(HttpStatus.BAD_REQUEST, "C005", "요청 데이터 형식이 올바르지 않습니다."),
+    INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "C001", "입력하신 정보가 올바르지 않습니다. 다시 확인해 주세요."),
+    ENTITY_ALREADY_EXISTS(HttpStatus.CONFLICT, "C002", "이미 등록된 정보입니다. 다른 정보로 시도해 주세요."),
+    NOT_FOUND(HttpStatus.NOT_FOUND, "C003", "요청하신 페이지나 기능을 찾을 수 없습니다."),
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "C004", "일시적인 서버 오류가 발생했습니다. 잠시 후 다시 시도해 주세요."),
+    INVALID_TYPE_VALUE(HttpStatus.BAD_REQUEST, "C005", "입력 형식이 올바르지 않습니다. 올바른 형식으로 입력해 주세요."),
     HANDLE_ACCESS_DENIED(HttpStatus.FORBIDDEN, "C006", "해당 작업에 대한 권한이 없습니다."),
 
     // Auth
-    ACCESS_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "A003", "Access token 이 만료되었습니다."),
-    INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "A004", "JWT 검증 중 오류가 발생했습니다."),
-    REFRESH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "A005", "Refresh token 이 만료되었습니다."),
-
+    ACCESS_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "A003", "로그인이 만료되었습니다. 다시 로그인해 주세요."),
+    INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "A004", "인증 정보가 올바르지 않습니다. 다시 로그인해 주세요."),
+    REFRESH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "A005", "로그인 세션이 만료되었습니다. 다시 로그인해 주세요."),
+    SMS_VERIFICATION_FAILED(HttpStatus.BAD_REQUEST, "A006", "인증번호가 올바르지 않거나 만료되었습니다. 다시 확인해 주세요."),
 
     // Member
-    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "M001", "회원정보를 찾을 수 없습니다."),
+    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "M001", "존재하지 않는 회원입니다."),
 
     // Elder
-    ELDER_NOT_FOUND(HttpStatus.NOT_FOUND, "E001", "어르신을 찾을 수 없습니다."),
+    ELDER_NOT_FOUND(HttpStatus.NOT_FOUND, "E001", "등록되지 않은 어르신입니다."),
 
     // CareCall
-    CARE_CALL_SETTING_NOT_FOUND(HttpStatus.NOT_FOUND, "CC001", "케어콜 설정을 찾을 수 없습니다."),
+    CARE_CALL_SETTING_NOT_FOUND(HttpStatus.NOT_FOUND, "CC001", "케어콜 설정 정보를 찾을 수 없습니다."),
 
     // Medication
-    MEDICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "MD001", "약 정보를 찾을 수 없습니다."),
+    MEDICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "MD001", "해당 복용약 정보를 찾을 수 없습니다."),
 
     // Order
-    ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "O001", "주문 정보를 찾을 수 없습니다,"),
-    ORDER_ALREADY_PROCESSED(HttpStatus.BAD_REQUEST, "O002", "이미 처리된 주문입니다."),
+    ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "O001", "주문 내역을 찾을 수 없습니다."),
+    ORDER_ALREADY_PROCESSED(HttpStatus.BAD_REQUEST, "O002", "이미 처리 완료된 주문입니다."),
 
     // NaverPay
-    NAVER_PAY_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "N001", "네이버페이 오류가 발생했습니다.");
+    NAVER_PAY_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "N001", "결제 처리 중 오류가 발생했습니다. 다시 시도해 주세요.");
 
 
     private final HttpStatus status;

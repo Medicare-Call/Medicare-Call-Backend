@@ -121,7 +121,7 @@ class SmsControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.verified").value(false))
-                .andExpect(jsonPath("$.message").value("인증번호가 올바르지 않거나 만료되었습니다."));
+                .andExpect(jsonPath("$.message").value("인증번호가 올바르지 않거나 만료되었습니다. 다시 확인해 주세요."));
     }
 
 }
