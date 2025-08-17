@@ -31,7 +31,7 @@ public class MemberController {
         return ResponseEntity.ok(tokenResponse);
     }
 
-    @GetMapping("/me")
+    @GetMapping("/member")
     @Operation(summary = "내 정보 조회", description = "현재 로그인한 사용자의 정보를 조회합니다")
     public ResponseEntity<MemberInfoResponse> getMemberInfo(@Parameter(hidden = true) @AuthUser Long memberId){
         MemberInfoResponse memberInfoResponse = memberService.getMemberInfo(memberId.intValue());
