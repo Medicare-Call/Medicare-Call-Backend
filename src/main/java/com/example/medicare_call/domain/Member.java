@@ -1,5 +1,7 @@
 package com.example.medicare_call.domain;
 
+import com.example.medicare_call.global.enums.Gender;
+import com.example.medicare_call.global.enums.NotificationStatus;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -39,8 +41,28 @@ public class Member {
     @Column(name = "plan") //처음 회원가입 시 plan이 없으므로  nullable=false 조건 삭제
     private Byte plan;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "push_all", nullable = false)
+    private NotificationStatus pushAll = NotificationStatus.ON;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "push_carecall_completed", nullable = false)
+    private NotificationStatus pushCarecallCompleted = NotificationStatus.ON;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "push_health_alert", nullable = false)
+    private NotificationStatus pushHealthAlert = NotificationStatus.ON;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "push_carecall_missed", nullable = false)
+    private NotificationStatus pushCarecallMissed = NotificationStatus.ON;
+
     @OneToMany(mappedBy = "guardian", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Elder> elders = new ArrayList<>();
+
+    public Gender getGenderEnum() {
+        return Gender.fromCode(gender); // byte값 → Enum 변환
+    }
 
     @Builder
     public Member(Integer id, String name, String phone, LocalDate birthDate, Byte gender, LocalDateTime termsAgreedAt, Byte plan) {
