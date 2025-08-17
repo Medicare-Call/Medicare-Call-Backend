@@ -276,14 +276,14 @@ class NaverPayServiceTest {
         String paymentId = "20170201NP1043587747";
 
         // 네이버페이 API 응답 (프리미엄 플랜)
-        NaverPayApplyResponse mockResponse = createMockApplyResponse("프리미엄", 29000);
+        NaverPayApplyResponse mockResponse = createMockApplyResponse(SubscriptionPlan.PREMIUM.getProductName(), 29000);
         ResponseEntity<NaverPayApplyResponse> responseEntity = new ResponseEntity<>(mockResponse, HttpStatus.OK);
 
         when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(NaverPayApplyResponse.class)))
                 .thenReturn(responseEntity);
 
         // 주문 조회 (프리미엄 플랜, 어르신 1명)
-        Order order = createMockOrder("프리미엄", 29000, "[1]");
+        Order order = createMockOrder(SubscriptionPlan.PREMIUM.getProductName(), 29000, "[1]");
         when(orderRepository.findByCode("550e8400-e29b-41d4-a716-446655440000")).thenReturn(Optional.of(order));
         when(orderRepository.save(any(Order.class))).thenReturn(order);
 
@@ -328,10 +328,11 @@ class NaverPayServiceTest {
         when(orderRepository.findByCode("550e8400-e29b-41d4-a716-446655440000")).thenReturn(Optional.of(order));
 
         // when & then
-        assertThatThrownBy(() -> naverPayService.approvePayment(paymentId))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("네이버페이 결제 승인 중 오류가 발생했습니다. 고객센터로 문의해 주세요.");
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            naverPayService.approvePayment(paymentId);
+        });
 
+        assertEquals(ErrorCode.NAVER_PAY_API_ERROR, exception.getErrorCode());
         assertThat(order.getStatus()).isEqualTo(OrderStatus.TAMPERED);
     }
 
@@ -357,10 +358,10 @@ class NaverPayServiceTest {
         when(orderRepository.findByCode("550e8400-e29b-41d4-a716-446655440000")).thenReturn(Optional.of(order));
 
         // when & then
-        assertThatThrownBy(() -> naverPayService.approvePayment(paymentId))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("네이버페이 결제 승인 중 오류가 발생했습니다. 고객센터로 문의해 주세요.");
-
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            naverPayService.approvePayment(paymentId);
+        });
+        assertEquals(ErrorCode.ORDER_ALREADY_PROCESSED, exception.getErrorCode());
         assertThat(order.getStatus()).isEqualTo(OrderStatus.PAYMENT_FAILED);
     }
 
@@ -385,9 +386,10 @@ class NaverPayServiceTest {
         when(orderRepository.findByCode("550e8400-e29b-41d4-a716-446655440000")).thenReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> naverPayService.approvePayment(paymentId))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("네이버페이 결제 승인 중 오류가 발생했습니다. 고객센터로 문의해 주세요.");
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            naverPayService.approvePayment(paymentId);
+        });
+        assertEquals(ErrorCode.ORDER_NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
@@ -476,6 +478,28 @@ class NaverPayServiceTest {
             naverPayService.approvePayment(paymentId);
         });
         assertEquals(ErrorCode.NAVER_PAY_API_ERROR, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("결제 승인 실패 - 잘못된 상품명")
+    void approvePayment_failure_invalidProductName() {
+        // given
+        String paymentId = "20170201NP1043587748";
+        String invalidProductName = "엄청난 상품";
+        NaverPayApplyResponse mockResponse = createMockApplyResponse(invalidProductName, 1000);
+        ResponseEntity<NaverPayApplyResponse> responseEntity = new ResponseEntity<>(mockResponse, HttpStatus.OK);
+        when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(NaverPayApplyResponse.class)))
+                .thenReturn(responseEntity);
+        Order order = createMockOrder(invalidProductName, 1000);
+        when(orderRepository.findByCode("550e8400-e29b-41d4-a716-446655440000")).thenReturn(Optional.of(order));
+
+        // when & then
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            naverPayService.approvePayment(paymentId);
+        });
+
+        assertEquals(ErrorCode.INVALID_INPUT_VALUE, exception.getErrorCode());
+        assertThat(exception.getMessage()).contains("알 수 없는 상품명입니다: " + invalidProductName);
     }
 
     private NaverPayApplyResponse createMockApplyResponse() {

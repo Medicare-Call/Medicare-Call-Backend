@@ -225,6 +225,8 @@ public class NaverPayService {
                 throw new CustomException(ErrorCode.NAVER_PAY_API_ERROR, "네이버페이 결제 승인이 실패했습니다. 고객센터로 문의해 주세요.");
             }
 
+        } catch (CustomException e) {
+            throw e; // CustomException은 그대로 다시 던짐
         } catch (RestClientException e) {
             log.error("네이버페이 API 호출 실패 - paymentId: {}, error: {}", paymentId, e.getMessage(), e);
             throw new CustomException(ErrorCode.NAVER_PAY_API_ERROR, "네이버페이 API 연동 중 오류가 발생했습니다.");
@@ -313,10 +315,10 @@ public class NaverPayService {
             List<Long> elderIds = objectMapper.readValue(order.getElderIds(), new TypeReference<List<Long>>() {});
             Member member = order.getMember();
             SubscriptionPlan plan;
-            if ("프리미엄".equals(order.getProductName())) {
-                plan = SubscriptionPlan.PREMIUM;
-            } else {
-                plan = SubscriptionPlan.STANDARD;
+            try {
+                plan = SubscriptionPlan.findByProductName(order.getProductName());
+            } catch (IllegalArgumentException e) {
+                throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "알 수 없는 상품명입니다: " + order.getProductName());
             }
 
             for (Long elderId : elderIds) {
