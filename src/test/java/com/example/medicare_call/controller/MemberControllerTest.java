@@ -93,7 +93,7 @@ class MemberControllerTest {
         when(memberService.getMemberInfo(anyInt())).thenReturn(expectedResponse);
 
         // when
-        ResultActions actions = mockMvc.perform(get("/me")
+        ResultActions actions = mockMvc.perform(get("/member")
                 .contentType(MediaType.APPLICATION_JSON)
         );
 
