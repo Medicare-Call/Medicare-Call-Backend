@@ -10,20 +10,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.example.medicare_call.global.enums.ElderRelation;
+import com.example.medicare_call.global.enums.ElderStatus;
 import com.example.medicare_call.global.enums.ResidenceType;
 import lombok.Setter;
+import org.hibernate.annotations.Where;
+import org.hibernate.annotations.SQLDelete;
 
 @Entity
 @Table(name = "Elder")
 @Getter
 @NoArgsConstructor
+@Where(clause = "status = 'ACTIVATED'")
+@SQLDelete(sql = "UPDATE Elder SET status = 'DELETED' WHERE id = ?")
 public class Elder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
 
-    @OneToOne(mappedBy = "elder", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "elder")
     private Subscription subscription;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -50,23 +55,27 @@ public class Elder {
     @Column(name = "residence_type", nullable = false, length = 20)
     private ResidenceType residenceType;
 
-    @OneToMany(mappedBy = "elder", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 20)
+    private ElderStatus status;
+
+    @OneToMany(mappedBy = "elder")
     private final List<CareCallRecord> careCallRecords = new ArrayList<>();
 
-    @OneToOne(mappedBy = "elder", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "elder", fetch = FetchType.LAZY)
     private CareCallSetting careCallSetting;
 
-    @OneToMany(mappedBy = "elder", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "elder")
     private final List<MedicationSchedule> medicationSchedules = new ArrayList<>();
 
-    @OneToMany(mappedBy = "elder", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "elder")
     private final List<ElderDisease> elderDiseases = new ArrayList<>();
 
-    @OneToOne(mappedBy = "elder", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "elder", fetch = FetchType.LAZY)
     private ElderHealthInfo elderHealthInfo;
 
     @Builder
-    public Elder(Integer id, Member guardian, String name, LocalDate birthDate, Byte gender, String phone, ElderRelation relationship, ResidenceType residenceType) {
+    public Elder(Integer id, Member guardian, String name, LocalDate birthDate, Byte gender, String phone, ElderRelation relationship, ResidenceType residenceType, ElderStatus status) {
         this.id = id;
         this.guardian = guardian;
         this.name = name;
@@ -75,6 +84,7 @@ public class Elder {
         this.phone = phone;
         this.relationship = relationship;
         this.residenceType = residenceType;
+        this.status = status != null ? status : ElderStatus.ACTIVATED;
     }
 
     // setting update를 post로 구현
