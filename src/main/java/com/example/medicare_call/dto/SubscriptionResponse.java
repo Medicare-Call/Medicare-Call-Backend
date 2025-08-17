@@ -41,7 +41,7 @@ public class SubscriptionResponse {
         return SubscriptionResponse.builder()
                 .elderId(subscription.getElder().getId())
                 .name(subscription.getElder().getName())
-                .plan(subscription.getPlan().getPlanName())
+                .plan(subscription.getPlan().getProductName())
                 .price(subscription.getPrice())
                 .nextBillingDate(subscription.getNextBillingDate())
                 .startDate(subscription.getStartDate())

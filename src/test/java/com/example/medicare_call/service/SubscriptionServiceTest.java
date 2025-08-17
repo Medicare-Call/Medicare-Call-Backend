@@ -68,7 +68,7 @@ public class SubscriptionServiceTest {
         assertThat(responses).hasSize(1);
         assertThat(responses.get(0).getElderId()).isEqualTo(elder.getId());
         assertThat(responses.get(0).getName()).isEqualTo(elder.getName());
-        assertThat(responses.get(0).getPlan()).isEqualTo(subscription.getPlan().getPlanName());
+        assertThat(responses.get(0).getPlan()).isEqualTo(subscription.getPlan().getProductName());
     }
 
     @Test
