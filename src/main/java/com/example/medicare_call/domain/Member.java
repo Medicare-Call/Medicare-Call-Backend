@@ -74,4 +74,17 @@ public class Member {
         this.termsAgreedAt = termsAgreedAt;
         this.plan = plan;
     }
+
+    public void updateInfo(String name, LocalDate birthDate, Byte gender, String phone,
+                           NotificationStatus pushAll, NotificationStatus pushCarecallCompleted,
+                           NotificationStatus pushHealthAlert, NotificationStatus pushCarecallMissed) {
+        this.name = name;
+        this.birthDate = birthDate;
+        this.gender = gender;
+        this.phone = phone;
+        this.pushAll = pushAll;
+        this.pushCarecallCompleted = pushCarecallCompleted;
+        this.pushHealthAlert = pushHealthAlert;
+        this.pushCarecallMissed = pushCarecallMissed;
+    }
 } 

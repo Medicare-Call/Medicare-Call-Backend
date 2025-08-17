@@ -1,6 +1,7 @@
 package com.example.medicare_call.controller;
 
 import com.example.medicare_call.dto.MemberInfoResponse;
+import com.example.medicare_call.dto.MemberInfoUpdateRequest;
 import com.example.medicare_call.dto.auth.MemberRegisterRequest;
 import com.example.medicare_call.dto.auth.TokenResponse;
 import com.example.medicare_call.global.annotation.AuthPhone;
@@ -36,5 +37,13 @@ public class MemberController {
     public ResponseEntity<MemberInfoResponse> getMemberInfo(@Parameter(hidden = true) @AuthUser Long memberId){
         MemberInfoResponse memberInfoResponse = memberService.getMemberInfo(memberId.intValue());
         return ResponseEntity.ok(memberInfoResponse);
+    }
+
+    @PostMapping("/member")
+    @Operation(summary = "내 정보 수정", description = "현재 로그인한 사용자의 정보를 수정합니다")
+    public ResponseEntity<MemberInfoResponse> updateMemberInfo(@Parameter(hidden = true) @AuthUser Long memberId,
+                                                               @Valid @RequestBody MemberInfoUpdateRequest request){
+        MemberInfoResponse response = memberService.updateMemberInfo(memberId.intValue(), request);
+        return ResponseEntity.ok(response);
     }
 }
