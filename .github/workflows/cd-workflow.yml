@@ -103,12 +103,12 @@ jobs:
             -e OPENAI_API_KEY="${OPENAI_API_KEY}" \
             -e OPENAI_API_URL="${OPENAI_API_URL}" \
             -e OPENAI_API_MODEL="${OPENAI_API_MODEL}" \
-            -e NAVERPAY_CLIENT_ID="{NAVERPAY_CLIENT_ID}" \
-            -e NAVERPAY_CLIENT_SECRET="{NAVERPAY_CLIENT_SECRET}" \
-            -e NAVERPAY_CHAIN_ID="{NAVERPAY_CHAIN_ID}" \
-            -e NAVERPAY_PARTNER_ID="{NAVERPAY_PARTNER_ID}" \
-            -e NAVERPAY_API_URL="{NAVERPAY_API_URL}" \
-            -e NAVERPAY_SDK_MODE="{NAVERPAY_SDK_MODE}" \
+            -e NAVERPAY_CLIENT_ID="${NAVERPAY_CLIENT_ID}" \
+            -e NAVERPAY_CLIENT_SECRET="${NAVERPAY_CLIENT_SECRET}" \
+            -e NAVERPAY_CHAIN_ID="${NAVERPAY_CHAIN_ID}" \
+            -e NAVERPAY_PARTNER_ID="${NAVERPAY_PARTNER_ID}" \
+            -e NAVERPAY_API_URL="${NAVERPAY_API_URL}" \
+            -e NAVERPAY_SDK_MODE="${NAVERPAY_SDK_MODE}" \
             "${DOCKER_USERNAME}/${DOCKER_IMAGE}"
 
             echo "⏳ Waiting for container to start..."
