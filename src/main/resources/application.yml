@@ -144,6 +144,6 @@ naverpay:
   api:
     url: ${NAVERPAY_API_URL}
   sdk:
-    mode: ${NAVERPAY_SDK_MODE:production}
+    mode: ${NAVERPAY_SDK_MODE}
 
 base-url: ${APP_BASE_URL}
