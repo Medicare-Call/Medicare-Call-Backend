@@ -39,7 +39,7 @@ public class MemberController {
         return ResponseEntity.ok(memberInfoResponse);
     }
 
-    @PostMapping("/me")
+    @PostMapping("/member")
     @Operation(summary = "내 정보 수정", description = "현재 로그인한 사용자의 정보를 수정합니다")
     public ResponseEntity<MemberInfoResponse> updateMemberInfo(@Parameter(hidden = true) @AuthUser Long memberId,
                                                                @Valid @RequestBody MemberInfoUpdateRequest request){
