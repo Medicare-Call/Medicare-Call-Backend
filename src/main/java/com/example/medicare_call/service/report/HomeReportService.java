@@ -82,7 +82,7 @@ public class HomeReportService {
 
         return HomeReportResponse.builder()
                 .elderName(elder.getName())
-                .AISummary(aiSummary)
+                .aiSummary(aiSummary)
                 .mealStatus(mealStatus)
                 .medicationStatus(medicationStatus)
                 .sleep(sleep)
