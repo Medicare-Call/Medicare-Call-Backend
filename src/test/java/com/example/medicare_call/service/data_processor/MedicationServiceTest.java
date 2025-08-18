@@ -153,6 +153,42 @@ public class MedicationServiceTest {
     }
 
     @Test
+    @DisplayName("복약 데이터 저장 건너뛰기 - 약 이름이 null일 경우")
+    void saveMedicationTakenRecord_skip_whenMedicationTypeIsNull() {
+        // given
+        HealthDataExtractionResponse.MedicationData medicationData = HealthDataExtractionResponse.MedicationData.builder()
+                .medicationType(null)
+                .taken("복용함")
+                .takenTime("아침")
+                .build();
+
+        // when
+        medicationService.saveMedicationTakenRecord(callRecord, medicationData);
+
+        // then
+        verify(medicationRepository, never()).findByName(any());
+        verify(medicationTakenRecordRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("복약 데이터 저장 건너뛰기 - 약 이름이 비어있을 경우")
+    void saveMedicationTakenRecord_skip_whenMedicationTypeIsEmpty() {
+        // given
+        HealthDataExtractionResponse.MedicationData medicationData = HealthDataExtractionResponse.MedicationData.builder()
+                .medicationType("  ") // 공백 문자열
+                .taken("복용함")
+                .takenTime("아침")
+                .build();
+
+        // when
+        medicationService.saveMedicationTakenRecord(callRecord, medicationData);
+
+        // then
+        verify(medicationRepository, never()).findByName(any());
+        verify(medicationTakenRecordRepository, never()).save(any());
+    }
+
+    @Test
     @DisplayName("복약 데이터 저장 실패 - 약을 찾을 수 없음")
     void saveMedicationTakenRecord_fail_medicationNotFound() {
         // given

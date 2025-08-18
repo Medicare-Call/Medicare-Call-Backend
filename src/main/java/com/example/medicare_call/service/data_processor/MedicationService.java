@@ -32,6 +32,11 @@ public class MedicationService {
 
     @Transactional
     public void saveMedicationTakenRecord(CareCallRecord callRecord, HealthDataExtractionResponse.MedicationData medicationData) {
+        if (medicationData.getMedicationType() == null || medicationData.getMedicationType().trim().isEmpty()) {
+            log.warn("약 이름이 누락되어 복약 데이터를 저장하지 않습니다. medicationData={}", medicationData);
+            return;
+        }
+
         // 약 이름으로 Medication 찾기
         Medication medication = medicationRepository.findByName(medicationData.getMedicationType())
                 .orElseThrow(() -> new CustomException(ErrorCode.MEDICATION_NOT_FOUND, "약을 찾을 수 없습니다: " + medicationData.getMedicationType()));
