@@ -12,9 +12,11 @@ import java.util.Optional;
 
 public interface CareCallSettingRepository extends JpaRepository<CareCallSetting, Integer> {
 
-    List<CareCallSetting> findByFirstCallTime(LocalTime now);
+    @Query("SELECT c FROM CareCallSetting c JOIN c.elder e WHERE c.firstCallTime = :now AND e.status = 'ACTIVATED'")
+    List<CareCallSetting> findByFirstCallTime(@Param("now") LocalTime now);
 
-    List<CareCallSetting> findBySecondCallTime(LocalTime now);
+    @Query("SELECT c FROM CareCallSetting c JOIN c.elder e WHERE c.secondCallTime = :now AND e.status = 'ACTIVATED'")
+    List<CareCallSetting> findBySecondCallTime(@Param("now") LocalTime now);
 
     Optional<CareCallSetting> findByElder(Elder elder);
 }
