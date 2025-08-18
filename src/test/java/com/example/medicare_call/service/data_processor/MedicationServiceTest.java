@@ -50,6 +50,7 @@ public class MedicationServiceTest {
     private CareCallRecord callRecord;
     private Elder elder;
     private Medication medication;
+    private Medication medication2;
     private MedicationSchedule medicationSchedule;
 
     @BeforeEach
@@ -67,6 +68,11 @@ public class MedicationServiceTest {
         medication = Medication.builder()
                 .id(1)
                 .name("혈압약")
+                .build();
+
+        medication2 = Medication.builder()
+                .id(2)
+                .name("당뇨약")
                 .build();
 
         medicationSchedule = MedicationSchedule.builder()
@@ -92,7 +98,7 @@ public class MedicationServiceTest {
         when(medicationTakenRecordRepository.save(any(MedicationTakenRecord.class))).thenReturn(MedicationTakenRecord.builder().id(1).build());
 
         // when
-        medicationService.saveMedicationTakenRecord(callRecord, medicationData);
+        medicationService.saveMedicationTakenRecord(callRecord, List.of(medicationData));
 
         // then
         verify(medicationRepository).findByName("혈압약");
@@ -119,7 +125,7 @@ public class MedicationServiceTest {
         when(medicationTakenRecordRepository.save(any(MedicationTakenRecord.class))).thenReturn(MedicationTakenRecord.builder().id(1).build());
 
         // when
-        medicationService.saveMedicationTakenRecord(callRecord, medicationData);
+        medicationService.saveMedicationTakenRecord(callRecord, List.of(medicationData));
 
         // then
         verify(medicationTakenRecordRepository).save(argThat(record -> 
@@ -144,7 +150,7 @@ public class MedicationServiceTest {
         when(medicationTakenRecordRepository.save(any(MedicationTakenRecord.class))).thenReturn(MedicationTakenRecord.builder().id(1).build());
 
         // when
-        medicationService.saveMedicationTakenRecord(callRecord, medicationData);
+        medicationService.saveMedicationTakenRecord(callRecord, List.of(medicationData));
 
         // then
         verify(medicationTakenRecordRepository).save(argThat(record -> 
@@ -163,7 +169,7 @@ public class MedicationServiceTest {
                 .build();
 
         // when
-        medicationService.saveMedicationTakenRecord(callRecord, medicationData);
+        medicationService.saveMedicationTakenRecord(callRecord, List.of(medicationData));
 
         // then
         verify(medicationRepository, never()).findByName(any());
@@ -181,7 +187,7 @@ public class MedicationServiceTest {
                 .build();
 
         // when
-        medicationService.saveMedicationTakenRecord(callRecord, medicationData);
+        medicationService.saveMedicationTakenRecord(callRecord, List.of(medicationData));
 
         // then
         verify(medicationRepository, never()).findByName(any());
@@ -203,7 +209,7 @@ public class MedicationServiceTest {
 
         // when & then
         CustomException exception = assertThrows(CustomException.class, () -> {
-            medicationService.saveMedicationTakenRecord(record, medicationData);
+            medicationService.saveMedicationTakenRecord(record, List.of(medicationData));
         });
         assertEquals(ErrorCode.MEDICATION_NOT_FOUND, exception.getErrorCode());
     }
@@ -230,7 +236,7 @@ public class MedicationServiceTest {
         when(medicationTakenRecordRepository.save(any(MedicationTakenRecord.class))).thenReturn(MedicationTakenRecord.builder().id(1).build());
 
         // when
-        medicationService.saveMedicationTakenRecord(callRecord, medicationData);
+        medicationService.saveMedicationTakenRecord(callRecord, List.of(medicationData));
 
         // then
         verify(medicationTakenRecordRepository).save(argThat(record -> 
@@ -261,7 +267,7 @@ public class MedicationServiceTest {
         when(medicationTakenRecordRepository.save(any(MedicationTakenRecord.class))).thenReturn(MedicationTakenRecord.builder().id(1).build());
 
         // when
-        medicationService.saveMedicationTakenRecord(callRecord, medicationData);
+        medicationService.saveMedicationTakenRecord(callRecord, List.of(medicationData));
 
         // then
         verify(medicationTakenRecordRepository).save(argThat(record -> 
@@ -292,7 +298,7 @@ public class MedicationServiceTest {
         when(medicationTakenRecordRepository.save(any(MedicationTakenRecord.class))).thenReturn(MedicationTakenRecord.builder().id(1).build());
 
         // when
-        medicationService.saveMedicationTakenRecord(callRecord, medicationData);
+        medicationService.saveMedicationTakenRecord(callRecord, List.of(medicationData));
 
         // then
         verify(medicationTakenRecordRepository).save(argThat(record -> 

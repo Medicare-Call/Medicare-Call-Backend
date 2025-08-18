@@ -81,18 +81,13 @@ class AiHealthDataExtractorServiceTest {
                 ))
                 .build();
 
+        HealthDataExtractionResponse.BloodSugarData bloodSugar = HealthDataExtractionResponse.BloodSugarData.builder()
+                .measurementTime("아침").mealTime("식후").bloodSugarValue(120).status("NORMAL").build();
         HealthDataExtractionResponse expectedResponse = HealthDataExtractionResponse.builder()
                 .date("2024-01-01")
-                .mealData(HealthDataExtractionResponse.MealData.builder()
-                        .mealType("아침")
-                        .mealSummary("아침 식사를 하였음")
-                        .build())
-                .bloodSugarData(HealthDataExtractionResponse.BloodSugarData.builder()
-                        .measurementTime("아침")
-                        .mealTime("식후")
-                        .bloodSugarValue(120)
-                        .status("NORMAL")
-                        .build())
+                .mealData(HealthDataExtractionResponse.MealData.builder().mealType("아침").mealSummary("아침 식사를 하였음").build())
+                .bloodSugarData(List.of(bloodSugar))
+                .medicationData(List.of())
                 .psychologicalState(List.of("기분이 좋음"))
                 .healthSigns(List.of("혈당이 정상 범위"))
                 .build();
@@ -110,7 +105,7 @@ class AiHealthDataExtractorServiceTest {
         assertThat(result).isNotNull();
         assertThat(result.getDate()).isEqualTo("2024-01-01");
         assertThat(result.getMealData().getMealType()).isEqualTo("아침");
-        assertThat(result.getBloodSugarData().getBloodSugarValue()).isEqualTo(120);
+        assertThat(result.getBloodSugarData().get(0).getBloodSugarValue()).isEqualTo(120);
         assertThat(result.getPsychologicalState()).contains("기분이 좋음");
     }
 
@@ -124,19 +119,20 @@ class AiHealthDataExtractorServiceTest {
                 .build();
 
         String mockOpenAiResponse = """
-            {
-              "date": "2024-01-01",
-              "mealData": null,
-              "sleepData": null,
-              "psychologicalState": null,
-              "bloodSugarData": null,
-              "medicationData": {
-                "medicationType": "혈압약",
-                "taken": "복용함",
-                "takenTime": "아침"
-              },
-              "healthSigns": null
-            }
+                {
+                   "date": "2024-01-01",
+                   "mealData": { "mealType": "아침", "mealSummary": "아침 식사를 하였음" },
+                   "sleepData": null,
+                   "psychologicalState": ["기분이 좋음"],
+                   "bloodSugarData": [{
+                     "measurementTime": "아침",
+                     "mealTime": "식후",
+                     "bloodSugarValue": 120,
+                     "status": "NORMAL"
+                   }],
+                   "medicationData": [],
+                   "healthSigns": ["혈당이 정상 범위"]
+                 }
             """;
 
         OpenAiResponse openAiResponse = OpenAiResponse.builder()
@@ -149,14 +145,17 @@ class AiHealthDataExtractorServiceTest {
                 ))
                 .build();
 
+        HealthDataExtractionResponse.BloodSugarData bloodSugar = HealthDataExtractionResponse.BloodSugarData.builder()
+                .measurementTime("아침").mealTime("식후").bloodSugarValue(120).status("NORMAL").build();
         HealthDataExtractionResponse expectedResponse = HealthDataExtractionResponse.builder()
                 .date("2024-01-01")
-                .medicationData(HealthDataExtractionResponse.MedicationData.builder()
-                        .medicationType("혈압약")
-                        .taken("복용함")
-                        .takenTime("아침")
-                        .build())
+                .mealData(HealthDataExtractionResponse.MealData.builder().mealType("아침").mealSummary("아침 식사를 하였음").build())
+                .bloodSugarData(List.of(bloodSugar))
+                .medicationData(List.of())
+                .psychologicalState(List.of("기분이 좋음"))
+                .healthSigns(List.of("혈당이 정상 범위"))
                 .build();
+
 
         when(restTemplate.postForObject(eq("https://api.openai.com/v1/chat/completions"), any(HttpEntity.class), eq(OpenAiResponse.class)))
                 .thenReturn(openAiResponse);
@@ -169,10 +168,10 @@ class AiHealthDataExtractorServiceTest {
         // then
         assertThat(result).isNotNull();
         assertThat(result.getDate()).isEqualTo("2024-01-01");
-        assertThat(result.getMedicationData()).isNotNull();
-        assertThat(result.getMedicationData().getMedicationType()).isEqualTo("혈압약");
-        assertThat(result.getMedicationData().getTaken()).isEqualTo("복용함");
-        assertThat(result.getMedicationData().getTakenTime()).isEqualTo("아침");
+        assertThat(result.getMealData().getMealType()).isEqualTo("아침");
+        assertThat(result.getBloodSugarData()).hasSize(1);
+        assertThat(result.getBloodSugarData().get(0).getBloodSugarValue()).isEqualTo(120);
+        assertThat(result.getPsychologicalState()).contains("기분이 좋음");
     }
 
     @Test
@@ -185,19 +184,17 @@ class AiHealthDataExtractorServiceTest {
                 .build();
 
         String mockOpenAiResponse = """
-            {
-              "date": "2024-01-01",
-              "mealData": null,
-              "sleepData": null,
-              "psychologicalState": null,
-              "bloodSugarData": null,
-              "medicationData": {
-                "medicationType": "혈압약",
-                "taken": "복용하지 않음",
-                "takenTime": "아침"
-              },
-              "healthSigns": null
-            }
+                {
+                   "date": "2024-01-02",
+                   "bloodSugarData": [
+                     { "measurementTime": "아침", "mealTime": "식전", "bloodSugarValue": 90, "status": "NORMAL" },
+                     { "measurementTime": "점심", "mealTime": "식후", "bloodSugarValue": 150, "status": "NORMAL" }
+                   ],
+                   "medicationData": [
+                     { "medicationType": "혈압약", "taken": "복용함", "takenTime": "아침" },
+                     { "medicationType": "당뇨약", "taken": "복용함", "takenTime": "점심" }
+                   ]
+                 }
             """;
 
         OpenAiResponse openAiResponse = OpenAiResponse.builder()
@@ -210,13 +207,20 @@ class AiHealthDataExtractorServiceTest {
                 ))
                 .build();
 
+        HealthDataExtractionResponse.BloodSugarData bloodSugar1 = HealthDataExtractionResponse.BloodSugarData.builder()
+                .measurementTime("아침").mealTime("식전").bloodSugarValue(90).status("NORMAL").build();
+        HealthDataExtractionResponse.BloodSugarData bloodSugar2 = HealthDataExtractionResponse.BloodSugarData.builder()
+                .measurementTime("점심").mealTime("식후").bloodSugarValue(150).status("NORMAL").build();
+
+        HealthDataExtractionResponse.MedicationData medication1 = HealthDataExtractionResponse.MedicationData.builder()
+                .medicationType("혈압약").taken("복용함").takenTime("아침").build();
+        HealthDataExtractionResponse.MedicationData medication2 = HealthDataExtractionResponse.MedicationData.builder()
+                .medicationType("당뇨약").taken("복용함").takenTime("점심").build();
+
         HealthDataExtractionResponse expectedResponse = HealthDataExtractionResponse.builder()
-                .date("2024-01-01")
-                .medicationData(HealthDataExtractionResponse.MedicationData.builder()
-                        .medicationType("혈압약")
-                        .taken("복용하지 않음")
-                        .takenTime("아침")
-                        .build())
+                .date("2024-01-02")
+                .bloodSugarData(List.of(bloodSugar1, bloodSugar2))
+                .medicationData(List.of(medication1, medication2))
                 .build();
 
         when(restTemplate.postForObject(eq("https://api.openai.com/v1/chat/completions"), any(HttpEntity.class), eq(OpenAiResponse.class)))
@@ -229,11 +233,12 @@ class AiHealthDataExtractorServiceTest {
 
         // then
         assertThat(result).isNotNull();
-        assertThat(result.getDate()).isEqualTo("2024-01-01");
-        assertThat(result.getMedicationData()).isNotNull();
-        assertThat(result.getMedicationData().getMedicationType()).isEqualTo("혈압약");
-        assertThat(result.getMedicationData().getTaken()).isEqualTo("복용하지 않음");
-        assertThat(result.getMedicationData().getTakenTime()).isEqualTo("아침");
+        assertThat(result.getBloodSugarData()).hasSize(2);
+        assertThat(result.getBloodSugarData().get(0).getBloodSugarValue()).isEqualTo(90);
+        assertThat(result.getBloodSugarData().get(1).getBloodSugarValue()).isEqualTo(150);
+        assertThat(result.getMedicationData()).hasSize(2);
+        assertThat(result.getMedicationData().get(0).getMedicationType()).isEqualTo("혈압약");
+        assertThat(result.getMedicationData().get(1).getMedicationType()).isEqualTo("당뇨약");
     }
 
     @Test

@@ -53,25 +53,25 @@ class HealthDataExtractionIntegrationTest {
                 .build();
 
         String mockOpenAiResponse = """
-            {
-              "date": "2024-01-01",
-              "mealData": {
-                "mealType": "아침",
-                "mealSummary": "김치찌개와 밥을 먹었음"
-              },
-              "sleepData": null,
-              "psychologicalState": ["기분이 좋음", "잠을 잘 잤음"],
-              "psychologicalStatus": "좋음",
-              "bloodSugarData": {
-                "measurementTime": "아침",
-                "mealTime": "식후",
-                "bloodSugarValue": 120,
-                "status": "NORMAL"
-              },
-              "medicationData": null,
-              "healthSigns": ["혈당이 정상 범위", "식사 후 혈당 측정"],
-              "healthStatus": "좋음"
-            }
+                {
+                  "date": "2024-01-01",
+                  "mealData": {
+                    "mealType": "아침",
+                    "mealSummary": "김치찌개와 밥을 먹었음"
+                  },
+                  "sleepData": null,
+                  "psychologicalState": ["기분이 좋음", "잠을 잘 잤음"],
+                  "psychologicalStatus": "좋음",
+                  "bloodSugarData": [{
+                    "measurementTime": "아침",
+                    "mealTime": "식후",
+                    "bloodSugarValue": 120,
+                    "status": "NORMAL"
+                  }],
+                  "medicationData": [],
+                  "healthSigns": ["혈당이 정상 범위", "식사 후 혈당 측정"],
+                  "healthStatus": "좋음"
+                }
             """;
 
         // Mock OpenAI API response
@@ -92,8 +92,10 @@ class HealthDataExtractionIntegrationTest {
         
         // 혈당 데이터 검증
         assertThat(result.getBloodSugarData()).isNotNull();
-        assertThat(result.getBloodSugarData().getBloodSugarValue()).isEqualTo(120);
-        assertThat(result.getBloodSugarData().getMealTime()).isEqualTo("식후");
+        assertThat(result.getBloodSugarData()).hasSize(1);
+        HealthDataExtractionResponse.BloodSugarData bloodSugar = result.getBloodSugarData().get(0);
+        assertThat(bloodSugar.getBloodSugarValue()).isEqualTo(120);
+        assertThat(bloodSugar.getMealTime()).isEqualTo("식후");
         
         // 심리 상태 검증
         assertThat(result.getPsychologicalState()).isNotNull();
@@ -122,25 +124,25 @@ class HealthDataExtractionIntegrationTest {
                 .build();
 
         String mockOpenAiResponse = """
-            {
-              "date": "2024-01-01",
-              "mealData": null,
-              "sleepData": {
-                "sleepStartTime": "22:00",
-                "sleepEndTime": "06:00",
-                "totalSleepTime": "8시간"
-              },
-              "psychologicalState": null,
-              "psychologicalStatus": null,
-              "bloodSugarData": null,
-              "medicationData": {
-                "medicationType": "혈압약",
-                "taken": "복용함",
-                "takenTime": "아침"
-              },
-              "healthSigns": ["머리가 아픔"],
-              "healthStatus": "나쁨"
-            }
+                {
+                   "date": "2024-01-01",
+                   "mealData": null,
+                   "sleepData": {
+                     "sleepStartTime": "22:00",
+                     "sleepEndTime": "06:00",
+                     "totalSleepTime": "8시간"
+                   },
+                   "psychologicalState": null,
+                   "psychologicalStatus": null,
+                   "bloodSugarData": [],
+                   "medicationData": [{
+                     "medicationType": "혈압약",
+                     "taken": "복용함",
+                     "takenTime": "아침"
+                   }],
+                   "healthSigns": ["머리가 아픔"],
+                   "healthStatus": "나쁨"
+                 }
             """;
 
         // Mock OpenAI API response
@@ -161,9 +163,11 @@ class HealthDataExtractionIntegrationTest {
         
         // 복약 데이터 검증
         assertThat(result.getMedicationData()).isNotNull();
-        assertThat(result.getMedicationData().getMedicationType()).isEqualTo("혈압약");
-        assertThat(result.getMedicationData().getTaken()).isEqualTo("복용함");
-        assertThat(result.getMedicationData().getTakenTime()).isEqualTo("아침");
+        assertThat(result.getMedicationData()).hasSize(1);
+        HealthDataExtractionResponse.MedicationData medication = result.getMedicationData().get(0);
+        assertThat(medication.getMedicationType()).isEqualTo("혈압약");
+        assertThat(medication.getTaken()).isEqualTo("복용함");
+        assertThat(medication.getTakenTime()).isEqualTo("아침");
         
         // 건강 징후 검증
         assertThat(result.getHealthSigns()).isNotNull();

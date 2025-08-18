@@ -31,44 +31,57 @@ public class MedicationService {
     private final ElderRepository elderRepository;
 
     @Transactional
-    public void saveMedicationTakenRecord(CareCallRecord callRecord, HealthDataExtractionResponse.MedicationData medicationData) {
-        if (medicationData.getMedicationType() == null || medicationData.getMedicationType().trim().isEmpty()) {
-            log.warn("약 이름이 누락되어 복약 데이터를 저장하지 않습니다. medicationData={}", medicationData);
-            return;
-        }
+    public void saveMedicationTakenRecord(CareCallRecord callRecord, List<HealthDataExtractionResponse.MedicationData> medicationDataList) {
 
-        // 약 이름으로 Medication 찾기
-        Medication medication = medicationRepository.findByName(medicationData.getMedicationType())
-                .orElseThrow(() -> new CustomException(ErrorCode.MEDICATION_NOT_FOUND, "약을 찾을 수 없습니다: " + medicationData.getMedicationType()));
-
-        // 해당 어르신의 복약 스케줄에서 매칭되는 것 찾기
         List<MedicationSchedule> schedules = medicationScheduleRepository.findByElder(callRecord.getElder());
-        MedicationSchedule matchedSchedule = null;
-        
-        for (MedicationSchedule schedule : schedules) {
-            if (schedule.getMedication().getId().equals(medication.getId()) &&
-                isScheduleTimeMatched(schedule.getScheduleTime(), medicationData.getTakenTime())) {
-                matchedSchedule = schedule;
-                break;
+
+        for (HealthDataExtractionResponse.MedicationData medicationData : medicationDataList) {
+            if (medicationData.getMedicationType() == null || medicationData.getMedicationType().trim().isEmpty()) {
+                log.warn("약 이름이 누락되어 복약 데이터를 저장하지 않습니다. medicationData={}", medicationData);
+                continue;
             }
+
+            Medication medication = medicationRepository.findByName(medicationData.getMedicationType())
+                    .orElseGet(() -> {
+                        log.info("새로운 약 발견: '{}'. DB에 새로 저장합니다.", medicationData.getMedicationType());
+                        Medication newMedication = Medication.builder()
+                                .name(medicationData.getMedicationType())
+                                .build();
+                        return medicationRepository.save(newMedication);
+                    });
+
+            // 약 이름으로 Medication 찾기
+//            Medication medication = medicationRepository.findByName(medicationData.getMedicationType())
+//                    .orElseThrow(() -> new CustomException(ErrorCode.MEDICATION_NOT_FOUND, "약을 찾을 수 없습니다: " + medicationData.getMedicationType()));
+//
+//            // 해당 어르신의 복약 스케줄에서 매칭되는 것 찾기
+//            MedicationSchedule matchedSchedule = null;
+//
+//            for (MedicationSchedule schedule : schedules) {
+//                if (schedule.getMedication().getId().equals(medication.getId()) &&
+//                        isScheduleTimeMatched(schedule.getScheduleTime(), medicationData.getTakenTime())) {
+//                    matchedSchedule = schedule;
+//                    break;
+//                }
+//            }
+
+            // takenStatus 결정
+            MedicationTakenStatus takenStatus = MedicationTakenStatus.fromDescription(medicationData.getTaken());
+
+            MedicationTakenRecord medicationRecord = MedicationTakenRecord.builder()
+                    .careCallRecord(callRecord)
+                    .medicationSchedule(null) // 매칭되는 스케줄이 있으면 설정, 없으면 null
+                    .medication(medication)
+                    .takenStatus(takenStatus)
+                    .responseSummary(String.format("복용시간: %s, 복용여부: %s",
+                            medicationData.getTakenTime(), medicationData.getTaken()))
+                    .recordedAt(LocalDateTime.now())
+                    .build();
+
+            medicationTakenRecordRepository.save(medicationRecord);
+            log.info("복약 데이터 저장 완료: medication={}, taken={}",
+                    medicationData.getMedicationType(), medicationData.getTaken());
         }
-        
-        // takenStatus 결정
-        MedicationTakenStatus takenStatus = MedicationTakenStatus.fromDescription(medicationData.getTaken());
-        
-        MedicationTakenRecord medicationRecord = MedicationTakenRecord.builder()
-                .careCallRecord(callRecord)
-                .medicationSchedule(matchedSchedule) // 매칭되는 스케줄이 있으면 설정, 없으면 null
-                .medication(medication)
-                .takenStatus(takenStatus)
-                .responseSummary(String.format("복용시간: %s, 복용여부: %s", 
-                    medicationData.getTakenTime(), medicationData.getTaken()))
-                .recordedAt(LocalDateTime.now())
-                .build();
-        
-        medicationTakenRecordRepository.save(medicationRecord);
-        log.info("복약 데이터 저장 완료: medication={}, taken={}, scheduleMatched={}", 
-            medicationData.getMedicationType(), medicationData.getTaken(), matchedSchedule != null);
     }
 
     /**
