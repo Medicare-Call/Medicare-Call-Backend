@@ -16,6 +16,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -28,6 +32,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -69,89 +74,96 @@ class WeeklyBloodSugarServiceTest {
     void getWeeklyBloodSugar_성공_데이터있음() {
         // given
         Integer elderId = 1;
-        LocalDate startDate = LocalDate.of(2025, 7, 14);
+        Integer counter = 0;
         String typeStr = "BEFORE_MEAL";
+        Pageable pageable = PageRequest.of(counter, 12);
         
         Elder elder = Elder.builder().id(elderId).name("테스트 어르신").build();
         when(elderRepository.findById(elderId)).thenReturn(java.util.Optional.of(elder));
         
         List<BloodSugarRecord> records = Arrays.asList(
-                createBloodSugarRecord(LocalDateTime.of(2025, 7, 14, 8, 0), 120),
-                createBloodSugarRecord(LocalDateTime.of(2025, 7, 15, 8, 0), 125),
-                createBloodSugarRecord(LocalDateTime.of(2025, 7, 16, 8, 0), 118)
+                createBloodSugarRecord(LocalDateTime.of(2025, 7, 16, 8, 0), 118, BloodSugarMeasurementType.BEFORE_MEAL),
+                createBloodSugarRecord(LocalDateTime.of(2025, 7, 15, 8, 0), 125, BloodSugarMeasurementType.BEFORE_MEAL),
+                createBloodSugarRecord(LocalDateTime.of(2025, 7, 14, 8, 0), 120, BloodSugarMeasurementType.BEFORE_MEAL)
         );
+        Page<BloodSugarRecord> recordsPage = new PageImpl<>(records, pageable, records.size());
         
-        when(bloodSugarRecordRepository.findByElderIdAndMeasurementTypeAndDateBetween(
-                elderId, BloodSugarMeasurementType.BEFORE_MEAL, startDate, startDate.plusDays(6)))
-                .thenReturn(records);
+        when(bloodSugarRecordRepository.findByElderIdAndMeasurementTypeOrderByRecordedAtDesc(
+                eq(elderId), eq(BloodSugarMeasurementType.BEFORE_MEAL), any(Pageable.class)))
+                .thenReturn(recordsPage);
 
         // when
-        WeeklyBloodSugarResponse response = weeklyBloodSugarService.getWeeklyBloodSugar(elderId, startDate, typeStr);
+        WeeklyBloodSugarResponse response = weeklyBloodSugarService.getWeeklyBloodSugar(elderId, counter, typeStr);
 
         // then
-        assertThat(response.getPeriod().getStartDate()).isEqualTo(startDate);
-        assertThat(response.getPeriod().getEndDate()).isEqualTo(startDate.plusDays(6));
         assertThat(response.getData()).hasSize(3);
-        assertThat(response.getAverage().getValue()).isEqualTo(121);
-        assertThat(response.getLatest().getValue()).isEqualTo(118);
+        assertThat(response.isHasNextPage()).isFalse(); // 전체 3개, 페이지 크기 12
+        assertThat(response.getData().get(0).getValue()).isEqualTo(118); // 7/16 데이터가 가장 먼저 오는지 확인
+        assertThat(response.getData().get(1).getValue()).isEqualTo(125); // 7/15 데이터
+        assertThat(response.getData().get(2).getValue()).isEqualTo(120); // 7/14 데이터
     }
 
     @Test
-    @DisplayName("주간 혈당 데이터 조회 실패 - 데이터 없음")
-    void getWeeklyBloodSugar_NoData_ThrowsResourceNotFoundException() {
+    @DisplayName("주간 혈당 데이터 조회 성공 - 데이터 없음")
+    void getWeeklyBloodSugar_성공_데이터없음() {
         // given
         Integer elderId = 1;
-        LocalDate startDate = LocalDate.of(2025, 7, 14);
+        Integer counter = 0;
         String typeStr = "BEFORE_MEAL";
+        Pageable pageable = PageRequest.of(counter, 12);
         
         Elder elder = Elder.builder().id(elderId).name("테스트 어르신").build();
         when(elderRepository.findById(elderId)).thenReturn(java.util.Optional.of(elder));
         
-        when(bloodSugarRecordRepository.findByElderIdAndMeasurementTypeAndDateBetween(
-                elderId, BloodSugarMeasurementType.BEFORE_MEAL, startDate, startDate.plusDays(6)))
-                .thenReturn(Collections.emptyList());
+        Page<BloodSugarRecord> emptyPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
+        
+        when(bloodSugarRecordRepository.findByElderIdAndMeasurementTypeOrderByRecordedAtDesc(
+                eq(elderId), eq(BloodSugarMeasurementType.BEFORE_MEAL), any(Pageable.class)))
+                .thenReturn(emptyPage);
 
         // when
-        WeeklyBloodSugarResponse response = weeklyBloodSugarService.getWeeklyBloodSugar(elderId, startDate, typeStr);
+        WeeklyBloodSugarResponse response = weeklyBloodSugarService.getWeeklyBloodSugar(elderId, counter, typeStr);
 
         // then
         assertThat(response).isNotNull();
-        assertThat(response.getPeriod()).isNotNull();
-        assertThat(response.getPeriod().getStartDate()).isEqualTo(startDate);
-        assertThat(response.getPeriod().getEndDate()).isEqualTo(startDate.plusDays(6));
         assertThat(response.getData()).isNotNull();
         assertThat(response.getData()).isEmpty();
-        assertThat(response.getAverage()).isNull();
-        assertThat(response.getLatest()).isNull();
+        assertThat(response.isHasNextPage()).isFalse();
     }
 
     @Test
-    @DisplayName("주간 혈당 데이터 조회 성공 - 단일 데이터")
-    void getWeeklyBloodSugar_성공_단일데이터() {
+    @DisplayName("주간 혈당 데이터 조회 성공 - 다음 페이지 존재")
+    void getWeeklyBloodSugar_성공_다음페이지있음() {
         // given
         Integer elderId = 1;
-        LocalDate startDate = LocalDate.of(2025, 7, 14);
+        Integer counter = 0;
         String typeStr = "AFTER_MEAL";
+        Pageable pageable = PageRequest.of(counter, 2); // 페이지 크기 2
         
         Elder elder = Elder.builder().id(elderId).name("테스트 어르신").build();
         when(elderRepository.findById(elderId)).thenReturn(java.util.Optional.of(elder));
         
         List<BloodSugarRecord> records = Arrays.asList(
-                createBloodSugarRecord(LocalDateTime.of(2025, 7, 14, 12, 30), 180)
+                createBloodSugarRecord(LocalDateTime.of(2025, 7, 14, 12, 30), 180, BloodSugarMeasurementType.AFTER_MEAL),
+                createBloodSugarRecord(LocalDateTime.of(2025, 7, 13, 12, 30), 170, BloodSugarMeasurementType.AFTER_MEAL)
         );
+        // 총 3개의 데이터가 있다고 가정
+        Page<BloodSugarRecord> recordsPage = new PageImpl<>(records, pageable, 3);
         
-        when(bloodSugarRecordRepository.findByElderIdAndMeasurementTypeAndDateBetween(
-                elderId, BloodSugarMeasurementType.AFTER_MEAL, startDate, startDate.plusDays(6)))
-                .thenReturn(records);
+        when(bloodSugarRecordRepository.findByElderIdAndMeasurementTypeOrderByRecordedAtDesc(
+                eq(elderId), eq(BloodSugarMeasurementType.AFTER_MEAL), any(Pageable.class)))
+                .thenReturn(recordsPage);
 
         // when
-        WeeklyBloodSugarResponse response = weeklyBloodSugarService.getWeeklyBloodSugar(elderId, startDate, typeStr);
+        WeeklyBloodSugarResponse response = weeklyBloodSugarService.getWeeklyBloodSugar(elderId, counter, typeStr);
 
         // then
-        assertThat(response.getData()).hasSize(1);
-        assertThat(response.getAverage().getValue()).isEqualTo(180);
-        assertThat(response.getLatest().getValue()).isEqualTo(180);
+        assertThat(response.getData()).hasSize(2);
+        assertThat(response.isHasNextPage()).isTrue();
+        assertThat(response.getData().get(0).getValue()).isEqualTo(180); // 7/14 데이터가 가장 먼저 오는지 확인
+        assertThat(response.getData().get(1).getValue()).isEqualTo(170); // 7/13 데이터
     }
+
 
     @Test
     @DisplayName("데이터 없음 - 어르신 ID를 찾을 수 없음")
@@ -161,16 +173,16 @@ class WeeklyBloodSugarServiceTest {
 
         // when, then
         CustomException exception = assertThrows(CustomException.class,
-                () -> weeklyBloodSugarService.getWeeklyBloodSugar(1, LocalDate.now(), "empty")
+                () -> weeklyBloodSugarService.getWeeklyBloodSugar(1, 0, "empty")
         );
         assertEquals(ErrorCode.ELDER_NOT_FOUND, exception.getErrorCode());
     }
 
-    private BloodSugarRecord createBloodSugarRecord(LocalDateTime dateTime, int value) {
+    private BloodSugarRecord createBloodSugarRecord(LocalDateTime dateTime, int value, BloodSugarMeasurementType type) {
         return BloodSugarRecord.builder()
                 .id(1) // Assuming a default ID for testing
                 .careCallRecord(testCallRecord)
-                .measurementType(BloodSugarMeasurementType.BEFORE_MEAL) // Assuming a default type for testing
+                .measurementType(type)
                 .blood_sugar_value(BigDecimal.valueOf(value))
                 .status(BloodSugarStatus.NORMAL) // Assuming a default status for testing
                 .recordedAt(dateTime)
