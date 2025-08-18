@@ -1,0 +1,14 @@
+bug:
+  - "fix/**"
+enhancement:
+  - "feat/**"
+documentation:
+  - "doc/**"
+release:
+  - "release/**"
+refactoring:
+  - "refactor/**"
+test:
+  - "test/**"
+invalid:
+  - "edit/**"
