@@ -16,6 +16,11 @@ public enum ErrorCode {
     INVALID_TYPE_VALUE(HttpStatus.BAD_REQUEST, "C005", "입력 형식이 올바르지 않습니다. 올바른 형식으로 입력해 주세요."),
     HANDLE_ACCESS_DENIED(HttpStatus.FORBIDDEN, "C006", "해당 작업에 대한 권한이 없습니다."),
     METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "C007", "지원하지 않는 요청 방식입니다. 올바른 방식으로 다시 시도해 주세요."),
+    MISSING_REQUEST_PARAMETER(HttpStatus.BAD_REQUEST, "C008", "필수 파라미터가 누락되었습니다. 요청을 확인해 주세요."),
+    INVALID_JSON_FORMAT(HttpStatus.BAD_REQUEST, "C009", "JSON 형식이 올바르지 않습니다. 요청 데이터를 확인해 주세요."),
+    UNSUPPORTED_MEDIA_TYPE(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "C010", "지원하지 않는 미디어 타입입니다."),
+    FILE_SIZE_EXCEEDED(HttpStatus.BAD_REQUEST, "C011", "파일 크기가 허용된 범위를 초과했습니다."),
+    REQUEST_TIMEOUT(HttpStatus.REQUEST_TIMEOUT, "C012", "요청 시간이 초과되었습니다. 다시 시도해 주세요."),
 
     // Auth
     ACCESS_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "A003", "로그인이 만료되었습니다. 다시 로그인해 주세요."),
