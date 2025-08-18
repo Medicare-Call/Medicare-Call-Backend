@@ -2,6 +2,7 @@ package com.example.medicare_call.domain;
 
 import com.example.medicare_call.global.enums.Gender;
 import com.example.medicare_call.global.enums.NotificationStatus;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,6 +21,7 @@ public class Member {
     @Column(name = "id")
     private Integer id;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Subscription> subscriptions = new ArrayList<>();
 
@@ -57,6 +59,7 @@ public class Member {
     @Column(name = "push_carecall_missed", nullable = false)
     private NotificationStatus pushCarecallMissed = NotificationStatus.ON;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "guardian", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Elder> elders = new ArrayList<>();
 

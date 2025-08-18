@@ -2,6 +2,7 @@ package com.example.medicare_call.domain;
 
 import com.example.medicare_call.global.enums.SubscriptionPlan;
 import com.example.medicare_call.global.enums.SubscriptionStatus;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -23,6 +24,7 @@ public class Subscription {
     @Column(name = "id")
     private Long id;
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
