@@ -28,6 +28,7 @@ import com.example.medicare_call.global.enums.MedicationTakenStatus;
 import com.example.medicare_call.repository.ElderRepository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @ExtendWith(MockitoExtension.class)
 public class MedicationServiceTest {
@@ -367,14 +368,27 @@ public class MedicationServiceTest {
                 .scheduleTime("DINNER")
                 .build();
 
-        CareCallRecord callRecord = CareCallRecord.builder()
+        CareCallRecord morningCall = CareCallRecord.builder()
                 .id(1)
                 .elder(elder)
+                .calledAt(LocalDateTime.of(2025, 7, 16, 9, 0)) // 아침
+                .build();
+
+        CareCallRecord lunchCall = CareCallRecord.builder()
+                .id(2)
+                .elder(elder)
+                .calledAt(LocalDateTime.of(2025, 7, 16, 13, 0)) // 점심
+                .build();
+
+        CareCallRecord dinnerCall = CareCallRecord.builder()
+                .id(3)
+                .elder(elder)
+                .calledAt(LocalDateTime.of(2025, 7, 16, 19, 0)) // 저녁
                 .build();
 
         MedicationTakenRecord takenRecord1 = MedicationTakenRecord.builder()
                 .id(1)
-                .careCallRecord(callRecord)
+                .careCallRecord(morningCall)
                 .medicationSchedule(schedule1)
                 .medication(medication1)
                 .takenStatus(MedicationTakenStatus.TAKEN)
@@ -382,7 +396,7 @@ public class MedicationServiceTest {
 
         MedicationTakenRecord takenRecord2 = MedicationTakenRecord.builder()
                 .id(2)
-                .careCallRecord(callRecord)
+                .careCallRecord(lunchCall)
                 .medicationSchedule(schedule2)
                 .medication(medication1)
                 .takenStatus(MedicationTakenStatus.TAKEN)
@@ -390,7 +404,7 @@ public class MedicationServiceTest {
 
         MedicationTakenRecord takenRecord3 = MedicationTakenRecord.builder()
                 .id(3)
-                .careCallRecord(callRecord)
+                .careCallRecord(morningCall) // 혈압약은 아침에 복용
                 .medicationSchedule(schedule4)
                 .medication(medication2)
                 .takenStatus(MedicationTakenStatus.TAKEN)
