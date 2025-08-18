@@ -1,5 +1,6 @@
 package com.example.medicare_call.domain;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Builder;
@@ -29,6 +30,7 @@ public class Elder {
     @Column(name = "id")
     private Integer id;
 
+    @JsonManagedReference
     @OneToOne(mappedBy = "elder")
     private Subscription subscription;
 
@@ -61,18 +63,23 @@ public class Elder {
     @Column(name = "status", nullable = false, length = 20)
     private ElderStatus status;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "elder")
     private final List<CareCallRecord> careCallRecords = new ArrayList<>();
 
+    @JsonManagedReference
     @OneToOne(mappedBy = "elder", fetch = FetchType.LAZY)
     private CareCallSetting careCallSetting;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "elder")
     private final List<MedicationSchedule> medicationSchedules = new ArrayList<>();
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "elder")
     private final List<ElderDisease> elderDiseases = new ArrayList<>();
 
+    @JsonManagedReference
     @OneToOne(mappedBy = "elder", fetch = FetchType.LAZY)
     private ElderHealthInfo elderHealthInfo;
 
