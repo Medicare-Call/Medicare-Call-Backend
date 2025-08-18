@@ -121,22 +121,26 @@ public class HomeReportService {
         Boolean lunch = null;
         Boolean dinner = null;
 
-        for (MealRecord meal : todayMeals) {
-            MealType mealType = MealType.fromValue(meal.getMealType());
-            if (mealType != null) {
-                breakfast = false;
-                lunch = false;
-                dinner = false;
-                switch (mealType) {
-                    case BREAKFAST:
-                        breakfast = true;
-                        break;
-                    case LUNCH:
-                        lunch = true;
-                        break;
-                    case DINNER:
-                        dinner = true;
-                        break;
+        if(!todayMeals.isEmpty()) {
+            breakfast = false;
+            lunch = false;
+            dinner = false;
+            for (MealRecord meal : todayMeals) {
+
+                if (meal == null) continue;
+                MealType mealType = MealType.fromValue(meal.getMealType());
+                if (mealType != null) {
+                    switch (mealType) {
+                        case BREAKFAST:
+                            breakfast = true;
+                            break;
+                        case LUNCH:
+                            lunch = true;
+                            break;
+                        case DINNER:
+                            dinner = true;
+                            break;
+                    }
                 }
             }
         }
