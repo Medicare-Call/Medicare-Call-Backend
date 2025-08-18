@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import lombok.*;
+import org.hibernate.annotations.Where;
 
 @Entity
 @Table(name = "Member")
@@ -58,6 +59,7 @@ public class Member {
     private NotificationStatus pushCarecallMissed = NotificationStatus.ON;
 
     @OneToMany(mappedBy = "guardian", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Where(clause = "status = 'ACTIVATED'")
     private List<Elder> elders = new ArrayList<>();
 
     public Gender getGenderEnum() {
