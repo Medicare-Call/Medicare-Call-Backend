@@ -57,16 +57,16 @@ public class BloodSugarController {
         @Parameter(description = "어르신 식별자", required = true, example = "1")
         @PathVariable("elderId") Integer elderId,
 
-        @Parameter(description = "주간 조회 시작일 (yyyy-MM-dd)", required = true, example = "2025-07-09")
-        @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+        @Parameter(description = "주간 조회를 위한 페이지네이션 값", required = true, example = "0")
+        @RequestParam("counter") Integer counter,
 
-        @Parameter(description = "식사 시간대", required = true, example = "BEFORE_MEAL", 
+        @Parameter(description = "식사 시간대", required = true, example = "BEFORE_MEAL",
                   schema = @Schema(allowableValues = {"BEFORE_MEAL", "AFTER_MEAL"}))
         @RequestParam("type") String type
     ) {
-        log.info("주간 혈당 데이터 조회 요청: elderId={}, startDate={}, type={}", elderId, startDate, type);
+        log.info("주간 혈당 데이터 조회 요청: elderId={}, counter={}, type={}", elderId, counter, type);
 
-        WeeklyBloodSugarResponse response = weeklyBloodSugarService.getWeeklyBloodSugar(elderId, startDate, type);
+        WeeklyBloodSugarResponse response = weeklyBloodSugarService.getWeeklyBloodSugar(elderId, counter, type);
 
         return ResponseEntity.ok(response);
     }

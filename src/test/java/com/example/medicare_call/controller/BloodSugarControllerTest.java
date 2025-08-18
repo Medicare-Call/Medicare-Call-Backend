@@ -47,13 +47,8 @@ class BloodSugarControllerTest {
     void getWeeklyBloodSugar_성공_데이터있음() throws Exception {
         // given
         Integer elderId = 1;
-        String startDate = "2025-07-09";
+        Integer counter = 0;
         String type = "BEFORE_MEAL";
-
-        WeeklyBloodSugarResponse.Period period = WeeklyBloodSugarResponse.Period.builder()
-                .startDate(LocalDate.of(2025, 7, 9))
-                .endDate(LocalDate.of(2025, 7, 15))
-                .build();
 
         WeeklyBloodSugarResponse.BloodSugarData data1 = WeeklyBloodSugarResponse.BloodSugarData.builder()
                 .date(LocalDate.of(2025, 7, 9))
@@ -67,33 +62,19 @@ class BloodSugarControllerTest {
                 .status(BloodSugarStatus.NORMAL)
                 .build();
 
-        WeeklyBloodSugarResponse.BloodSugarSummary average = WeeklyBloodSugarResponse.BloodSugarSummary.builder()
-                .value(128)
-                .status(BloodSugarStatus.NORMAL)
-                .build();
-
-        WeeklyBloodSugarResponse.BloodSugarSummary latest = WeeklyBloodSugarResponse.BloodSugarSummary.builder()
-                .value(105)
-                .status(BloodSugarStatus.NORMAL)
-                .build();
-
         WeeklyBloodSugarResponse expectedResponse = WeeklyBloodSugarResponse.builder()
-                .period(period)
                 .data(Arrays.asList(data1, data2))
-                .average(average)
-                .latest(latest)
+                .hasNextPage(true)
                 .build();
 
-        when(weeklyBloodSugarService.getWeeklyBloodSugar(eq(elderId), any(LocalDate.class), eq(type)))
+        when(weeklyBloodSugarService.getWeeklyBloodSugar(eq(elderId), eq(counter), eq(type)))
                 .thenReturn(expectedResponse);
 
         // when & then
         mockMvc.perform(get("/elders/{elderId}/blood-sugar/weekly", elderId)
-                        .param("startDate", startDate)
+                        .param("counter", String.valueOf(counter))
                         .param("type", type))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.period.startDate").value("2025-07-09"))
-                .andExpect(jsonPath("$.period.endDate").value("2025-07-15"))
                 .andExpect(jsonPath("$.data").isArray())
                 .andExpect(jsonPath("$.data[0].date").value("2025-07-09"))
                 .andExpect(jsonPath("$.data[0].value").value(90))
@@ -101,10 +82,7 @@ class BloodSugarControllerTest {
                 .andExpect(jsonPath("$.data[1].date").value("2025-07-10"))
                 .andExpect(jsonPath("$.data[1].value").value(105))
                 .andExpect(jsonPath("$.data[1].status").value("NORMAL"))
-                .andExpect(jsonPath("$.average.value").value(128))
-                .andExpect(jsonPath("$.average.status").value("NORMAL"))
-                .andExpect(jsonPath("$.latest.value").value(105))
-                .andExpect(jsonPath("$.latest.status").value("NORMAL"));
+                .andExpect(jsonPath("$.hasNextPage").value(true));
     }
 
     @Test
@@ -112,34 +90,24 @@ class BloodSugarControllerTest {
     void getWeeklyBloodSugar_성공_데이터없음() throws Exception {
         // given
         Integer elderId = 1;
-        String startDate = "2025-07-09";
+        Integer counter = 0;
         String type = "AFTER_MEAL";
 
-        WeeklyBloodSugarResponse.Period period = WeeklyBloodSugarResponse.Period.builder()
-                .startDate(LocalDate.of(2025, 7, 9))
-                .endDate(LocalDate.of(2025, 7, 15))
-                .build();
-
         WeeklyBloodSugarResponse expectedResponse = WeeklyBloodSugarResponse.builder()
-                .period(period)
                 .data(Collections.emptyList())
-                .average(null)
-                .latest(null)
+                .hasNextPage(false)
                 .build();
 
-        when(weeklyBloodSugarService.getWeeklyBloodSugar(eq(elderId), any(LocalDate.class), eq(type)))
+        when(weeklyBloodSugarService.getWeeklyBloodSugar(eq(elderId), eq(counter), eq(type)))
                 .thenReturn(expectedResponse);
 
         // when & then
         mockMvc.perform(get("/elders/{elderId}/blood-sugar/weekly", elderId)
-                        .param("startDate", startDate)
+                        .param("counter", String.valueOf(counter))
                         .param("type", type))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.period.startDate").value("2025-07-09"))
-                .andExpect(jsonPath("$.period.endDate").value("2025-07-15"))
                 .andExpect(jsonPath("$.data").isArray())
                 .andExpect(jsonPath("$.data").isEmpty())
-                .andExpect(jsonPath("$.average").isEmpty())
-                .andExpect(jsonPath("$.latest").isEmpty());
+                .andExpect(jsonPath("$.hasNextPage").value(false));
     }
 } 

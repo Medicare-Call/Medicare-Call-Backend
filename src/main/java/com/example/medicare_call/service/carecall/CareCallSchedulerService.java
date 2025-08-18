@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @Service
@@ -17,8 +18,11 @@ public class CareCallSchedulerService {
     private final CareCallRequestSenderService careCallRequestSenderService;
 
     public void checkAndSendCalls() {
-        LocalTime now = LocalTime.now().withSecond(0).withNano(0); // 초 단위 무시
+        LocalTime now = LocalTime.now().withSecond(0).withNano(0); // UTC 기준 현재 시간
+        checkAndSendCalls(now);
+    }
 
+    public void checkAndSendCalls(LocalTime now) {
         //1차 케어콜
         List<CareCallSetting> firstTargets = settingRepository.findByFirstCallTime(now);
         for (CareCallSetting setting : firstTargets) {
