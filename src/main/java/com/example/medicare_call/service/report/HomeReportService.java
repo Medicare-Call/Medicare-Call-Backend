@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.Arrays;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -161,8 +163,10 @@ public class HomeReportService {
                     String medicationName = entry.getKey();
                     List<MedicationSchedule> medicationScheduleList = entry.getValue();
                     
-                    // 해당 약의 하루 목표 복용 횟수 (스케줄 개수)
-                    int goal = medicationScheduleList.size();
+                    // 해당 약의 하루 목표 복용 횟수
+                    int goal = medicationScheduleList.stream()
+                            .mapToInt(schedule -> schedule.getScheduleTime().split(",").length)
+                            .sum();
                     int taken = medicationTakenCounts.getOrDefault(medicationName, 0L).intValue();
 
                     // 다음 복약 시간 계산 (해당 약의 스케줄 중 가장 가까운 시간)
@@ -178,7 +182,9 @@ public class HomeReportService {
                 .collect(Collectors.toList());
 
         // 전체 목표 복용 횟수 계산
-        int totalGoal = schedules.size();
+        int totalGoal = schedules.stream()
+                .mapToInt(schedule -> schedule.getScheduleTime().split(",").length)
+                .sum();
 
         // 전체 다음 복약 시간 계산 (모든 약 중 가장 가까운 시간)
         MedicationScheduleTime nextTime = calculateNextMedicationTime(schedules);
@@ -198,14 +204,19 @@ public class HomeReportService {
     private MedicationScheduleTime calculateNextMedicationTimeFrom(List<MedicationSchedule> schedules) {
         LocalTime now = LocalTime.now();
 
-        return schedules.stream()
-                .map(schedule -> MedicationScheduleTime.valueOf(schedule.getScheduleTime()))
+        Optional<MedicationScheduleTime> nextTimeToday = schedules.stream()
+                .flatMap(schedule -> Arrays.stream(schedule.getScheduleTime().split(",")))
+                .map(String::trim)
+                .map(MedicationScheduleTime::valueOf)
                 .filter(scheduleTime -> getLocalTimeFromScheduleTime(scheduleTime).isAfter(now))
+                .min(Comparator.comparing(this::getLocalTimeFromScheduleTime));
+
+        return nextTimeToday.orElseGet(() -> schedules.stream()
+                .flatMap(schedule -> Arrays.stream(schedule.getScheduleTime().split(",")))
+                .map(String::trim)
+                .map(MedicationScheduleTime::valueOf)
                 .min(Comparator.comparing(this::getLocalTimeFromScheduleTime))
-                .orElseGet(() -> schedules.stream()
-                        .map(schedule -> MedicationScheduleTime.valueOf(schedule.getScheduleTime()))
-                        .min(Comparator.comparing(this::getLocalTimeFromScheduleTime))
-                        .orElse(MedicationScheduleTime.MORNING));
+                .orElse(MedicationScheduleTime.MORNING));
     }
 
     private LocalTime getLocalTimeFromScheduleTime(MedicationScheduleTime scheduleTime) {

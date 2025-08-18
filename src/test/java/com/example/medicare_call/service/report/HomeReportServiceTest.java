@@ -212,6 +212,47 @@ class HomeReportServiceTest {
         assertThat(medicationInfo.getTaken()).isEqualTo(0);
     }
 
+    @Test
+    @DisplayName("홈 화면 데이터 조회 성공 - 복약 스케줄이 쉼표로 구분된 문자열일 경우")
+    void getHomeReport_성공_복약스케줄_쉼표구분() {
+        // given
+        Integer elderId = 1;
+
+        // 복약 스케줄 생성 (하루 3회 복용, 쉼표로 구분된 문자열)
+        MedicationSchedule commaSeparatedSchedule = createMedicationSchedule(1, "혈압약", "MORNING,LUNCH,DINNER");
+
+        when(elderRepository.findById(elderId)).thenReturn(java.util.Optional.of(testElder));
+        when(mealRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+        when(medicationScheduleRepository.findByElder(testElder))
+                .thenReturn(Collections.singletonList(commaSeparatedSchedule));
+        when(medicationTakenRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+        when(bloodSugarRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithSleepData(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithHealthData(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithPsychologicalData(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+
+        // when
+        HomeReportResponse response = homeReportService.getHomeReport(elderId);
+
+        // then
+        assertThat(response.getMedicationStatus()).isNotNull();
+        assertThat(response.getMedicationStatus().getTotalGoal()).isEqualTo(3);
+        assertThat(response.getMedicationStatus().getTotalTaken()).isEqualTo(0);
+        assertThat(response.getMedicationStatus().getMedicationList()).hasSize(1);
+        assertThat(response.getMedicationStatus().getNextMedicationTime()).isNotNull();
+
+        HomeReportResponse.MedicationInfo medicationInfo = response.getMedicationStatus().getMedicationList().get(0);
+        assertThat(medicationInfo.getType()).isEqualTo("혈압약");
+        assertThat(medicationInfo.getGoal()).isEqualTo(3);
+        assertThat(medicationInfo.getTaken()).isEqualTo(0);
+    }
+
     private MealRecord createMealRecord(Integer id, Byte mealType) {
         return MealRecord.builder()
                 .id(id)
