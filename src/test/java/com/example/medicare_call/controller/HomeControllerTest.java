@@ -97,4 +97,54 @@ class HomeControllerTest {
                 .andExpect(jsonPath("$.mentalStatus").value("좋음"))
                 .andExpect(jsonPath("$.bloodSugar.meanValue").value(120));
     }
+
+    @Test
+    @DisplayName("홈 화면 데이터 조회 성공 - 건강 상태 나쁨, 심리 상태 나쁨")
+    void getHomeData_성공_상태나쁨() throws Exception {
+        // given
+        Integer elderId = 1;
+
+        HomeReportResponse.MealStatus mealStatus = HomeReportResponse.MealStatus.builder()
+                .breakfast(false)
+                .lunch(false)
+                .dinner(false)
+                .build();
+
+        HomeReportResponse.MedicationStatus medicationStatus = HomeReportResponse.MedicationStatus.builder()
+                .totalTaken(0)
+                .totalGoal(3)
+                .nextMedicationTime(MedicationScheduleTime.MORNING)
+                .medicationList(Collections.emptyList())
+                .build();
+
+        HomeReportResponse expectedResponse = HomeReportResponse.builder()
+                .elderName("김옥자")
+                .aiSummary("건강 상태가 좋지 않습니다.")
+                .mealStatus(mealStatus)
+                .medicationStatus(medicationStatus)
+                .sleep(null)
+                .healthStatus("나쁨")
+                .mentalStatus("나쁨")
+                .bloodSugar(null)
+                .build();
+
+        when(homeReportService.getHomeReport(eq(elderId)))
+                .thenReturn(expectedResponse);
+
+        // when & then
+        mockMvc.perform(get("/elders/{elderId}/home", elderId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.elderName").value("김옥자"))
+                .andExpect(jsonPath("$.aiSummary").value("건강 상태가 좋지 않습니다."))
+                .andExpect(jsonPath("$.mealStatus.breakfast").value(false))
+                .andExpect(jsonPath("$.mealStatus.lunch").value(false))
+                .andExpect(jsonPath("$.mealStatus.dinner").value(false))
+                .andExpect(jsonPath("$.medicationStatus.totalTaken").value(0))
+                .andExpect(jsonPath("$.medicationStatus.totalGoal").value(3))
+                .andExpect(jsonPath("$.medicationStatus.nextMedicationTime").value("MORNING"))
+                .andExpect(jsonPath("$.healthStatus").value("나쁨"))
+                .andExpect(jsonPath("$.mentalStatus").value("나쁨"))
+                .andExpect(jsonPath("$.sleep").doesNotExist())
+                .andExpect(jsonPath("$.bloodSugar").doesNotExist());
+    }
 } 

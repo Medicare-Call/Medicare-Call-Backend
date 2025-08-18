@@ -261,6 +261,168 @@ class HomeReportServiceTest {
                 .build();
     }
 
+    @Test
+    @DisplayName("홈 화면 데이터 조회 성공 - 건강 상태 좋음")
+    void getHomeReport_성공_건강상태좋음() {
+        // given
+        Integer elderId = 1;
+
+        CareCallRecord healthRecord = createCareCallRecord(1, (byte) 1, null); // healthStatus = 1 (좋음)
+
+        when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
+        when(mealRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+        when(medicationScheduleRepository.findByElder(testElder))
+                .thenReturn(Collections.emptyList());
+        when(medicationTakenRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithSleepData(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithHealthData(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.singletonList(healthRecord));
+        when(careCallRecordRepository.findByElderIdAndDateWithPsychologicalData(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+        when(bloodSugarRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+        when(aiSummaryService.getHomeSummary(any(HomeSummaryDto.class))).thenReturn("AI 요약");
+
+        // when
+        HomeReportResponse response = homeReportService.getHomeReport(elderId);
+
+        // then
+        assertThat(response.getHealthStatus()).isEqualTo("좋음");
+    }
+
+    @Test
+    @DisplayName("홈 화면 데이터 조회 성공 - 건강 상태 나쁨")
+    void getHomeReport_성공_건강상태나쁨() {
+        // given
+        Integer elderId = 1;
+
+        CareCallRecord healthRecord = createCareCallRecord(1, (byte) 0, null); // healthStatus = 0 (나쁨)
+
+        when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
+        when(mealRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+        when(medicationScheduleRepository.findByElder(testElder))
+                .thenReturn(Collections.emptyList());
+        when(medicationTakenRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithSleepData(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithHealthData(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.singletonList(healthRecord));
+        when(careCallRecordRepository.findByElderIdAndDateWithPsychologicalData(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+        when(bloodSugarRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+        when(aiSummaryService.getHomeSummary(any(HomeSummaryDto.class))).thenReturn("AI 요약");
+
+        // when
+        HomeReportResponse response = homeReportService.getHomeReport(elderId);
+
+        // then
+        assertThat(response.getHealthStatus()).isEqualTo("나쁨");
+    }
+
+    @Test
+    @DisplayName("홈 화면 데이터 조회 성공 - 심리 상태 좋음")
+    void getHomeReport_성공_심리상태좋음() {
+        // given
+        Integer elderId = 1;
+
+        CareCallRecord mentalRecord = createCareCallRecord(1, null, (byte) 1); // psychStatus = 1 (좋음)
+
+        when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
+        when(mealRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+        when(medicationScheduleRepository.findByElder(testElder))
+                .thenReturn(Collections.emptyList());
+        when(medicationTakenRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithSleepData(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithHealthData(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithPsychologicalData(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.singletonList(mentalRecord));
+        when(bloodSugarRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+        when(aiSummaryService.getHomeSummary(any(HomeSummaryDto.class))).thenReturn("AI 요약");
+
+        // when
+        HomeReportResponse response = homeReportService.getHomeReport(elderId);
+
+        // then
+        assertThat(response.getMentalStatus()).isEqualTo("좋음");
+    }
+
+    @Test
+    @DisplayName("홈 화면 데이터 조회 성공 - 심리 상태 나쁨")
+    void getHomeReport_성공_심리상태나쁨() {
+        // given
+        Integer elderId = 1;
+
+        CareCallRecord mentalRecord = createCareCallRecord(1, null, (byte) 0); // psychStatus = 0 (나쁨)
+
+        when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
+        when(mealRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+        when(medicationScheduleRepository.findByElder(testElder))
+                .thenReturn(Collections.emptyList());
+        when(medicationTakenRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithSleepData(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithHealthData(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithPsychologicalData(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.singletonList(mentalRecord));
+        when(bloodSugarRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+        when(aiSummaryService.getHomeSummary(any(HomeSummaryDto.class))).thenReturn("AI 요약");
+
+        // when
+        HomeReportResponse response = homeReportService.getHomeReport(elderId);
+
+        // then
+        assertThat(response.getMentalStatus()).isEqualTo("나쁨");
+    }
+
+    @Test
+    @DisplayName("홈 화면 데이터 조회 성공 - 건강 및 심리 상태 모두 있음")
+    void getHomeReport_성공_건강심리상태모두있음() {
+        // given
+        Integer elderId = 1;
+
+        CareCallRecord healthRecord = createCareCallRecord(1, (byte) 1, null); // healthStatus = 1 (좋음)
+        CareCallRecord mentalRecord = createCareCallRecord(2, null, (byte) 0); // psychStatus = 0 (나쁨)
+
+        when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
+        when(mealRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+        when(medicationScheduleRepository.findByElder(testElder))
+                .thenReturn(Collections.emptyList());
+        when(medicationTakenRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithSleepData(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithHealthData(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.singletonList(healthRecord));
+        when(careCallRecordRepository.findByElderIdAndDateWithPsychologicalData(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.singletonList(mentalRecord));
+        when(bloodSugarRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+        when(aiSummaryService.getHomeSummary(any(HomeSummaryDto.class))).thenReturn("AI 요약");
+
+        // when
+        HomeReportResponse response = homeReportService.getHomeReport(elderId);
+
+        // then
+        assertThat(response.getHealthStatus()).isEqualTo("좋음");
+        assertThat(response.getMentalStatus()).isEqualTo("나쁨");
+    }
+
     private MedicationSchedule createMedicationSchedule(Integer id, String medicationName, String scheduleTime) {
         Medication medication = Medication.builder()
                 .id(id)
@@ -271,6 +433,17 @@ class HomeReportServiceTest {
                 .id(id)
                 .medication(medication)
                 .scheduleTime(scheduleTime)
+                .build();
+    }
+
+    private CareCallRecord createCareCallRecord(Integer id, Byte healthStatus, Byte psychStatus) {
+        return CareCallRecord.builder()
+                .id(id)
+                .elder(testElder)
+                .calledAt(LocalDateTime.now())
+                .responded((byte) 1)
+                .healthStatus(healthStatus)
+                .psychStatus(psychStatus)
                 .build();
     }
 }
