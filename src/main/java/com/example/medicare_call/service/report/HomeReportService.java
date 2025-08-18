@@ -286,7 +286,13 @@ public class HomeReportService {
 
         // 가장 최근 기록의 건강 상태 반환
         CareCallRecord latestRecord = healthRecords.get(healthRecords.size() - 1);
-        return latestRecord.getHealthDetails();
+        Byte healthStatus = latestRecord.getHealthStatus();
+        
+        if (healthStatus == null) {
+            return null;
+        }
+        
+        return healthStatus == 1 ? "좋음" : "나쁨";
     }
 
     private String getMentalStatus(Integer elderId, LocalDate date) {
@@ -298,7 +304,13 @@ public class HomeReportService {
 
         // 가장 최근 기록의 심리 상태 반환
         CareCallRecord latestRecord = mentalRecords.get(mentalRecords.size() - 1);
-        return latestRecord.getPsychologicalDetails();
+        Byte psychStatus = latestRecord.getPsychStatus();
+        
+        if (psychStatus == null) {
+            return null;
+        }
+        
+        return psychStatus == 1 ? "좋음" : "나쁨";
     }
 
     private HomeReportResponse.BloodSugar getBloodSugarInfo(Integer elderId, LocalDate date) {
