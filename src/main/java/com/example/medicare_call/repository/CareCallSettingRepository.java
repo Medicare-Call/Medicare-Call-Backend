@@ -18,5 +18,8 @@ public interface CareCallSettingRepository extends JpaRepository<CareCallSetting
     @Query("SELECT c FROM CareCallSetting c JOIN c.elder e WHERE c.secondCallTime = :now AND e.status = 'ACTIVATED'")
     List<CareCallSetting> findBySecondCallTime(@Param("now") LocalTime now);
 
+    @Query("SELECT c FROM CareCallSetting c JOIN c.elder e WHERE c.thirdCallTime = :now AND e.status = 'ACTIVATED'")
+    List<CareCallSetting> findByThirdCallTime(@Param("now") LocalTime now);
+
     Optional<CareCallSetting> findByElder(Elder elder);
 }
