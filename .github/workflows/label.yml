@@ -1,0 +1,48 @@
+name: Labeler
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      repository-projects: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Add label based on branch name
+        run: |
+          BRANCH_NAME="${{ github.head_ref }}"
+          echo "Current branch: $BRANCH_NAME"
+          
+          if [[ "$BRANCH_NAME" == feat/* ]]; then
+            LABEL="enhancement"
+          elif [[ "$BRANCH_NAME" == fix/* ]]; then
+            LABEL="bug"
+          elif [[ "$BRANCH_NAME" == refactor/* ]]; then
+            LABEL="refactoring"
+          elif [[ "$BRANCH_NAME" == test/* ]]; then
+            LABEL="test"
+          elif [[ "$BRANCH_NAME" == release/* ]]; then
+            LABEL="release"
+          elif [[ "$BRANCH_NAME" == doc/* || "$BRANCH_NAME" == docs/* ]]; then
+            LABEL="documentation"
+          else
+            LABEL=""
+          fi
+          
+          if [[ ! -z "$LABEL" ]]; then
+            echo "Applying label: $LABEL"
+            gh pr edit ${{ github.event.pull_request.number }} --add-label "$LABEL"
+          else
+            echo "No matching label found for branch: $BRANCH_NAME"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
