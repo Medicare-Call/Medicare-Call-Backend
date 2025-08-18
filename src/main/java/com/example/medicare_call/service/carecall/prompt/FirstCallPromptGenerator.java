@@ -22,7 +22,7 @@ public class FirstCallPromptGenerator implements CallPromptGenerator{
 
         // 아침 복약명 추출 (scheduleTime: "morning")
         List<String> morningMedications = medicationSchedules.stream()
-                .filter(ms -> "MORNING".equalsIgnoreCase(ms.getScheduleTime())) //TODO: 확인 필요
+                .filter(ms -> ms.getScheduleTime() != null && ms.getScheduleTime().toUpperCase().contains("MORNING"))
                 .map(ms -> ms.getMedication().getName())
                 .toList();
 

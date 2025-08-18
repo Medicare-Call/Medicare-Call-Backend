@@ -17,7 +17,7 @@ public class ThirdCallPromptGenerator implements CallPromptGenerator {
 
 // 2. 저녁 복약명 추출 (scheduleTime: "evening")
         List<String> eveningMedications = medicationSchedules.stream()
-                .filter(ms -> "DINNER".equalsIgnoreCase(ms.getScheduleTime())) //TODO: 확인 필요
+                .filter(ms -> ms.getScheduleTime() != null && ms.getScheduleTime().toUpperCase().contains("DINNER"))
                 .map(ms -> ms.getMedication().getName())
                 .toList();
 
