@@ -50,27 +50,23 @@ public class MedicationService {
                         return medicationRepository.save(newMedication);
                     });
 
-            // 약 이름으로 Medication 찾기
-//            Medication medication = medicationRepository.findByName(medicationData.getMedicationType())
-//                    .orElseThrow(() -> new CustomException(ErrorCode.MEDICATION_NOT_FOUND, "약을 찾을 수 없습니다: " + medicationData.getMedicationType()));
-//
-//            // 해당 어르신의 복약 스케줄에서 매칭되는 것 찾기
-//            MedicationSchedule matchedSchedule = null;
-//
-//            for (MedicationSchedule schedule : schedules) {
-//                if (schedule.getMedication().getId().equals(medication.getId()) &&
-//                        isScheduleTimeMatched(schedule.getScheduleTime(), medicationData.getTakenTime())) {
-//                    matchedSchedule = schedule;
-//                    break;
-//                }
-//            }
+            // 해당 어르신의 복약 스케줄에서 매칭되는 것 찾기
+            MedicationSchedule matchedSchedule = null;
+
+            for (MedicationSchedule schedule : schedules) {
+                if (schedule.getMedication().getId().equals(medication.getId()) &&
+                        isScheduleTimeMatched(schedule.getScheduleTime(), medicationData.getTakenTime())) {
+                    matchedSchedule = schedule;
+                    break;
+                }
+            }
 
             // takenStatus 결정
             MedicationTakenStatus takenStatus = MedicationTakenStatus.fromDescription(medicationData.getTaken());
 
             MedicationTakenRecord medicationRecord = MedicationTakenRecord.builder()
                     .careCallRecord(callRecord)
-                    .medicationSchedule(null) // 매칭되는 스케줄이 있으면 설정, 없으면 null
+                    .medicationSchedule(matchedSchedule) // 매칭되는 스케줄이 있으면 설정, 없으면 null
                     .medication(medication)
                     .takenStatus(takenStatus)
                     .responseSummary(String.format("복용시간: %s, 복용여부: %s",
@@ -79,8 +75,8 @@ public class MedicationService {
                     .build();
 
             medicationTakenRecordRepository.save(medicationRecord);
-            log.info("복약 데이터 저장 완료: medication={}, taken={}",
-                    medicationData.getMedicationType(), medicationData.getTaken());
+            log.info("복약 데이터 저장 완료: medication={}, taken={}, scheduleMatched={}",
+                    medicationData.getMedicationType(), medicationData.getTaken(), matchedSchedule != null);
         }
     }
 
