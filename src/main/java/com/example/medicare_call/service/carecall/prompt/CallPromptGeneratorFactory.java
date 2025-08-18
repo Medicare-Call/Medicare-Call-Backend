@@ -10,12 +10,14 @@ public class CallPromptGeneratorFactory {
     private final FirstCallPromptGenerator firstStrategy;
     private final SecondCallPromptGenerator secondStrategy;
     private final ThirdCallPromptGenerator thirdStrategy;
+    private final ImmediateCallPromptGenerator immediateStrategy;
 
     public CallPromptGenerator getGenerator(CallType callType) {
         return switch (callType) {
             case FIRST -> firstStrategy;
             case SECOND -> secondStrategy;
             case THIRD -> thirdStrategy;
+            case IMMEDIATE -> immediateStrategy;
         };
     }
 }
