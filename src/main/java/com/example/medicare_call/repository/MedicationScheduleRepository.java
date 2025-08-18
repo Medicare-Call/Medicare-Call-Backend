@@ -9,7 +9,8 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface MedicationScheduleRepository extends JpaRepository<MedicationSchedule, Integer> {
-    List<MedicationSchedule> findByElderId(Integer elderId);
+    @Query("SELECT ms FROM MedicationSchedule ms JOIN ms.elder e WHERE e.id = :elderId AND e.status = 'ACTIVATED'")
+    List<MedicationSchedule> findByElderId(@Param("elderId") Integer elderId);
     List<MedicationSchedule> findByElder(Elder elder);
     void deleteAllByElder(Elder elder);
     
