@@ -69,8 +69,8 @@ public class GlobalExceptionHandler {
 
     // 404 Not Found 처리
     @ExceptionHandler(NoResourceFoundException.class)
-    protected ResponseEntity<ErrorResponse> handleNoHandlerFoundException(NoResourceFoundException e) {
-        log.error("handleNoHandlerFoundException", e);
+    protected ResponseEntity<ErrorResponse> handleNoResourceFoundException(NoResourceFoundException e) {
+        log.error("handleNoResourceFoundException", e);
         final ErrorResponse response = ErrorResponse.of(ErrorCode.NOT_FOUND);
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
