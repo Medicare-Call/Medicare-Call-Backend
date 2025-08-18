@@ -9,6 +9,7 @@ import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.*;
 import com.example.medicare_call.service.carecall.prompt.CallPromptGeneratorFactory;
 import com.example.medicare_call.service.carecall.prompt.FirstCallPromptGenerator;
+import com.example.medicare_call.service.carecall.prompt.ImmediateCallPromptGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -58,7 +59,7 @@ class CareCallRequestSenderServiceImmediateTest {
     private CallPromptGeneratorFactory callPromptGeneratorFactory;
 
     @Mock
-    private FirstCallPromptGenerator firstCallPromptGenerator;
+    private ImmediateCallPromptGenerator immediateCallPromptGenerator;
 
     @Mock
     private RestTemplate restTemplate;
@@ -140,8 +141,8 @@ class CareCallRequestSenderServiceImmediateTest {
         when(healthInfoRepository.findByElderId(testElder1.getId())).thenReturn(testHealthInfo);
         when(elderDiseaseRepository.findDiseasesByElder(testElder1)).thenReturn(testDiseases);
         when(medicationScheduleRepository.findByElderId(testElder1.getId())).thenReturn(testMedicationSchedules);
-        when(callPromptGeneratorFactory.getGenerator(CallType.FIRST)).thenReturn(firstCallPromptGenerator);
-        when(firstCallPromptGenerator.generate(any(), any(), any(), any())).thenReturn(expectedPrompt);
+        when(callPromptGeneratorFactory.getGenerator(CallType.IMMEDIATE)).thenReturn(immediateCallPromptGenerator);
+        when(immediateCallPromptGenerator.generate(any(), any(), any(), any())).thenReturn(expectedPrompt);
 
         // when
         String result = careCallRequestSenderService.sendImmediateCallToFirstElder(memberId);
@@ -152,7 +153,7 @@ class CareCallRequestSenderServiceImmediateTest {
         verify(memberRepository).findById(memberId);
         verify(careCallSettingRepository).findByElder(testElder1);
         verify(careCallSettingRepository).save(any(CareCallSetting.class));
-        verify(callPromptGeneratorFactory).getGenerator(CallType.FIRST);
+        verify(callPromptGeneratorFactory).getGenerator(CallType.IMMEDIATE);
         // 첫 번째 어르신에게만 전화하므로 testElder1에만 호출
         verify(elderRepository).findById(testElder1.getId());
         verify(elderRepository, never()).findById(testElder2.getId());
@@ -209,8 +210,8 @@ class CareCallRequestSenderServiceImmediateTest {
         when(healthInfoRepository.findByElderId(testElder1.getId())).thenReturn(testHealthInfo);
         when(elderDiseaseRepository.findDiseasesByElder(testElder1)).thenReturn(testDiseases);
         when(medicationScheduleRepository.findByElderId(testElder1.getId())).thenReturn(testMedicationSchedules);
-        when(callPromptGeneratorFactory.getGenerator(CallType.FIRST)).thenReturn(firstCallPromptGenerator);
-        when(firstCallPromptGenerator.generate(any(), any(), any(), any())).thenReturn(expectedPrompt);
+        when(callPromptGeneratorFactory.getGenerator(CallType.IMMEDIATE)).thenReturn(immediateCallPromptGenerator);
+        when(immediateCallPromptGenerator.generate(any(), any(), any(), any())).thenReturn(expectedPrompt);
 
         // when
         String result = careCallRequestSenderService.sendImmediateCallToFirstElder(memberId);
@@ -221,6 +222,6 @@ class CareCallRequestSenderServiceImmediateTest {
         verify(memberRepository).findById(memberId);
         verify(careCallSettingRepository).findByElder(testElder1);
         verify(careCallSettingRepository).save(any(CareCallSetting.class)); // 새로운 설정 저장
-        verify(callPromptGeneratorFactory).getGenerator(CallType.FIRST);
+        verify(callPromptGeneratorFactory).getGenerator(CallType.IMMEDIATE);
     }
 }
