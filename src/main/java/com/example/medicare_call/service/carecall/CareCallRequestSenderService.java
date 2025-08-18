@@ -81,7 +81,7 @@ public class CareCallRequestSenderService {
         
         try {
             CareCallSetting setting = getOrCreateImmediateSetting(firstElder);
-            sendCall(setting.getId(), firstElder.getId(), CallType.FIRST);
+            sendCall(setting.getId(), firstElder.getId(), CallType.IMMEDIATE);
             return String.format("%s 어르신께 즉시 케어콜 발송이 완료되었습니다.", firstElder.getName());
         } catch (Exception e) {
             log.error("즉시 케어콜 발송 실패 - elderId: {}, error: {}", firstElder.getId(), e.getMessage());
