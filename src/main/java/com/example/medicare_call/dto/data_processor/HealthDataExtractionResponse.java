@@ -35,10 +35,10 @@ public class HealthDataExtractionResponse {
     private String psychologicalStatus;
     
     @Schema(description = "혈당 데이터")
-    private BloodSugarData bloodSugarData;
+    private List<BloodSugarData> bloodSugarData;
     
     @Schema(description = "복약 데이터")
-    private MedicationData medicationData;
+    private List<MedicationData> medicationData;
     
     @Schema(description = "건강 징후 목록", example = "[\"혈당이 정상 범위\", \"수면 패턴 양호\"]")
     private List<String> healthSigns;

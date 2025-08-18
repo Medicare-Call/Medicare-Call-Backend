@@ -50,6 +50,7 @@ public class MedicationServiceTest {
     private CareCallRecord callRecord;
     private Elder elder;
     private Medication medication;
+    private Medication existingMedication;
     private MedicationSchedule medicationSchedule;
 
     @BeforeEach
@@ -67,6 +68,11 @@ public class MedicationServiceTest {
         medication = Medication.builder()
                 .id(1)
                 .name("혈압약")
+                .build();
+
+        existingMedication = Medication.builder()
+                .id(2)
+                .name("당뇨약")
                 .build();
 
         medicationSchedule = MedicationSchedule.builder()
@@ -92,7 +98,7 @@ public class MedicationServiceTest {
         when(medicationTakenRecordRepository.save(any(MedicationTakenRecord.class))).thenReturn(MedicationTakenRecord.builder().id(1).build());
 
         // when
-        medicationService.saveMedicationTakenRecord(callRecord, medicationData);
+        medicationService.saveMedicationTakenRecord(callRecord, List.of(medicationData));
 
         // then
         verify(medicationRepository).findByName("혈압약");
@@ -119,7 +125,7 @@ public class MedicationServiceTest {
         when(medicationTakenRecordRepository.save(any(MedicationTakenRecord.class))).thenReturn(MedicationTakenRecord.builder().id(1).build());
 
         // when
-        medicationService.saveMedicationTakenRecord(callRecord, medicationData);
+        medicationService.saveMedicationTakenRecord(callRecord, List.of(medicationData));
 
         // then
         verify(medicationTakenRecordRepository).save(argThat(record -> 
@@ -144,7 +150,7 @@ public class MedicationServiceTest {
         when(medicationTakenRecordRepository.save(any(MedicationTakenRecord.class))).thenReturn(MedicationTakenRecord.builder().id(1).build());
 
         // when
-        medicationService.saveMedicationTakenRecord(callRecord, medicationData);
+        medicationService.saveMedicationTakenRecord(callRecord, List.of(medicationData));
 
         // then
         verify(medicationTakenRecordRepository).save(argThat(record -> 
@@ -163,7 +169,7 @@ public class MedicationServiceTest {
                 .build();
 
         // when
-        medicationService.saveMedicationTakenRecord(callRecord, medicationData);
+        medicationService.saveMedicationTakenRecord(callRecord, List.of(medicationData));
 
         // then
         verify(medicationRepository, never()).findByName(any());
@@ -181,7 +187,7 @@ public class MedicationServiceTest {
                 .build();
 
         // when
-        medicationService.saveMedicationTakenRecord(callRecord, medicationData);
+        medicationService.saveMedicationTakenRecord(callRecord, List.of(medicationData));
 
         // then
         verify(medicationRepository, never()).findByName(any());
@@ -189,23 +195,27 @@ public class MedicationServiceTest {
     }
 
     @Test
-    @DisplayName("복약 데이터 저장 실패 - 약을 찾을 수 없음")
-    void saveMedicationTakenRecord_fail_medicationNotFound() {
+    @DisplayName("[신규] 여러 복약 데이터 저장 성공 (기존 약 + 새로운 약)")
+    void saveMedicationTakenRecord_Success_WithMultipleData() {
         // given
-        CareCallRecord record = new CareCallRecord();
-        HealthDataExtractionResponse.MedicationData medicationData = HealthDataExtractionResponse.MedicationData.builder()
-                .medicationType("존재하지 않는 약")
-                .taken("복용함")
-                .takenTime("아침")
-                .build();
+        HealthDataExtractionResponse.MedicationData existingMedData = HealthDataExtractionResponse.MedicationData.builder()
+                .medicationType("혈압약").taken("복용함").takenTime("아침").build();
+        HealthDataExtractionResponse.MedicationData newMedData = HealthDataExtractionResponse.MedicationData.builder()
+                .medicationType("새로운 약").taken("복용하지 않음").takenTime("점심").build();
 
-        when(medicationRepository.findByName("존재하지 않는 약")).thenReturn(Optional.empty());
+        Medication createdMedication = Medication.builder().id(2).name("새로운 약").build();
 
-        // when & then
-        CustomException exception = assertThrows(CustomException.class, () -> {
-            medicationService.saveMedicationTakenRecord(record, medicationData);
-        });
-        assertEquals(ErrorCode.MEDICATION_NOT_FOUND, exception.getErrorCode());
+        when(medicationRepository.findByName("혈압약")).thenReturn(Optional.of(existingMedication));
+        when(medicationRepository.findByName("새로운 약")).thenReturn(Optional.empty());
+        when(medicationRepository.save(any(Medication.class))).thenReturn(createdMedication);
+        when(medicationScheduleRepository.findByElder(elder)).thenReturn(List.of(medicationSchedule));
+
+        // when
+        medicationService.saveMedicationTakenRecord(callRecord, List.of(existingMedData, newMedData));
+
+        // then
+        verify(medicationRepository, times(1)).save(any(Medication.class)); // 새로운 약만 저장
+        verify(medicationTakenRecordRepository, times(2)).save(any(MedicationTakenRecord.class)); // 복용기록은 2번 저장
     }
 
     @Test
@@ -230,7 +240,7 @@ public class MedicationServiceTest {
         when(medicationTakenRecordRepository.save(any(MedicationTakenRecord.class))).thenReturn(MedicationTakenRecord.builder().id(1).build());
 
         // when
-        medicationService.saveMedicationTakenRecord(callRecord, medicationData);
+        medicationService.saveMedicationTakenRecord(callRecord, List.of(medicationData));
 
         // then
         verify(medicationTakenRecordRepository).save(argThat(record -> 
@@ -261,7 +271,7 @@ public class MedicationServiceTest {
         when(medicationTakenRecordRepository.save(any(MedicationTakenRecord.class))).thenReturn(MedicationTakenRecord.builder().id(1).build());
 
         // when
-        medicationService.saveMedicationTakenRecord(callRecord, medicationData);
+        medicationService.saveMedicationTakenRecord(callRecord, List.of(medicationData));
 
         // then
         verify(medicationTakenRecordRepository).save(argThat(record -> 
@@ -292,7 +302,7 @@ public class MedicationServiceTest {
         when(medicationTakenRecordRepository.save(any(MedicationTakenRecord.class))).thenReturn(MedicationTakenRecord.builder().id(1).build());
 
         // when
-        medicationService.saveMedicationTakenRecord(callRecord, medicationData);
+        medicationService.saveMedicationTakenRecord(callRecord, List.of(medicationData));
 
         // then
         verify(medicationTakenRecordRepository).save(argThat(record -> 

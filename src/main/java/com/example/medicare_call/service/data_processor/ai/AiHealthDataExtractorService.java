@@ -121,6 +121,8 @@ public class AiHealthDataExtractorService {
                - 건강 징후 상세 내용 (짧은 문장들로 요약)
                - 건강 상태 요약 (좋음/나쁨)
             
+            [중요] 만약 혈당을 여러 번 측정했거나 여러 종류의 약을 복용했다면, 각각을 반드시 별개의 JSON 객체로 분리하여 배열에 담아주세요. 예를 들어, "아침 혈압약, 점심 당뇨약"은 2개의 복약 데이터 객체로 분리해야 합니다. 절대로 하나의 필드에 여러 정보를 합치지 마세요.
+            
             응답은 반드시 다음 JSON 구조로 해주세요:
             {
               "date": "날짜",
@@ -135,17 +137,32 @@ public class AiHealthDataExtractorService {
               },
               "psychologicalState": ["심리 상태 상세 내용 1", "심리 상태 상세 내용 2"],
               "psychologicalStatus": "좋음/나쁨",
-              "bloodSugarData": {
-                "measurementTime": "측정 시각",
-                "mealTime": "식전/식후",
-                "bloodSugarValue": 숫자값,
-                "status": "LOW/NORMAL/HIGH"
-              },
-              "medicationData": {
-                "medicationType": "약 종류",
-                "taken": "복용함/복용하지 않음",
-                "takenTime": "복용 시간"
-              },
+              "bloodSugarData": [
+                {
+                  "measurementTime": "측정 시각1",
+                  "mealTime": "식전/식후1",
+                  "bloodSugarValue": 숫자값1,
+                  "status": "LOW/NORMAL/HIGH"
+                },
+                {
+                  "measurementTime": "측정 시각2",
+                  "mealTime": "식전/식후2",
+                  "bloodSugarValue": 숫자값2,
+                  "status": "LOW/NORMAL/HIGH"
+                }
+              ],
+              "medicationData": [
+              {
+                  "medicationType": "약 종류1",
+                  "taken": "복용함/복용하지 않음",
+                  "takenTime": "복용 시간1"
+                },
+                {
+                  "medicationType": "약 종류2",
+                  "taken": "복용함/복용하지 않음",
+                  "takenTime": "복용 시간2"
+                }
+              ],
               "healthSigns": ["건강 징후 상세 내용 1", "건강 징후 상세 내용 2"],
               "healthStatus": "좋음/나쁨"
             }

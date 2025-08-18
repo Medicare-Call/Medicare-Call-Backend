@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -65,7 +66,7 @@ class BloodSugarServiceTest {
                 .thenReturn(new BloodSugarRecord());
 
         // when
-        bloodSugarService.saveBloodSugarData(testCallRecord, testBloodSugarData);
+        bloodSugarService.saveBloodSugarData(testCallRecord, List.of(testBloodSugarData));
 
         // then
         ArgumentCaptor<BloodSugarRecord> captor = ArgumentCaptor.forClass(BloodSugarRecord.class);
@@ -94,7 +95,7 @@ class BloodSugarServiceTest {
                 .thenReturn(new BloodSugarRecord());
 
         // when
-        bloodSugarService.saveBloodSugarData(testCallRecord, testBloodSugarData);
+        bloodSugarService.saveBloodSugarData(testCallRecord, List.of(testBloodSugarData));
 
         // then
         ArgumentCaptor<BloodSugarRecord> captor = ArgumentCaptor.forClass(BloodSugarRecord.class);
@@ -120,7 +121,7 @@ class BloodSugarServiceTest {
                 .thenReturn(new BloodSugarRecord());
 
         // when
-        bloodSugarService.saveBloodSugarData(testCallRecord, testBloodSugarData);
+        bloodSugarService.saveBloodSugarData(testCallRecord, List.of(testBloodSugarData));
 
         // then
         ArgumentCaptor<BloodSugarRecord> captor = ArgumentCaptor.forClass(BloodSugarRecord.class);
@@ -146,7 +147,7 @@ class BloodSugarServiceTest {
                 .thenReturn(new BloodSugarRecord());
 
         // when
-        bloodSugarService.saveBloodSugarData(testCallRecord, testBloodSugarData);
+        bloodSugarService.saveBloodSugarData(testCallRecord, List.of(testBloodSugarData));
 
         // then
         ArgumentCaptor<BloodSugarRecord> captor = ArgumentCaptor.forClass(BloodSugarRecord.class);
@@ -168,7 +169,7 @@ class BloodSugarServiceTest {
                 .build();
 
         // when
-        bloodSugarService.saveBloodSugarData(testCallRecord, testBloodSugarData);
+        bloodSugarService.saveBloodSugarData(testCallRecord, List.of(testBloodSugarData));
 
         // then
         // 혈당 값이 null이면 저장하지 않음
