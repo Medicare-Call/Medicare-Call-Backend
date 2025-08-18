@@ -153,6 +153,7 @@ public class HomeReportService {
 
         // 약 종류별 복용 횟수 계산
         Map<String, Long> medicationTakenCounts = todayMedications.stream()
+                .filter(mtr -> mtr.getMedicationSchedule() != null && mtr.getMedicationSchedule().getMedication() != null)
                 .collect(Collectors.groupingBy(
                         mtr -> mtr.getMedicationSchedule().getMedication().getName(),
                         Collectors.counting()
