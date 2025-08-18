@@ -1,6 +1,8 @@
 package com.example.medicare_call.domain;
 
 import com.example.medicare_call.dto.data_processor.CareCallDataProcessRequest;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;
@@ -21,10 +23,12 @@ public class CareCallRecord {
     @Column(name = "id")
     private Integer id;
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "elder_id", nullable = false)
     private Elder elder;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "setting_id", nullable = false)
     private CareCallSetting setting;

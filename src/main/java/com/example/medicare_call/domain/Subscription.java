@@ -29,6 +29,7 @@ public class Subscription {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
+    @JsonBackReference
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "elder_id", nullable = false, unique = true)
     private Elder elder;

@@ -1,5 +1,6 @@
 package com.example.medicare_call.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Builder;
@@ -17,6 +18,7 @@ public class ElderHealthInfo {
     @Column(name = "id")
     private Integer id;
 
+    @JsonBackReference
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "elder_id", nullable = false, unique = true)
     private Elder elder;
