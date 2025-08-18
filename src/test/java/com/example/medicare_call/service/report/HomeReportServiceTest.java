@@ -107,7 +107,7 @@ class HomeReportServiceTest {
         // then
         assertThat(response).isNotNull();
         assertThat(response.getElderName()).isEqualTo("김옥자");
-        assertEquals("AI 요약", response.getAISummary());
+        assertEquals("AI 요약", response.getAiSummary());
         assertThat(response.getMealStatus()).isNotNull();
         assertThat(response.getMealStatus().getBreakfast()).isFalse();
         assertThat(response.getMealStatus().getLunch()).isFalse();

@@ -68,7 +68,7 @@ class HomeControllerTest {
 
         HomeReportResponse expectedResponse = HomeReportResponse.builder()
                 .elderName("김옥자")
-                .AISummary("TODO: AI 요약 기능 구현 필요")
+                .aiSummary("TODO: AI 요약 기능 구현 필요")
                 .mealStatus(mealStatus)
                 .medicationStatus(medicationStatus)
                 .sleep(sleep)
@@ -84,7 +84,7 @@ class HomeControllerTest {
         mockMvc.perform(get("/elders/{elderId}/home", elderId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.elderName").value("김옥자"))
-                .andExpect(jsonPath("$.aisummary").value("TODO: AI 요약 기능 구현 필요"))
+                .andExpect(jsonPath("$.aiSummary").value("TODO: AI 요약 기능 구현 필요"))
                 .andExpect(jsonPath("$.mealStatus.breakfast").value(true))
                 .andExpect(jsonPath("$.mealStatus.lunch").value(true))
                 .andExpect(jsonPath("$.mealStatus.dinner").value(false))

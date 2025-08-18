@@ -16,7 +16,7 @@ public class HomeReportResponse {
     private String elderName;
 
     @Schema(description = "AI가 생성한 건강 상태 요약 문장", example = "아침·점심 복약과 식사는 문제 없으나, 저녁 약 복용이 늦어진 우려가 있어요.")
-    private String AISummary;
+    private String aiSummary;
 
     @Schema(description = "식사 여부 상태 정보")
     private MealStatus mealStatus;
