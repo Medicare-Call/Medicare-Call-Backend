@@ -98,10 +98,13 @@ public class HomeReportService {
                                                 String healthStatus,
                                                 String mentalStatus,
                                                 HomeReportResponse.BloodSugar bloodSugar) {
+        HomeReportResponse.MealStatus finalMealStatus = Optional.ofNullable(mealStatus)
+                .orElse(HomeReportResponse.MealStatus.builder().build());
+
         return HomeSummaryDto.builder()
-                .breakfast(mealStatus != null ? mealStatus.getBreakfast() : false)
-                .lunch(mealStatus != null ? mealStatus.getLunch() : false)
-                .dinner(mealStatus != null ? mealStatus.getDinner() : false)
+                .breakfast(Boolean.TRUE.equals(finalMealStatus.getBreakfast()))
+                .lunch(Boolean.TRUE.equals(finalMealStatus.getLunch()))
+                .dinner(Boolean.TRUE.equals(finalMealStatus.getDinner()))
                 .totalTakenMedication(medicationStatus != null ? medicationStatus.getTotalTaken() : 0)
                 .totalGoalMedication(medicationStatus != null ? medicationStatus.getTotalGoal() : 0)
                 .nextMedicationTime(medicationStatus != null ? medicationStatus.getNextMedicationTime() : null)
@@ -114,13 +117,16 @@ public class HomeReportService {
     }
 
     private HomeReportResponse.MealStatus getMealStatus(List<MealRecord> todayMeals) {
-        boolean breakfast = false;
-        boolean lunch = false;
-        boolean dinner = false;
+        Boolean breakfast = null;
+        Boolean lunch = null;
+        Boolean dinner = null;
 
         for (MealRecord meal : todayMeals) {
             MealType mealType = MealType.fromValue(meal.getMealType());
             if (mealType != null) {
+                breakfast = false;
+                lunch = false;
+                dinner = false;
                 switch (mealType) {
                     case BREAKFAST:
                         breakfast = true;
