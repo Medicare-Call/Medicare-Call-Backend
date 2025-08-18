@@ -20,6 +20,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Objects;
+import java.util.Set;
+
 
 @Slf4j
 @Service
@@ -152,25 +157,28 @@ public class MedicationService {
     }
 
     private List<DailyMedicationResponse.TimeInfo> createTimeInfos(
-            List<MedicationSchedule> schedules, 
+            List<MedicationSchedule> schedules,
             List<MedicationTakenRecord> takenRecords) {
-        
-        return schedules.stream()
-                .map(schedule -> {
-                    MedicationScheduleTime scheduleTime = MedicationScheduleTime.valueOf(schedule.getScheduleTime());
 
-                    boolean taken = takenRecords.stream()
-                            .anyMatch(record -> 
-                                record.getTakenStatus() == MedicationTakenStatus.TAKEN &&
-                                record.getMedicationSchedule() != null &&
-                                record.getMedicationSchedule().getId().equals(schedule.getId())
-                            );
-                    
-                    return DailyMedicationResponse.TimeInfo.builder()
-                            .time(scheduleTime)
-                            .taken(taken)
-                            .build();
-                })
+        Set<MedicationScheduleTime> takenTimes = takenRecords.stream()
+                .filter(record ->
+                        record.getTakenStatus() == MedicationTakenStatus.TAKEN && record.getCareCallRecord() != null)
+                .map(record ->
+                        MedicationScheduleTime.fromHour(record.getCareCallRecord().getCalledAt().getHour()))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        return schedules.stream()
+                .flatMap(schedule ->
+                        Arrays.stream(schedule.getScheduleTime().split(",")))
+                .map(String::trim)
+                .map(MedicationScheduleTime::valueOf)
+                .distinct()
+                .map(scheduleTime -> DailyMedicationResponse.TimeInfo.builder()
+                        .time(scheduleTime)
+                        .taken(takenTimes.contains(scheduleTime))
+                        .build())
+                .sorted(Comparator.comparing(DailyMedicationResponse.TimeInfo::getTime))
                 .collect(Collectors.toList());
     }
 } 
