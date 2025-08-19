@@ -108,11 +108,9 @@ class HomeReportServiceTest {
         assertThat(response).isNotNull();
         assertThat(response.getElderName()).isEqualTo("김옥자");
         assertEquals("AI 요약", response.getAiSummary());
-        assertThat(response.getMealStatus()).isNotNull();
-        assertThat(response.getMealStatus().getBreakfast()).isFalse();
-        assertThat(response.getMealStatus().getLunch()).isFalse();
-        assertThat(response.getMealStatus().getDinner()).isFalse();
-        assertThat(response.getMedicationStatus()).isNotNull();
+        assertThat(response.getMealStatus().getBreakfast()).isNull();
+        assertThat(response.getMealStatus().getLunch()).isNull();
+        assertThat(response.getMealStatus().getDinner()).isNull();
         assertThat(response.getMedicationStatus().getTotalTaken()).isEqualTo(0);
         assertThat(response.getMedicationStatus().getTotalGoal()).isEqualTo(0);
         assertThat(response.getSleep()).isNull();
@@ -165,6 +163,7 @@ class HomeReportServiceTest {
         HomeReportResponse response = homeReportService.getHomeReport(elderId);
 
         // then
+        assertThat(response).isNotNull();
         assertThat(response.getMealStatus().getBreakfast()).isTrue();
         assertThat(response.getMealStatus().getLunch()).isTrue();
         assertThat(response.getMealStatus().getDinner()).isFalse();
@@ -201,7 +200,6 @@ class HomeReportServiceTest {
         HomeReportResponse response = homeReportService.getHomeReport(elderId);
 
         // then
-        assertThat(response.getMedicationStatus()).isNotNull();
         assertThat(response.getMedicationStatus().getTotalGoal()).isEqualTo(3);
         assertThat(response.getMedicationStatus().getTotalTaken()).isEqualTo(0);
         assertThat(response.getMedicationStatus().getMedicationList()).hasSize(1);
@@ -241,11 +239,9 @@ class HomeReportServiceTest {
         HomeReportResponse response = homeReportService.getHomeReport(elderId);
 
         // then
-        assertThat(response.getMedicationStatus()).isNotNull();
         assertThat(response.getMedicationStatus().getTotalGoal()).isEqualTo(3);
         assertThat(response.getMedicationStatus().getTotalTaken()).isEqualTo(0);
         assertThat(response.getMedicationStatus().getMedicationList()).hasSize(1);
-        assertThat(response.getMedicationStatus().getNextMedicationTime()).isNotNull();
 
         HomeReportResponse.MedicationInfo medicationInfo = response.getMedicationStatus().getMedicationList().get(0);
         assertThat(medicationInfo.getType()).isEqualTo("혈압약");

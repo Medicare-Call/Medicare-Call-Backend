@@ -115,11 +115,19 @@ public class AiSummaryService {
         }
     }
 
+    // meal data 값이 null일 수도 있으므로 추가 처리
+    private String formatMealStatus(Boolean status, String mealName) {
+        if (status == null) {
+            return mealName + " 기록 존재하지 않음";
+        }
+        return status ? mealName + " 식사 완료" : mealName + " 식사하지 않음";
+    }
+
     private String buildHomePrompt(HomeSummaryDto dto) {
         String mealSummary = Stream.of(
-                dto.getBreakfast() ? "아침 식사 완료" : "아침 식사 누락",
-                dto.getLunch() ? "점심 식사 완료" : "점심 식사 누락",
-                dto.getDinner() ? "저녁 식사 완료" : "저녁 식사 누락"
+                formatMealStatus(dto.getBreakfast(), "아침"),
+                formatMealStatus(dto.getBreakfast(), "점심"),
+                formatMealStatus(dto.getBreakfast(), "저녁")
         ).collect(Collectors.joining(", "));
 
         String medicationSummary = String.format("오늘 복약 %d/%d, 다음 복약: %s",
