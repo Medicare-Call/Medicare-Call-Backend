@@ -31,7 +31,7 @@ public class MealRecordService {
         List<MealRecord> mealRecords = mealRecordRepository.findByElderIdAndDate(elderId, date);
 
         if (mealRecords.isEmpty()) {
-            return DailyMealResponse.empty(date);
+            throw new CustomException(ErrorCode.NO_DATA_FOR_TODAY);
         }
 
         String breakfast = null;

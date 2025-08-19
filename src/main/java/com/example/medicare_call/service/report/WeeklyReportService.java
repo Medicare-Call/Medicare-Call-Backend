@@ -41,24 +41,39 @@ public class WeeklyReportService {
         Elder elder = elderRepository.findById(elderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ELDER_NOT_FOUND));
 
+        // 데이터 조회
+        List<MealRecord> mealRecords = mealRecordRepository.findByElderIdAndDateBetween(elderId, startDate, endDate);
+        List<MedicationSchedule> schedules = medicationScheduleRepository.findByElderId(elderId);
+        List<MedicationTakenRecord> takenRecords = medicationTakenRecordRepository.findByElderIdAndDateBetween(elderId, startDate, endDate);
+        List<CareCallRecord> sleepRecords = careCallRecordRepository.findByElderIdAndDateBetweenWithSleepData(elderId, startDate, endDate);
+        List<CareCallRecord> mentalRecords = careCallRecordRepository.findByElderIdAndDateBetweenWithPsychologicalData(elderId, startDate, endDate);
+        List<BloodSugarRecord> bloodSugarRecords = bloodSugarRecordRepository.findByElderIdAndDateBetween(elderId, startDate, endDate);
+        List<CareCallRecord> healthRecords = careCallRecordRepository.findByElderIdAndDateBetweenWithHealthData(elderId, startDate, endDate);
+        List<CareCallRecord> callRecords = careCallRecordRepository.findByElderIdAndDateBetween(elderId, startDate, endDate);
+
+
+        if (callRecords.isEmpty()) {
+            throw new CustomException(ErrorCode.NO_DATA_FOR_WEEK);
+        }
+
         // 1. 식사 통계
-        WeeklyReportResponse.MealStats mealStats = getMealStats(elderId, startDate, endDate);
+        WeeklyReportResponse.MealStats mealStats = getMealStats(mealRecords);
 
         // 2. 복약 통계
-        Map<String, WeeklyReportResponse.MedicationStats> medicationStats = getMedicationStats(elderId, startDate, endDate);
+        Map<String, WeeklyReportResponse.MedicationStats> medicationStats = getMedicationStats(schedules, takenRecords);
 
         // 3. 수면 통계
-        WeeklyReportResponse.AverageSleep averageSleep = getAverageSleep(elderId, startDate, endDate);
+        WeeklyReportResponse.AverageSleep averageSleep = getAverageSleep(sleepRecords);
 
         // 4. 심리 상태 통계
-        WeeklyReportResponse.PsychSummary psychSummary = getPsychSummary(elderId, startDate, endDate);
+        WeeklyReportResponse.PsychSummary psychSummary = getPsychSummary(mentalRecords);
 
         // 5. 혈당 통계
-        WeeklyReportResponse.BloodSugar bloodSugar = getBloodSugarStats(elderId, startDate, endDate);
+        WeeklyReportResponse.BloodSugar bloodSugar = getBloodSugarStats(bloodSugarRecords);
 
         // 6. 요약 통계 계산
         WeeklyReportResponse.SummaryStats summaryStats = calculateSummaryStats(
-                mealStats, medicationStats, elderId, startDate, endDate);
+                mealStats, medicationStats, healthRecords, callRecords);
 
         // 7. AI 요약 생성
         WeeklySummaryDto weeklySummaryDto = createWeeklySummaryDto(mealStats, medicationStats, averageSleep, psychSummary, bloodSugar, summaryStats);
@@ -109,8 +124,7 @@ public class WeeklyReportService {
                 .build();
     }
 
-    private WeeklyReportResponse.MealStats getMealStats(Integer elderId, LocalDate startDate, LocalDate endDate) {
-        List<MealRecord> mealRecords = mealRecordRepository.findByElderIdAndDateBetween(elderId, startDate, endDate);
+    private WeeklyReportResponse.MealStats getMealStats(List<MealRecord> mealRecords) {
 
         int breakfast = 0, lunch = 0, dinner = 0;
 
@@ -138,14 +152,12 @@ public class WeeklyReportService {
                 .build();
     }
 
-    private Map<String, WeeklyReportResponse.MedicationStats> getMedicationStats(Integer elderId, LocalDate startDate, LocalDate endDate) {
+    private Map<String, WeeklyReportResponse.MedicationStats> getMedicationStats(List<MedicationSchedule> schedules, List<MedicationTakenRecord> takenRecords) {
         // 약물별 스케줄 조회
-        List<MedicationSchedule> schedules = medicationScheduleRepository.findByElderId(elderId);
         Map<String, List<MedicationSchedule>> medicationSchedules = schedules.stream()
                 .collect(Collectors.groupingBy(MedicationSchedule::getName));
 
         // 약물별 복용 기록 조회
-        List<MedicationTakenRecord> takenRecords = medicationTakenRecordRepository.findByElderIdAndDateBetween(elderId, startDate, endDate);
         Map<String, Long> takenCounts = takenRecords.stream()
                 .collect(Collectors.groupingBy(
                         MedicationTakenRecord::getName,
@@ -170,8 +182,7 @@ public class WeeklyReportService {
         return result;
     }
 
-    private WeeklyReportResponse.AverageSleep getAverageSleep(Integer elderId, LocalDate startDate, LocalDate endDate) {
-        List<CareCallRecord> sleepRecords = careCallRecordRepository.findByElderIdAndDateBetweenWithSleepData(elderId, startDate, endDate);
+    private WeeklyReportResponse.AverageSleep getAverageSleep(List<CareCallRecord> sleepRecords) {
 
         if (sleepRecords.isEmpty()) {
             return WeeklyReportResponse.AverageSleep.builder()
@@ -210,8 +221,7 @@ public class WeeklyReportService {
                 .build();
     }
 
-    private WeeklyReportResponse.PsychSummary getPsychSummary(Integer elderId, LocalDate startDate, LocalDate endDate) {
-        List<CareCallRecord> mentalRecords = careCallRecordRepository.findByElderIdAndDateBetweenWithPsychologicalData(elderId, startDate, endDate);
+    private WeeklyReportResponse.PsychSummary getPsychSummary(List<CareCallRecord> mentalRecords) {
 
         int good = 0, normal = 0, bad = 0;
 
@@ -234,8 +244,7 @@ public class WeeklyReportService {
                 .build();
     }
 
-    private WeeklyReportResponse.BloodSugar getBloodSugarStats(Integer elderId, LocalDate startDate, LocalDate endDate) {
-        List<BloodSugarRecord> bloodSugarRecords = bloodSugarRecordRepository.findByElderIdAndDateBetween(elderId, startDate, endDate);
+    private WeeklyReportResponse.BloodSugar getBloodSugarStats(List<BloodSugarRecord> bloodSugarRecords) {
 
         Map<BloodSugarMeasurementType, Map<BloodSugarStatus, Integer>> stats = new HashMap<>();
         stats.put(BloodSugarMeasurementType.BEFORE_MEAL, new HashMap<>());
@@ -272,7 +281,7 @@ public class WeeklyReportService {
     private WeeklyReportResponse.SummaryStats calculateSummaryStats(
             WeeklyReportResponse.MealStats mealStats,
             Map<String, WeeklyReportResponse.MedicationStats> medicationStats,
-            Integer elderId, LocalDate startDate, LocalDate endDate) {
+            List<CareCallRecord> healthRecords, List<CareCallRecord> callRecords) {
 
         // 식사율 계산 (7일 * 3끼 = 21끼 중 실제 식사한 횟수), 소숫점 버림
         int totalMeals = mealStats.getBreakfast() + mealStats.getLunch() + mealStats.getDinner();
@@ -288,14 +297,12 @@ public class WeeklyReportService {
         int medicationRate = totalMedicationCount == 0 ? 0 : (int) Math.round((double) totalTakenCount / totalMedicationCount * 100);
 
         // 건강 이상 징후 횟수 (CareCallRecord에서 healthDetails가 있는 건수)
-        List<CareCallRecord> healthRecords = careCallRecordRepository.findByElderIdAndDateBetweenWithHealthData(elderId, startDate, endDate);
         int healthSignals = (int) healthRecords.stream()
                 .filter(record -> record.getHealthDetails() != null && !record.getHealthDetails().trim().isEmpty())
                 .count();
 
         // 미응답 건수 (callStatus가 failed인 건수)
         // TODO: Twilio에서 실제 상태값이 어떻게 정의되는지를 확인하고, 이에 알맞도록 수정
-        List<CareCallRecord> callRecords = careCallRecordRepository.findByElderIdAndDateBetween(elderId, startDate, endDate);
         int missedCalls = (int) callRecords.stream()
                 .filter(record -> "failed".equals(record.getCallStatus()))
                 .count();

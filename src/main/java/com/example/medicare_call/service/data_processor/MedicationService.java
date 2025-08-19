@@ -85,12 +85,11 @@ public class MedicationService {
                 .orElseThrow(() -> new CustomException(ErrorCode.ELDER_NOT_FOUND));
 
         List<MedicationTakenRecord> takenRecords = medicationTakenRecordRepository.findByElderIdAndDate(elderId, date);
+        List<MedicationSchedule> schedules = medicationScheduleRepository.findByElder(elder);
 
         if (takenRecords.isEmpty()) {
-            return DailyMedicationResponse.empty(date);
+            throw new CustomException(ErrorCode.NO_DATA_FOR_TODAY);
         }
-
-        List<MedicationSchedule> schedules = medicationScheduleRepository.findByElder(elder);
 
         // 약 종류별 스케줄
         Map<String, List<MedicationSchedule>> schedulesByName = schedules.stream()

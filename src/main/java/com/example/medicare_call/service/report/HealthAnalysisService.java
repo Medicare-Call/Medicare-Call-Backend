@@ -28,7 +28,7 @@ public class HealthAnalysisService {
         List<CareCallRecord> healthRecords = careCallRecordRepository.findByElderIdAndDateWithHealthData(elderId, date);
 
         if (healthRecords.isEmpty()) {
-            return DailyHealthAnalysisResponse.empty(date);
+            throw new CustomException(ErrorCode.NO_DATA_FOR_TODAY);
         }
 
         CareCallRecord latestRecord = healthRecords.get(healthRecords.size() - 1);
