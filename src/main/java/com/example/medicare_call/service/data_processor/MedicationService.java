@@ -24,6 +24,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collections;
 
 
 @Slf4j
@@ -45,53 +47,37 @@ public class MedicationService {
                 continue;
             }
 
-            // 해당 어르신의 복약 스케줄에서 매칭되는 것 찾기
-            MedicationSchedule matchedSchedule = null;
+            MedicationTakenRecord.MedicationTakenRecordBuilder recordBuilder = MedicationTakenRecord.builder()
+                    .careCallRecord(callRecord)
+                    .name(medicationData.getMedicationType())
+                    .takenStatus(MedicationTakenStatus.fromDescription(medicationData.getTaken()))
+                    .responseSummary(String.format("복용시간: %s, 복용여부: %s",
+                            medicationData.getTakenTime(), medicationData.getTaken()))
+                    .recordedAt(LocalDateTime.now());
 
-            for (MedicationSchedule schedule : schedules) {
-                if (schedule.getName().equals(medicationData.getMedicationType()) &&
-                        isScheduleTimeMatched(schedule.getScheduleTime(), medicationData.getTakenTime())) {
-                    matchedSchedule = schedule;
-                    break;
-                }
+            MedicationSchedule schedule = null;
+
+            if (medicationData.getTakenTime() != null && !medicationData.getTakenTime().isBlank()) {
+                MedicationScheduleTime takenTimeEnum = MedicationScheduleTime.fromDescription(medicationData.getTakenTime().trim());
+                recordBuilder.takenTime(takenTimeEnum);
+
+                // 복용 시간과 약 이름이 일치하는 스케줄 찾기
+                schedule = schedules.stream()
+                    .filter(s -> s.getName().equals(medicationData.getMedicationType()) &&
+                        s.getScheduleTime() == takenTimeEnum)
+                    .findFirst()
+                    .orElse(null);
             }
 
-            // takenStatus 결정
-            MedicationTakenStatus takenStatus = MedicationTakenStatus.fromDescription(medicationData.getTaken());
 
-            MedicationTakenRecord medicationRecord = MedicationTakenRecord.builder()
-                    .careCallRecord(callRecord)
-                    .medicationSchedule(matchedSchedule) // 매칭되는 스케줄이 있으면 설정, 없으면 null
-                    .name(medicationData.getMedicationType())
-                    .takenStatus(takenStatus)
-                    .responseSummary(String.format("복용시간: %s, 복용여부: %s", //TODO: MedicationTakenRecord 컬럼 정리
-                            medicationData.getTakenTime(), medicationData.getTaken()))
-                    .recordedAt(LocalDateTime.now())
+            MedicationTakenRecord record = recordBuilder
+                    .medicationSchedule(schedule)
                     .build();
 
-            medicationTakenRecordRepository.save(medicationRecord);
+            medicationTakenRecordRepository.save(record);
             MedicationService.log.info("복약 데이터 저장 완료: medication={}, taken={}, scheduleMatched={}",
-                    medicationData.getMedicationType(), medicationData.getTaken(), matchedSchedule != null);
+                    medicationData.getMedicationType(), medicationData.getTaken(), schedule != null);
         }
-    }
-
-    /**
-     * 스케줄 시간과 복용 시간을 매칭하는 메서드
-     * DB에 저장된 스케줄 시간(예: "MORNING,LUNCH")과 프롬프트에서 나온 복용 시간(예: "아침")을 매칭
-     */
-    private boolean isScheduleTimeMatched(MedicationScheduleTime scheduleTime, String takenTime) {
-        if (scheduleTime == null || takenTime == null) {
-            return false;
-        }
-
-        // 프롬프트에서 나오는 시간을 enum으로 변환
-        MedicationScheduleTime takenTimeEnum = MedicationScheduleTime.fromDescription(takenTime);
-        if (takenTimeEnum == null) {
-            return false;
-        }
-
-        // DB에 저장된 스케줄 시간에 포함되어 있는지 확인
-        return scheduleTime == takenTimeEnum;
     }
 
     public DailyMedicationResponse getDailyMedication(Integer elderId, LocalDate date) {
@@ -107,56 +93,47 @@ public class MedicationService {
         List<MedicationSchedule> schedules = medicationScheduleRepository.findByElder(elder);
 
         // 약 종류별 스케줄
-        Map<String, List<MedicationSchedule>> medicationSchedules = schedules.stream()
+        Map<String, List<MedicationSchedule>> schedulesByName = schedules.stream()
                 .collect(Collectors.groupingBy(
                         MedicationSchedule::getName
                 ));
 
         // 약 종류별 복용 기록
-        Map<String, List<MedicationTakenRecord>> medicationTakenRecords = takenRecords.stream()
-                .collect(Collectors.groupingBy(
-                        MedicationTakenRecord::getName
-                ));
+        Map<String, List<MedicationTakenRecord>> takenRecordsByName = takenRecords.stream()
+                .collect(Collectors.groupingBy(MedicationTakenRecord::getName));
 
-        List<DailyMedicationResponse.MedicationInfo> medicationList = medicationSchedules.entrySet().stream()
-                .map(entry -> {
-                    String medicationName = entry.getKey();
-                    List<MedicationSchedule> medicationScheduleList = entry.getValue();
-                    List<MedicationTakenRecord> takenRecordList = medicationTakenRecords.getOrDefault(medicationName, List.of());
-                    
-                    int goalCount = medicationScheduleList.size();
-                    int takenCount = (int) takenRecordList.stream()
-                            .filter(record -> record.getTakenStatus() == MedicationTakenStatus.TAKEN)
-                            .count();
+        List<DailyMedicationResponse.MedicationInfo> medicationInfos = new ArrayList<>();
 
-                    List<DailyMedicationResponse.TimeInfo> timeInfos = createTimeInfos(medicationScheduleList, takenRecordList);
-                    
-                    return DailyMedicationResponse.MedicationInfo.builder()
+        for (Map.Entry<String, List<MedicationSchedule>> entry : schedulesByName.entrySet()) {
+            String medicationName = entry.getKey();
+            List<MedicationSchedule> schedulesForMed = entry.getValue();
+            List<MedicationTakenRecord> takenRecordsForMed = takenRecordsByName.getOrDefault(medicationName, Collections.emptyList());
+
+            // 복용 완료한 시간대 집합
+            Set<MedicationScheduleTime> takenTimes = takenRecordsForMed.stream()
+                    .map(MedicationTakenRecord::getTakenTime)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+
+            List<DailyMedicationResponse.TimeInfo> timeInfos = createTimeInfos(schedulesForMed, takenTimes);
+
+            medicationInfos.add(DailyMedicationResponse.MedicationInfo.builder()
                             .type(medicationName)
-                            .goalCount(goalCount)
-                            .takenCount(takenCount)
+                            .goalCount(schedulesForMed.size())
+                            .takenCount(takenTimes.size())
                             .times(timeInfos)
-                            .build();
-                })
-                .collect(Collectors.toList());
+                            .build());
+        }
 
         return DailyMedicationResponse.builder()
                 .date(date)
-                .medications(medicationList)
+                .medications(medicationInfos)
                 .build();
     }
 
     private List<DailyMedicationResponse.TimeInfo> createTimeInfos(
             List<MedicationSchedule> schedules,
-            List<MedicationTakenRecord> takenRecords) {
-
-        Set<MedicationScheduleTime> takenTimes = takenRecords.stream()
-                .filter(record ->
-                        record.getTakenStatus() == MedicationTakenStatus.TAKEN && record.getCareCallRecord() != null)
-                .map(record ->
-                        MedicationScheduleTime.fromHour(record.getCareCallRecord().getCalledAt().getHour()))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
+            Set<MedicationScheduleTime> takenTimes) {
 
         return schedules.stream()
                 .map(MedicationSchedule::getScheduleTime)

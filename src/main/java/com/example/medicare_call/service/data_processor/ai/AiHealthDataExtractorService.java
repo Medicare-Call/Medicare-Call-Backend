@@ -116,7 +116,7 @@ public class AiHealthDataExtractorService {
             6. 복약 데이터
                - 약의 종류
                - 복약 여부 (반드시 "복용함" 또는 "복용하지 않음"으로 응답)
-               - 복용 시간
+               - 복용 시간 (반드시 "아침" 또는 "점심" 또는 "저녁" 으로 응답)
             7. 건강 징후 데이터
                - 건강 징후 상세 내용 (짧은 문장들로 요약)
                - 건강 상태 요약 (좋음/나쁨)
@@ -155,12 +155,12 @@ public class AiHealthDataExtractorService {
               {
                   "medicationType": "약 종류1",
                   "taken": "복용함/복용하지 않음",
-                  "takenTime": "복용 시간1"
+                  "takenTime": "아침/점심/저녁"
                 },
                 {
                   "medicationType": "약 종류2",
                   "taken": "복용함/복용하지 않음",
-                  "takenTime": "복용 시간2"
+                  "takenTime": "아침/점심/저녁"
                 }
               ],
               "healthSigns": ["건강 징후 상세 내용 1", "건강 징후 상세 내용 2"],
