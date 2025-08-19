@@ -1,9 +1,12 @@
 package com.example.medicare_call.domain;
 
+import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.global.enums.MedicationTakenStatus;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Builder;
+import lombok.ToString;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -36,17 +39,22 @@ public class MedicationTakenRecord {
     @Column(name = "response_summary", length = 500)
     private String responseSummary;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "taken_time")
+    private MedicationScheduleTime takenTime;
+
     @Column(name = "recorded_at", nullable = false)
     private LocalDateTime recordedAt;
 
     @Builder
-    public MedicationTakenRecord(Integer id, CareCallRecord careCallRecord, MedicationSchedule medicationSchedule, String name, MedicationTakenStatus takenStatus, String responseSummary, LocalDateTime recordedAt) {
+    public MedicationTakenRecord(Integer id, CareCallRecord careCallRecord, MedicationSchedule medicationSchedule, String name, MedicationTakenStatus takenStatus, String responseSummary, MedicationScheduleTime takenTime, LocalDateTime recordedAt) {
         this.id = id;
         this.careCallRecord = careCallRecord;
         this.medicationSchedule = medicationSchedule;
         this.name = name;
         this.takenStatus = takenStatus;
         this.responseSummary = responseSummary;
+        this.takenTime = takenTime;
         this.recordedAt = recordedAt;
     }
 } 

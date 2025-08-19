@@ -20,15 +20,4 @@ public enum MedicationScheduleTime {
         }
         return null;
     }
-
-    public static MedicationScheduleTime fromHour(int hour) {
-        if (hour >= 6 && hour < 12) {
-            return MORNING;
-        } else if (hour >= 12 && hour < 18) {
-            return LUNCH;
-        } else if (hour >= 18) {
-            return DINNER;
-        }
-        return null; // 해당하는 시간대가 없는 경우
-    }
 } 

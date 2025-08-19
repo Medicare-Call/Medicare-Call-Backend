@@ -88,10 +88,11 @@ public class MedicationServiceTest {
 
         // then
         verify(medicationScheduleRepository).findByElder(elder);
-        verify(medicationTakenRecordRepository).save(argThat(record -> 
+        verify(medicationTakenRecordRepository).save(argThat(record ->
             record.getName().equals("혈압약") &&
             record.getMedicationSchedule().getId().equals(1) &&
-            record.getTakenStatus().name().equals("TAKEN")
+            record.getTakenStatus().name().equals("TAKEN") &&
+            record.getTakenTime() == MedicationScheduleTime.MORNING
         ));
     }
 
@@ -112,10 +113,11 @@ public class MedicationServiceTest {
         medicationService.saveMedicationTakenRecord(callRecord, List.of(medicationData));
 
         // then
-        verify(medicationTakenRecordRepository).save(argThat(record -> 
+        verify(medicationTakenRecordRepository).save(argThat(record ->
             record.getName().equals("혈압약") &&
             record.getMedicationSchedule() == null &&
-            record.getTakenStatus().name().equals("TAKEN")
+            record.getTakenStatus().name().equals("TAKEN") &&
+            record.getTakenTime() == MedicationScheduleTime.LUNCH
         ));
     }
 
@@ -136,8 +138,9 @@ public class MedicationServiceTest {
         medicationService.saveMedicationTakenRecord(callRecord, List.of(medicationData));
 
         // then
-        verify(medicationTakenRecordRepository).save(argThat(record -> 
-            record.getTakenStatus().name().equals("NOT_TAKEN")
+        verify(medicationTakenRecordRepository).save(argThat(record ->
+            record.getTakenStatus().name().equals("NOT_TAKEN") &&
+            record.getTakenTime() == MedicationScheduleTime.MORNING
         ));
     }
 
@@ -354,6 +357,7 @@ public class MedicationServiceTest {
                 .medicationSchedule(schedule1)
                 .name("당뇨약")
                 .takenStatus(MedicationTakenStatus.TAKEN)
+                .takenTime(MedicationScheduleTime.MORNING)
                 .build();
 
         MedicationTakenRecord takenRecord2 = MedicationTakenRecord.builder()
@@ -362,6 +366,7 @@ public class MedicationServiceTest {
                 .medicationSchedule(schedule2)
                 .name("당뇨약")
                 .takenStatus(MedicationTakenStatus.TAKEN)
+                .takenTime(MedicationScheduleTime.LUNCH)
                 .build();
 
         MedicationTakenRecord takenRecord3 = MedicationTakenRecord.builder()
@@ -370,6 +375,7 @@ public class MedicationServiceTest {
                 .medicationSchedule(schedule4)
                 .name("혈압약")
                 .takenStatus(MedicationTakenStatus.TAKEN)
+                .takenTime(MedicationScheduleTime.MORNING)
                 .build();
 
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(elder));
