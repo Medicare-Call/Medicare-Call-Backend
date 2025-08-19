@@ -41,7 +41,7 @@ public class MedicationService {
 
         for (HealthDataExtractionResponse.MedicationData medicationData : medicationDataList) {
             if (medicationData.getMedicationType() == null || medicationData.getMedicationType().trim().isEmpty()) {
-                log.warn("약 이름이 누락되어 복약 데이터를 저장하지 않습니다. medicationData={}", medicationData);
+                MedicationService.log.warn("약 이름이 누락되어 복약 데이터를 저장하지 않습니다. medicationData={}", medicationData);
                 continue;
             }
 
@@ -70,7 +70,7 @@ public class MedicationService {
                     .build();
 
             medicationTakenRecordRepository.save(medicationRecord);
-            log.info("복약 데이터 저장 완료: medication={}, taken={}, scheduleMatched={}",
+            MedicationService.log.info("복약 데이터 저장 완료: medication={}, taken={}, scheduleMatched={}",
                     medicationData.getMedicationType(), medicationData.getTaken(), matchedSchedule != null);
         }
     }
@@ -79,7 +79,7 @@ public class MedicationService {
      * 스케줄 시간과 복용 시간을 매칭하는 메서드
      * DB에 저장된 스케줄 시간(예: "MORNING,LUNCH")과 프롬프트에서 나온 복용 시간(예: "아침")을 매칭
      */
-    private boolean isScheduleTimeMatched(String scheduleTime, String takenTime) {
+    private boolean isScheduleTimeMatched(MedicationScheduleTime scheduleTime, String takenTime) {
         if (scheduleTime == null || takenTime == null) {
             return false;
         }
@@ -91,7 +91,7 @@ public class MedicationService {
         }
 
         // DB에 저장된 스케줄 시간에 포함되어 있는지 확인
-        return scheduleTime.contains(takenTimeEnum.name());
+        return scheduleTime == takenTimeEnum;
     }
 
     public DailyMedicationResponse getDailyMedication(Integer elderId, LocalDate date) {
@@ -159,10 +159,7 @@ public class MedicationService {
                 .collect(Collectors.toSet());
 
         return schedules.stream()
-                .flatMap(schedule ->
-                        Arrays.stream(schedule.getScheduleTime().split(",")))
-                .map(String::trim)
-                .map(MedicationScheduleTime::valueOf)
+                .map(MedicationSchedule::getScheduleTime)
                 .distinct()
                 .map(scheduleTime -> DailyMedicationResponse.TimeInfo.builder()
                         .time(scheduleTime)

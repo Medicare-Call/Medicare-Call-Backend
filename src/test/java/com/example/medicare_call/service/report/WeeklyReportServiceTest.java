@@ -4,6 +4,7 @@ import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.report.WeeklyReportResponse;
 import com.example.medicare_call.dto.report.WeeklySummaryDto;
 import com.example.medicare_call.global.enums.MealType;
+import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.repository.*;
 import com.example.medicare_call.service.data_processor.ai.AiSummaryService;
 import org.junit.jupiter.api.BeforeEach;
@@ -73,7 +74,7 @@ class WeeklyReportServiceTest {
         testMedicationSchedule = MedicationSchedule.builder()
                 .id(1)
                 .name("혈압약")
-                .scheduleTime("MORNING")
+                .scheduleTime(MedicationScheduleTime.MORNING)
                 .build();
     }
 

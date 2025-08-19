@@ -38,14 +38,14 @@ public class ElderHealthInfoCreateRequest {
     @NoArgsConstructor
     public static class MedicationScheduleRequest {
         private String medicationName;
-        private List<MedicationScheduleTime> scheduleTimes;
+        private List<String> scheduleTimes;
 
         @Builder
-        public MedicationScheduleRequest(String medicationName, List<MedicationScheduleTime> scheduleTimes) {
+        public MedicationScheduleRequest(String medicationName, List<String> scheduleTimes) {
             this.medicationName = medicationName;
             this.scheduleTimes = scheduleTimes;
         }
 
-        public List<MedicationScheduleTime> getScheduleTimes() { return scheduleTimes; }
+        public List<String> getScheduleTimes() { return scheduleTimes; }
     }
 } 
