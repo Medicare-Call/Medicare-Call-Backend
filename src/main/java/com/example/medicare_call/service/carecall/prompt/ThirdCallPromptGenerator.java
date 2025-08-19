@@ -4,6 +4,7 @@ import com.example.medicare_call.domain.Disease;
 import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.domain.ElderHealthInfo;
 import com.example.medicare_call.domain.MedicationSchedule;
+import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,7 +18,7 @@ public class ThirdCallPromptGenerator implements CallPromptGenerator {
 
 // 2. 저녁 복약명 추출 (scheduleTime: "evening")
         List<String> eveningMedications = medicationSchedules.stream()
-                .filter(ms -> ms.getScheduleTime() != null && ms.getScheduleTime().toUpperCase().contains("DINNER"))
+                .filter(ms -> ms.getScheduleTime() == MedicationScheduleTime.DINNER)
                 .map(MedicationSchedule::getName)
                 .toList();
 

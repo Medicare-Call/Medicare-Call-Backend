@@ -34,7 +34,7 @@ class ElderHealthInfoControllerTest {
     void registerElderHealthInfo_success() throws Exception {
         ElderHealthInfoCreateRequest.MedicationScheduleRequest msReq = ElderHealthInfoCreateRequest.MedicationScheduleRequest.builder()
                 .medicationName("당뇨약")
-                .scheduleTimes(List.of(MedicationScheduleTime.MORNING, MedicationScheduleTime.DINNER))
+                .scheduleTimes(List.of(MedicationScheduleTime.MORNING.name(), MedicationScheduleTime.DINNER.name()))
                 .build();
         ElderHealthInfoCreateRequest request = ElderHealthInfoCreateRequest.builder()
                 .diseaseNames(List.of("당뇨"))

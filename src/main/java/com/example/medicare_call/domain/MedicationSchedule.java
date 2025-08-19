@@ -1,5 +1,6 @@
 package com.example.medicare_call.domain;
 
+import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,11 +26,12 @@ public class MedicationSchedule {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "schedule_time", nullable = false)
-    private String scheduleTime;
+    private MedicationScheduleTime scheduleTime;
 
     @Builder
-    public MedicationSchedule(Integer id, Elder elder, String name, String scheduleTime) {
+    public MedicationSchedule(Integer id, Elder elder, String name, MedicationScheduleTime scheduleTime) {
         this.id = id;
         this.elder = elder;
         this.name = name;

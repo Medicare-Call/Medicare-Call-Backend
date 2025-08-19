@@ -25,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.example.medicare_call.dto.report.DailyMedicationResponse;
 import com.example.medicare_call.global.enums.MedicationTakenStatus;
+import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.repository.ElderRepository;
 
 import java.time.LocalDate;
@@ -65,7 +66,7 @@ public class MedicationServiceTest {
                 .id(1)
                 .elder(elder)
                 .name("혈압약")
-                .scheduleTime("MORNING")
+                .scheduleTime(MedicationScheduleTime.MORNING)
                 .build();
     }
 
@@ -207,7 +208,7 @@ public class MedicationServiceTest {
                 .id(1)
                 .elder(elder)
                 .name("혈압약")
-                .scheduleTime("MORNING,LUNCH")
+                .scheduleTime(MedicationScheduleTime.MORNING)
                 .build();
 
         when(medicationScheduleRepository.findByElder(elder)).thenReturn(Arrays.asList(morningSchedule));
@@ -237,7 +238,7 @@ public class MedicationServiceTest {
                 .id(1)
                 .elder(elder)
                 .name("혈압약")
-                .scheduleTime("MORNING,LUNCH")
+                .scheduleTime(MedicationScheduleTime.LUNCH)
                 .build();
 
         when(medicationScheduleRepository.findByElder(elder)).thenReturn(Arrays.asList(lunchSchedule));
@@ -267,7 +268,7 @@ public class MedicationServiceTest {
                 .id(1)
                 .elder(elder)
                 .name("혈압약")
-                .scheduleTime("MORNING,LUNCH")
+                .scheduleTime(MedicationScheduleTime.MORNING)
                 .build();
 
         when(medicationScheduleRepository.findByElder(elder)).thenReturn(Arrays.asList(morningSchedule));
@@ -298,35 +299,35 @@ public class MedicationServiceTest {
                 .id(1)
                 .elder(elder)
                 .name("당뇨약")
-                .scheduleTime("MORNING")
+                .scheduleTime(MedicationScheduleTime.MORNING)
                 .build();
 
         MedicationSchedule schedule2 = MedicationSchedule.builder()
                 .id(2)
                 .elder(elder)
                 .name("당뇨약")
-                .scheduleTime("LUNCH")
+                .scheduleTime(MedicationScheduleTime.LUNCH)
                 .build();
 
         MedicationSchedule schedule3 = MedicationSchedule.builder()
                 .id(3)
                 .elder(elder)
                 .name("당뇨약")
-                .scheduleTime("DINNER")
+                .scheduleTime(MedicationScheduleTime.DINNER)
                 .build();
 
         MedicationSchedule schedule4 = MedicationSchedule.builder()
                 .id(4)
                 .elder(elder)
                 .name("혈압약")
-                .scheduleTime("MORNING")
+                .scheduleTime(MedicationScheduleTime.MORNING)
                 .build();
 
         MedicationSchedule schedule5 = MedicationSchedule.builder()
                 .id(5)
                 .elder(elder)
                 .name("혈압약")
-                .scheduleTime("DINNER")
+                .scheduleTime(MedicationScheduleTime.DINNER)
                 .build();
 
         CareCallRecord morningCall = CareCallRecord.builder()

@@ -9,6 +9,7 @@ import com.example.medicare_call.dto.data_processor.HealthDataExtractionRequest;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
 import com.example.medicare_call.global.enums.ElderRelation;
 import com.example.medicare_call.global.enums.Gender;
+import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.global.enums.ResidenceType;
 import com.example.medicare_call.repository.CareCallRecordRepository;
 import com.example.medicare_call.repository.CareCallSettingRepository;
@@ -302,7 +303,7 @@ public class HealthDataController {
                     MedicationSchedule newSchedule = MedicationSchedule.builder()
                             .name("혈압약")
                             .elder(elder)
-                            .scheduleTime("MORNING")
+                            .scheduleTime(MedicationScheduleTime.MORNING)
                             .build();
                     return medicationScheduleRepository.save(newSchedule);
                 });

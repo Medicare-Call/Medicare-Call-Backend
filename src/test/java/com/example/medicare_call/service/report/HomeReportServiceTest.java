@@ -37,6 +37,7 @@ import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
+import com.example.medicare_call.global.enums.MedicationScheduleTime;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("HomeReportService 테스트")
@@ -176,9 +177,9 @@ class HomeReportServiceTest {
         Integer elderId = 1;
 
         // 복약 스케줄 생성 (하루 3회 복용)
-        MedicationSchedule morningSchedule = createMedicationSchedule(1, "혈압약", "MORNING");
-        MedicationSchedule lunchSchedule = createMedicationSchedule(2, "혈압약", "LUNCH");
-        MedicationSchedule dinnerSchedule = createMedicationSchedule(3, "혈압약", "DINNER");
+        MedicationSchedule morningSchedule = createMedicationSchedule(1, "혈압약", MedicationScheduleTime.MORNING);
+        MedicationSchedule lunchSchedule = createMedicationSchedule(2, "혈압약", MedicationScheduleTime.LUNCH);
+        MedicationSchedule dinnerSchedule = createMedicationSchedule(3, "혈압약", MedicationScheduleTime.DINNER);
 
         when(elderRepository.findById(elderId)).thenReturn(java.util.Optional.of(testElder));
         when(mealRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
@@ -207,45 +208,6 @@ class HomeReportServiceTest {
         HomeReportResponse.MedicationInfo medicationInfo = response.getMedicationStatus().getMedicationList().get(0);
         assertThat(medicationInfo.getType()).isEqualTo("혈압약");
         assertThat(medicationInfo.getGoal()).isEqualTo(3); // 하루 3회 복용 목표
-        assertThat(medicationInfo.getTaken()).isEqualTo(0);
-    }
-
-    @Test
-    @DisplayName("홈 화면 데이터 조회 성공 - 복약 스케줄이 쉼표로 구분된 문자열일 경우")
-    void getHomeReport_성공_복약스케줄_쉼표구분() {
-        // given
-        Integer elderId = 1;
-
-        // 복약 스케줄 생성 (하루 3회 복용, 쉼표로 구분된 문자열)
-        MedicationSchedule commaSeparatedSchedule = createMedicationSchedule(1, "혈압약", "MORNING,LUNCH,DINNER");
-
-        when(elderRepository.findById(elderId)).thenReturn(java.util.Optional.of(testElder));
-        when(mealRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
-                .thenReturn(Collections.emptyList());
-        when(medicationScheduleRepository.findByElder(testElder))
-                .thenReturn(Collections.singletonList(commaSeparatedSchedule));
-        when(medicationTakenRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
-                .thenReturn(Collections.emptyList());
-        when(bloodSugarRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
-                .thenReturn(Collections.emptyList());
-        when(careCallRecordRepository.findByElderIdAndDateWithSleepData(eq(elderId), any(LocalDate.class)))
-                .thenReturn(Collections.emptyList());
-        when(careCallRecordRepository.findByElderIdAndDateWithHealthData(eq(elderId), any(LocalDate.class)))
-                .thenReturn(Collections.emptyList());
-        when(careCallRecordRepository.findByElderIdAndDateWithPsychologicalData(eq(elderId), any(LocalDate.class)))
-                .thenReturn(Collections.emptyList());
-
-        // when
-        HomeReportResponse response = homeReportService.getHomeReport(elderId);
-
-        // then
-        assertThat(response.getMedicationStatus().getTotalGoal()).isEqualTo(3);
-        assertThat(response.getMedicationStatus().getTotalTaken()).isEqualTo(0);
-        assertThat(response.getMedicationStatus().getMedicationList()).hasSize(1);
-
-        HomeReportResponse.MedicationInfo medicationInfo = response.getMedicationStatus().getMedicationList().get(0);
-        assertThat(medicationInfo.getType()).isEqualTo("혈압약");
-        assertThat(medicationInfo.getGoal()).isEqualTo(3);
         assertThat(medicationInfo.getTaken()).isEqualTo(0);
     }
 
@@ -419,7 +381,7 @@ class HomeReportServiceTest {
         assertThat(response.getMentalStatus()).isEqualTo("나쁨");
     }
 
-    private MedicationSchedule createMedicationSchedule(Integer id, String medicationName, String scheduleTime) {
+    private MedicationSchedule createMedicationSchedule(Integer id, String medicationName, MedicationScheduleTime scheduleTime) {
         return MedicationSchedule.builder()
                 .id(id)
                 .name(medicationName)

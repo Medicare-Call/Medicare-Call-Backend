@@ -3,6 +3,7 @@ package com.example.medicare_call.service.report;
 import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.ElderHealthInfoCreateRequest;
 import com.example.medicare_call.dto.ElderHealthInfoResponse;
+import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.*;
@@ -29,13 +30,20 @@ public class ElderHealthInfoService {
         Elder elder = elderRepository.findById(elderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ELDER_NOT_FOUND));
 
-        // 질환 등록
-        if (request.getDiseaseNames() != null && !request.getDiseaseNames().isEmpty()) {
+        // 질환 정보 업데이트
+        if (request.getDiseaseNames() != null) {
             elderDiseaseRepository.deleteAllByElder(elder);
-            for (String diseaseName : request.getDiseaseNames()) {
-                // 기획 변경: 사용자의 입력을 그대로 받는 방식으로 (데이터의 중복만 최소화하자)
+            Set<String> diseaseNames = request.getDiseaseNames().stream()
+                    .flatMap(name -> Arrays.stream(name.split(",\\s*")))
+                    .map(String::trim)
+                    .collect(Collectors.toSet());
+
+            for (String diseaseName : diseaseNames) {
                 Disease disease = diseaseRepository.findByName(diseaseName)
-                        .orElseGet(() -> diseaseRepository.save(Disease.builder().name(diseaseName).build()));
+                        .orElseGet(() -> {
+                            Disease newDisease = Disease.builder().name(diseaseName).build();
+                            return diseaseRepository.save(newDisease);
+                        });
 
                 ElderDisease elderDisease = ElderDisease.builder()
                         .elder(elder)
@@ -49,17 +57,18 @@ public class ElderHealthInfoService {
         if (request.getMedicationSchedules() != null && !request.getMedicationSchedules().isEmpty()) {
             medicationScheduleRepository.deleteAllByElder(elder);
             for (ElderHealthInfoCreateRequest.MedicationScheduleRequest msReq : request.getMedicationSchedules()) {
-
-                String scheduleTime = msReq.getScheduleTimes().stream()
-                        .map(Enum::name)
-                        .collect(Collectors.joining(","));
-
-                MedicationSchedule schedule = MedicationSchedule.builder()
-                        .elder(elder)
-                        .name(msReq.getMedicationName())
-                        .scheduleTime(scheduleTime)
-                        .build();
-                medicationScheduleRepository.save(schedule);
+                for (String scheduleTimeStr : msReq.getScheduleTimes()) {
+                    String[] times = scheduleTimeStr.split(",\\s*");
+                    for (String time : times) {
+                        MedicationScheduleTime scheduleTime = MedicationScheduleTime.valueOf(time.trim().toUpperCase());
+                        MedicationSchedule schedule = MedicationSchedule.builder()
+                                .elder(elder)
+                                .name(msReq.getMedicationName())
+                                .scheduleTime(scheduleTime)
+                                .build();
+                        medicationScheduleRepository.save(schedule);
+                    }
+                }
             }
         }
 
@@ -135,7 +144,7 @@ public class ElderHealthInfoService {
         Map<String, List<String>> medications = new HashMap<>();
 
         for (MedicationSchedule schedule : elder.getMedicationSchedules()) {
-            String scheduleTime = schedule.getScheduleTime();
+            String scheduleTime = schedule.getScheduleTime().name();
             String medicationName = schedule.getName();
 
             String[] times = scheduleTime.split(",");

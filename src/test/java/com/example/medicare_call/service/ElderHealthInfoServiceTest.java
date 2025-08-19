@@ -18,6 +18,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -39,27 +40,27 @@ class ElderHealthInfoServiceTest {
 
     @Test
     void registerElderHealthInfo_success() {
-        Elder elder = Elder.builder().id(1).build();
-        Disease.builder().id(1).name("당뇨").build();
+        // given
+        List<String> diseaseNames = Arrays.asList("고혈압, 당뇨", "치매");
+        List<ElderHealthInfoCreateRequest.MedicationScheduleRequest> medicationSchedules = Arrays.asList(
+                ElderHealthInfoCreateRequest.MedicationScheduleRequest.builder().medicationName("혈압약").scheduleTimes(Arrays.asList("MORNING", "DINNER")).build(),
+                ElderHealthInfoCreateRequest.MedicationScheduleRequest.builder().medicationName("당뇨약").scheduleTimes(Arrays.asList("MORNING, LUNCH")).build()
+        );
+        ElderHealthInfoCreateRequest request = ElderHealthInfoCreateRequest.builder()
+                .notes(List.of(ElderHealthNoteType.INSOMNIA))
+                .diseaseNames(diseaseNames)
+                .medicationSchedules(medicationSchedules)
+                .build();
 
-        when(elderRepository.findById(1)).thenReturn(Optional.of(elder));
-        when(diseaseRepository.findByName("당뇨")).thenReturn(Optional.empty());
+        when(elderRepository.findById(1)).thenReturn(Optional.of(new Elder()));
+        when(diseaseRepository.findByName(anyString())).thenAnswer(invocation -> Optional.of(new Disease()));
         when(diseaseRepository.save(any(Disease.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        ElderHealthInfoCreateRequest.MedicationScheduleRequest msReq = ElderHealthInfoCreateRequest.MedicationScheduleRequest.builder()
-                .medicationName("당뇨약")
-                .scheduleTimes(List.of(MedicationScheduleTime.MORNING, MedicationScheduleTime.DINNER))
-                .build();
-        ElderHealthInfoCreateRequest request = ElderHealthInfoCreateRequest.builder()
-                .diseaseNames(List.of("당뇨"))
-                .medicationSchedules(List.of(msReq))
-                .notes(List.of(ElderHealthNoteType.INSOMNIA))
-                .build();
-
+        // when
         elderHealthInfoService.upsertElderHealthInfo(1, request);
 
-        verify(elderDiseaseRepository, times(1)).save(any(ElderDisease.class));
-        verify(medicationScheduleRepository, times(1)).save(any(MedicationSchedule.class));
+        verify(elderDiseaseRepository, times(3)).save(any(ElderDisease.class));
+        verify(medicationScheduleRepository, times(4)).save(any(MedicationSchedule.class));
         verify(elderHealthInfoRepository, times(1)).save(any(ElderHealthInfo.class));
     }
 
