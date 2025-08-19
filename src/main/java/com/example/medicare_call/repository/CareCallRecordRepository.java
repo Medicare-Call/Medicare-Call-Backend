@@ -1,12 +1,16 @@
 package com.example.medicare_call.repository;
 
 import com.example.medicare_call.domain.CareCallRecord;
+import com.example.medicare_call.domain.Elder;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -73,4 +77,7 @@ public interface CareCallRecordRepository extends JpaRepository<CareCallRecord, 
            "AND DATE(ccr.startTime) BETWEEN :startDate AND :endDate " +
            "ORDER BY ccr.startTime")
     List<CareCallRecord> findByElderIdAndDateBetween(@Param("elderId") Integer elderId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT ccr FROM CareCallRecord ccr WHERE ccr.elder = :elder AND DATE(ccr.calledAt) = :today")
+    List<CareCallRecord> findByElderAndToday(@Param("elder") Elder elder, @Param("today") LocalDate today);
 } 

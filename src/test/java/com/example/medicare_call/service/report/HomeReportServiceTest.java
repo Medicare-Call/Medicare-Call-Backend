@@ -33,8 +33,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
+
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 
@@ -67,7 +68,11 @@ class HomeReportServiceTest {
 
     private Elder testElder;
     private LocalDate testDate;
-
+    private CareCallRecord createCompletedCareCallRecord() {
+        return CareCallRecord.builder()
+                .callStatus("completed")
+                .build();
+    }
     @BeforeEach
     void setUp() {
         testElder = Elder.builder()
@@ -76,6 +81,7 @@ class HomeReportServiceTest {
                 .build();
         testDate = LocalDate.now();
     }
+
 
     @Test
     @DisplayName("홈 화면 데이터 조회 성공")
@@ -99,6 +105,8 @@ class HomeReportServiceTest {
                 .thenReturn(Collections.emptyList());
         when(bloodSugarRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
                 .thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderAndToday(any(Elder.class), any(LocalDate.class)))
+                .thenReturn(Arrays.asList(createCompletedCareCallRecord()));
         when(aiSummaryService.getHomeSummary(any(HomeSummaryDto.class))).thenReturn("AI 요약");
 
         // when
@@ -118,6 +126,57 @@ class HomeReportServiceTest {
         assertThat(response.getMentalStatus()).isNull();
         assertThat(response.getBloodSugar()).isNull();
     }
+
+    @Test
+    void getHomeReport_케어콜모두실패_ai요약생성안됨() {
+        // given
+        Integer elderId = 1;
+        LocalDate today = LocalDate.now();
+
+        when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
+        when(mealRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+        when(medicationScheduleRepository.findByElder(testElder))
+                .thenReturn(Collections.emptyList());
+        when(medicationTakenRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithSleepData(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithHealthData(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithPsychologicalData(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+        when(bloodSugarRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.emptyList());
+
+        CareCallRecord failedRecord = CareCallRecord.builder()
+                .callStatus("no-answer")   // busy, failed
+                .calledAt(LocalDateTime.now())
+                .build();
+        when(careCallRecordRepository.findByElderAndToday(any(Elder.class), any(LocalDate.class)))
+                .thenReturn(Arrays.asList(failedRecord));
+
+        // when
+        HomeReportResponse response = homeReportService.getHomeReport(elderId);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getElderName()).isEqualTo("김옥자");
+        assertEquals("", response.getAiSummary()); // AI 요약은 빈 문자열
+        assertThat(response.getMealStatus().getBreakfast()).isNull();
+        assertThat(response.getMealStatus().getLunch()).isNull();
+        assertThat(response.getMealStatus().getDinner()).isNull();
+        assertThat(response.getMedicationStatus().getTotalTaken()).isEqualTo(0);
+        assertThat(response.getMedicationStatus().getTotalGoal()).isEqualTo(0);
+        assertThat(response.getSleep()).isNull();
+        assertThat(response.getHealthStatus()).isNull();
+        assertThat(response.getMentalStatus()).isNull();
+        assertThat(response.getBloodSugar()).isNull();
+
+        // AI summary 서비스가 호출되지 않았는지 명확히 검증
+        verify(aiSummaryService, never()).getHomeSummary(any(HomeSummaryDto.class));
+    }
+
 
     @Test
     @DisplayName("홈 화면 데이터 조회 실패 - 어르신을 찾을 수 없음")
@@ -264,6 +323,11 @@ class HomeReportServiceTest {
         Integer elderId = 1;
 
         CareCallRecord healthRecord = createCareCallRecord(1, (byte) 1, null); // healthStatus = 1 (좋음)
+        CareCallRecord completedRecord = CareCallRecord.builder()
+                .callStatus("completed")
+                .build();
+        when(careCallRecordRepository.findByElderAndToday(any(Elder.class), any(LocalDate.class)))
+                .thenReturn(Arrays.asList(completedRecord));
 
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
         when(mealRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
@@ -284,6 +348,7 @@ class HomeReportServiceTest {
 
         // when
         HomeReportResponse response = homeReportService.getHomeReport(elderId);
+        System.out.println("healthStatus: " + response.getHealthStatus());
 
         // then
         assertThat(response.getHealthStatus()).isEqualTo("좋음");
@@ -296,6 +361,11 @@ class HomeReportServiceTest {
         Integer elderId = 1;
 
         CareCallRecord healthRecord = createCareCallRecord(1, (byte) 0, null); // healthStatus = 0 (나쁨)
+        CareCallRecord completedRecord = CareCallRecord.builder()
+                .callStatus("completed")
+                .build();
+        when(careCallRecordRepository.findByElderAndToday(any(Elder.class), any(LocalDate.class)))
+                .thenReturn(Arrays.asList(completedRecord));
 
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
         when(mealRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
@@ -328,6 +398,11 @@ class HomeReportServiceTest {
         Integer elderId = 1;
 
         CareCallRecord mentalRecord = createCareCallRecord(1, null, (byte) 1); // psychStatus = 1 (좋음)
+        CareCallRecord completedRecord = CareCallRecord.builder()
+                .callStatus("completed")
+                .build();
+        when(careCallRecordRepository.findByElderAndToday(any(Elder.class), any(LocalDate.class)))
+                .thenReturn(Arrays.asList(completedRecord));
 
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
         when(mealRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
@@ -358,6 +433,11 @@ class HomeReportServiceTest {
     void getHomeReport_성공_심리상태나쁨() {
         // given
         Integer elderId = 1;
+        CareCallRecord completedRecord = CareCallRecord.builder()
+                .callStatus("completed")
+                .build();
+        when(careCallRecordRepository.findByElderAndToday(any(Elder.class), any(LocalDate.class)))
+                .thenReturn(Arrays.asList(completedRecord));
 
         CareCallRecord mentalRecord = createCareCallRecord(1, null, (byte) 0); // psychStatus = 0 (나쁨)
 
@@ -393,6 +473,11 @@ class HomeReportServiceTest {
 
         CareCallRecord healthRecord = createCareCallRecord(1, (byte) 1, null); // healthStatus = 1 (좋음)
         CareCallRecord mentalRecord = createCareCallRecord(2, null, (byte) 0); // psychStatus = 0 (나쁨)
+        CareCallRecord completedRecord = CareCallRecord.builder()
+                .callStatus("completed")
+                .build();
+        when(careCallRecordRepository.findByElderAndToday(any(Elder.class), any(LocalDate.class)))
+                .thenReturn(Arrays.asList(completedRecord));
 
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
         when(mealRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))

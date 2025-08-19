@@ -36,6 +36,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -77,8 +78,28 @@ public class HomeReportService {
         HomeReportResponse.BloodSugar bloodSugar = getBloodSugarInfo(elderId, today);
 
         // AI 요약 생성
+        //*
+        // AI 요약을 생성하기 전에 케어콜이 모두 실패하진 않았는지, 데이터가 null 인지 검증합니다.
+        // 검증 값에 따라 AI를 호출하거나 빈 문자열로 요약문을 생성합니다. *//
         HomeSummaryDto summaryDto = createHomeSummaryDto(mealStatus, medicationStatus, sleep, healthStatus, mentalStatus, bloodSugar);
-        String aiSummary = aiSummaryService.getHomeSummary(summaryDto);
+        List<CareCallRecord> records = careCallRecordRepository.findByElderAndToday(elder, today);
+        boolean hasCompletedCallToday = false;
+
+        for (CareCallRecord record : records) {
+            if (record.getCallStatus() != null && record.getCallStatus().equals("completed")) {
+                hasCompletedCallToday = true; // 케어콜 존재
+                break;
+            }
+        }
+
+        String aiSummary;
+        if((mealStatus == null && medicationStatus == null
+                && sleep == null && healthStatus == null
+                && mentalStatus == null && bloodSugar == null) || !hasCompletedCallToday){ // 모든 data 값이 null 이거나 carecall 이 모두 실패하면
+            aiSummary = "";
+        } else {
+        aiSummary = aiSummaryService.getHomeSummary(summaryDto);
+        }
 
         return HomeReportResponse.builder()
                 .elderName(elder.getName())
