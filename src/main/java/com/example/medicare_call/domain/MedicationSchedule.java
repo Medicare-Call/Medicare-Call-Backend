@@ -22,22 +22,17 @@ public class MedicationSchedule {
     @JoinColumn(name = "elder_id", nullable = false)
     private Elder elder;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "medication_id", nullable = false)
-    private Medication medication;
+    @Column(name = "name", nullable = false)
+    private String name;
 
     @Column(name = "schedule_time", nullable = false)
     private String scheduleTime;
 
-    @Column(name = "notes", length = 500)
-    private String notes;;
-
     @Builder
-    public MedicationSchedule(Integer id, Elder elder, Medication medication, String scheduleTime, String notes) {
+    public MedicationSchedule(Integer id, Elder elder, String name, String scheduleTime) {
         this.id = id;
         this.elder = elder;
-        this.medication = medication;
+        this.name = name;
         this.scheduleTime = scheduleTime;
-        this.notes = notes;
     }
 } 

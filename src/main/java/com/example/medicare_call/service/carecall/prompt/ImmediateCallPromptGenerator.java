@@ -23,7 +23,7 @@ public class ImmediateCallPromptGenerator implements CallPromptGenerator {
         // 아침 복약명 추출 (scheduleTime: "MORNING")
         List<String> morningMedications = medicationSchedules.stream()
                 .filter(ms -> ms.getScheduleTime() != null && ms.getScheduleTime().toUpperCase().contains("MORNING"))
-                .map(ms -> ms.getMedication().getName())
+                .map(MedicationSchedule::getName)
                 .toList();
 
         String morningMedNames = morningMedications.isEmpty()

@@ -32,7 +32,6 @@ import java.util.Set;
 public class MedicationService {
     private final MedicationTakenRecordRepository medicationTakenRecordRepository;
     private final MedicationScheduleRepository medicationScheduleRepository;
-    private final MedicationRepository medicationRepository;
     private final ElderRepository elderRepository;
 
     @Transactional
@@ -46,20 +45,11 @@ public class MedicationService {
                 continue;
             }
 
-            Medication medication = medicationRepository.findByName(medicationData.getMedicationType())
-                    .orElseGet(() -> {
-                        log.info("새로운 약 발견: '{}'. DB에 새로 저장합니다.", medicationData.getMedicationType());
-                        Medication newMedication = Medication.builder()
-                                .name(medicationData.getMedicationType())
-                                .build();
-                        return medicationRepository.save(newMedication);
-                    });
-
             // 해당 어르신의 복약 스케줄에서 매칭되는 것 찾기
             MedicationSchedule matchedSchedule = null;
 
             for (MedicationSchedule schedule : schedules) {
-                if (schedule.getMedication().getId().equals(medication.getId()) &&
+                if (schedule.getName().equals(medicationData.getMedicationType()) &&
                         isScheduleTimeMatched(schedule.getScheduleTime(), medicationData.getTakenTime())) {
                     matchedSchedule = schedule;
                     break;
@@ -72,9 +62,9 @@ public class MedicationService {
             MedicationTakenRecord medicationRecord = MedicationTakenRecord.builder()
                     .careCallRecord(callRecord)
                     .medicationSchedule(matchedSchedule) // 매칭되는 스케줄이 있으면 설정, 없으면 null
-                    .medication(medication)
+                    .name(medicationData.getMedicationType())
                     .takenStatus(takenStatus)
-                    .responseSummary(String.format("복용시간: %s, 복용여부: %s",
+                    .responseSummary(String.format("복용시간: %s, 복용여부: %s", //TODO: MedicationTakenRecord 컬럼 정리
                             medicationData.getTakenTime(), medicationData.getTaken()))
                     .recordedAt(LocalDateTime.now())
                     .build();
@@ -119,13 +109,13 @@ public class MedicationService {
         // 약 종류별 스케줄
         Map<String, List<MedicationSchedule>> medicationSchedules = schedules.stream()
                 .collect(Collectors.groupingBy(
-                        schedule -> schedule.getMedication().getName()
+                        MedicationSchedule::getName
                 ));
 
         // 약 종류별 복용 기록
         Map<String, List<MedicationTakenRecord>> medicationTakenRecords = takenRecords.stream()
                 .collect(Collectors.groupingBy(
-                        record -> record.getMedication().getName()
+                        MedicationTakenRecord::getName
                 ));
 
         List<DailyMedicationResponse.MedicationInfo> medicationList = medicationSchedules.entrySet().stream()

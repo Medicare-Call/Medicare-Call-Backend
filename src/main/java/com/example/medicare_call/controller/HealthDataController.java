@@ -4,7 +4,6 @@ import com.example.medicare_call.domain.CareCallRecord;
 import com.example.medicare_call.domain.CareCallSetting;
 import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.domain.Member;
-import com.example.medicare_call.domain.Medication;
 import com.example.medicare_call.domain.MedicationSchedule;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionRequest;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
@@ -15,7 +14,6 @@ import com.example.medicare_call.repository.CareCallRecordRepository;
 import com.example.medicare_call.repository.CareCallSettingRepository;
 import com.example.medicare_call.repository.ElderRepository;
 import com.example.medicare_call.repository.MemberRepository;
-import com.example.medicare_call.repository.MedicationRepository;
 import com.example.medicare_call.repository.MedicationScheduleRepository;
 import com.example.medicare_call.service.data_processor.CareCallDataProcessingService;
 import com.example.medicare_call.service.data_processor.ai.AiHealthDataExtractorService;
@@ -49,7 +47,6 @@ public class HealthDataController {
     private final CareCallSettingRepository careCallSettingRepository;
     private final CareCallRecordRepository careCallRecordRepository;
     private final MemberRepository memberRepository;
-    private final MedicationRepository medicationRepository;
     private final MedicationScheduleRepository medicationScheduleRepository;
 
     @Operation(
@@ -296,23 +293,14 @@ public class HealthDataController {
                     return careCallSettingRepository.save(newSetting);
                 });
         
-        // 테스트용 Medication 생성 또는 조회
-        Medication medication = medicationRepository.findByName("혈압약")
-                .orElseGet(() -> {
-                    Medication newMedication = Medication.builder()
-                            .name("혈압약")
-                            .build();
-                    return medicationRepository.save(newMedication);
-                });
-        
         // 테스트용 MedicationSchedule 생성 또는 조회
         MedicationSchedule schedule = medicationScheduleRepository.findByElder(elder)
                 .stream()
-                .filter(s -> s.getMedication().equals(medication))
+                .filter(s -> s.getName().equals("혈압약"))
                 .findFirst()
                 .orElseGet(() -> {
                     MedicationSchedule newSchedule = MedicationSchedule.builder()
-                            .medication(medication)
+                            .name("혈압약")
                             .elder(elder)
                             .scheduleTime("MORNING")
                             .build();

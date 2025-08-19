@@ -420,14 +420,9 @@ class HomeReportServiceTest {
     }
 
     private MedicationSchedule createMedicationSchedule(Integer id, String medicationName, String scheduleTime) {
-        Medication medication = Medication.builder()
-                .id(id)
-                .name(medicationName)
-                .build();
-
         return MedicationSchedule.builder()
                 .id(id)
-                .medication(medication)
+                .name(medicationName)
                 .scheduleTime(scheduleTime)
                 .build();
     }

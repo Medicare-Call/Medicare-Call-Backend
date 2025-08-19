@@ -158,14 +158,14 @@ public class HomeReportService {
         // 약 종류별로 스케줄을 그룹화하여 목표 복용 횟수 계산
         Map<String, List<MedicationSchedule>> medicationSchedules = schedules.stream()
                 .collect(Collectors.groupingBy(
-                        schedule -> schedule.getMedication().getName()
+                        MedicationSchedule::getName
                 ));
 
         // 약 종류별 복용 횟수 계산
         Map<String, Long> medicationTakenCounts = todayMedications.stream()
-                .filter(mtr -> mtr.getMedicationSchedule() != null && mtr.getMedicationSchedule().getMedication() != null)
+                .filter(mtr -> mtr.getMedicationSchedule() != null)
                 .collect(Collectors.groupingBy(
-                        mtr -> mtr.getMedicationSchedule().getMedication().getName(),
+                        MedicationTakenRecord::getName,
                         Collectors.counting()
                 ));
 

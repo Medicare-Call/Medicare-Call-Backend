@@ -19,7 +19,7 @@ public class SecondCallPromptGenerator implements CallPromptGenerator {
         // 2. 점심 복약명 추출 (scheduleTime: "lunch")
         List<String> lunchMedications = medicationSchedules.stream()
                 .filter(ms -> ms.getScheduleTime() != null && ms.getScheduleTime().toUpperCase().contains("LUNCH"))
-                .map(ms -> ms.getMedication().getName())
+                .map(MedicationSchedule::getName)
                 .toList();
 
         String lunchMedNames = lunchMedications.isEmpty()

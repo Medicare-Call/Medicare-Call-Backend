@@ -142,13 +142,13 @@ public class WeeklyReportService {
         // 약물별 스케줄 조회
         List<MedicationSchedule> schedules = medicationScheduleRepository.findByElderId(elderId);
         Map<String, List<MedicationSchedule>> medicationSchedules = schedules.stream()
-                .collect(Collectors.groupingBy(schedule -> schedule.getMedication().getName()));
+                .collect(Collectors.groupingBy(MedicationSchedule::getName));
 
         // 약물별 복용 기록 조회
         List<MedicationTakenRecord> takenRecords = medicationTakenRecordRepository.findByElderIdAndDateBetween(elderId, startDate, endDate);
         Map<String, Long> takenCounts = takenRecords.stream()
                 .collect(Collectors.groupingBy(
-                        record -> record.getMedicationSchedule().getMedication().getName(),
+                        MedicationTakenRecord::getName,
                         Collectors.counting()
                 ));
 
