@@ -102,9 +102,9 @@ public class HomeReportService {
                 .orElse(HomeReportResponse.MealStatus.builder().build());
 
         return HomeSummaryDto.builder()
-                .breakfast(Boolean.TRUE.equals(finalMealStatus.getBreakfast()))
-                .lunch(Boolean.TRUE.equals(finalMealStatus.getLunch()))
-                .dinner(Boolean.TRUE.equals(finalMealStatus.getDinner()))
+                .breakfast(finalMealStatus.getBreakfast())
+                .lunch(finalMealStatus.getLunch())
+                .dinner(finalMealStatus.getDinner())
                 .totalTakenMedication(medicationStatus != null ? medicationStatus.getTotalTaken() : 0)
                 .totalGoalMedication(medicationStatus != null ? medicationStatus.getTotalGoal() : 0)
                 .nextMedicationTime(medicationStatus != null ? medicationStatus.getNextMedicationTime() : null)
