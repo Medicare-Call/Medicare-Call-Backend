@@ -4,10 +4,10 @@ ALTER TABLE MedicationTakenRecord ADD COLUMN name VARCHAR(255);
 
 -- Medication 테이블로부터 fk를 통해 name 데이터를 추출
 UPDATE MedicationSchedule ms
-SET name = (SELECT m.name FROM medication m WHERE m.id = ms.medication_id);
+SET name = (SELECT m.name FROM Medication m WHERE m.id = ms.medication_id);
 
 UPDATE MedicationTakenRecord mtr
-SET name = (SELECT m.name FROM medication m WHERE m.id = mtr.medication_id);
+SET name = (SELECT m.name FROM Medication m WHERE m.id = mtr.medication_id);
 
 -- NOT NULL 설정
 ALTER TABLE MedicationSchedule MODIFY COLUMN name VARCHAR(255) NOT NULL;
