@@ -28,15 +28,11 @@ public class MedicationSchedule {
     @Column(name = "schedule_time", nullable = false)
     private String scheduleTime;
 
-    @Column(name = "notes", length = 500)
-    private String notes;;
-
     @Builder
-    public MedicationSchedule(Integer id, Elder elder, String name, String scheduleTime, String notes) {
+    public MedicationSchedule(Integer id, Elder elder, String name, String scheduleTime) {
         this.id = id;
         this.elder = elder;
         this.name = name;
         this.scheduleTime = scheduleTime;
-        this.notes = notes;
     }
 } 
