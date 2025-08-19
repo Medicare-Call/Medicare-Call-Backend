@@ -2,31 +2,23 @@
 ALTER TABLE MedicationSchedule ADD COLUMN name VARCHAR(255);
 ALTER TABLE MedicationTakenRecord ADD COLUMN name VARCHAR(255);
 
--- Medication 테이블에서 fk로 연결되어 있으니
+-- Medication 테이블로부터 fk를 통해 name 데이터를 추출
 UPDATE MedicationSchedule ms
 SET name = (SELECT m.name FROM medication m WHERE m.id = ms.medication_id);
 
 UPDATE MedicationTakenRecord mtr
 SET name = (SELECT m.name FROM medication m WHERE m.id = mtr.medication_id);
 
--- Set the new 'name' columns to be NOT NULL
-ALTER TABLE MedicationSchedule ALTER COLUMN name SET NOT NULL;
-ALTER TABLE MedicationTakenRecord ALTER COLUMN name SET NOT NULL;
+-- NOT NULL 설정
+ALTER TABLE MedicationSchedule MODIFY COLUMN name VARCHAR(255) NOT NULL;
+ALTER TABLE MedicationTakenRecord MODIFY COLUMN name VARCHAR(255) NOT NULL;
 
--- Drop foreign key constraints and the medication_id column
--- Note: Constraint names can vary. Replace with actual names if different.
--- First, find the constraint names if you don't know them:
--- SELECT conname FROM pg_constraint WHERE conrelid = 'MedicationSchedule'::regclass AND confrelid = 'medication'::regclass;
--- SELECT conname FROM pg_constraint WHERE conrelid = 'MedicationTakenRecord'::regclass AND confrelid = 'medication'::regclass;
-
--- Assuming default or known constraint names, drop them.
--- You might need to adjust these names based on your actual schema.
-ALTER TABLE MedicationSchedule DROP CONSTRAINT IF EXISTS MedicationSchedule_medication_id_fkey;
+-- 의존성 제거
+ALTER TABLE MedicationSchedule DROP FOREIGN KEY FKou7fj2p6i0w2pkv2jbl07q0c6;
 ALTER TABLE MedicationSchedule DROP COLUMN medication_id;
 
-ALTER TABLE MedicationTakenRecord DROP CONSTRAINT IF EXISTS MedicationTakenRecord_medication_id_fkey;
+ALTER TABLE MedicationTakenRecord DROP FOREIGN KEY FKbvl9qu6xd8qovnpfxgofokvwx;
 ALTER TABLE MedicationTakenRecord DROP COLUMN medication_id;
 
-
--- Drop the now-redundant medication table
-DROP TABLE medication;
+-- Medication 테이블 제거
+DROP TABLE Medication;
