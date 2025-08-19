@@ -32,6 +32,8 @@ jobs:
             LABEL="test"
           elif [[ "$BRANCH_NAME" == release/* ]]; then
             LABEL="release"
+          elif [[ "$BRANCH_NAME" == edit/* ]]; then
+            LABEL="edit"
           elif [[ "$BRANCH_NAME" == doc/* || "$BRANCH_NAME" == docs/* ]]; then
             LABEL="documentation"
           else
