@@ -26,9 +26,8 @@ public class MedicationTakenRecord {
     @JoinColumn(name = "medication_schedule_id")
     private MedicationSchedule medicationSchedule; // 매칭되는 스케줄이 있으면 설정, 없으면 null
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "medication_id", nullable = false)
-    private Medication medication;
+    @Column(name = "name", nullable = false)
+    private String name;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "taken_status", columnDefinition = "VARCHAR(20)")
@@ -41,11 +40,11 @@ public class MedicationTakenRecord {
     private LocalDateTime recordedAt;
 
     @Builder
-    public MedicationTakenRecord(Integer id, CareCallRecord careCallRecord, MedicationSchedule medicationSchedule, Medication medication, MedicationTakenStatus takenStatus, String responseSummary, LocalDateTime recordedAt) {
+    public MedicationTakenRecord(Integer id, CareCallRecord careCallRecord, MedicationSchedule medicationSchedule, String name, MedicationTakenStatus takenStatus, String responseSummary, LocalDateTime recordedAt) {
         this.id = id;
         this.careCallRecord = careCallRecord;
         this.medicationSchedule = medicationSchedule;
-        this.medication = medication;
+        this.name = name;
         this.takenStatus = takenStatus;
         this.responseSummary = responseSummary;
         this.recordedAt = recordedAt;

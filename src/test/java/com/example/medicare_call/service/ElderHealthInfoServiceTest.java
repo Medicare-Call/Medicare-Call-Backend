@@ -29,7 +29,6 @@ class ElderHealthInfoServiceTest {
     @Mock ElderHealthInfoRepository elderHealthInfoRepository;
     @Mock ElderDiseaseRepository elderDiseaseRepository;
     @Mock DiseaseRepository diseaseRepository;
-    @Mock MedicationRepository medicationRepository;
     @Mock MedicationScheduleRepository medicationScheduleRepository;
     @Mock MemberRepository memberRepository;
     @InjectMocks
@@ -42,13 +41,10 @@ class ElderHealthInfoServiceTest {
     void registerElderHealthInfo_success() {
         Elder elder = Elder.builder().id(1).build();
         Disease.builder().id(1).name("당뇨").build();
-        Medication.builder().id(1).name("당뇨약").build();
 
         when(elderRepository.findById(1)).thenReturn(Optional.of(elder));
         when(diseaseRepository.findByName("당뇨")).thenReturn(Optional.empty());
         when(diseaseRepository.save(any(Disease.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(medicationRepository.findByName("당뇨약")).thenReturn(Optional.empty());
-        when(medicationRepository.save(any(Medication.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         ElderHealthInfoCreateRequest.MedicationScheduleRequest msReq = ElderHealthInfoCreateRequest.MedicationScheduleRequest.builder()
                 .medicationName("당뇨약")

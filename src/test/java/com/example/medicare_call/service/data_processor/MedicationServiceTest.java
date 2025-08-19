@@ -40,9 +40,6 @@ public class MedicationServiceTest {
     private MedicationScheduleRepository medicationScheduleRepository;
 
     @Mock
-    private MedicationRepository medicationRepository;
-
-    @Mock
     private ElderRepository elderRepository;
 
     @InjectMocks
@@ -50,8 +47,6 @@ public class MedicationServiceTest {
 
     private CareCallRecord callRecord;
     private Elder elder;
-    private Medication medication;
-    private Medication existingMedication;
     private MedicationSchedule medicationSchedule;
 
     @BeforeEach
@@ -66,20 +61,10 @@ public class MedicationServiceTest {
                 .elder(elder)
                 .build();
 
-        medication = Medication.builder()
-                .id(1)
-                .name("혈압약")
-                .build();
-
-        existingMedication = Medication.builder()
-                .id(2)
-                .name("당뇨약")
-                .build();
-
         medicationSchedule = MedicationSchedule.builder()
                 .id(1)
                 .elder(elder)
-                .medication(medication)
+                .name("혈압약")
                 .scheduleTime("MORNING")
                 .build();
     }
@@ -94,7 +79,6 @@ public class MedicationServiceTest {
                 .takenTime("아침")
                 .build();
 
-        when(medicationRepository.findByName("혈압약")).thenReturn(Optional.of(medication));
         when(medicationScheduleRepository.findByElder(elder)).thenReturn(Arrays.asList(medicationSchedule));
         when(medicationTakenRecordRepository.save(any(MedicationTakenRecord.class))).thenReturn(MedicationTakenRecord.builder().id(1).build());
 
@@ -102,10 +86,9 @@ public class MedicationServiceTest {
         medicationService.saveMedicationTakenRecord(callRecord, List.of(medicationData));
 
         // then
-        verify(medicationRepository).findByName("혈압약");
         verify(medicationScheduleRepository).findByElder(elder);
         verify(medicationTakenRecordRepository).save(argThat(record -> 
-            record.getMedication().getId().equals(1) &&
+            record.getName().equals("혈압약") &&
             record.getMedicationSchedule().getId().equals(1) &&
             record.getTakenStatus().name().equals("TAKEN")
         ));
@@ -121,7 +104,6 @@ public class MedicationServiceTest {
                 .takenTime("점심")
                 .build();
 
-        when(medicationRepository.findByName("혈압약")).thenReturn(Optional.of(medication));
         when(medicationScheduleRepository.findByElder(elder)).thenReturn(Arrays.asList(medicationSchedule));
         when(medicationTakenRecordRepository.save(any(MedicationTakenRecord.class))).thenReturn(MedicationTakenRecord.builder().id(1).build());
 
@@ -130,7 +112,7 @@ public class MedicationServiceTest {
 
         // then
         verify(medicationTakenRecordRepository).save(argThat(record -> 
-            record.getMedication().getId().equals(1) &&
+            record.getName().equals("혈압약") &&
             record.getMedicationSchedule() == null &&
             record.getTakenStatus().name().equals("TAKEN")
         ));
@@ -146,7 +128,6 @@ public class MedicationServiceTest {
                 .takenTime("아침")
                 .build();
 
-        when(medicationRepository.findByName("혈압약")).thenReturn(Optional.of(medication));
         when(medicationScheduleRepository.findByElder(elder)).thenReturn(Arrays.asList(medicationSchedule));
         when(medicationTakenRecordRepository.save(any(MedicationTakenRecord.class))).thenReturn(MedicationTakenRecord.builder().id(1).build());
 
@@ -173,7 +154,6 @@ public class MedicationServiceTest {
         medicationService.saveMedicationTakenRecord(callRecord, List.of(medicationData));
 
         // then
-        verify(medicationRepository, never()).findByName(any());
         verify(medicationTakenRecordRepository, never()).save(any());
     }
 
@@ -191,7 +171,6 @@ public class MedicationServiceTest {
         medicationService.saveMedicationTakenRecord(callRecord, List.of(medicationData));
 
         // then
-        verify(medicationRepository, never()).findByName(any());
         verify(medicationTakenRecordRepository, never()).save(any());
     }
 
@@ -204,18 +183,13 @@ public class MedicationServiceTest {
         HealthDataExtractionResponse.MedicationData newMedData = HealthDataExtractionResponse.MedicationData.builder()
                 .medicationType("새로운 약").taken("복용하지 않음").takenTime("점심").build();
 
-        Medication createdMedication = Medication.builder().id(2).name("새로운 약").build();
 
-        when(medicationRepository.findByName("혈압약")).thenReturn(Optional.of(existingMedication));
-        when(medicationRepository.findByName("새로운 약")).thenReturn(Optional.empty());
-        when(medicationRepository.save(any(Medication.class))).thenReturn(createdMedication);
         when(medicationScheduleRepository.findByElder(elder)).thenReturn(List.of(medicationSchedule));
 
         // when
         medicationService.saveMedicationTakenRecord(callRecord, List.of(existingMedData, newMedData));
 
         // then
-        verify(medicationRepository, times(1)).save(any(Medication.class)); // 새로운 약만 저장
         verify(medicationTakenRecordRepository, times(2)).save(any(MedicationTakenRecord.class)); // 복용기록은 2번 저장
     }
 
@@ -232,11 +206,10 @@ public class MedicationServiceTest {
         MedicationSchedule morningSchedule = MedicationSchedule.builder()
                 .id(1)
                 .elder(elder)
-                .medication(medication)
+                .name("혈압약")
                 .scheduleTime("MORNING,LUNCH")
                 .build();
 
-        when(medicationRepository.findByName("혈압약")).thenReturn(Optional.of(medication));
         when(medicationScheduleRepository.findByElder(elder)).thenReturn(Arrays.asList(morningSchedule));
         when(medicationTakenRecordRepository.save(any(MedicationTakenRecord.class))).thenReturn(MedicationTakenRecord.builder().id(1).build());
 
@@ -263,11 +236,10 @@ public class MedicationServiceTest {
         MedicationSchedule lunchSchedule = MedicationSchedule.builder()
                 .id(1)
                 .elder(elder)
-                .medication(medication)
+                .name("혈압약")
                 .scheduleTime("MORNING,LUNCH")
                 .build();
 
-        when(medicationRepository.findByName("혈압약")).thenReturn(Optional.of(medication));
         when(medicationScheduleRepository.findByElder(elder)).thenReturn(Arrays.asList(lunchSchedule));
         when(medicationTakenRecordRepository.save(any(MedicationTakenRecord.class))).thenReturn(MedicationTakenRecord.builder().id(1).build());
 
@@ -294,11 +266,10 @@ public class MedicationServiceTest {
         MedicationSchedule morningSchedule = MedicationSchedule.builder()
                 .id(1)
                 .elder(elder)
-                .medication(medication)
+                .name("혈압약")
                 .scheduleTime("MORNING,LUNCH")
                 .build();
 
-        when(medicationRepository.findByName("혈압약")).thenReturn(Optional.of(medication));
         when(medicationScheduleRepository.findByElder(elder)).thenReturn(Arrays.asList(morningSchedule));
         when(medicationTakenRecordRepository.save(any(MedicationTakenRecord.class))).thenReturn(MedicationTakenRecord.builder().id(1).build());
 
@@ -323,48 +294,38 @@ public class MedicationServiceTest {
                 .name("테스트 어르신")
                 .build();
 
-        Medication medication1 = Medication.builder()
-                .id(1)
-                .name("당뇨약")
-                .build();
-
-        Medication medication2 = Medication.builder()
-                .id(2)
-                .name("혈압약")
-                .build();
-
         MedicationSchedule schedule1 = MedicationSchedule.builder()
                 .id(1)
                 .elder(elder)
-                .medication(medication1)
+                .name("당뇨약")
                 .scheduleTime("MORNING")
                 .build();
 
         MedicationSchedule schedule2 = MedicationSchedule.builder()
                 .id(2)
                 .elder(elder)
-                .medication(medication1)
+                .name("당뇨약")
                 .scheduleTime("LUNCH")
                 .build();
 
         MedicationSchedule schedule3 = MedicationSchedule.builder()
                 .id(3)
                 .elder(elder)
-                .medication(medication1)
+                .name("당뇨약")
                 .scheduleTime("DINNER")
                 .build();
 
         MedicationSchedule schedule4 = MedicationSchedule.builder()
                 .id(4)
                 .elder(elder)
-                .medication(medication2)
+                .name("혈압약")
                 .scheduleTime("MORNING")
                 .build();
 
         MedicationSchedule schedule5 = MedicationSchedule.builder()
                 .id(5)
                 .elder(elder)
-                .medication(medication2)
+                .name("혈압약")
                 .scheduleTime("DINNER")
                 .build();
 
@@ -390,7 +351,7 @@ public class MedicationServiceTest {
                 .id(1)
                 .careCallRecord(morningCall)
                 .medicationSchedule(schedule1)
-                .medication(medication1)
+                .name("당뇨약")
                 .takenStatus(MedicationTakenStatus.TAKEN)
                 .build();
 
@@ -398,7 +359,7 @@ public class MedicationServiceTest {
                 .id(2)
                 .careCallRecord(lunchCall)
                 .medicationSchedule(schedule2)
-                .medication(medication1)
+                .name("당뇨약")
                 .takenStatus(MedicationTakenStatus.TAKEN)
                 .build();
 
@@ -406,7 +367,7 @@ public class MedicationServiceTest {
                 .id(3)
                 .careCallRecord(morningCall) // 혈압약은 아침에 복용
                 .medicationSchedule(schedule4)
-                .medication(medication2)
+                .name("혈압약")
                 .takenStatus(MedicationTakenStatus.TAKEN)
                 .build();
 

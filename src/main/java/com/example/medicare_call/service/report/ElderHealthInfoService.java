@@ -20,7 +20,6 @@ public class ElderHealthInfoService {
     private final ElderHealthInfoRepository elderHealthInfoRepository;
     private final ElderDiseaseRepository elderDiseaseRepository;
     private final DiseaseRepository diseaseRepository;
-    private final MedicationRepository medicationRepository;
     private final MedicationScheduleRepository medicationScheduleRepository;
     private final MemberRepository memberRepository;
 
@@ -50,9 +49,6 @@ public class ElderHealthInfoService {
         if (request.getMedicationSchedules() != null && !request.getMedicationSchedules().isEmpty()) {
             medicationScheduleRepository.deleteAllByElder(elder);
             for (ElderHealthInfoCreateRequest.MedicationScheduleRequest msReq : request.getMedicationSchedules()) {
-                // 기획 변경: 사용자의 입력을 그대로 받는 방식으로 (데이터의 중복만 최소화하자)
-                Medication medication = medicationRepository.findByName(msReq.getMedicationName())
-                        .orElseGet(() -> medicationRepository.save(Medication.builder().name(msReq.getMedicationName()).build()));
 
                 String scheduleTime = msReq.getScheduleTimes().stream()
                         .map(Enum::name)
@@ -60,7 +56,7 @@ public class ElderHealthInfoService {
 
                 MedicationSchedule schedule = MedicationSchedule.builder()
                         .elder(elder)
-                        .medication(medication)
+                        .name(msReq.getMedicationName())
                         .scheduleTime(scheduleTime)
                         .build();
                 medicationScheduleRepository.save(schedule);
@@ -140,13 +136,7 @@ public class ElderHealthInfoService {
 
         for (MedicationSchedule schedule : elder.getMedicationSchedules()) {
             String scheduleTime = schedule.getScheduleTime();
-            Medication medication = schedule.getMedication();
-
-            if (medication == null) {
-                continue; // 약 정보가 없는 경우 스킵
-            }
-
-            String medicationName = medication.getName();
+            String medicationName = schedule.getName();
 
             String[] times = scheduleTime.split(",");
             for (String time : times) {

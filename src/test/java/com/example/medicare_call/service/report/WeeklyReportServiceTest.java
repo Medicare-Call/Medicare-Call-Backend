@@ -55,7 +55,6 @@ class WeeklyReportServiceTest {
 
     private Elder testElder;
     private CareCallRecord testCallRecord;
-    private Medication testMedication;
     private MedicationSchedule testMedicationSchedule;
 
     @BeforeEach
@@ -71,14 +70,9 @@ class WeeklyReportServiceTest {
                 .startTime(LocalDateTime.now())
                 .build();
 
-        testMedication = Medication.builder()
-                .id(1)
-                .name("혈압약")
-                .build();
-
         testMedicationSchedule = MedicationSchedule.builder()
                 .id(1)
-                .medication(testMedication)
+                .name("혈압약")
                 .scheduleTime("MORNING")
                 .build();
     }
