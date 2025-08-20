@@ -34,10 +34,11 @@ public class HealthAnalysisService {
         CareCallRecord latestRecord = healthRecords.get(healthRecords.size() - 1);
         String healthDetails = latestRecord.getHealthDetails();
         List<String> symptomList = (healthDetails == null || healthDetails.isBlank()) ? List.of() : Arrays.stream(healthDetails.split(",")).map(String::trim).toList();
+        String analysisComment = aiSummaryService.getSymptomAnalysis(symptomList);
         return DailyHealthAnalysisResponse.builder()
                 .date(date)
                 .symptomList(symptomList)
-                .analysisComment(null)
+                .analysisComment(analysisComment)
                 .build();
     }
 } 

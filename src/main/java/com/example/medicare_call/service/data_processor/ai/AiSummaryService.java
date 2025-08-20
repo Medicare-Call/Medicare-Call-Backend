@@ -216,4 +216,49 @@ public class AiSummaryService {
                 bloodSugarType.getHigh(),
                 bloodSugarType.getLow());
     }
+
+    public String getSymptomAnalysis(List<String> symptomList) {
+        try {
+            log.info("OpenAI API를 통한 증상 분석 코멘트 생성 시작");
+
+            if (symptomList == null || symptomList.isEmpty()) {
+                return null;
+            }
+
+            String joinedSymptoms = symptomList.stream()
+                    .filter(Objects::nonNull)
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .distinct()
+                    .collect(Collectors.joining(", "));
+
+            String prompt = String.format("""
+                다음은 어르신의 오늘 보고된 증상 목록입니다. 이 증상들을 간단히 묶어 해석하고, 보호자가 바로 취할 수 있는 한 가지 권고를 포함하여 한국어로 공백 포함 100자 내외 한 문장으로 작성해주세요. 의학적 진단 단정은 피하고 존댓말을 사용하세요.
+
+                [증상 목록]
+                %s
+                """, joinedSymptoms);
+
+            OpenAiRequest openAiRequest = OpenAiRequest.builder()
+                    .model(openaiModel)
+                    .messages(List.of(
+                            OpenAiRequest.Message.builder()
+                                    .role("system")
+                                    .content("당신은 비의료적 안내 코멘트를 작성하는 전문가입니다. 증상을 종합해 위험 신호 가능성을 부드럽게 알리고, 보호자를 위한 실천적 권고 1가지를 담아 공백 포함 100자 내외 한 문장으로 작성하세요.")
+                                    .build(),
+                            OpenAiRequest.Message.builder()
+                                    .role("user")
+                                    .content(prompt)
+                                    .build()
+                    ))
+                    .temperature(0.5)
+                    .build();
+
+            return callOpenAiApi(openAiRequest, "증상 분석 코멘트를 생성하지 못했습니다.");
+
+        } catch (Exception e) {
+            log.error("OpenAI API 호출 중 오류 발생", e);
+            return "증상 분석 코멘트 생성 중 오류가 발생했습니다.";
+        }
+    }
 }
