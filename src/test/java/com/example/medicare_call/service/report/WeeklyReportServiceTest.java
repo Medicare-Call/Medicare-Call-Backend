@@ -100,7 +100,7 @@ class WeeklyReportServiceTest {
                         .callStatus("completed")
                         .build(),
                 CareCallRecord.builder()
-                        .callStatus("failed")
+                        .callStatus("no-answer")
                         .build()
         );
         when(mealRecordRepository.findByElderIdAndDateBetween(eq(elderId), eq(startDate), eq(endLocalDate)))

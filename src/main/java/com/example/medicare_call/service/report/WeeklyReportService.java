@@ -348,11 +348,10 @@ public class WeeklyReportService {
                 .filter(record -> record.getHealthDetails() != null && !record.getHealthDetails().trim().isEmpty())
                 .count();
 
-        // 미응답 건수 (callStatus가 failed, no-answer인 건수)
+        // 미응답 건수 (callStatus가 no-answer인 건수)
         // TODO: Twilio에서 실제 상태값이 어떻게 정의되는지를 확인하고, 이에 알맞도록 수정
         int missedCalls = (int) callRecords.stream()
                 .filter(record ->
-                    "failed".equals(record.getCallStatus()) ||
                     "no-answer".equals(record.getCallStatus())
                 )
                 .count();
