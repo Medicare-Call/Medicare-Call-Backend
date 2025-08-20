@@ -2,6 +2,7 @@ package com.example.medicare_call.service.carecall;
 
 import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.carecall.CareCallTestRequest;
+import com.example.medicare_call.dto.carecall.ImmediateCareCallRequest.CareCallOption;
 import com.example.medicare_call.global.enums.CallType;
 import com.example.medicare_call.global.enums.ElderRelation;
 import com.example.medicare_call.global.enums.ResidenceType;
@@ -66,26 +67,35 @@ public class CareCallRequestSenderService {
 
     /**
      * // TODO [DEMO] 데모데이 시연용 임시 코드 → 정식 버전 구현 시 제거 필요
-     * memberId를 통해 해당 보호자의 첫 번째 어르신에게 즉시 케어콜 발송
+     * elderId와 careCallOption를 통해 해당 어르신에게 즉시 케어콜 발송
      */
-    public String sendImmediateCallToFirstElder(Integer memberId) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND, "보호자를 찾을 수 없습니다. ID: " + memberId));
+    public String sendImmediateCall(Long elderId, CareCallOption careCallOption) {
+        Elder elder = elderRepository.findById(elderId.intValue())
+                .orElseThrow(() -> new CustomException(ErrorCode.ELDER_NOT_FOUND, "케어콜 발송 대상 어르신을 찾을 수 없습니다. ID: " + elderId));
 
-        List<Elder> elders = member.getElders();
-        if (elders.isEmpty()) {
-            throw new CustomException(ErrorCode.ELDER_NOT_FOUND);
-        }
-
-        Elder firstElder = elders.get(0);
-        
         try {
-            CareCallSetting setting = getOrCreateImmediateSetting(firstElder);
-            sendCall(setting.getId(), firstElder.getId(), CallType.IMMEDIATE);
-            return String.format("%s 어르신께 즉시 케어콜 발송이 완료되었습니다.", firstElder.getName());
+            CareCallSetting setting = getOrCreateImmediateSetting(elder);
+            
+            CallType callType = convertOptionToCallType(careCallOption);
+
+            sendCall(setting.getId(), elderId.intValue(), callType);
+            return String.format("%s 어르신께 즉시 케어콜 발송이 완료되었습니다.", elder.getName());
         } catch (Exception e) {
-            log.error("즉시 케어콜 발송 실패 - elderId: {}, error: {}", firstElder.getId(), e.getMessage());
+            log.error("즉시 케어콜 발송 실패 - elderId: {}, error: {}", elder.getId(), e.getMessage());
             throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "케어콜 발송 중 오류가 발생했습니다: " + e.getMessage());
+        }
+    }
+
+    private CallType convertOptionToCallType(CareCallOption option) {
+        switch (option) {
+            case FIRST:
+                return CallType.FIRST;
+            case SECOND:
+                return CallType.SECOND;
+            case THIRD:
+                return CallType.THIRD;
+            default:
+                throw new IllegalArgumentException("Unknown CareCallOption: " + option);
         }
     }
 
