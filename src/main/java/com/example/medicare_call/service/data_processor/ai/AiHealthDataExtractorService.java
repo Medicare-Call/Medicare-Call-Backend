@@ -6,7 +6,6 @@ import com.example.medicare_call.dto.data_processor.ai.OpenAiRequest;
 import com.example.medicare_call.dto.data_processor.ai.OpenAiResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -21,7 +20,6 @@ import java.util.List;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class AiHealthDataExtractorService {
     
     private static final int JSON_CODE_BLOCK_MARKER_LENGTH = 7; // "```json"
