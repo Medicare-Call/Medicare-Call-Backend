@@ -417,4 +417,157 @@ class HomeReportServiceTest {
                 .psychStatus(psychStatus)
                 .build();
     }
+    
+    @Test
+    @DisplayName("건강 상태 - 최신 값이 null이면 바로 이전의 null이 아닌 값을 사용한다")
+    void getHomeReport_건강상태_최신null이면바로이전값사용() {
+        Integer elderId = 1;
+
+        // 최신(마지막) 레코드는 null, 그 이전 레코드는 1(좋음)
+        CareCallRecord oldNull = createCareCallRecord(1, null, null);
+        CareCallRecord middleGood = createCareCallRecord(2, (byte) 1, null);
+        CareCallRecord latestNull = createCareCallRecord(3, null, null);
+
+        when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
+        when(mealRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.singletonList(createMealRecord(10, MealType.BREAKFAST.getValue(), (byte) 1)));
+        when(medicationScheduleRepository.findByElder(testElder)).thenReturn(Collections.emptyList());
+        when(medicationTakenRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithSleepData(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithHealthData(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Arrays.asList(oldNull, middleGood, latestNull)); // 오름차순 가정
+        when(careCallRecordRepository.findByElderIdAndDateWithPsychologicalData(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
+        when(bloodSugarRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
+        when(aiSummaryService.getHomeSummary(any(HomeSummaryDto.class))).thenReturn("AI 요약");
+
+        HomeReportResponse response = homeReportService.getHomeReport(elderId);
+
+        assertThat(response.getHealthStatus()).isEqualTo("좋음");
+    }
+
+    @Test
+    @DisplayName("건강 상태 - 최신 값이 null이 아니면 최신 값을 사용한다")
+    void getHomeReport_건강상태_최신값사용() {
+        Integer elderId = 1;
+
+        CareCallRecord olderBad = createCareCallRecord(1, (byte) 0, null);
+        CareCallRecord latestGood = createCareCallRecord(2, (byte) 1, null);
+
+        when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
+        when(mealRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.singletonList(createMealRecord(10, MealType.BREAKFAST.getValue(), (byte) 1)));
+        when(medicationScheduleRepository.findByElder(testElder)).thenReturn(Collections.emptyList());
+        when(medicationTakenRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithSleepData(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithHealthData(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Arrays.asList(olderBad, latestGood)); // 최신 값이 1
+        when(careCallRecordRepository.findByElderIdAndDateWithPsychologicalData(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
+        when(bloodSugarRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
+        when(aiSummaryService.getHomeSummary(any(HomeSummaryDto.class))).thenReturn("AI 요약");
+
+        HomeReportResponse response = homeReportService.getHomeReport(elderId);
+
+        assertThat(response.getHealthStatus()).isEqualTo("좋음");
+    }
+
+    @Test
+    @DisplayName("건강 상태 - 오늘 값이 전부 null이면 null 반환")
+    void getHomeReport_건강상태_전부null이면_null반환() {
+        Integer elderId = 1;
+
+        CareCallRecord r1 = createCareCallRecord(1, null, null);
+        CareCallRecord r2 = createCareCallRecord(2, null, null);
+
+        when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
+        when(mealRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.singletonList(createMealRecord(10, MealType.BREAKFAST.getValue(), (byte) 1)));
+        when(medicationScheduleRepository.findByElder(testElder)).thenReturn(Collections.emptyList());
+        when(medicationTakenRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithSleepData(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithHealthData(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Arrays.asList(r1, r2));
+        when(careCallRecordRepository.findByElderIdAndDateWithPsychologicalData(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
+        when(bloodSugarRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
+        when(aiSummaryService.getHomeSummary(any(HomeSummaryDto.class))).thenReturn("AI 요약");
+
+        HomeReportResponse response = homeReportService.getHomeReport(elderId);
+
+        assertThat(response.getHealthStatus()).isNull();
+    }
+
+    @Test
+    @DisplayName("심리 상태 - 최신 값이 null이면 바로 이전의 null이 아닌 값을 사용한다")
+    void getHomeReport_심리상태_최신null이면바로이전값사용() {
+        Integer elderId = 1;
+
+        CareCallRecord oldNull = createCareCallRecord(1, null, null);
+        CareCallRecord middleBad = createCareCallRecord(2, null, (byte) 0);
+        CareCallRecord latestNull = createCareCallRecord(3, null, null);
+
+        when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
+        when(mealRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.singletonList(createMealRecord(10, MealType.BREAKFAST.getValue(), (byte) 1)));
+        when(medicationScheduleRepository.findByElder(testElder)).thenReturn(Collections.emptyList());
+        when(medicationTakenRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithSleepData(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithHealthData(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithPsychologicalData(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Arrays.asList(oldNull, middleBad, latestNull));
+        when(bloodSugarRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
+        when(aiSummaryService.getHomeSummary(any(HomeSummaryDto.class))).thenReturn("AI 요약");
+
+        HomeReportResponse response = homeReportService.getHomeReport(elderId);
+
+        assertThat(response.getMentalStatus()).isEqualTo("나쁨");
+    }
+
+    @Test
+    @DisplayName("심리 상태 - 최신 값이 null이 아니면 최신 값을 사용한다")
+    void getHomeReport_심리상태_최신값사용() {
+        Integer elderId = 1;
+
+        CareCallRecord olderGood = createCareCallRecord(1, null, (byte) 1);
+        CareCallRecord latestBad = createCareCallRecord(2, null, (byte) 0);
+
+        when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
+        when(mealRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.singletonList(createMealRecord(10, MealType.BREAKFAST.getValue(), (byte) 1)));
+        when(medicationScheduleRepository.findByElder(testElder)).thenReturn(Collections.emptyList());
+        when(medicationTakenRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithSleepData(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithHealthData(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithPsychologicalData(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Arrays.asList(olderGood, latestBad)); // 최신 값이 0
+        when(bloodSugarRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
+        when(aiSummaryService.getHomeSummary(any(HomeSummaryDto.class))).thenReturn("AI 요약");
+
+        HomeReportResponse response = homeReportService.getHomeReport(elderId);
+
+        assertThat(response.getMentalStatus()).isEqualTo("나쁨");
+    }
+
+    @Test
+    @DisplayName("심리 상태 - 오늘 값이 전부 null이면 null 반환")
+    void getHomeReport_심리상태_전부null이면_null반환() {
+        Integer elderId = 1;
+
+        CareCallRecord r1 = createCareCallRecord(1, null, null);
+        CareCallRecord r2 = createCareCallRecord(2, null, null);
+
+        when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
+        when(mealRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Collections.singletonList(createMealRecord(10, MealType.BREAKFAST.getValue(), (byte) 1)));
+        when(medicationScheduleRepository.findByElder(testElder)).thenReturn(Collections.emptyList());
+        when(medicationTakenRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithSleepData(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithHealthData(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithPsychologicalData(eq(elderId), any(LocalDate.class)))
+                .thenReturn(Arrays.asList(r1, r2));
+        when(bloodSugarRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
+        when(aiSummaryService.getHomeSummary(any(HomeSummaryDto.class))).thenReturn("AI 요약");
+
+        HomeReportResponse response = homeReportService.getHomeReport(elderId);
+
+        assertThat(response.getMentalStatus()).isNull();
+    }
 }
