@@ -119,11 +119,11 @@ public class HomeReportService {
                 .totalTakenMedication(medicationStatus != null ? medicationStatus.getTotalTaken() : 0)
                 .totalGoalMedication(medicationStatus != null ? medicationStatus.getTotalGoal() : 0)
                 .nextMedicationTime(medicationStatus != null ? medicationStatus.getNextMedicationTime() : null)
-                .sleepHours(sleep != null ? sleep.getMeanHours() : 0)
-                .sleepMinutes(sleep != null ? sleep.getMeanMinutes() : 0)
+                .sleepHours(sleep != null ? sleep.getMeanHours() : null)
+                .sleepMinutes(sleep != null ? sleep.getMeanMinutes() : null)
                 .healthStatus(healthStatus)
                 .mentalStatus(mentalStatus)
-                .averageBloodSugar(bloodSugar != null ? bloodSugar.getMeanValue() : 0)
+                .averageBloodSugar(bloodSugar != null ? bloodSugar.getMeanValue() : null)
                 .build();
     }
 
