@@ -83,14 +83,7 @@ public class HomeReportService {
         // 검증 값에 따라 AI를 호출하거나 빈 문자열로 요약문을 생성합니다. *//
         HomeSummaryDto summaryDto = createHomeSummaryDto(mealStatus, medicationStatus, sleep, healthStatus, mentalStatus, bloodSugar);
         List<CareCallRecord> records = careCallRecordRepository.findByElderAndToday(elder, today);
-        boolean hasCompletedCallToday = false;
-
-        for (CareCallRecord record : records) {
-            if (record.getCallStatus() != null && record.getCallStatus().equals("completed")) {
-                hasCompletedCallToday = true; // 케어콜 존재
-                break;
-            }
-        }
+        boolean hasCompletedCallToday = hasCompletedCareCallToday(records);
 
         String aiSummary;
         if((mealStatus == null && medicationStatus == null
@@ -367,5 +360,14 @@ public class HomeReportService {
         return HomeReportResponse.BloodSugar.builder()
                 .meanValue(average.intValue())
                 .build();
+    }
+
+    private boolean hasCompletedCareCallToday(List<CareCallRecord> records){
+        for (CareCallRecord record : records) {
+            if (record.getCallStatus() != null && record.getCallStatus().equals("completed")) {
+                return true; // 케어콜 존재
+            }
+        }
+        return false;
     }
 } 
