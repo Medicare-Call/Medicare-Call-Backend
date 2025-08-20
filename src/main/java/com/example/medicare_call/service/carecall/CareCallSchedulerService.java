@@ -18,25 +18,27 @@ public class CareCallSchedulerService {
     private final CareCallRequestSenderService careCallRequestSenderService;
 
     public void checkAndSendCalls() {
-        LocalTime now = LocalTime.now().withSecond(0).withNano(0); // UTC 기준 현재 시간
-        checkAndSendCalls(now);
+        LocalTime endTime = LocalTime.now().withSecond(0).withNano(0);
+        // 현재부터 10분 전까지의 기간 설정 (cron job 이 10분 단위로 실행)
+        LocalTime startTime = endTime.minusMinutes(10);
+        checkAndSendCallsInRange(startTime, endTime);
     }
 
-    public void checkAndSendCalls(LocalTime now) {
+    public void checkAndSendCallsInRange(LocalTime startTime, LocalTime endTime) {
         //1차 케어콜
-        List<CareCallSetting> firstTargets = settingRepository.findByFirstCallTime(now);
+        List<CareCallSetting> firstTargets = settingRepository.findByFirstCallTimeBetween(startTime, endTime);
         for (CareCallSetting setting : firstTargets) {
             careCallRequestSenderService.sendCall(setting.getId(), setting.getElder().getId(), CallType.FIRST);
         }
 
         //2차 케어콜
-        List<CareCallSetting> secondTargets = settingRepository.findBySecondCallTime(now);
+        List<CareCallSetting> secondTargets = settingRepository.findBySecondCallTimeBetween(startTime, endTime);
         for (CareCallSetting setting : secondTargets) {
             careCallRequestSenderService.sendCall(setting.getId(), setting.getElder().getId(), CallType.SECOND);
         }
 
         //3차 케어콜
-        List<CareCallSetting> thirdTargets = settingRepository.findByThirdCallTime(now);
+        List<CareCallSetting> thirdTargets = settingRepository.findByThirdCallTimeBetween(startTime, endTime);
         for (CareCallSetting setting : thirdTargets) {
             careCallRequestSenderService.sendCall(setting.getId(), setting.getElder().getId(), CallType.THIRD);
         }
