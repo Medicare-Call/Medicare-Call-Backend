@@ -97,29 +97,51 @@ public class MedicationService {
                         MedicationSchedule::getName
                 ));
 
-        // 약 종류별 복용 기록
-        Map<String, List<MedicationTakenRecord>> takenRecordsByName = takenRecords.stream()
-                .collect(Collectors.groupingBy(MedicationTakenRecord::getName));
+        // 약 종류와 복용 시간(MedicationScheduleTime)을 키로 하는 복용 기록 맵
+        Map<String, Map<MedicationScheduleTime, MedicationTakenRecord>> takenRecordsByMedAndTime = takenRecords.stream()
+            .filter(r -> r.getName() != null && r.getTakenTime() != null)
+            .collect(Collectors.groupingBy(
+                MedicationTakenRecord::getName,
+                Collectors.toMap(
+                    MedicationTakenRecord::getTakenTime,
+                    r -> r,
+                    (existing, replacement) -> existing // 중복 시 기존 값 유지
+                )
+            ));
 
         List<DailyMedicationResponse.MedicationInfo> medicationInfos = new ArrayList<>();
 
         for (Map.Entry<String, List<MedicationSchedule>> entry : schedulesByName.entrySet()) {
             String medicationName = entry.getKey();
             List<MedicationSchedule> schedulesForMed = entry.getValue();
-            List<MedicationTakenRecord> takenRecordsForMed = takenRecordsByName.getOrDefault(medicationName, Collections.emptyList());
+            Map<MedicationScheduleTime, MedicationTakenRecord> takenRecordsForMed = takenRecordsByMedAndTime.getOrDefault(medicationName, Collections.emptyMap());
 
-            // 복용 완료한 시간대 집합
-            Set<MedicationScheduleTime> takenTimes = takenRecordsForMed.stream()
-                    .map(MedicationTakenRecord::getTakenTime)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toSet());
+            long takenCount = schedulesForMed.stream()
+                .map(MedicationSchedule::getScheduleTime)
+                .map(takenRecordsForMed::get)
+                .filter(Objects::nonNull)
+                .filter(record -> record.getTakenStatus() == MedicationTakenStatus.TAKEN)
+                .count();
 
-            List<DailyMedicationResponse.TimeInfo> timeInfos = createTimeInfos(schedulesForMed, takenTimes);
+            List<DailyMedicationResponse.TimeInfo> timeInfos = schedulesForMed.stream()
+                .map(schedule -> {
+                    MedicationTakenRecord record = takenRecordsForMed.get(schedule.getScheduleTime());
+                    Boolean taken = null;
+                    if (record != null) {
+                        taken = record.getTakenStatus() == MedicationTakenStatus.TAKEN;
+                    }
+                    return DailyMedicationResponse.TimeInfo.builder()
+                        .time(schedule.getScheduleTime())
+                        .taken(taken)
+                        .build();
+                })
+                .sorted(Comparator.comparing(DailyMedicationResponse.TimeInfo::getTime))
+                .collect(Collectors.toList());
 
             medicationInfos.add(DailyMedicationResponse.MedicationInfo.builder()
                             .type(medicationName)
                             .goalCount(schedulesForMed.size())
-                            .takenCount(takenTimes.size())
+                            .takenCount((int) takenCount)
                             .times(timeInfos)
                             .build());
         }
@@ -128,20 +150,5 @@ public class MedicationService {
                 .date(date)
                 .medications(medicationInfos)
                 .build();
-    }
-
-    private List<DailyMedicationResponse.TimeInfo> createTimeInfos(
-            List<MedicationSchedule> schedules,
-            Set<MedicationScheduleTime> takenTimes) {
-
-        return schedules.stream()
-                .map(MedicationSchedule::getScheduleTime)
-                .distinct()
-                .map(scheduleTime -> DailyMedicationResponse.TimeInfo.builder()
-                        .time(scheduleTime)
-                        .taken(takenTimes.contains(scheduleTime))
-                        .build())
-                .sorted(Comparator.comparing(DailyMedicationResponse.TimeInfo::getTime))
-                .collect(Collectors.toList());
     }
 } 

@@ -7,6 +7,7 @@ import com.example.medicare_call.domain.MealRecord;
 import com.example.medicare_call.domain.MedicationSchedule;
 import com.example.medicare_call.domain.MedicationTakenRecord;
 import com.example.medicare_call.dto.report.HomeReportResponse;
+import com.example.medicare_call.global.enums.MedicationTakenStatus;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.global.enums.MealType;
@@ -164,8 +165,10 @@ public class HomeReportService {
     }
 
     private HomeReportResponse.MedicationStatus getMedicationStatus(List<MedicationSchedule> schedules, List<MedicationTakenRecord> todayMedications) {
-        int totalTaken = todayMedications.size();
-        
+        long totalTaken = todayMedications.stream()
+                .filter(record -> record.getTakenStatus() == MedicationTakenStatus.TAKEN)
+                .count();
+
         // 약 종류별로 스케줄을 그룹화하여 목표 복용 횟수 계산
         Map<String, List<MedicationSchedule>> medicationSchedules = schedules.stream()
                 .collect(Collectors.groupingBy(
@@ -174,7 +177,7 @@ public class HomeReportService {
 
         // 약 종류별 복용 횟수 계산
         Map<String, Long> medicationTakenCounts = todayMedications.stream()
-                .filter(mtr -> mtr.getMedicationSchedule() != null)
+                .filter(mtr -> mtr.getMedicationSchedule() != null && mtr.getTakenStatus() == MedicationTakenStatus.TAKEN)
                 .collect(Collectors.groupingBy(
                         MedicationTakenRecord::getName,
                         Collectors.counting()
@@ -208,7 +211,7 @@ public class HomeReportService {
         MedicationScheduleTime nextTime = calculateNextMedicationTime(schedules);
 
         return HomeReportResponse.MedicationStatus.builder()
-                .totalTaken(totalTaken)
+                .totalTaken((int) totalTaken)
                 .totalGoal(totalGoal)
                 .nextMedicationTime(nextTime)
                 .medicationList(medicationList)
