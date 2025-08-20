@@ -292,9 +292,9 @@ public class HomeReportService {
     }
 
     private String getHealthStatus(Integer elderId, LocalDate date) {
-        List<CareCallRecord> healthRecords = careCallRecordRepository.findByElderIdAndDateWithHealthData(elderId, date);
+        List<CareCallRecord> healthRecords = careCallRecordRepository.findByElderIdAndDateBetween(elderId, date, date);
         
-        if (healthRecords.isEmpty()) {
+        if (healthRecords == null || healthRecords.isEmpty()) {
             return null;
         }
 
@@ -310,9 +310,9 @@ public class HomeReportService {
     }
 
     private String getMentalStatus(Integer elderId, LocalDate date) {
-        List<CareCallRecord> mentalRecords = careCallRecordRepository.findByElderIdAndDateWithPsychologicalData(elderId, date);
+        List<CareCallRecord> mentalRecords = careCallRecordRepository.findByElderIdAndDateBetween(elderId, date, date);
         
-        if (mentalRecords.isEmpty()) {
+        if (mentalRecords == null || mentalRecords.isEmpty()) {
             return null;
         }
 
