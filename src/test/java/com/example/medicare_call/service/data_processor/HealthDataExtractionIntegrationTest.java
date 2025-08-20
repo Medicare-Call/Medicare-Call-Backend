@@ -31,7 +31,7 @@ class HealthDataExtractionIntegrationTest {
     @Autowired
     private AiHealthDataExtractorService aiHealthDataExtractorService;
 
-    @MockBean
+    @MockBean(name = "openAiRestTemplate")
     private RestTemplate restTemplate;
 
     @Autowired
