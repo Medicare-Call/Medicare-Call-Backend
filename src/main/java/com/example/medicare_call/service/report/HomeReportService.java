@@ -298,15 +298,15 @@ public class HomeReportService {
             return null;
         }
 
-        // 가장 최근 기록의 건강 상태 반환
-        CareCallRecord latestRecord = healthRecords.get(healthRecords.size() - 1);
-        Byte healthStatus = latestRecord.getHealthStatus();
-        
-        if (healthStatus == null) {
-            return null;
+        // 오늘 데이터 중 null이 아닌 최신 건강 상태 반환
+        for (int i = healthRecords.size() - 1; i >= 0; i--) {
+            Byte healthStatus = healthRecords.get(i).getHealthStatus();
+            if (healthStatus != null) {
+                return healthStatus == 1 ? "좋음" : "나쁨";
+            }
         }
-        
-        return healthStatus == 1 ? "좋음" : "나쁨";
+
+        return null;
     }
 
     private String getMentalStatus(Integer elderId, LocalDate date) {
@@ -316,15 +316,15 @@ public class HomeReportService {
             return null;
         }
 
-        // 가장 최근 기록의 심리 상태 반환
-        CareCallRecord latestRecord = mentalRecords.get(mentalRecords.size() - 1);
-        Byte psychStatus = latestRecord.getPsychStatus();
-        
-        if (psychStatus == null) {
-            return null;
+        // 오늘 데이터 중 null이 아닌 최신 심리 상태 반환
+        for (int i = mentalRecords.size() - 1; i >= 0; i--) {
+            Byte psychStatus = mentalRecords.get(i).getPsychStatus();
+            if (psychStatus != null) {
+                return psychStatus == 1 ? "좋음" : "나쁨";
+            }
         }
-        
-        return psychStatus == 1 ? "좋음" : "나쁨";
+
+        return null;
     }
 
     private HomeReportResponse.BloodSugar getBloodSugarInfo(Integer elderId, LocalDate date) {
