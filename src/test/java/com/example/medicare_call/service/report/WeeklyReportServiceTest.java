@@ -92,8 +92,8 @@ class WeeklyReportServiceTest {
 
         // 식사 기록 모킹
         List<MealRecord> mealRecords = Arrays.asList(
-                createMealRecord(1, MealType.BREAKFAST),
-                createMealRecord(2, MealType.LUNCH)
+                createMealRecord(1, MealType.BREAKFAST, (byte) 0),
+                createMealRecord(2, MealType.LUNCH, (byte) 1)
         );
         List<CareCallRecord> careCallRecordsRecords = Arrays.asList(
                 CareCallRecord.builder()
@@ -130,13 +130,13 @@ class WeeklyReportServiceTest {
         // then
         assertThat(response).isNotNull();
         assertThat(response.getElderName()).isEqualTo("김옥자");
-        assertThat(response.getSummaryStats().getMealRate()).isEqualTo(10); // 2/21 * 100 ≈ 10
+        assertThat(response.getSummaryStats().getMealRate()).isEqualTo(5); // 1/21s * 100 ≈ 5
         assertThat(response.getSummaryStats().getMedicationRate()).isEqualTo(0);
         assertThat(response.getSummaryStats().getHealthSignals()).isEqualTo(0);
         assertThat(response.getSummaryStats().getMissedCalls()).isEqualTo(1);
-        assertThat(response.getMealStats().getBreakfast()).isEqualTo(1);
+        assertThat(response.getMealStats().getBreakfast()).isEqualTo(0);
         assertThat(response.getMealStats().getLunch()).isEqualTo(1);
-        assertThat(response.getMealStats().getDinner()).isEqualTo(0);
+        assertThat(response.getMealStats().getDinner()).isEqualTo(null);
         assertThat(response.getAverageSleep().getHours()).isEqualTo(null);
         assertThat(response.getAverageSleep().getMinutes()).isEqualTo(null);
         assertThat(response.getPsychSummary().getGood()).isEqualTo(0);
@@ -175,11 +175,12 @@ class WeeklyReportServiceTest {
         assertEquals(ErrorCode.NO_DATA_FOR_WEEK, exception.getErrorCode());
     }
 
-    private MealRecord createMealRecord(Integer id, MealType mealType) {
+    private MealRecord createMealRecord(Integer id, MealType mealType, byte eatenStatus) {
         return MealRecord.builder()
                 .id(id)
                 .careCallRecord(testCallRecord)
                 .mealType(mealType.getValue())
+                .eatenStatus(eatenStatus)
                 .responseSummary("식사 내용")
                 .recordedAt(LocalDateTime.now())
                 .build();

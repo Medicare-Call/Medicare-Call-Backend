@@ -85,7 +85,7 @@ class HomeReportServiceTest {
         Integer elderId = 1;
 
         // 최소 하나의 데이터가 있도록 설정 (예: 식사 기록)
-        MealRecord breakfastMeal = createMealRecord(1, MealType.BREAKFAST.getValue());
+        MealRecord breakfastMeal = createMealRecord(1, MealType.BREAKFAST.getValue(), (byte) 1);
         when(mealRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
                 .thenReturn(List.of(breakfastMeal));
 
@@ -112,8 +112,8 @@ class HomeReportServiceTest {
         assertThat(response.getElderName()).isEqualTo("김옥자");
         assertEquals("AI 요약", response.getAiSummary());
         assertThat(response.getMealStatus().getBreakfast()).isTrue(); // 식사 데이터가 있으므로 true
-        assertThat(response.getMealStatus().getLunch()).isFalse();
-        assertThat(response.getMealStatus().getDinner()).isFalse();
+        assertThat(response.getMealStatus().getLunch()).isNull();
+        assertThat(response.getMealStatus().getDinner()).isNull();
         assertThat(response.getMedicationStatus().getTotalTaken()).isEqualTo(0);
         assertThat(response.getMedicationStatus().getTotalGoal()).isEqualTo(0);
         assertThat(response.getSleep()).isNull();
@@ -165,8 +165,8 @@ class HomeReportServiceTest {
         Integer elderId = 1;
 
         // 식사 기록 생성
-        MealRecord breakfastMeal = createMealRecord(1, (byte) 1);
-        MealRecord lunchMeal = createMealRecord(2, (byte) 2);
+        MealRecord breakfastMeal = createMealRecord(1, MealType.BREAKFAST.getValue(), (byte) 1);
+        MealRecord lunchMeal = createMealRecord(2, MealType.LUNCH.getValue(), (byte) 0);
 
         when(elderRepository.findById(elderId)).thenReturn(java.util.Optional.of(testElder));
         when(mealRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
@@ -190,8 +190,8 @@ class HomeReportServiceTest {
         // then
         assertThat(response).isNotNull();
         assertThat(response.getMealStatus().getBreakfast()).isTrue();
-        assertThat(response.getMealStatus().getLunch()).isTrue();
-        assertThat(response.getMealStatus().getDinner()).isFalse();
+        assertThat(response.getMealStatus().getLunch()).isFalse();
+        assertThat(response.getMealStatus().getDinner()).isNull();
     }
 
     @Test
@@ -228,10 +228,11 @@ class HomeReportServiceTest {
         assertEquals(ErrorCode.NO_DATA_FOR_TODAY, exception.getErrorCode());
     }
 
-    private MealRecord createMealRecord(Integer id, Byte mealType) {
+    private MealRecord createMealRecord(Integer id, Byte mealType, Byte eatenStatus) {
         return MealRecord.builder()
                 .id(id)
                 .mealType(mealType)
+                .eatenStatus(eatenStatus)
                 .recordedAt(LocalDateTime.now())
                 .build();
     }

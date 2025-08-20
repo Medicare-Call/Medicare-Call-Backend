@@ -25,7 +25,7 @@ public class MealRecord {
     private Byte mealType;
 
     @Column(name = "eaten_status")
-    private Byte eatenStatus;
+    private Byte eatenStatus; // 0: 식사 안함  1: 식사함
 
     @Column(name = "response_summary", length = 500)
     private String responseSummary;
