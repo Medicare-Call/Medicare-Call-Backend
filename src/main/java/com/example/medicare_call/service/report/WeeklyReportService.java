@@ -116,8 +116,12 @@ public class WeeklyReportService {
         int totalMedicationTaken = 0;
         int totalMedicationMissed = 0;
         for (WeeklyReportResponse.MedicationStats stats : medicationStatsMap.values()) {
-            totalMedicationTaken += stats.getTakenCount();
-            totalMedicationMissed += (stats.getTotalCount() - stats.getTakenCount());
+            if (stats.getTakenCount() != null) {
+                totalMedicationTaken += stats.getTakenCount();
+                totalMedicationMissed += (stats.getTotalCount() - stats.getTakenCount());
+            } else {
+                totalMedicationMissed += stats.getTotalCount();
+            }
         }
 
         return WeeklySummaryDto.builder()
@@ -339,7 +343,9 @@ public class WeeklyReportService {
         int totalTakenCount = 0;
         for (WeeklyReportResponse.MedicationStats stats : medicationStats.values()) {
             totalMedicationCount += stats.getTotalCount();
-            totalTakenCount += stats.getTakenCount();
+            if (stats.getTakenCount() != null) {
+                totalTakenCount += stats.getTakenCount();
+            }
         }
         int medicationRate = totalMedicationCount == 0 ? 0 : (int) Math.round((double) totalTakenCount / totalMedicationCount * 100);
 
