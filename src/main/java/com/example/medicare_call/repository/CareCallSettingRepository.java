@@ -12,14 +12,17 @@ import java.util.Optional;
 
 public interface CareCallSettingRepository extends JpaRepository<CareCallSetting, Integer> {
 
-    @Query("SELECT c FROM CareCallSetting c JOIN c.elder e WHERE c.firstCallTime = :now AND e.status = 'ACTIVATED'")
-    List<CareCallSetting> findByFirstCallTime(@Param("now") LocalTime now);
+    // 1차 콜 시간 범위 조회
+    @Query("SELECT c FROM CareCallSetting c JOIN c.elder e WHERE c.firstCallTime BETWEEN :startTime AND :endTime AND e.status = 'ACTIVATED'")
+    List<CareCallSetting> findByFirstCallTimeBetween(@Param("startTime") LocalTime startTime, @Param("endTime") LocalTime endTime);
 
-    @Query("SELECT c FROM CareCallSetting c JOIN c.elder e WHERE c.secondCallTime = :now AND e.status = 'ACTIVATED'")
-    List<CareCallSetting> findBySecondCallTime(@Param("now") LocalTime now);
+    // 2차 콜 시간 범위 조회
+    @Query("SELECT c FROM CareCallSetting c JOIN c.elder e WHERE c.secondCallTime BETWEEN :startTime AND :endTime AND e.status = 'ACTIVATED'")
+    List<CareCallSetting> findBySecondCallTimeBetween(@Param("startTime") LocalTime startTime, @Param("endTime") LocalTime endTime);
 
-    @Query("SELECT c FROM CareCallSetting c JOIN c.elder e WHERE c.thirdCallTime = :now AND e.status = 'ACTIVATED'")
-    List<CareCallSetting> findByThirdCallTime(@Param("now") LocalTime now);
+    // 3차 콜 시간 범위 조회
+    @Query("SELECT c FROM CareCallSetting c JOIN c.elder e WHERE c.thirdCallTime BETWEEN :startTime AND :endTime AND e.status = 'ACTIVATED'")
+    List<CareCallSetting> findByThirdCallTimeBetween(@Param("startTime") LocalTime startTime, @Param("endTime") LocalTime endTime);
 
     Optional<CareCallSetting> findByElder(Elder elder);
 }

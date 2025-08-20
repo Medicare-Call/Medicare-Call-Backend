@@ -30,26 +30,28 @@ public class CareCallSchedulerServiceTest {
     @Test
     void testCheckAndSendCalls_shouldCallEldersWithMatchingTimes() {
         // given
-        LocalTime fixedTime = LocalTime.of(10, 0);
+        LocalTime startTime = LocalTime.of(10, 0);
+        LocalTime endTime = LocalTime.of(10, 10);
+
 
         Elder dummyElder1 = Elder.builder().id(1).build();
         Elder dummyElder2 = Elder.builder().id(2).build();
 
         CareCallSetting firstSetting = CareCallSetting.builder()
                 .elder(dummyElder1)
-                .firstCallTime(fixedTime)
+                .firstCallTime(LocalTime.of(10, 5))
                 .build();
 
         CareCallSetting secondSetting = CareCallSetting.builder()
                 .elder(dummyElder2)
-                .secondCallTime(fixedTime)
+                .secondCallTime(LocalTime.of(10, 8))
                 .build();
 
-        when(careCallSettingRepository.findByFirstCallTime(fixedTime)).thenReturn(List.of(firstSetting));
-        when(careCallSettingRepository.findBySecondCallTime(fixedTime)).thenReturn(List.of(secondSetting));
+        when(careCallSettingRepository.findByFirstCallTimeBetween(startTime, endTime)).thenReturn(List.of(firstSetting));
+        when(careCallSettingRepository.findBySecondCallTimeBetween(startTime, endTime)).thenReturn(List.of(secondSetting));
 
         // when
-        schedulerService.checkAndSendCalls(fixedTime);
+        schedulerService.checkAndSendCallsInRange(startTime, endTime);
 
         // then
         verify(callService).sendCall(firstSetting.getId(), dummyElder1.getId(), CallType.FIRST);
