@@ -53,7 +53,10 @@ public class WeeklyReportService {
         List<CareCallRecord> callRecords = careCallRecordRepository.findByElderIdAndDateBetween(elderId, startDate, endDate);
 
 
-        if (callRecords.isEmpty()) {
+        boolean hasCompletedCall = callRecords.stream()
+                .anyMatch(record -> "completed".equals(record.getCallStatus()));
+
+        if (!hasCompletedCall) {
             throw new CustomException(ErrorCode.NO_DATA_FOR_WEEK);
         }
 
@@ -102,7 +105,10 @@ public class WeeklyReportService {
             WeeklyReportResponse.SummaryStats summaryStats) {
 
         int totalMeals = mealStats.getBreakfast() + mealStats.getLunch() + mealStats.getDinner();
-        double avgSleepHours = averageSleep.getHours() + (averageSleep.getMinutes() / 60.0);
+        Double avgSleepHours = null;
+        if (averageSleep.getHours() != null && averageSleep.getMinutes() != null) {
+            avgSleepHours = averageSleep.getHours() + (averageSleep.getMinutes() / 60.0);
+        }
 
         int totalMedicationTaken = 0;
         int totalMedicationMissed = 0;
@@ -188,8 +194,8 @@ public class WeeklyReportService {
 
         if (sleepRecords.isEmpty()) {
             return WeeklyReportResponse.AverageSleep.builder()
-                    .hours(0)
-                    .minutes(0)
+                    .hours(null)
+                    .minutes(null)
                     .build();
         }
 

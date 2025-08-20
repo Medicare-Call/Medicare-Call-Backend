@@ -8,7 +8,7 @@ import lombok.Getter;
 public class WeeklySummaryDto {
     private final int mealCount;
     private final int mealRate;
-    private final double averageSleepHours;
+    private final Double averageSleepHours;
     private final WeeklyReportResponse.BloodSugar bloodSugar;
     private final int medicationTakenCount;
     private final int medicationMissedCount;

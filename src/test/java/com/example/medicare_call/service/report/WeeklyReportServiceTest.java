@@ -96,8 +96,12 @@ class WeeklyReportServiceTest {
                 createMealRecord(2, MealType.LUNCH)
         );
         List<CareCallRecord> careCallRecordsRecords = Arrays.asList(
-                new CareCallRecord(),
-                new CareCallRecord()
+                CareCallRecord.builder()
+                        .callStatus("completed")
+                        .build(),
+                CareCallRecord.builder()
+                        .callStatus("failed")
+                        .build()
         );
         when(mealRecordRepository.findByElderIdAndDateBetween(eq(elderId), eq(startDate), eq(endLocalDate)))
                 .thenReturn(mealRecords);
@@ -129,12 +133,12 @@ class WeeklyReportServiceTest {
         assertThat(response.getSummaryStats().getMealRate()).isEqualTo(10); // 2/21 * 100 ≈ 10
         assertThat(response.getSummaryStats().getMedicationRate()).isEqualTo(0);
         assertThat(response.getSummaryStats().getHealthSignals()).isEqualTo(0);
-        assertThat(response.getSummaryStats().getMissedCalls()).isEqualTo(0);
+        assertThat(response.getSummaryStats().getMissedCalls()).isEqualTo(1);
         assertThat(response.getMealStats().getBreakfast()).isEqualTo(1);
         assertThat(response.getMealStats().getLunch()).isEqualTo(1);
         assertThat(response.getMealStats().getDinner()).isEqualTo(0);
-        assertThat(response.getAverageSleep().getHours()).isEqualTo(0);
-        assertThat(response.getAverageSleep().getMinutes()).isEqualTo(0);
+        assertThat(response.getAverageSleep().getHours()).isEqualTo(null);
+        assertThat(response.getAverageSleep().getMinutes()).isEqualTo(null);
         assertThat(response.getPsychSummary().getGood()).isEqualTo(0);
         assertThat(response.getPsychSummary().getNormal()).isEqualTo(0);
         assertThat(response.getPsychSummary().getBad()).isEqualTo(0);
