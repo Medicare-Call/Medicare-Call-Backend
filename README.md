@@ -3,7 +3,7 @@
 매일 챙기기 어려운 부모님의 건강, AI가 전화로 대신 확인해주는 돌봄 서비스, **메디케어콜**
 
 <p align="center">
-  <img src="https://placehold.co/600x400" width="600"/>
+  <img width="1920" height="1080" alt="KakaoTalk_Photo_2025-08-20-18-41-35" src="https://github.com/user-attachments/assets/ea5c399c-ba0d-4557-b20a-49911d913c4d" />
 </p>
 
 ## Major Features of MediCare Call
