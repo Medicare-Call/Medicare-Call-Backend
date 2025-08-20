@@ -57,7 +57,7 @@
 - CI 파이프라인을 통해 모든 Push 및 PR에 대해 전체 테스트가 자동으로 실행되어, 변경 사항으로 인한 잠재적인 버그를 사전에 방지합니다.
 
 <p align="center">
-  <img src="https://placehold.co/600x400" width="600"/>
+  <img width="962" height="291" alt="스크린샷 2025-08-20 오후 3 27 43" src="https://github.com/user-attachments/assets/6c321aaf-7d5b-41b9-9cab-76d0662803ce" />
 </p>
 
 ## Git Managing
@@ -75,13 +75,15 @@
 ### Database Schema
 
 <p align="center">
-  <img src="https://placehold.co/600x400" width="600"/>
+  <img width="2506" height="1877" alt="Untitled (9)" src="https://github.com/user-attachments/assets/cab0c529-0efa-4a90-aecc-4471ed6017b5" />
 </p>
+
+- [상세 정보](https://dbdocs.io/contact.terrykim/Medicare-Call-ERD?view=relationships)
 
 ### Service Architecture
 
 <p align="center">
-  <img src="https://placehold.co/600x400" width="600"/>
+  <img width="818" height="424" alt="medicarecall-architecture" src="https://github.com/user-attachments/assets/c94ccd2c-9cf3-474a-8aa8-e7aad41d2546" />
 </p>
 
 - [전화 서버 링크](https://github.com/Medicare-Call/Medicare-Call-Telephony-Server)
