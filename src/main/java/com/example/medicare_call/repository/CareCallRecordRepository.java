@@ -12,65 +12,65 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CareCallRecordRepository extends JpaRepository<CareCallRecord, Integer> {
     
-                @Query("SELECT ccr FROM CareCallRecord ccr " +
-                        "JOIN ccr.elder e " +
-                   "WHERE ccr.elder.id = :elderId " +
-                   "AND e.status = 'ACTIVATED' " +
-                   "AND DATE(ccr.startTime) = :date " +
-                   "AND ccr.sleepStart IS NOT NULL " +
-                   "ORDER BY ccr.startTime")
-            List<CareCallRecord> findByElderIdAndDateWithSleepData(@Param("elderId") Integer elderId, @Param("date") LocalDate date);
-
-            @Query("SELECT ccr FROM CareCallRecord ccr " +
-                    "JOIN ccr.elder e " +
-                   "WHERE ccr.elder.id = :elderId " +
-                    "AND e.status = 'ACTIVATED' " +
-                   "AND DATE(ccr.startTime) = :date " +
-                   "AND ccr.psychologicalDetails IS NOT NULL " +
-                   "ORDER BY ccr.startTime")
-            List<CareCallRecord> findByElderIdAndDateWithPsychologicalData(@Param("elderId") Integer elderId, @Param("date") LocalDate date);
-
-            @Query("SELECT ccr FROM CareCallRecord ccr " +
-                    "JOIN ccr.elder e " +
-                   "WHERE ccr.elder.id = :elderId " +
-                    "AND e.status = 'ACTIVATED' " +
-                   "AND DATE(ccr.startTime) = :date " +
-                   "AND ccr.healthDetails IS NOT NULL " +
-                   "ORDER BY ccr.startTime")
-            List<CareCallRecord> findByElderIdAndDateWithHealthData(@Param("elderId") Integer elderId, @Param("date") LocalDate date);
+    @Query("SELECT ccr FROM CareCallRecord ccr " +
+            "JOIN ccr.elder e " +
+       "WHERE ccr.elder.id = :elderId " +
+       "AND e.status = 'ACTIVATED' " +
+       "AND DATE(ccr.calledAt) = :date " +
+       "AND ccr.sleepStart IS NOT NULL " +
+       "ORDER BY ccr.calledAt")
+    List<CareCallRecord> findByElderIdAndDateWithSleepData(@Param("elderId") Integer elderId, @Param("date") LocalDate date);
 
     @Query("SELECT ccr FROM CareCallRecord ccr " +
             "JOIN ccr.elder e " +
            "WHERE ccr.elder.id = :elderId " +
             "AND e.status = 'ACTIVATED' " +
-           "AND DATE(ccr.startTime) BETWEEN :startDate AND :endDate " +
+           "AND DATE(ccr.calledAt) = :date " +
+           "AND ccr.psychologicalDetails IS NOT NULL " +
+           "ORDER BY ccr.calledAt")
+    List<CareCallRecord> findByElderIdAndDateWithPsychologicalData(@Param("elderId") Integer elderId, @Param("date") LocalDate date);
+
+    @Query("SELECT ccr FROM CareCallRecord ccr " +
+            "JOIN ccr.elder e " +
+           "WHERE ccr.elder.id = :elderId " +
+            "AND e.status = 'ACTIVATED' " +
+           "AND DATE(ccr.calledAt) = :date " +
+           "AND ccr.healthDetails IS NOT NULL " +
+           "ORDER BY ccr.calledAt")
+    List<CareCallRecord> findByElderIdAndDateWithHealthData(@Param("elderId") Integer elderId, @Param("date") LocalDate date);
+
+    @Query("SELECT ccr FROM CareCallRecord ccr " +
+            "JOIN ccr.elder e " +
+           "WHERE ccr.elder.id = :elderId " +
+            "AND e.status = 'ACTIVATED' " +
+           "AND DATE(ccr.calledAt) BETWEEN :startDate AND :endDate " +
            "AND ccr.sleepStart IS NOT NULL " +
-           "ORDER BY ccr.startTime")
+           "ORDER BY ccr.calledAt")
     List<CareCallRecord> findByElderIdAndDateBetweenWithSleepData(@Param("elderId") Integer elderId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
     @Query("SELECT ccr FROM CareCallRecord ccr " +
             "JOIN ccr.elder e " +
            "WHERE ccr.elder.id = :elderId " +
             "AND e.status = 'ACTIVATED' " +
-           "AND DATE(ccr.startTime) BETWEEN :startDate AND :endDate " +
+           "AND DATE(ccr.calledAt) BETWEEN :startDate AND :endDate " +
            "AND ccr.psychologicalDetails IS NOT NULL " +
-           "ORDER BY ccr.startTime")
+           "ORDER BY ccr.calledAt")
     List<CareCallRecord> findByElderIdAndDateBetweenWithPsychologicalData(@Param("elderId") Integer elderId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
     @Query("SELECT ccr FROM CareCallRecord ccr " +
             "JOIN ccr.elder e " +
            "WHERE ccr.elder.id = :elderId " +
             "AND e.status = 'ACTIVATED' " +
-           "AND DATE(ccr.startTime) BETWEEN :startDate AND :endDate " +
+           "AND DATE(ccr.calledAt) BETWEEN :startDate AND :endDate " +
            "AND ccr.healthDetails IS NOT NULL " +
-           "ORDER BY ccr.startTime")
+           "ORDER BY ccr.calledAt")
     List<CareCallRecord> findByElderIdAndDateBetweenWithHealthData(@Param("elderId") Integer elderId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
     @Query("SELECT ccr FROM CareCallRecord ccr " +
             "JOIN ccr.elder e " +
            "WHERE ccr.elder.id = :elderId " +
             "AND e.status = 'ACTIVATED' " +
-           "AND DATE(ccr.startTime) BETWEEN :startDate AND :endDate " +
-           "ORDER BY ccr.startTime")
+           "AND DATE(ccr.calledAt) BETWEEN :startDate AND :endDate " +
+           "ORDER BY ccr.calledAt")
     List<CareCallRecord> findByElderIdAndDateBetween(@Param("elderId") Integer elderId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 } 
