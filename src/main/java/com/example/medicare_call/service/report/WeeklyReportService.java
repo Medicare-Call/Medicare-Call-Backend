@@ -104,7 +104,10 @@ public class WeeklyReportService {
             WeeklyReportResponse.BloodSugar bloodSugar,
             WeeklyReportResponse.SummaryStats summaryStats) {
 
-        int totalMeals = mealStats.getBreakfast() + mealStats.getLunch() + mealStats.getDinner();
+        int totalMeals =
+                (mealStats.getBreakfast() == null ? 0 : mealStats.getBreakfast()) +
+                (mealStats.getLunch() == null ? 0 : mealStats.getLunch()) +
+                (mealStats.getDinner() == null ? 0 : mealStats.getDinner());
         Double avgSleepHours = null;
         if (averageSleep.getHours() != null && averageSleep.getMinutes() != null) {
             avgSleepHours = averageSleep.getHours() + (averageSleep.getMinutes() / 60.0);
@@ -132,21 +135,45 @@ public class WeeklyReportService {
     }
 
     private WeeklyReportResponse.MealStats getMealStats(List<MealRecord> mealRecords) {
-
-        int breakfast = 0, lunch = 0, dinner = 0;
+        Integer breakfast = null;
+        Integer lunch = null;
+        Integer dinner = null;
 
         for (MealRecord record : mealRecords) {
             MealType mealType = MealType.fromValue(record.getMealType());
             if (mealType != null) {
                 switch (mealType) {
                     case BREAKFAST:
-                        breakfast++;
+                        if (record.getEatenStatus() != null) {
+                            if (breakfast == null) {
+                                breakfast = 0;
+                            }
+                            if (record.getEatenStatus() == (byte) 1) {
+                                breakfast++;
+                            }
+                        }
                         break;
+
                     case LUNCH:
-                        lunch++;
+                        if (record.getEatenStatus() != null) {
+                            if (lunch == null) {
+                                lunch = 0;
+                            }
+                            if (record.getEatenStatus() == (byte) 1) {
+                                lunch++;
+                            }
+                        }
                         break;
+
                     case DINNER:
-                        dinner++;
+                        if (record.getEatenStatus() != null) {
+                            if (dinner == null) {
+                                dinner = 0;
+                            }
+                            if (record.getEatenStatus() == (byte) 1) {
+                                dinner++;
+                            }
+                        }
                         break;
                 }
             }
@@ -292,7 +319,10 @@ public class WeeklyReportService {
             List<CareCallRecord> healthRecords, List<CareCallRecord> callRecords) {
 
         // 식사율 계산 (7일 * 3끼 = 21끼 중 실제 식사한 횟수), 소숫점 버림
-        int totalMeals = mealStats.getBreakfast() + mealStats.getLunch() + mealStats.getDinner();
+        int totalMeals =
+                (mealStats.getBreakfast() == null ? 0 : mealStats.getBreakfast()) +
+                (mealStats.getLunch() == null ? 0 : mealStats.getLunch()) +
+                (mealStats.getDinner() == null ? 0 : mealStats.getDinner());
         int mealRate = totalMeals == 0 ? 0 : (int) Math.round((double) totalMeals / 21 * 100);
 
         // 복약률 계산

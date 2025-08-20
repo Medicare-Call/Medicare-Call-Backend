@@ -134,9 +134,6 @@ public class HomeReportService {
         Boolean dinner = null;
 
         if(!todayMeals.isEmpty()) {
-            breakfast = false;
-            lunch = false;
-            dinner = false;
             for (MealRecord meal : todayMeals) {
 
                 if (meal == null) continue;
@@ -144,13 +141,13 @@ public class HomeReportService {
                 if (mealType != null) {
                     switch (mealType) {
                         case BREAKFAST:
-                            breakfast = true;
+                            breakfast = meal.getEatenStatus() == (byte) 1;
                             break;
                         case LUNCH:
-                            lunch = true;
+                            lunch = meal.getEatenStatus() == (byte) 1;
                             break;
                         case DINNER:
-                            dinner = true;
+                            dinner = meal.getEatenStatus() == (byte) 1;
                             break;
                     }
                 }
