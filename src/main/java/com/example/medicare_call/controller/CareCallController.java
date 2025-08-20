@@ -5,6 +5,7 @@ import com.example.medicare_call.dto.carecall.CareCallSettingRequest;
 import com.example.medicare_call.dto.carecall.CareCallSettingResponse;
 import com.example.medicare_call.dto.carecall.CareCallTestRequest;
 import com.example.medicare_call.dto.data_processor.CareCallDataProcessRequest;
+import com.example.medicare_call.dto.carecall.ImmediateCareCallRequest;
 import com.example.medicare_call.global.annotation.AuthUser;
 import com.example.medicare_call.service.carecall.CareCallRequestSenderService;
 import com.example.medicare_call.service.carecall.CareCallSettingService;
@@ -54,8 +55,8 @@ public class CareCallController {
     // TODO [DEMO] 데모데이 시연용 임시 코드 → 정식 버전 구현 시 제거 필요
     @Operation(summary = "즉시 케어콜 발송", description = "memberId를 통해 해당 보호자의 첫 번째 어르신에게 즉시 케어콜을 발송합니다.")
     @PostMapping("/care-call/immediate")
-    public ResponseEntity<String> sendImmediateCareCall(@Parameter(hidden = true) @AuthUser Long authMemberId) {
-        String result = careCallRequestSenderService.sendImmediateCallToFirstElder(authMemberId.intValue());
+    public ResponseEntity<String> sendImmediateCareCall(@Valid @RequestBody ImmediateCareCallRequest request) {
+        String result = careCallRequestSenderService.sendImmediateCall(request.getElderId(), request.getCareCallOption());
         return ResponseEntity.ok(result);
     }
 

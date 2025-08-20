@@ -24,6 +24,8 @@ import com.example.medicare_call.repository.CareCallSettingRepository;
 import com.example.medicare_call.global.annotation.AuthenticationArgumentResolver;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
+import com.example.medicare_call.dto.carecall.ImmediateCareCallRequest;
+import com.example.medicare_call.dto.carecall.ImmediateCareCallRequest.CareCallOption;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -112,34 +114,41 @@ class CareCallControllerImmediateTest {
     }
 
     @Test
-    @DisplayName("토큰의 memberId로 첫 번째 어르신에게 즉시 케어콜 발송 - 성공")
+    @DisplayName("요청된 어르신에게 즉시 케어콜 발송 - 성공")
     void sendImmediateCareCall_Success() throws Exception {
         // given
-        Integer memberId = 1; // TestConfig에서 @AuthUser는 항상 1L을 반환
+        ImmediateCareCallRequest request = new ImmediateCareCallRequest();
+        request.setElderId(1L);
+        request.setCareCallOption(CareCallOption.FIRST);
+
         String expectedResult = "김할머니 어르신께 즉시 케어콜 발송이 완료되었습니다.";
         
-        when(careCallRequestSenderService.sendImmediateCallToFirstElder(memberId))
+        when(careCallRequestSenderService.sendImmediateCall(request.getElderId(), request.getCareCallOption()))
                 .thenReturn(expectedResult);
 
         // when & then
         mockMvc.perform(post("/care-call/immediate")
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(expectedResult));
     }
 
     @Test
-    @DisplayName("등록된 어르신이 없는 경우")
-    void sendImmediateCareCall_NoElders() throws Exception {
+    @DisplayName("요청된 어르신이 존재하지 않는 경우")
+    void sendImmediateCareCall_ElderNotFound() throws Exception {
         // given
-        Integer memberId = 1; // TestConfig에서 @AuthUser는 항상 1L을 반환
+        ImmediateCareCallRequest request = new ImmediateCareCallRequest();
+        request.setElderId(999L); // 존재하지 않는 ID
+        request.setCareCallOption(CareCallOption.FIRST);
         
-        when(careCallRequestSenderService.sendImmediateCallToFirstElder(memberId))
+        when(careCallRequestSenderService.sendImmediateCall(request.getElderId(), request.getCareCallOption()))
                 .thenThrow(new CustomException(ErrorCode.ELDER_NOT_FOUND));
 
         // when & then
         mockMvc.perform(post("/care-call/immediate")
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
     }
 }

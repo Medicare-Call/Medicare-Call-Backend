@@ -52,7 +52,7 @@ public class CareCallSchedulerServiceTest {
         schedulerService.checkAndSendCalls(fixedTime);
 
         // then
-        verify(callService).sendCall(firstSetting.getId(),1, CallType.FIRST);
-        verify(callService).sendCall(secondSetting.getId(),2, CallType.SECOND);
+        verify(callService).sendCall(firstSetting.getId(), dummyElder1.getId(), CallType.FIRST);
+        verify(callService).sendCall(secondSetting.getId(), dummyElder2.getId(), CallType.SECOND);
     }
 }
