@@ -32,7 +32,7 @@ public class SleepRecordService {
         List<CareCallRecord> sleepRecords = careCallRecordRepository.findByElderIdAndDateWithSleepData(elderId, date);
         
         if (sleepRecords.isEmpty()) {
-            return DailySleepResponse.empty(date);
+            throw new CustomException(ErrorCode.NO_DATA_FOR_TODAY);
         }
         
         // 가장 최근 수면 기록 사용

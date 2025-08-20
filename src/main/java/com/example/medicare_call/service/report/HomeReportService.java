@@ -76,6 +76,17 @@ public class HomeReportService {
         // 혈당 정보 조회
         HomeReportResponse.BloodSugar bloodSugar = getBloodSugarInfo(elderId, today);
 
+        // 모든 데이터가 비어있는지 확인
+        if (todayMeals.isEmpty() &&
+            todayMedications.isEmpty() &&
+            sleep == null &&
+            healthStatus == null &&
+            mentalStatus == null &&
+            bloodSugar == null
+        ) {
+            throw new CustomException(ErrorCode.NO_DATA_FOR_TODAY);
+        }
+
         // AI 요약 생성
         HomeSummaryDto summaryDto = createHomeSummaryDto(mealStatus, medicationStatus, sleep, healthStatus, mentalStatus, bloodSugar);
         String aiSummary = aiSummaryService.getHomeSummary(summaryDto);

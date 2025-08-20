@@ -22,6 +22,10 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import com.example.medicare_call.global.exception.CustomException;
+import com.example.medicare_call.global.exception.ErrorCode;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("MentalAnalysisService Test")
@@ -100,7 +104,7 @@ class MentalAnalysisServiceTest {
 
     @Test
     @DisplayName("심리 상태 데이터 조회 실패 - 데이터 없음")
-    void getDailyMentalAnalysis_NoData_ThrowsResourceNotFoundException() {
+    void getDailyMentalAnalysis_NoData_ThrowsException() {
         // given
         Integer elderId = 1;
         LocalDate date = LocalDate.of(2025, 7, 16);
@@ -111,13 +115,11 @@ class MentalAnalysisServiceTest {
         when(careCallRecordRepository.findByElderIdAndDateWithPsychologicalData(elderId, date))
                 .thenReturn(Collections.emptyList());
 
-        // when
-        DailyMentalAnalysisResponse response = mentalAnalysisService.getDailyMentalAnalysis(elderId, date);
-
-        // then
-        assertThat(response).isNotNull();
-        assertThat(response.getDate()).isEqualTo(date);
-        assertThat(response.getCommentList()).isEmpty();
+        // when & then
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            mentalAnalysisService.getDailyMentalAnalysis(elderId, date);
+        });
+        assertEquals(ErrorCode.NO_DATA_FOR_TODAY, exception.getErrorCode());
     }
 
     @Test

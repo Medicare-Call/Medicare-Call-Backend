@@ -144,7 +144,7 @@ class MealRecordServiceTest {
 
     @Test
     @DisplayName("날짜별 식사 데이터 조회 실패 - 데이터 없음")
-    void getDailyMeals_NoData_ThrowsResourceNotFoundException() {
+    void getDailyMeals_NoData_ThrowsException() {
         // given
         Integer elderId = 1;
         LocalDate date = LocalDate.of(2024, 1, 1);
@@ -153,16 +153,10 @@ class MealRecordServiceTest {
         when(mealRecordRepository.findByElderIdAndDate(elderId, date)).thenReturn(List.of());
 
         // when & then
-        // when
-        DailyMealResponse response = mealRecordService.getDailyMeals(elderId, date);
-
-        // then
-        assertThat(response).isNotNull();
-        assertThat(response.getDate()).isEqualTo(date);
-        assertThat(response.getMeals()).isNotNull();
-        assertThat(response.getMeals().getBreakfast()).isNull();
-        assertThat(response.getMeals().getLunch()).isNull();
-        assertThat(response.getMeals().getDinner()).isNull();
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            mealRecordService.getDailyMeals(elderId, date);
+        });
+        assertEquals(ErrorCode.NO_DATA_FOR_TODAY, exception.getErrorCode());
     }
 
     private MealRecord createMealRecord(MealType mealType, String responseSummary) {

@@ -83,11 +83,13 @@ class HomeReportServiceTest {
     void getHomeReport_성공() {
         // given
         Integer elderId = 1;
-        LocalDate today = LocalDate.now();
+
+        // 최소 하나의 데이터가 있도록 설정 (예: 식사 기록)
+        MealRecord breakfastMeal = createMealRecord(1, MealType.BREAKFAST.getValue());
+        when(mealRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
+                .thenReturn(List.of(breakfastMeal));
 
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
-        when(mealRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
-                .thenReturn(Collections.emptyList());
         when(medicationScheduleRepository.findByElder(testElder))
                 .thenReturn(Collections.emptyList());
         when(medicationTakenRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
@@ -109,15 +111,37 @@ class HomeReportServiceTest {
         assertThat(response).isNotNull();
         assertThat(response.getElderName()).isEqualTo("김옥자");
         assertEquals("AI 요약", response.getAiSummary());
-        assertThat(response.getMealStatus().getBreakfast()).isNull();
-        assertThat(response.getMealStatus().getLunch()).isNull();
-        assertThat(response.getMealStatus().getDinner()).isNull();
+        assertThat(response.getMealStatus().getBreakfast()).isTrue(); // 식사 데이터가 있으므로 true
+        assertThat(response.getMealStatus().getLunch()).isFalse();
+        assertThat(response.getMealStatus().getDinner()).isFalse();
         assertThat(response.getMedicationStatus().getTotalTaken()).isEqualTo(0);
         assertThat(response.getMedicationStatus().getTotalGoal()).isEqualTo(0);
         assertThat(response.getSleep()).isNull();
         assertThat(response.getHealthStatus()).isNull();
         assertThat(response.getMentalStatus()).isNull();
         assertThat(response.getBloodSugar()).isNull();
+    }
+
+    @Test
+    @DisplayName("홈 화면 데이터 조회 실패 - 데이터 없음")
+    void getHomeReport_실패_데이터없음() {
+        // given
+        Integer elderId = 1;
+
+        when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
+        when(mealRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
+        when(medicationScheduleRepository.findByElder(testElder)).thenReturn(Collections.emptyList());
+        when(medicationTakenRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithSleepData(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithHealthData(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithPsychologicalData(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
+        when(bloodSugarRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
+
+        // when & then
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            homeReportService.getHomeReport(elderId);
+        });
+        assertEquals(ErrorCode.NO_DATA_FOR_TODAY, exception.getErrorCode());
     }
 
     @Test
@@ -171,8 +195,8 @@ class HomeReportServiceTest {
     }
 
     @Test
-    @DisplayName("홈 화면 데이터 조회 성공 - 복약 스케줄 있음")
-    void getHomeReport_성공_복약스케줄있음() {
+    @DisplayName("홈 화면 데이터 조회 실패 - 복약 스케줄만 있음")
+    void getHomeReport_실패_복약스케줄있음() {
         // given
         Integer elderId = 1;
 
@@ -197,18 +221,11 @@ class HomeReportServiceTest {
         when(careCallRecordRepository.findByElderIdAndDateWithPsychologicalData(eq(elderId), any(LocalDate.class)))
                 .thenReturn(Collections.emptyList());
 
-        // when
-        HomeReportResponse response = homeReportService.getHomeReport(elderId);
-
-        // then
-        assertThat(response.getMedicationStatus().getTotalGoal()).isEqualTo(3);
-        assertThat(response.getMedicationStatus().getTotalTaken()).isEqualTo(0);
-        assertThat(response.getMedicationStatus().getMedicationList()).hasSize(1);
-
-        HomeReportResponse.MedicationInfo medicationInfo = response.getMedicationStatus().getMedicationList().get(0);
-        assertThat(medicationInfo.getType()).isEqualTo("혈압약");
-        assertThat(medicationInfo.getGoal()).isEqualTo(3); // 하루 3회 복용 목표
-        assertThat(medicationInfo.getTaken()).isEqualTo(0);
+        // when & then
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            homeReportService.getHomeReport(elderId);
+        });
+        assertEquals(ErrorCode.NO_DATA_FOR_TODAY, exception.getErrorCode());
     }
 
     private MealRecord createMealRecord(Integer id, Byte mealType) {

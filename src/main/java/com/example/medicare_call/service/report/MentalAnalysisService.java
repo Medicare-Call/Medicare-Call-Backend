@@ -35,7 +35,7 @@ public class MentalAnalysisService {
         List<CareCallRecord> mentalRecords = careCallRecordRepository.findByElderIdAndDateWithPsychologicalData(elderId, date);
 
         if (mentalRecords.isEmpty()) {
-            return DailyMentalAnalysisResponse.empty(date);
+            throw new CustomException(ErrorCode.NO_DATA_FOR_TODAY);
         }
 
         List<String> commentList = new ArrayList<>();

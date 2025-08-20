@@ -30,6 +30,7 @@ import com.example.medicare_call.repository.ElderRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collections;
 
 @ExtendWith(MockitoExtension.class)
 public class MedicationServiceTest {
@@ -429,20 +430,21 @@ public class MedicationServiceTest {
     }
 
     @Test
-    @DisplayName("복약 데이터 조회 성공 - 데이터 없음")
-    void getDailyMedication_ThrowsResourceNotFoundException() {
+    @DisplayName("날짜별 복약 데이터 조회 실패 - 데이터 없음")
+    void getDailyMedication_NoData_ThrowsException() {
         // given
         Integer elderId = 1;
         LocalDate date = LocalDate.of(2025, 7, 16);
 
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(new Elder()));
+        when(medicationTakenRecordRepository.findByElderIdAndDate(elderId, date)).thenReturn(Collections.emptyList());
+        when(medicationScheduleRepository.findByElder(any(Elder.class))).thenReturn(Collections.emptyList());
 
-        // when
-        DailyMedicationResponse response = medicationService.getDailyMedication(elderId, date);
 
-        // then
-        assertThat(response).isNotNull();
-        assertEquals(date, response.getDate());
-        assertTrue(response.getMedications().isEmpty());
+        // when & then
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            medicationService.getDailyMedication(elderId, date);
+        });
+        assertEquals(ErrorCode.NO_DATA_FOR_TODAY, exception.getErrorCode());
     }
 } 

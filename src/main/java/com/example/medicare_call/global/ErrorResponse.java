@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor
 @Builder
 public class ErrorResponse {
 
@@ -21,27 +21,12 @@ public class ErrorResponse {
     private String code;
 
 
-    private ErrorResponse(final ErrorCode code, final List<FieldError> errors) {
-        this.message = code.getMessage();
-        this.status = code.getStatus().value();
-        this.errors = errors;
-        this.code = code.getCode();
-    }
-
-    private ErrorResponse(final ErrorCode code) {
-        this.message = code.getMessage();
-        this.status = code.getStatus().value();
-        this.code = code.getCode();
-        this.errors = new ArrayList<>();
-    }
-
-
     public static ErrorResponse of(final ErrorCode code, final BindingResult bindingResult) {
-        return new ErrorResponse(code, FieldError.of(bindingResult));
+        return new ErrorResponse(code.getMessage(), code.getStatus().value(), FieldError.of(bindingResult), code.getCode());
     }
 
     public static ErrorResponse of(final ErrorCode code) {
-        return new ErrorResponse(code);
+        return new ErrorResponse(code.getMessage(), code.getStatus().value(), new ArrayList<>(), code.getCode());
     }
 
 

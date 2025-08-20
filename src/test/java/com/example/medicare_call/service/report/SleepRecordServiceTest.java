@@ -140,7 +140,7 @@ class SleepRecordServiceTest {
 
     @Test
     @DisplayName("수면 데이터 조회 실패 - 데이터 없음")
-    void getDailySleep_NoData_ThrowsResourceNotFoundException() {
+    void getDailySleep_NoData_ThrowsException() {
         // given
         Integer elderId = 1;
         LocalDate date = LocalDate.of(2025, 7, 16);
@@ -151,16 +151,11 @@ class SleepRecordServiceTest {
         when(careCallRecordRepository.findByElderIdAndDateWithSleepData(elderId, date))
                 .thenReturn(Collections.emptyList());
 
-        DailySleepResponse response = sleepRecordService.getDailySleep(elderId, date);
-
-        // then
-        assertThat(response).isNotNull();
-        assertThat(response.getDate()).isEqualTo(date);
-        assertThat(response.getTotalSleep()).isNotNull();
-        assertThat(response.getTotalSleep().getHours()).isNull();
-        assertThat(response.getTotalSleep().getMinutes()).isNull();
-        assertThat(response.getSleepTime()).isNull();
-        assertThat(response.getWakeTime()).isNull();
+        // when & then
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            sleepRecordService.getDailySleep(elderId, date);
+        });
+        assertEquals(ErrorCode.NO_DATA_FOR_TODAY, exception.getErrorCode());
     }
 
     @Test
