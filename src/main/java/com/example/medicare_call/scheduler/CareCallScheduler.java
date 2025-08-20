@@ -16,7 +16,7 @@ public class CareCallScheduler {
 
     private final CareCallSchedulerService schedulerService;
 
-    @Scheduled(cron = "0 */10 * * * *") // 매 10분마다 0초에 실행
+    // @Scheduled(cron = "0 */10 * * * *") // 매 10분마다 0초에 실행
     public void runCallScheduler() {
         schedulerService.checkAndSendCalls();
     }
