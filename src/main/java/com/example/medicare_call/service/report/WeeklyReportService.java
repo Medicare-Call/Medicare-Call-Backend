@@ -6,6 +6,7 @@ import com.example.medicare_call.dto.report.WeeklySummaryDto;
 import com.example.medicare_call.global.enums.BloodSugarMeasurementType;
 import com.example.medicare_call.global.enums.BloodSugarStatus;
 import com.example.medicare_call.global.enums.MealType;
+import com.example.medicare_call.global.enums.MedicationTakenStatus;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.*;
@@ -159,6 +160,7 @@ public class WeeklyReportService {
 
         // 약물별 복용 기록 조회
         Map<String, Long> takenCounts = takenRecords.stream()
+                .filter(record -> record.getTakenStatus() == MedicationTakenStatus.TAKEN)
                 .collect(Collectors.groupingBy(
                         MedicationTakenRecord::getName,
                         Collectors.counting()
