@@ -8,6 +8,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -36,6 +38,16 @@ public class AiHealthDataExtractorService {
     
     @Value("${openai.model}")
     private String openaiModel;
+
+    @Autowired
+    public AiHealthDataExtractorService(
+            @Qualifier("openAiRestTemplate") RestTemplate restTemplate,
+            ObjectMapper objectMapper
+    ) {
+        this.restTemplate = restTemplate;
+        this.objectMapper = objectMapper;
+    }
+
 
     public HealthDataExtractionResponse extractHealthData(HealthDataExtractionRequest request) {
         try {
