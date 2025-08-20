@@ -186,18 +186,17 @@ public class WeeklyReportService {
                 .build();
     }
 
-    private Map<String, WeeklyReportResponse.MedicationStats> getMedicationStats(List<MedicationSchedule> schedules, List<MedicationTakenRecord> takenRecords) {
+    private Map<String, WeeklyReportResponse.MedicationStats> getMedicationStats(
+            List<MedicationSchedule> schedules,
+            List<MedicationTakenRecord> takenRecords) {
+
         // 약물별 스케줄 조회
         Map<String, List<MedicationSchedule>> medicationSchedules = schedules.stream()
                 .collect(Collectors.groupingBy(MedicationSchedule::getName));
 
         // 약물별 복용 기록 조회
-        Map<String, Long> takenCounts = takenRecords.stream()
-                .filter(record -> record.getTakenStatus() == MedicationTakenStatus.TAKEN)
-                .collect(Collectors.groupingBy(
-                        MedicationTakenRecord::getName,
-                        Collectors.counting()
-                ));
+        Map<String, List<MedicationTakenRecord>> recordsByMedication = takenRecords.stream()
+                .collect(Collectors.groupingBy(MedicationTakenRecord::getName));
 
         Map<String, WeeklyReportResponse.MedicationStats> result = new HashMap<>();
 
@@ -206,7 +205,17 @@ public class WeeklyReportService {
             List<MedicationSchedule> medicationScheduleList = entry.getValue();
 
             int totalCount = medicationScheduleList.size() * 7;
-            int takenCount = takenCounts.getOrDefault(medicationName, 0L).intValue();
+
+            Integer takenCount = null;
+            List<MedicationTakenRecord> records = recordsByMedication.get(medicationName);
+
+            if (records != null && !records.isEmpty()) {
+                // 레코드가 있을 때만 0 또는 n으로 설정
+                long count = records.stream()
+                        .filter(r -> r.getTakenStatus() == MedicationTakenStatus.TAKEN)
+                        .count();
+                takenCount = (int) count; // 모두 NOT_TAKEN이면 0
+            }
 
             result.put(medicationName, WeeklyReportResponse.MedicationStats.builder()
                     .totalCount(totalCount)
@@ -339,10 +348,12 @@ public class WeeklyReportService {
                 .filter(record -> record.getHealthDetails() != null && !record.getHealthDetails().trim().isEmpty())
                 .count();
 
-        // 미응답 건수 (callStatus가 failed인 건수)
+        // 미응답 건수 (callStatus가 no-answer인 건수)
         // TODO: Twilio에서 실제 상태값이 어떻게 정의되는지를 확인하고, 이에 알맞도록 수정
         int missedCalls = (int) callRecords.stream()
-                .filter(record -> "failed".equals(record.getCallStatus()))
+                .filter(record ->
+                    "no-answer".equals(record.getCallStatus())
+                )
                 .count();
 
         return WeeklyReportResponse.SummaryStats.builder()
