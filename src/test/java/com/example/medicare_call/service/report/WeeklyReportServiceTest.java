@@ -53,12 +53,16 @@ class WeeklyReportServiceTest {
     @Mock
     private AiSummaryService aiSummaryService;
 
+    @Mock
+    private SubscriptionRepository subscriptionRepository;
+
     @InjectMocks
     private WeeklyReportService weeklyReportService;
 
     private Elder testElder;
     private CareCallRecord testCallRecord;
     private MedicationSchedule testMedicationSchedule;
+    private Subscription testSubscription;
 
     @BeforeEach
     void setUp() {
@@ -77,6 +81,12 @@ class WeeklyReportServiceTest {
                 .id(1)
                 .name("혈압약")
                 .scheduleTime(MedicationScheduleTime.MORNING)
+                .build();
+
+        testSubscription = Subscription.builder()
+                .id(1L)
+                .elder(testElder)
+                .startDate(LocalDate.of(2025, 7, 1))
                 .build();
     }
 
@@ -120,6 +130,7 @@ class WeeklyReportServiceTest {
                 .thenReturn(careCallRecordsRecords);
         when(bloodSugarRecordRepository.findByElderIdAndDateBetween(eq(elderId), eq(startDate), eq(endLocalDate)))
                 .thenReturn(Collections.emptyList());
+        when(subscriptionRepository.findByElderId(elderId)).thenReturn(java.util.Optional.of(testSubscription));
 
 
         when(aiSummaryService.getWeeklyStatsSummary(any(WeeklySummaryDto.class))).thenReturn("주간 AI 요약");
@@ -167,6 +178,7 @@ class WeeklyReportServiceTest {
         when(bloodSugarRecordRepository.findByElderIdAndDateBetween(any(), any(), any())).thenReturn(Collections.emptyList());
         when(careCallRecordRepository.findByElderIdAndDateBetweenWithHealthData(any(), any(), any())).thenReturn(Collections.emptyList());
         when(careCallRecordRepository.findByElderIdAndDateBetween(any(), any(), any())).thenReturn(Collections.emptyList());
+        when(subscriptionRepository.findByElderId(elderId)).thenReturn(java.util.Optional.of(testSubscription));
 
         // when & then
         CustomException exception = org.junit.jupiter.api.Assertions.assertThrows(CustomException.class, () -> {
@@ -174,6 +186,7 @@ class WeeklyReportServiceTest {
         });
         assertEquals(ErrorCode.NO_DATA_FOR_WEEK, exception.getErrorCode());
     }
+
 
     private MealRecord createMealRecord(Integer id, MealType mealType, byte eatenStatus) {
         return MealRecord.builder()

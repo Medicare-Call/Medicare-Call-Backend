@@ -49,7 +49,10 @@ public enum ErrorCode {
 
     // Data
     NO_DATA_FOR_TODAY(HttpStatus.NOT_FOUND, "D001", "오늘의 데이터가 없습니다."),
-    NO_DATA_FOR_WEEK(HttpStatus.NOT_FOUND, "D002", "이번주의 데이터가 없습니다.");
+    NO_DATA_FOR_WEEK(HttpStatus.NOT_FOUND, "D002", "이번주의 데이터가 없습니다."),
+
+    // Subscription
+    SUBSCRIPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "S001", "구독 정보를 찾을 수 없습니다.");
 
 
     private final HttpStatus status;

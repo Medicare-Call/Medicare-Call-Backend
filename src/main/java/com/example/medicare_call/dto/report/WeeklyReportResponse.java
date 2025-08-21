@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 @Getter
@@ -34,6 +35,9 @@ public class WeeklyReportResponse {
 
     @Schema(description = "혈당 상태 통계")
     private BloodSugar bloodSugar;
+
+    @Schema(description = "회원의 구독 시작 날짜")
+    private LocalDate subscriptionStartDate;
 
     @Getter
     @Builder
