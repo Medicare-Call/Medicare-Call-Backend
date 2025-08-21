@@ -11,6 +11,7 @@ import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.*;
 import com.example.medicare_call.service.data_processor.ai.AiSummaryService;
+import jdk.dynalink.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -34,8 +36,13 @@ public class WeeklyReportService {
     private final CareCallRecordRepository careCallRecordRepository;
     private final BloodSugarRecordRepository bloodSugarRecordRepository;
     private final AiSummaryService aiSummaryService;
+    private final SubscriptionRepository subscriptionRepository;
 
     public WeeklyReportResponse getWeeklyReport(Integer elderId, LocalDate startDate) {
+        LocalDate subscriptionStartDate = subscriptionRepository.findByElderId(elderId)
+                .map(Subscription::getStartDate)
+                .orElseThrow(() -> new CustomException(ErrorCode.SUBSCRIPTION_NOT_FOUND));
+
         LocalDate endDate = startDate.plusDays(6); // 7일간 조회
 
         // 어르신 정보 조회
@@ -93,6 +100,7 @@ public class WeeklyReportService {
                 .averageSleep(averageSleep)
                 .psychSummary(psychSummary)
                 .bloodSugar(bloodSugar)
+                .subscriptionStartDate(subscriptionStartDate)
                 .build();
     }
     
