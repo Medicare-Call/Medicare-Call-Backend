@@ -83,7 +83,7 @@
 ### Service Architecture
 
 <p align="center">
-  <img width="818" height="424" alt="medicarecall-architecture" src="https://github.com/user-attachments/assets/c94ccd2c-9cf3-474a-8aa8-e7aad41d2546" />
+<img width="818" height="424" alt="medicarecall-architecture" src="https://github.com/user-attachments/assets/29aab279-394a-4845-8328-377966babeb4" />
 </p>
 
 - [전화 서버 링크](https://github.com/Medicare-Call/Medicare-Call-Telephony-Server)
