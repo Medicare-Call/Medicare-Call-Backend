@@ -78,6 +78,17 @@ naverpay:
 
 base-url: ${LOCAL_BASE_URL}
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus,health,info
+  endpoint:
+    prometheus:
+      enabled: true
+  server:
+    prometheus-allowed-ips: 0.0.0.0/0 # 로컬이니 열어두긴 했는데 compose 네트워크 대역만 허용해도 상관없습니다
+
 ---
 spring:
   config:
@@ -147,3 +158,14 @@ naverpay:
     mode: ${NAVERPAY_SDK_MODE}
 
 base-url: ${APP_BASE_URL}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus
+  endpoint:
+    prometheus:
+      enabled: true
+  server:
+    prometheus-allowed-ips: ${MONITORING_SERVER_HOST}

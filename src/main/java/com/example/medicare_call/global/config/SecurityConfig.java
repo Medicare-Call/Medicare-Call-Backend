@@ -14,13 +14,15 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.IpAddressMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authorization.AuthorizationDecision;
 
 @Slf4j
 @Configuration
@@ -44,7 +46,7 @@ public class SecurityConfig {
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/",
-            "/redis/**",
+            "/redis/**"
     };
 
     private final String[] PUBLIC_PUT = {
@@ -52,6 +54,9 @@ public class SecurityConfig {
     };
 
     private final JwtProvider jwtProvider;
+
+    @Value("${management.server.prometheus-allowed-ips}")
+    private String[] prometheusAllowedIps;
 
     /**
      * Security Filter 설정
@@ -72,6 +77,15 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, PUBLIC_POST).permitAll()
                                 .requestMatchers(HttpMethod.GET, PUBLIC_GET).permitAll()
                                 .requestMatchers(HttpMethod.PUT, PUBLIC_PUT).permitAll()
+                                .requestMatchers("/actuator/prometheus").access((authentication, object) -> {
+                                    String remoteAddr = object.getRequest().getRemoteAddr();
+                                    for (String allowedIp : prometheusAllowedIps) {
+                                        if (new IpAddressMatcher(allowedIp).matches(remoteAddr)) {
+                                            return new AuthorizationDecision(true);
+                                        }
+                                    }
+                                    return new AuthorizationDecision(false);
+                                })
                                 .anyRequest().authenticated()
                 );
         http
