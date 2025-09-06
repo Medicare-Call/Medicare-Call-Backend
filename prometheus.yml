@@ -1,0 +1,8 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'medicare-call-backend'
+    metrics_path: '/api/actuator/prometheus'
+    static_configs:
+      - targets: ['medicare-call-backend:8080']
