@@ -49,3 +49,7 @@ naverpay:
     mode: test
 
 base-url: https://example.com
+
+management:
+  server:
+    prometheus-allowed-ips: 0.0.0.0/0

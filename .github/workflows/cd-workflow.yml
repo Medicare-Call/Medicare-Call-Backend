@@ -69,6 +69,7 @@ jobs:
             NAVERPAY_PARTNER_ID="${{ secrets.NAVERPAY_PARTNER_ID }}"
             NAVERPAY_API_URL="${{ secrets.NAVERPAY_API_URL }}"
             NAVERPAY_SDK_MODE="${{ secrets.NAVERPAY_SDK_MODE }}"
+            MONITORING_SERVER_HOST="${{ secrets.MONITORING_SERVER_HOST }}"
 
 
             echo "✋🏻 Stopping existing container"
@@ -109,6 +110,7 @@ jobs:
             -e NAVERPAY_PARTNER_ID="${NAVERPAY_PARTNER_ID}" \
             -e NAVERPAY_API_URL="${NAVERPAY_API_URL}" \
             -e NAVERPAY_SDK_MODE="${NAVERPAY_SDK_MODE}" \
+            -e MONITORING_SERVER_HOST="${MONITORING_SERVER_HOST}" \
             "${DOCKER_USERNAME}/${DOCKER_IMAGE}"
 
             echo "⏳ Waiting for container to start..."
