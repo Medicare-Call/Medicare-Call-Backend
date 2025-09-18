@@ -3,7 +3,7 @@ package com.example.medicare_call.service.data_processor;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionRequest;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
 import com.example.medicare_call.dto.data_processor.ai.OpenAiResponse;
-import com.example.medicare_call.service.data_processor.ai.AiHealthDataExtractorService;
+import com.example.medicare_call.service.ai.AiHealthDataExtractorService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

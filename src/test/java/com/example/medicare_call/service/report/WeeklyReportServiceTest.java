@@ -8,7 +8,7 @@ import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.*;
-import com.example.medicare_call.service.data_processor.ai.AiSummaryService;
+import com.example.medicare_call.service.ai.AiSummaryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

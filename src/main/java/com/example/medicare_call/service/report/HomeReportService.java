@@ -19,7 +19,7 @@ import com.example.medicare_call.repository.MealRecordRepository;
 import com.example.medicare_call.repository.MedicationScheduleRepository;
 import com.example.medicare_call.repository.MedicationTakenRecordRepository;
 import com.example.medicare_call.dto.report.HomeSummaryDto;
-import com.example.medicare_call.service.data_processor.ai.AiSummaryService;
+import com.example.medicare_call.service.ai.AiSummaryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.Arrays;
 import java.util.Optional;
 
 @Slf4j

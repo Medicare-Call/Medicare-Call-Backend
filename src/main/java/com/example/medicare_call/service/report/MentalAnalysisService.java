@@ -1,16 +1,12 @@
 package com.example.medicare_call.service.report;
 
 import com.example.medicare_call.domain.CareCallRecord;
-import com.example.medicare_call.domain.MealRecord;
-import com.example.medicare_call.dto.report.DailyMealResponse;
 import com.example.medicare_call.dto.report.DailyMentalAnalysisResponse;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
-import com.example.medicare_call.global.enums.MealType;
 import com.example.medicare_call.repository.CareCallRecordRepository;
 import com.example.medicare_call.repository.ElderRepository;
-import com.example.medicare_call.repository.MealRecordRepository;
-import com.example.medicare_call.service.data_processor.ai.AiSummaryService;
+import com.example.medicare_call.service.ai.AiSummaryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -7,7 +7,7 @@ import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.*;
-import com.example.medicare_call.service.data_processor.ai.AiHealthDataExtractorService;
+import com.example.medicare_call.service.ai.AiHealthDataExtractorService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

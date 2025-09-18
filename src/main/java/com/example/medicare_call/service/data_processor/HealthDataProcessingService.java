@@ -9,7 +9,6 @@ import com.example.medicare_call.global.enums.MealType;
 import com.example.medicare_call.global.enums.PsychologicalStatus;
 import com.example.medicare_call.repository.CareCallRecordRepository;
 import com.example.medicare_call.repository.MealRecordRepository;
-import com.example.medicare_call.service.data_processor.ai.AiHealthDataExtractorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
