@@ -1,4 +1,4 @@
-package com.example.medicare_call.service.ai.config;
+package com.example.medicare_call.global.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
