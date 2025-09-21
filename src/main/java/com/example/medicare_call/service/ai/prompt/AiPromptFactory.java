@@ -10,18 +10,20 @@ import java.util.List;
 
 @Component
 public class AiPromptFactory {
-    public static Prompt createPrompt(String systemContent, String userContent, double temperature) {
+    public static Prompt createPrompt(String systemContent, String userContent, OpenAiChatOptions chatOptions) {
         SystemMessage systemMessage = new SystemMessage(systemContent);
         UserMessage userMessage = new UserMessage(userContent);
         return new Prompt(
                 List.of(systemMessage, userMessage),
-                OpenAiChatOptions.builder()
-                        .temperature(temperature)
-                        .build()
+                chatOptions
         );
     }
 
-    public static Prompt createPrompt(String systemContent, String userContent) {
-        return createPrompt(systemContent, userContent, 0.0);
+    public static Prompt createPrompt(String systemContent, String userContent, double temperature) {
+        return createPrompt(
+                systemContent,
+                userContent,
+                OpenAiChatOptions.builder().temperature(temperature).build()
+        );
     }
 }

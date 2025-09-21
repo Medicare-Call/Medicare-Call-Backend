@@ -1,13 +1,16 @@
 package com.example.medicare_call.service.ai;
 
+import com.example.medicare_call.service.ai.prompt.AiPromptFactory;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.stereotype.Service;
 
@@ -35,16 +38,17 @@ public class OpenAiChatService {
     public ChatResponse openAiChat(
             String userInput,
             String systemMessage,
-            String model
+            String model,
+            OpenAiChatOptions chatOptions
     ) {
         logger.debug("OpenAI 챗 호출 시작 - 모델: {}", model);
         try {
-            // 메시지 구성
-            UserMessage userMessage = new UserMessage(userInput);
-            SystemMessage systemPrompt = new SystemMessage(systemMessage);
 
-            // 프롬프트 생성
-            Prompt prompt = new Prompt(List.of(userMessage, systemPrompt));
+            Prompt prompt = AiPromptFactory.createPrompt(
+                    userInput,
+                    systemMessage,
+                    chatOptions
+            );
 
             // 챗 모델 생성 및 호출
             ChatResponse response = chatModel.call(prompt);
