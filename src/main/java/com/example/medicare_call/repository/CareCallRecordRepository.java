@@ -73,4 +73,7 @@ public interface CareCallRecordRepository extends JpaRepository<CareCallRecord, 
            "AND DATE(ccr.calledAt) BETWEEN :startDate AND :endDate " +
            "ORDER BY ccr.calledAt")
     List<CareCallRecord> findByElderIdAndDateBetween(@Param("elderId") Integer elderId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
-} 
+
+
+
+}

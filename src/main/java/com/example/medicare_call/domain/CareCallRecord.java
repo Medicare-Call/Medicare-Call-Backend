@@ -8,9 +8,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 @Entity
@@ -68,6 +72,19 @@ public class CareCallRecord {
 
     @Column(name = "health_details", columnDefinition = "TEXT")
     private String healthDetails; // 건강 징후 상세 내용
+
+    @BatchSize(size=100)
+    @OneToMany(mappedBy = "careCallRecord", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<BloodSugarRecord> bloodSugarRecords = new ArrayList<>();
+
+    @BatchSize(size=100)
+    @OneToMany(mappedBy = "careCallRecord", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<MealRecord> mealRecords = new ArrayList<>();
+
+    @BatchSize(size=100)
+    @OneToMany(mappedBy = "careCallRecord", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<MedicationTakenRecord> medicationTakenRecords = new ArrayList<>();
+
 
     @Builder
     public CareCallRecord(Integer id, Elder elder, CareCallSetting setting, LocalDateTime calledAt, Byte responded, LocalDateTime sleepStart, LocalDateTime sleepEnd, Byte healthStatus, Byte psychStatus,

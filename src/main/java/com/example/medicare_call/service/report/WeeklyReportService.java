@@ -60,6 +60,7 @@ public class WeeklyReportService {
         List<CareCallRecord> callRecords = careCallRecordRepository.findByElderIdAndDateBetween(elderId, startDate, endDate);
 
 
+
         boolean hasCompletedCall = callRecords.stream()
                 .anyMatch(record -> "completed".equals(record.getCallStatus()));
 

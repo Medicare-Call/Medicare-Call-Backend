@@ -114,6 +114,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
         show-sql: true
+        default_batch_fetch_size: 100
   flyway:
     enabled: true
     baseline-on-migrate: true
