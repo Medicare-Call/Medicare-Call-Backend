@@ -47,8 +47,9 @@ public class HomeSummaryPromptBuilder implements PromptBuilder<HomeSummaryDto> {
                 dto.getTotalTakenMedication(), dto.getTotalGoalMedication(),
                 dto.getNextMedicationTime() != null ? dto.getNextMedicationTime().getDescription() : "기록 없음");
 
-        String sleepSummary = String.format("최근 수면 시간: %d시간 %d분",
-                dto.getSleepHours(), dto.getSleepMinutes());
+
+        String sleepSummary = (dto.getSleepHours() == null || dto.getSleepMinutes() == null)
+                ? "기록 없음" : String.format("최근 수면 시간: %d시간 %d분", dto.getSleepHours(), dto.getSleepMinutes());
 
         String bloodSugarSummary = dto.getAverageBloodSugar() != null ?
                 dto.getAverageBloodSugar() + " mg/dL" : "기록 없음";

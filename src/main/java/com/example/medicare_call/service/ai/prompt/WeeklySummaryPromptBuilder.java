@@ -54,8 +54,9 @@ public class WeeklySummaryPromptBuilder implements PromptBuilder<WeeklySummaryDt
         promptTemplate.add("negativePsychologicalCount", weeklySummaryDto.getNegativePsychologicalCount());
         promptTemplate.add("healthSignals", weeklySummaryDto.getHealthSignals());
         promptTemplate.add("missedCalls", weeklySummaryDto.getMissedCalls());
-        promptTemplate.add("bloodSugarBeforeMeal", formatBloodSugarStats(weeklySummaryDto.getBloodSugar().getBeforeMeal()));
-        promptTemplate.add("bloodSugarAfterMeal", formatBloodSugarStats(weeklySummaryDto.getBloodSugar().getAfterMeal()));
+        var bloodSugar = weeklySummaryDto.getBloodSugar();
+        promptTemplate.add("bloodSugarBeforeMeal", formatBloodSugarStats(bloodSugar != null ? bloodSugar.getBeforeMeal() : null));
+        promptTemplate.add("bloodSugarAfterMeal", formatBloodSugarStats(bloodSugar != null ? bloodSugar.getAfterMeal() : null));
 
         return promptTemplate.create().getContents();
     }

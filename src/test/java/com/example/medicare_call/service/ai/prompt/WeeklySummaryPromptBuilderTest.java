@@ -98,4 +98,30 @@ class WeeklySummaryPromptBuilderTest {
         assertThat(prompt).contains("식전: 측정 기록 없음");
         assertThat(prompt).contains("식후: 측정 기록 없음");
     }
+
+    @Test
+    @DisplayName("buildPrompt 메서드는 WeeklySummaryDto의 bloodSugar 필드가 null일 때도 NPE 없이 올바른 프롬프트를 생성해야 한다")
+    void buildPrompt_shouldHandleNullBloodSugarFieldWithoutNPE() {
+        // Given
+        WeeklySummaryDto dto = WeeklySummaryDto.builder()
+                .mealCount(0)
+                .mealRate(0)
+                .averageSleepHours(0.0)
+                .medicationTakenCount(0)
+                .medicationMissedCount(0)
+                .positivePsychologicalCount(0)
+                .negativePsychologicalCount(0)
+                .healthSignals(0)
+                .missedCalls(0)
+                .bloodSugar(null) // bloodSugar 필드를 null로 설정
+                .build();
+
+        // When
+        String prompt = weeklySummaryPromptBuilder.buildPrompt(dto);
+
+        // Then
+        assertThat(prompt).isNotNull();
+        assertThat(prompt).contains("식전: 측정 기록 없음");
+        assertThat(prompt).contains("식후: 측정 기록 없음");
+    }
 }
