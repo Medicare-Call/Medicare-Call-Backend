@@ -1,5 +1,7 @@
 package com.example.medicare_call.service.ai;
 
+import com.example.medicare_call.global.exception.CustomException;
+import com.example.medicare_call.global.exception.ErrorCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,6 +25,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 class OpenAiChatServiceTest {
@@ -70,12 +73,11 @@ class OpenAiChatServiceTest {
     }
 
     @Test
-    @DisplayName("openAiChat 메서드는 예외 발생 시 null을 반환해야 한다")
-    void openAiChat_shouldReturnNullOnException() {
+    @DisplayName("openAiChat 메서드는 예외 발생 시 CustomException을 던져야 한다")
+    void openAiChat_shouldThrowCustomExceptionOnFailure() {
         // Given
         String userInput = "안녕하세요, 잘 지내고 계신가요?";
         String systemMessage = "당신은 유용한 AI 비서입니다.";
-        String model = "gpt-4.1";
         OpenAiChatOptions chatOptions = OpenAiChatOptions.builder().temperature(0.7).model("gpt-4.1").build();
 
         Prompt mockPrompt = new Prompt(
@@ -85,10 +87,10 @@ class OpenAiChatServiceTest {
 
         when(chatModel.call(any(Prompt.class))).thenThrow(new RuntimeException("API call failed"));
 
-        // When
-        ChatResponse response = openAiChatService.openAiChat(userInput, systemMessage, chatOptions);
-
-        // Then
-        assertThat(response).isNull();
+        // When & Then
+        CustomException exception = assertThrows(CustomException.class, () ->
+                openAiChatService.openAiChat(userInput, systemMessage, chatOptions)
+        );
+        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.OPENAI_API_ERROR);
     }
 }

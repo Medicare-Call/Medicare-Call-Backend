@@ -1,5 +1,7 @@
 package com.example.medicare_call.service.ai;
 
+import com.example.medicare_call.global.exception.CustomException;
+import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.service.ai.prompt.AiPromptFactory;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -55,7 +57,7 @@ public class OpenAiChatService {
             return response;
         } catch (Exception e) {
             logger.error("OpenAI 챗 호출 중 오류 발생: {}", e.getMessage(), e);
-            return null;
+            throw new CustomException(ErrorCode.OPENAI_API_ERROR, e);
         }
     }
 }
