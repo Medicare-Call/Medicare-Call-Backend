@@ -92,6 +92,12 @@ public class HealthDataExtractionPromptBuilder implements PromptBuilder<HealthDa
             """
             ;
 
+    @Override
+    public String buildSystemMessage() {
+        return "당신은 의료 통화 내용에서 건강 데이터를 추출하는 전문가입니다. 주어진 통화 내용에서 건강 관련 정보를 정확히 추출하여 JSON 형태로 응답해주세요.";
+    }
+
+    @Override
     public String buildPrompt(HealthDataExtractionRequest request) {
         PromptTemplate promptTemplate = new PromptTemplate(HEALTH_DATA_EXTRACTION_TEMPLATE);
         promptTemplate.add("callDate", request.getCallDate());

@@ -36,6 +36,12 @@ public class WeeklySummaryPromptBuilder implements PromptBuilder<WeeklySummaryDt
             - 데이터를 종합하여 보호자가 가장 주의해야 할 점 1~2가지를 중심으로 보고서를 작성해주세요.
             """;
 
+    @Override
+    public String buildSystemMessage() {
+        return "당신은 어르신 주간 건강 보고서 전문가입니다. 어르신의 주간 데이터를 분석하여 보호자에게 필요한 핵심 정보를 80자 이상 100자 미만으로 요약 보고해야 합니다.";
+    }
+
+    @Override
     public String buildPrompt(WeeklySummaryDto weeklySummaryDto) {
         PromptTemplate promptTemplate = new PromptTemplate(WEEKLY_SUMMARY_PROMPT_TEMPLATE);
 

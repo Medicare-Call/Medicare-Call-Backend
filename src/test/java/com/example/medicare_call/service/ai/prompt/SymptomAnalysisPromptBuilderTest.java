@@ -14,6 +14,16 @@ class SymptomAnalysisPromptBuilderTest {
     private final SymptomAnalysisPromptBuilder symptomAnalysisPromptBuilder = new SymptomAnalysisPromptBuilder();
 
     @Test
+    @DisplayName("buildSystemMessage 메서드는 올바른 시스템 메시지를 반환해야 한다")
+    void buildSystemMessage_shouldReturnCorrectSystemMessage() {
+        // When
+        String systemMessage = symptomAnalysisPromptBuilder.buildSystemMessage();
+
+        // Then
+        assertThat(systemMessage).isEqualTo("당신은 어르신 증상 분석 전문가입니다. 주어진 증상 목록을 분석하여 보호자에게 간결한 해석과 한 가지 권고를 100자 이내로 제공해야 합니다.");
+    }
+
+    @Test
     @DisplayName("buildPrompt 메서드는 PromptTemplate을 사용하여 올바른 프롬프트를 생성해야 한다")
     void buildPrompt_shouldCreateCorrectPromptUsingPromptTemplate() {
         // Given

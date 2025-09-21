@@ -17,6 +17,12 @@ public class SymptomAnalysisPromptBuilder implements PromptBuilder<List<String>>
             {joinedSymptoms}
             """;
 
+    @Override
+    public String buildSystemMessage() {
+        return "당신은 어르신 증상 분석 전문가입니다. 주어진 증상 목록을 분석하여 보호자에게 간결한 해석과 한 가지 권고를 100자 이내로 제공해야 합니다.";
+    }
+
+    @Override
     public String buildPrompt(List<String> symptomList) {
         if (symptomList == null || symptomList.isEmpty()) {
             return null;

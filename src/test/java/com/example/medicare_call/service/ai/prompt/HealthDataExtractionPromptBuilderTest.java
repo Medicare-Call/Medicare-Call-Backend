@@ -13,6 +13,16 @@ class HealthDataExtractionPromptBuilderTest {
     private final HealthDataExtractionPromptBuilder healthDataExtractionPromptBuilder = new HealthDataExtractionPromptBuilder();
 
     @Test
+    @DisplayName("buildSystemMessage 메서드는 올바른 시스템 메시지를 반환해야 한다")
+    void buildSystemMessage_shouldReturnCorrectSystemMessage() {
+        // When
+        String systemMessage = healthDataExtractionPromptBuilder.buildSystemMessage();
+
+        // Then
+        assertThat(systemMessage).isEqualTo("당신은 의료 통화 내용에서 건강 데이터를 추출하는 전문가입니다. 주어진 통화 내용에서 건강 관련 정보를 정확히 추출하여 JSON 형태로 응답해주세요.");
+    }
+
+    @Test
     @DisplayName("buildPrompt 메서드는 PromptTemplate을 사용하여 올바른 프롬프트를 생성해야 한다")
     void buildPrompt_shouldCreateCorrectPromptUsingPromptTemplate() {
         // Given

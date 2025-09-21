@@ -30,6 +30,12 @@ public class HomeSummaryPromptBuilder implements PromptBuilder<HomeSummaryDto> {
             - 긍정적인 내용은 짧게 언급하거나, 부정적인 내용이 없다면 생략해도 좋습니다.
             """;
 
+    @Override
+    public String buildSystemMessage() {
+        return "당신은 어르신 건강 요약 보고서 전문가입니다. 어르신 데이터를 분석하여 보호자에게 필요한 핵심 정보를 45자 이내로 요약 보고해야 합니다.";
+    }
+
+    @Override
     public String buildPrompt(HomeSummaryDto dto) {
         String mealSummary = Stream.of(
                 formatMealStatus(dto.getBreakfast(), "아침"),
