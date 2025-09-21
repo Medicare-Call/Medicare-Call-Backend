@@ -57,7 +57,7 @@ public class OpenAiChatService {
             return response;
         } catch (Exception e) {
             logger.error("OpenAI 챗 호출 중 오류 발생: {}", e.getMessage(), e);
-            throw new CustomException(ErrorCode.OPENAI_API_ERROR, e);
+            throw new CustomException(ErrorCode.OPENAI_API_ERROR);
         }
     }
 }
