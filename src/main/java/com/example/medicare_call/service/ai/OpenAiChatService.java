@@ -32,21 +32,20 @@ public class OpenAiChatService {
      *
      * @param userInput 사용자 입력 메시지
      * @param systemMessage 시스템 프롬프트
-     * @param model 사용할 LLM 모델명
+     * @param chatOptions LLM 호출 설정
      * @return 챗 응답 객체, 오류 시 null
      */
     public ChatResponse openAiChat(
             String userInput,
             String systemMessage,
-            String model,
             OpenAiChatOptions chatOptions
     ) {
-        logger.debug("OpenAI 챗 호출 시작 - 모델: {}", model);
+        logger.debug("OpenAI 챗 호출 시작");
         try {
 
             Prompt prompt = AiPromptFactory.createPrompt(
-                    userInput,
                     systemMessage,
+                    userInput,
                     chatOptions
             );
 

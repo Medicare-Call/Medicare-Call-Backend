@@ -48,8 +48,7 @@ class OpenAiChatServiceTest {
         // Given
         String userInput = "안녕하세요, 잘 지내고 계신가요?";
         String systemMessage = "당신은 유용한 AI 비서입니다.";
-        String model = "gpt-4.1";
-        OpenAiChatOptions chatOptions = OpenAiChatOptions.builder().temperature(0.7).build();
+        OpenAiChatOptions chatOptions = OpenAiChatOptions.builder().temperature(0.7).model("gpt-4.1").build();
         String expectedContent = "잘 지내고 있습니다, 감사합니다!";
 
         Prompt mockPrompt = new Prompt(
@@ -63,7 +62,7 @@ class OpenAiChatServiceTest {
         when(chatModel.call(any(Prompt.class))).thenReturn(mockChatResponse);
 
         // When
-        ChatResponse response = openAiChatService.openAiChat(userInput, systemMessage, model, chatOptions);
+        ChatResponse response = openAiChatService.openAiChat(userInput, systemMessage, chatOptions);
 
         // Then
         assertThat(response).isNotNull();
@@ -77,7 +76,7 @@ class OpenAiChatServiceTest {
         String userInput = "안녕하세요, 잘 지내고 계신가요?";
         String systemMessage = "당신은 유용한 AI 비서입니다.";
         String model = "gpt-4.1";
-        OpenAiChatOptions chatOptions = OpenAiChatOptions.builder().temperature(0.7).build();
+        OpenAiChatOptions chatOptions = OpenAiChatOptions.builder().temperature(0.7).model("gpt-4.1").build();
 
         Prompt mockPrompt = new Prompt(
                 List.of(new SystemMessage(systemMessage), new UserMessage(userInput)),
@@ -87,7 +86,7 @@ class OpenAiChatServiceTest {
         when(chatModel.call(any(Prompt.class))).thenThrow(new RuntimeException("API call failed"));
 
         // When
-        ChatResponse response = openAiChatService.openAiChat(userInput, systemMessage, model, chatOptions);
+        ChatResponse response = openAiChatService.openAiChat(userInput, systemMessage, chatOptions);
 
         // Then
         assertThat(response).isNull();
