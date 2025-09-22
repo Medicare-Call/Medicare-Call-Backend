@@ -120,12 +120,6 @@ class WeeklyReportServiceTest {
                 .thenReturn(Collections.emptyList());
         when(medicationTakenRecordRepository.findByElderIdAndDateBetween(eq(elderId), eq(startDate), eq(endLocalDate)))
                 .thenReturn(Collections.emptyList());
-        when(careCallRecordRepository.findByElderIdAndDateBetweenWithSleepData(eq(elderId), eq(startDate), eq(endLocalDate)))
-                .thenReturn(Collections.emptyList());
-        when(careCallRecordRepository.findByElderIdAndDateBetweenWithPsychologicalData(eq(elderId), eq(startDate), eq(endLocalDate)))
-                .thenReturn(Collections.emptyList());
-        when(careCallRecordRepository.findByElderIdAndDateBetweenWithHealthData(eq(elderId), eq(startDate), eq(endLocalDate)))
-                .thenReturn(Collections.emptyList());
         when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), eq(startDate), eq(endLocalDate)))
                 .thenReturn(careCallRecordsRecords);
         when(bloodSugarRecordRepository.findByElderIdAndDateBetween(eq(elderId), eq(startDate), eq(endLocalDate)))
@@ -173,10 +167,7 @@ class WeeklyReportServiceTest {
         when(mealRecordRepository.findByElderIdAndDateBetween(any(), any(), any())).thenReturn(Collections.emptyList());
         when(medicationScheduleRepository.findByElderId(any())).thenReturn(Collections.emptyList());
         when(medicationTakenRecordRepository.findByElderIdAndDateBetween(any(), any(), any())).thenReturn(Collections.emptyList());
-        when(careCallRecordRepository.findByElderIdAndDateBetweenWithSleepData(any(), any(), any())).thenReturn(Collections.emptyList());
-        when(careCallRecordRepository.findByElderIdAndDateBetweenWithPsychologicalData(any(), any(), any())).thenReturn(Collections.emptyList());
         when(bloodSugarRecordRepository.findByElderIdAndDateBetween(any(), any(), any())).thenReturn(Collections.emptyList());
-        when(careCallRecordRepository.findByElderIdAndDateBetweenWithHealthData(any(), any(), any())).thenReturn(Collections.emptyList());
         when(careCallRecordRepository.findByElderIdAndDateBetween(any(), any(), any())).thenReturn(Collections.emptyList());
         when(subscriptionRepository.findByElderId(elderId)).thenReturn(java.util.Optional.of(testSubscription));
 

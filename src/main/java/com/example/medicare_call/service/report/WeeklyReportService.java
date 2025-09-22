@@ -15,6 +15,7 @@ import jdk.dynalink.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -38,6 +39,7 @@ public class WeeklyReportService {
     private final AiSummaryService aiSummaryService;
     private final SubscriptionRepository subscriptionRepository;
 
+    @Transactional(readOnly = true)
     public WeeklyReportResponse getWeeklyReport(Integer elderId, LocalDate startDate) {
         LocalDate subscriptionStartDate = subscriptionRepository.findByElderId(elderId)
                 .map(Subscription::getStartDate)
@@ -50,14 +52,16 @@ public class WeeklyReportService {
                 .orElseThrow(() -> new CustomException(ErrorCode.ELDER_NOT_FOUND));
 
         // 데이터 조회
-        List<MealRecord> mealRecords = mealRecordRepository.findByElderIdAndDateBetween(elderId, startDate, endDate);
         List<MedicationSchedule> schedules = medicationScheduleRepository.findByElderId(elderId);
+
+        List<MealRecord> mealRecords = mealRecordRepository.findByElderIdAndDateBetween(elderId, startDate, endDate);
         List<MedicationTakenRecord> takenRecords = medicationTakenRecordRepository.findByElderIdAndDateBetween(elderId, startDate, endDate);
-        List<CareCallRecord> sleepRecords = careCallRecordRepository.findByElderIdAndDateBetweenWithSleepData(elderId, startDate, endDate);
-        List<CareCallRecord> mentalRecords = careCallRecordRepository.findByElderIdAndDateBetweenWithPsychologicalData(elderId, startDate, endDate);
         List<BloodSugarRecord> bloodSugarRecords = bloodSugarRecordRepository.findByElderIdAndDateBetween(elderId, startDate, endDate);
-        List<CareCallRecord> healthRecords = careCallRecordRepository.findByElderIdAndDateBetweenWithHealthData(elderId, startDate, endDate);
+
         List<CareCallRecord> callRecords = careCallRecordRepository.findByElderIdAndDateBetween(elderId, startDate, endDate);
+        List<CareCallRecord> sleepRecords  = callRecords.stream().filter(r -> r.getSleepStart() != null).toList();
+        List<CareCallRecord> mentalRecords = callRecords.stream().filter(r -> r.getPsychologicalDetails() != null).toList();
+        List<CareCallRecord> healthRecords = callRecords.stream().filter(r -> r.getHealthDetails() != null).toList();
 
 
 
