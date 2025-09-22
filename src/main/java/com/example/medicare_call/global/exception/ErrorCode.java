@@ -47,6 +47,9 @@ public enum ErrorCode {
     // NaverPay
     NAVER_PAY_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "N001", "결제 처리 중 오류가 발생했습니다. 다시 시도해 주세요."),
 
+    // OpenAI
+    OPENAI_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "AI001", "OpenAI API 호출 중 오류가 발생했습니다. 다시 시도해 주세요."),
+
     // Data
     NO_DATA_FOR_TODAY(HttpStatus.NOT_FOUND, "D001", "오늘의 데이터가 없습니다."),
     NO_DATA_FOR_WEEK(HttpStatus.NOT_FOUND, "D002", "이번주의 데이터가 없습니다."),

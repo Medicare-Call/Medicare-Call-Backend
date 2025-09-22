@@ -6,7 +6,7 @@ import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.CareCallRecordRepository;
 import com.example.medicare_call.repository.ElderRepository;
-import com.example.medicare_call.service.data_processor.ai.AiSummaryService;
+import com.example.medicare_call.service.ai.AiSummaryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

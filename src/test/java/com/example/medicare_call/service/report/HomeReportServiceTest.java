@@ -1,9 +1,7 @@
 package com.example.medicare_call.service.report;
 
 import com.example.medicare_call.domain.*;
-import com.example.medicare_call.dto.report.DailyMealResponse;
 import com.example.medicare_call.dto.report.HomeReportResponse;
-import com.example.medicare_call.global.enums.Gender;
 import com.example.medicare_call.global.enums.MealType;
 import com.example.medicare_call.repository.BloodSugarRecordRepository;
 import com.example.medicare_call.repository.CareCallRecordRepository;
@@ -12,7 +10,7 @@ import com.example.medicare_call.repository.MealRecordRepository;
 import com.example.medicare_call.repository.MedicationScheduleRepository;
 import com.example.medicare_call.repository.MedicationTakenRecordRepository;
 import com.example.medicare_call.dto.report.HomeSummaryDto;
-import com.example.medicare_call.service.data_processor.ai.AiSummaryService;
+import com.example.medicare_call.service.ai.AiSummaryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

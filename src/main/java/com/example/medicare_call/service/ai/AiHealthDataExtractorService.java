@@ -1,4 +1,4 @@
-package com.example.medicare_call.service.data_processor.ai;
+package com.example.medicare_call.service.ai;
 
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionRequest;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;

@@ -1,10 +1,11 @@
-package com.example.medicare_call.service.data_processor.ai;
+package com.example.medicare_call.service.ai;
 
 import com.example.medicare_call.dto.report.HomeSummaryDto;
 import com.example.medicare_call.dto.data_processor.ai.OpenAiResponse;
 import com.example.medicare_call.dto.report.WeeklyReportResponse;
 import com.example.medicare_call.dto.report.WeeklySummaryDto;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
+import com.example.medicare_call.service.ai.AiSummaryService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

@@ -1,4 +1,7 @@
 spring:
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
   profiles:
     active: local # 기본 active profile 설정
 

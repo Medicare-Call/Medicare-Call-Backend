@@ -10,8 +10,7 @@ import com.example.medicare_call.global.enums.MedicationTakenStatus;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.*;
-import com.example.medicare_call.service.data_processor.ai.AiSummaryService;
-import jdk.dynalink.Operation;
+import com.example.medicare_call.service.ai.AiSummaryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,7 +20,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
