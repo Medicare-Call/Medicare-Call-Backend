@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -120,7 +121,7 @@ class WeeklyReportServiceTest {
                 .thenReturn(Collections.emptyList());
         when(medicationTakenRecordRepository.findByElderIdAndDateBetween(eq(elderId), eq(startDate), eq(endLocalDate)))
                 .thenReturn(Collections.emptyList());
-        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), eq(startDate), eq(endLocalDate)))
+        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), eq(startDate.atStartOfDay()), eq(endLocalDate.atTime(LocalTime.MAX))))
                 .thenReturn(careCallRecordsRecords);
         when(bloodSugarRecordRepository.findByElderIdAndDateBetween(eq(elderId), eq(startDate), eq(endLocalDate)))
                 .thenReturn(Collections.emptyList());

@@ -96,7 +96,7 @@ class HomeReportServiceTest {
                 .thenReturn(Collections.emptyList());
         when(careCallRecordRepository.findByElderIdAndDateWithSleepData(eq(elderId), any(LocalDate.class)))
                 .thenReturn(Collections.emptyList());
-        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), any(LocalDate.class), any(LocalDate.class)))
+        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), any(LocalDateTime.class), any(LocalDateTime.class)))
                 .thenReturn(Collections.emptyList());
         when(bloodSugarRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
                 .thenReturn(Collections.emptyList());
@@ -131,7 +131,7 @@ class HomeReportServiceTest {
         when(medicationScheduleRepository.findByElder(testElder)).thenReturn(Collections.emptyList());
         when(medicationTakenRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
         when(careCallRecordRepository.findByElderIdAndDateWithSleepData(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
-        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), any(LocalDate.class), any(LocalDate.class))).thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(Collections.emptyList());
         when(bloodSugarRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
 
         // when & then
@@ -176,7 +176,7 @@ class HomeReportServiceTest {
                 .thenReturn(Collections.emptyList());
         when(careCallRecordRepository.findByElderIdAndDateWithSleepData(eq(elderId), any(LocalDate.class)))
                 .thenReturn(Collections.emptyList());
-        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), any(LocalDate.class), any(LocalDate.class)))
+        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), any(LocalDateTime.class), any(LocalDateTime.class)))
                 .thenReturn(Collections.emptyList());
 
         // when
@@ -211,7 +211,7 @@ class HomeReportServiceTest {
                 .thenReturn(Collections.emptyList());
         when(careCallRecordRepository.findByElderIdAndDateWithSleepData(eq(elderId), any(LocalDate.class)))
                 .thenReturn(Collections.emptyList());
-        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), any(LocalDate.class), any(LocalDate.class)))
+        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), any(LocalDateTime.class), any(LocalDateTime.class)))
                 .thenReturn(Collections.emptyList());
 
         // when & then
@@ -247,7 +247,7 @@ class HomeReportServiceTest {
                 .thenReturn(Collections.emptyList());
         when(careCallRecordRepository.findByElderIdAndDateWithSleepData(eq(elderId), any(LocalDate.class)))
                 .thenReturn(Collections.emptyList());
-        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), any(LocalDate.class), any(LocalDate.class)))
+        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), any(LocalDateTime.class), any(LocalDateTime.class)))
                 .thenReturn(Collections.singletonList(healthRecord));
         when(bloodSugarRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
                 .thenReturn(Collections.emptyList());
@@ -277,7 +277,7 @@ class HomeReportServiceTest {
                 .thenReturn(Collections.emptyList());
         when(careCallRecordRepository.findByElderIdAndDateWithSleepData(eq(elderId), any(LocalDate.class)))
                 .thenReturn(Collections.emptyList());
-        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), any(LocalDate.class), any(LocalDate.class)))
+        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), any(LocalDateTime.class), any(LocalDateTime.class)))
                 .thenReturn(Collections.singletonList(healthRecord));
         when(bloodSugarRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
                 .thenReturn(Collections.emptyList());
@@ -307,7 +307,7 @@ class HomeReportServiceTest {
                 .thenReturn(Collections.emptyList());
         when(careCallRecordRepository.findByElderIdAndDateWithSleepData(eq(elderId), any(LocalDate.class)))
                 .thenReturn(Collections.emptyList());
-        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), any(LocalDate.class), any(LocalDate.class)))
+        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), any(LocalDateTime.class), any(LocalDateTime.class)))
                 .thenReturn(Collections.singletonList(mentalRecord));
         when(bloodSugarRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
                 .thenReturn(Collections.emptyList());
@@ -337,7 +337,7 @@ class HomeReportServiceTest {
                 .thenReturn(Collections.emptyList());
         when(careCallRecordRepository.findByElderIdAndDateWithSleepData(eq(elderId), any(LocalDate.class)))
                 .thenReturn(Collections.emptyList());
-        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), any(LocalDate.class), any(LocalDate.class)))
+        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), any(LocalDateTime.class), any(LocalDateTime.class)))
                 .thenReturn(Collections.singletonList(mentalRecord));
         when(bloodSugarRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
                 .thenReturn(Collections.emptyList());
@@ -368,7 +368,7 @@ class HomeReportServiceTest {
                 .thenReturn(Collections.emptyList());
         when(careCallRecordRepository.findByElderIdAndDateWithSleepData(eq(elderId), any(LocalDate.class)))
                 .thenReturn(Collections.emptyList());
-        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), any(LocalDate.class), any(LocalDate.class)))
+        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), any(LocalDateTime.class), any(LocalDateTime.class)))
                 .thenReturn(Arrays.asList(healthRecord, mentalRecord));
         when(bloodSugarRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class)))
                 .thenReturn(Collections.emptyList());
@@ -417,7 +417,7 @@ class HomeReportServiceTest {
         when(medicationScheduleRepository.findByElder(testElder)).thenReturn(Collections.emptyList());
         when(medicationTakenRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
         when(careCallRecordRepository.findByElderIdAndDateWithSleepData(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
-        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), any(LocalDate.class), any(LocalDate.class)))
+        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), any(LocalDateTime.class), any(LocalDateTime.class)))
                 .thenReturn(Arrays.asList(oldNull, middleGood, latestNull)); // 오름차순 가정
         when(bloodSugarRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
         when(aiSummaryService.getHomeSummary(any(HomeSummaryDto.class))).thenReturn("AI 요약");
@@ -441,7 +441,7 @@ class HomeReportServiceTest {
         when(medicationScheduleRepository.findByElder(testElder)).thenReturn(Collections.emptyList());
         when(medicationTakenRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
         when(careCallRecordRepository.findByElderIdAndDateWithSleepData(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
-        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), any(LocalDate.class), any(LocalDate.class)))
+        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), any(LocalDateTime.class), any(LocalDateTime.class)))
                 .thenReturn(Arrays.asList(olderBad, latestGood)); // 최신 값이 1
         when(bloodSugarRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
         when(aiSummaryService.getHomeSummary(any(HomeSummaryDto.class))).thenReturn("AI 요약");
@@ -465,7 +465,7 @@ class HomeReportServiceTest {
         when(medicationScheduleRepository.findByElder(testElder)).thenReturn(Collections.emptyList());
         when(medicationTakenRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
         when(careCallRecordRepository.findByElderIdAndDateWithSleepData(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
-        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), any(LocalDate.class), any(LocalDate.class)))
+        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), any(LocalDateTime.class), any(LocalDateTime.class)))
                 .thenReturn(Arrays.asList(r1, r2));
         when(bloodSugarRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
         when(aiSummaryService.getHomeSummary(any(HomeSummaryDto.class))).thenReturn("AI 요약");
@@ -490,7 +490,7 @@ class HomeReportServiceTest {
         when(medicationScheduleRepository.findByElder(testElder)).thenReturn(Collections.emptyList());
         when(medicationTakenRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
         when(careCallRecordRepository.findByElderIdAndDateWithSleepData(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
-        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), any(LocalDate.class), any(LocalDate.class)))
+        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), any(LocalDateTime.class), any(LocalDateTime.class)))
                 .thenReturn(Arrays.asList(oldNull, middleBad, latestNull));
         when(bloodSugarRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
         when(aiSummaryService.getHomeSummary(any(HomeSummaryDto.class))).thenReturn("AI 요약");
@@ -514,7 +514,7 @@ class HomeReportServiceTest {
         when(medicationScheduleRepository.findByElder(testElder)).thenReturn(Collections.emptyList());
         when(medicationTakenRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
         when(careCallRecordRepository.findByElderIdAndDateWithSleepData(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
-        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), any(LocalDate.class), any(LocalDate.class)))
+        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), any(LocalDateTime.class), any(LocalDateTime.class)))
                 .thenReturn(Arrays.asList(olderGood, latestBad)); // 최신 값이 0
         when(bloodSugarRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
         when(aiSummaryService.getHomeSummary(any(HomeSummaryDto.class))).thenReturn("AI 요약");
@@ -538,7 +538,7 @@ class HomeReportServiceTest {
         when(medicationScheduleRepository.findByElder(testElder)).thenReturn(Collections.emptyList());
         when(medicationTakenRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
         when(careCallRecordRepository.findByElderIdAndDateWithSleepData(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
-        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), any(LocalDate.class), any(LocalDate.class)))
+        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), any(LocalDateTime.class), any(LocalDateTime.class)))
                 .thenReturn(Arrays.asList(r1, r2));
         when(bloodSugarRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class))).thenReturn(Collections.emptyList());
         when(aiSummaryService.getHomeSummary(any(HomeSummaryDto.class))).thenReturn("AI 요약");

@@ -33,6 +33,7 @@ public enum ErrorCode {
 
     // Elder
     ELDER_NOT_FOUND(HttpStatus.NOT_FOUND, "E001", "등록되지 않은 어르신입니다."),
+    ELDER_DELETED(HttpStatus.UNAUTHORIZED, "E002", "활성화되지 않은 어르신입니다."),
 
     // CareCall
     CARE_CALL_SETTING_NOT_FOUND(HttpStatus.NOT_FOUND, "CC001", "케어콜 설정 정보를 찾을 수 없습니다."),

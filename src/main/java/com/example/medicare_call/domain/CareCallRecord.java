@@ -73,19 +73,6 @@ public class CareCallRecord {
     @Column(name = "health_details", columnDefinition = "TEXT")
     private String healthDetails; // 건강 징후 상세 내용
 
-    @BatchSize(size=100)
-    @OneToMany(mappedBy = "careCallRecord", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<BloodSugarRecord> bloodSugarRecords = new ArrayList<>();
-
-    @BatchSize(size=100)
-    @OneToMany(mappedBy = "careCallRecord", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<MealRecord> mealRecords = new ArrayList<>();
-
-    @BatchSize(size=100)
-    @OneToMany(mappedBy = "careCallRecord", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<MedicationTakenRecord> medicationTakenRecords = new ArrayList<>();
-
-
     @Builder
     public CareCallRecord(Integer id, Elder elder, CareCallSetting setting, LocalDateTime calledAt, Byte responded, LocalDateTime sleepStart, LocalDateTime sleepEnd, Byte healthStatus, Byte psychStatus,
                           LocalDateTime startTime, LocalDateTime endTime, String callStatus, String transcriptionText, String psychologicalDetails, String healthDetails) {
