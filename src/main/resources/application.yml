@@ -88,6 +88,12 @@ management:
       enabled: true
   server:
     prometheus-allowed-ips: 0.0.0.0/0 # 로컬이니 열어두긴 했는데 compose 네트워크 대역만 허용해도 상관없습니다
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.db.io.time: true
+      percentiles:
+        http.db.io.time: 0.5,0.95,0.99
 
 ---
 spring:
@@ -169,3 +175,9 @@ management:
       enabled: true
   server:
     prometheus-allowed-ips: ${MONITORING_SERVER_HOST}
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.db.io.time: true
+      percentiles:
+        http.db.io.time: 0.5,0.95,0.99
