@@ -1,5 +1,6 @@
 package com.example.medicare_call.global.config;
 
+import com.example.medicare_call.global.metrics.CustomQueryExecutionListener;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.context.annotation.Bean;
