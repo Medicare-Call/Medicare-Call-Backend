@@ -57,8 +57,8 @@ class GlobalExceptionHandlerTest {
 //        // given & when & then
 //        mockMvc.perform(get("/non-existent-endpoint"))
 //                .andExpect(status().isNotFound())
-//                .andExpect(jsonPath("$.code").value("C003"))
-//                .andExpect(jsonPath("$.status").value(404))
+//                .andExpect(jsonPath("$.success").value(false))
+//                .andExpect(jsonPath("$.code").value("NOT_FOUND"))
 //                .andExpect(jsonPath("$.message").value("요청하신 페이지나 기능을 찾을 수 없습니다."));
 //    }
 
@@ -68,8 +68,8 @@ class GlobalExceptionHandlerTest {
         // given & when & then
         mockMvc.perform(get("/test/missing-param"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("C008"))
-                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.code").value("MISSING_REQUEST_PARAMETER"))
                 .andExpect(jsonPath("$.message").value("필수 파라미터 'requiredParam'가 누락되었습니다."));
     }
 
@@ -81,8 +81,8 @@ class GlobalExceptionHandlerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{invalid json}"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("C009"))
-                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.code").value("INVALID_JSON_FORMAT"))
                 .andExpect(jsonPath("$.message").value("JSON 형식이 올바르지 않습니다. 요청 데이터를 확인해 주세요."));
     }
 
@@ -92,8 +92,8 @@ class GlobalExceptionHandlerTest {
         // given & when & then
         mockMvc.perform(delete("/test/get-only"))
                 .andExpect(status().isMethodNotAllowed())
-                .andExpect(jsonPath("$.code").value("C007"))
-                .andExpect(jsonPath("$.status").value(405))
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.code").value("METHOD_NOT_ALLOWED"))
                 .andExpect(jsonPath("$.message").value("지원하지 않는 요청 방식입니다. 올바른 방식으로 다시 시도해 주세요."));
     }
 
@@ -105,8 +105,8 @@ class GlobalExceptionHandlerTest {
                         .contentType(MediaType.TEXT_PLAIN)
                         .content("plain text"))
                 .andExpect(status().isUnsupportedMediaType())
-                .andExpect(jsonPath("$.code").value("C010"))
-                .andExpect(jsonPath("$.status").value(415))
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.code").value("UNSUPPORTED_MEDIA_TYPE"))
                 .andExpect(jsonPath("$.message").value("지원하지 않는 미디어 타입입니다."));
     }
 
@@ -116,8 +116,8 @@ class GlobalExceptionHandlerTest {
         // given & when & then
         mockMvc.perform(get("/test/type-mismatch?id=invalid"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("C005"))
-                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.code").value("INVALID_TYPE_VALUE"))
                 .andExpect(jsonPath("$.message").value("Invalid value 'invalid' for parameter 'id'."));
     }
 
@@ -127,8 +127,8 @@ class GlobalExceptionHandlerTest {
         // given & when & then
         mockMvc.perform(get("/test/custom-exception"))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value("M001"))
-                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.code").value("MEMBER_NOT_FOUND"))
                 .andExpect(jsonPath("$.message").value("존재하지 않는 회원입니다."));
     }
 
@@ -138,8 +138,8 @@ class GlobalExceptionHandlerTest {
         // given & when & then
         mockMvc.perform(get("/test/general-exception"))
                 .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.code").value("C004"))
-                .andExpect(jsonPath("$.status").value(500))
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.code").value("INTERNAL_SERVER_ERROR"))
                 .andExpect(jsonPath("$.message").value("일시적인 서버 오류가 발생했습니다. 잠시 후 다시 시도해 주세요."));
     }
 

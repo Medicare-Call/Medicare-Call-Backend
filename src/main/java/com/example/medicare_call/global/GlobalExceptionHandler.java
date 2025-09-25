@@ -51,8 +51,7 @@ public class GlobalExceptionHandler {
         String message = String.format("Invalid value '%s' for parameter '%s'.", value, fieldName);
 
         ErrorResponse response = ErrorResponse.builder()
-                .status(ErrorCode.INVALID_TYPE_VALUE.getStatus().value())
-                .code(ErrorCode.INVALID_TYPE_VALUE.getCode())
+                .code(ErrorCode.INVALID_TYPE_VALUE.name())
                 .message(message)
                 .build();
 
@@ -82,8 +81,7 @@ public class GlobalExceptionHandler {
         
         String message = String.format("필수 파라미터 '%s'가 누락되었습니다.", e.getParameterName());
         ErrorResponse response = ErrorResponse.builder()
-                .status(ErrorCode.MISSING_REQUEST_PARAMETER.getStatus().value())
-                .code(ErrorCode.MISSING_REQUEST_PARAMETER.getCode())
+                .code(ErrorCode.MISSING_REQUEST_PARAMETER.name())
                 .message(message)
                 .build();
         
