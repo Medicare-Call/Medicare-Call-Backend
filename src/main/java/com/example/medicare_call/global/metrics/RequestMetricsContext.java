@@ -11,9 +11,9 @@ public class RequestMetricsContext {
         this.httpMethod = httpMethod;
     }
 
-    public void addDbTime(long nanos) {
+    public void addQueryMetrics(long nanos, int queries) {
         dbElapsedTimeNanos += nanos;
-        queryCount++;
+        queryCount += queries;
     }
 
     public long getDbElapsedTimeNanos() { return dbElapsedTimeNanos; }
