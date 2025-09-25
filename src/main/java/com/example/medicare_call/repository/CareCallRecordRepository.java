@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Repository;
 
@@ -39,38 +40,13 @@ public interface CareCallRecordRepository extends JpaRepository<CareCallRecord, 
            "ORDER BY ccr.calledAt")
     List<CareCallRecord> findByElderIdAndDateWithHealthData(@Param("elderId") Integer elderId, @Param("date") LocalDate date);
 
-    @Query("SELECT ccr FROM CareCallRecord ccr " +
-            "JOIN ccr.elder e " +
-           "WHERE ccr.elder.id = :elderId " +
-            "AND e.status = 'ACTIVATED' " +
-           "AND DATE(ccr.calledAt) BETWEEN :startDate AND :endDate " +
-           "AND ccr.sleepStart IS NOT NULL " +
-           "ORDER BY ccr.calledAt")
-    List<CareCallRecord> findByElderIdAndDateBetweenWithSleepData(@Param("elderId") Integer elderId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
     @Query("SELECT ccr FROM CareCallRecord ccr " +
-            "JOIN ccr.elder e " +
            "WHERE ccr.elder.id = :elderId " +
-            "AND e.status = 'ACTIVATED' " +
-           "AND DATE(ccr.calledAt) BETWEEN :startDate AND :endDate " +
-           "AND ccr.psychologicalDetails IS NOT NULL " +
+           "AND ccr.calledAt BETWEEN :startDate AND :endDate " +
            "ORDER BY ccr.calledAt")
-    List<CareCallRecord> findByElderIdAndDateBetweenWithPsychologicalData(@Param("elderId") Integer elderId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+    List<CareCallRecord> findByElderIdAndDateBetween(@Param("elderId") Integer elderId, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 
-    @Query("SELECT ccr FROM CareCallRecord ccr " +
-            "JOIN ccr.elder e " +
-           "WHERE ccr.elder.id = :elderId " +
-            "AND e.status = 'ACTIVATED' " +
-           "AND DATE(ccr.calledAt) BETWEEN :startDate AND :endDate " +
-           "AND ccr.healthDetails IS NOT NULL " +
-           "ORDER BY ccr.calledAt")
-    List<CareCallRecord> findByElderIdAndDateBetweenWithHealthData(@Param("elderId") Integer elderId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
-    @Query("SELECT ccr FROM CareCallRecord ccr " +
-            "JOIN ccr.elder e " +
-           "WHERE ccr.elder.id = :elderId " +
-            "AND e.status = 'ACTIVATED' " +
-           "AND DATE(ccr.calledAt) BETWEEN :startDate AND :endDate " +
-           "ORDER BY ccr.calledAt")
-    List<CareCallRecord> findByElderIdAndDateBetween(@Param("elderId") Integer elderId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
-} 
+
+}

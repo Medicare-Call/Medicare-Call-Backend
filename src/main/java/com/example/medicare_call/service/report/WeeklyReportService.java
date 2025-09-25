@@ -3,10 +3,7 @@ package com.example.medicare_call.service.report;
 import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.report.WeeklyReportResponse;
 import com.example.medicare_call.dto.report.WeeklySummaryDto;
-import com.example.medicare_call.global.enums.BloodSugarMeasurementType;
-import com.example.medicare_call.global.enums.BloodSugarStatus;
-import com.example.medicare_call.global.enums.MealType;
-import com.example.medicare_call.global.enums.MedicationTakenStatus;
+import com.example.medicare_call.global.enums.*;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.*;
@@ -14,8 +11,10 @@ import com.example.medicare_call.service.ai.AiSummaryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +35,7 @@ public class WeeklyReportService {
     private final AiSummaryService aiSummaryService;
     private final SubscriptionRepository subscriptionRepository;
 
+    @Transactional(readOnly = true)
     public WeeklyReportResponse getWeeklyReport(Integer elderId, LocalDate startDate) {
         LocalDate subscriptionStartDate = subscriptionRepository.findByElderId(elderId)
                 .map(Subscription::getStartDate)
@@ -46,17 +46,20 @@ public class WeeklyReportService {
         // 어르신 정보 조회
         Elder elder = elderRepository.findById(elderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ELDER_NOT_FOUND));
+       if(elder.getStatus() != ElderStatus.ACTIVATED)
+           throw new CustomException(ErrorCode.ELDER_DELETED);
 
         // 데이터 조회
-        List<MealRecord> mealRecords = mealRecordRepository.findByElderIdAndDateBetween(elderId, startDate, endDate);
         List<MedicationSchedule> schedules = medicationScheduleRepository.findByElderId(elderId);
-        List<MedicationTakenRecord> takenRecords = medicationTakenRecordRepository.findByElderIdAndDateBetween(elderId, startDate, endDate);
-        List<CareCallRecord> sleepRecords = careCallRecordRepository.findByElderIdAndDateBetweenWithSleepData(elderId, startDate, endDate);
-        List<CareCallRecord> mentalRecords = careCallRecordRepository.findByElderIdAndDateBetweenWithPsychologicalData(elderId, startDate, endDate);
-        List<BloodSugarRecord> bloodSugarRecords = bloodSugarRecordRepository.findByElderIdAndDateBetween(elderId, startDate, endDate);
-        List<CareCallRecord> healthRecords = careCallRecordRepository.findByElderIdAndDateBetweenWithHealthData(elderId, startDate, endDate);
-        List<CareCallRecord> callRecords = careCallRecordRepository.findByElderIdAndDateBetween(elderId, startDate, endDate);
 
+        List<MealRecord> mealRecords = mealRecordRepository.findByElderIdAndDateBetween(elderId, startDate, endDate);
+        List<MedicationTakenRecord> takenRecords = medicationTakenRecordRepository.findByElderIdAndDateBetween(elderId, startDate, endDate);
+        List<BloodSugarRecord> bloodSugarRecords = bloodSugarRecordRepository.findByElderIdAndDateBetween(elderId, startDate, endDate);
+
+        List<CareCallRecord> callRecords = careCallRecordRepository.findByElderIdAndDateBetween(elderId, startDate.atStartOfDay(), endDate.atTime(LocalTime.MAX));
+        List<CareCallRecord> sleepRecords  = callRecords.stream().filter(r -> r.getSleepStart() != null).toList();
+        List<CareCallRecord> mentalRecords = callRecords.stream().filter(r -> r.getPsychologicalDetails() != null).toList();
+        List<CareCallRecord> healthRecords = callRecords.stream().filter(r -> r.getHealthDetails() != null).toList();
 
         boolean hasCompletedCall = callRecords.stream()
                 .anyMatch(record -> "completed".equals(record.getCallStatus()));
