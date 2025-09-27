@@ -1,18 +1,16 @@
 package com.example.medicare_call.service;
 
-import com.example.medicare_call.dto.ElderRegisterRequest;
 import com.example.medicare_call.domain.Elder;
-import com.example.medicare_call.dto.ElderResponse;
-import com.example.medicare_call.dto.ElderUpdateRequest;
+import com.example.medicare_call.domain.Member;
+import com.example.medicare_call.dto.*;
+import com.example.medicare_call.global.enums.Gender;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
-import com.example.medicare_call.global.enums.Gender;
 import com.example.medicare_call.repository.ElderRepository;
 import com.example.medicare_call.repository.MemberRepository;
-import com.example.medicare_call.domain.Member;
+import com.example.medicare_call.service.report.ElderHealthInfoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +21,7 @@ import java.util.List;
 public class ElderService {
     private final ElderRepository elderRepository;
     private final MemberRepository memberRepository;
+    private final ElderHealthInfoService elderHealthInfoService;
 
     @Transactional
     public Elder registerElder(Integer memberId, @Valid ElderRegisterRequest request) {
@@ -38,6 +37,46 @@ public class ElderService {
             .guardian(guardian)
             .build();
         return elderRepository.save(elder);
+    }
+
+    // All-or-Nothing: 하나라도 처리 실패하면 예외 발생, 전체 롤백
+    @Transactional(rollbackFor = Exception.class)
+    public ElderBulkResponse bulkRegisterElders(Integer memberId, List<ElderBulkRequest> requests) {
+        Member guardian = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        List<Elder> elders = requests.stream()
+                .map(request -> Elder.builder()
+                        .name(request.getElder().getName())
+                        .birthDate(request.getElder().getBirthDate())
+                        .gender((byte) (request.getElder().getGender() == Gender.MALE ? 0 : 1))
+                        .phone(request.getElder().getPhone())
+                        .relationship(request.getElder().getRelationship())
+                        .residenceType(request.getElder().getResidenceType())
+                        .guardian(guardian)
+                        .build())
+                .toList();
+
+        List<Elder> savedElders = elderRepository.saveAll(elders);
+
+        for (int i = 0; i < requests.size(); i++) {
+            elderHealthInfoService.upsertElderHealthInfo(
+                    savedElders.get(i).getId(),
+                    requests.get(i).getHealthInfo()
+            );
+        }
+
+        List<ElderBulkResponse.ElderResult> successResults = savedElders.stream()
+                .map(elder -> ElderBulkResponse.ElderResult.builder()
+                        .elderId(elder.getId())
+                        .elderName(elder.getName())
+                        .build())
+                .toList();
+
+        return ElderBulkResponse.builder()
+                .totalCount(successResults.size())
+                .successResults(successResults)
+                .build();
     }
 
     public List<ElderResponse> getElder(Integer memberId){
