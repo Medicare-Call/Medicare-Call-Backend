@@ -60,10 +60,13 @@ public class ElderService {
         List<Elder> savedElders = elderRepository.saveAll(elders);
 
         for (int i = 0; i < requests.size(); i++) {
-            elderHealthInfoService.upsertElderHealthInfo(
-                    savedElders.get(i).getId(),
-                    requests.get(i).getHealthInfo()
-            );
+            ElderHealthInfoCreateRequest healthInfo = requests.get(i).getHealthInfo();
+            if (healthInfo != null) {
+                elderHealthInfoService.upsertElderHealthInfo(
+                        savedElders.get(i).getId(),
+                        healthInfo
+                );
+            }
         }
 
         List<ElderBulkResponse.ElderResult> successResults = savedElders.stream()
