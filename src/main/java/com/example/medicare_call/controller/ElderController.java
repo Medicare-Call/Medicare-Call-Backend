@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -92,7 +93,7 @@ public class ElderController {
     @PostMapping("/bulk")
     public ResponseEntity<ElderBulkResponse> bulkRegisterElders(
             @Parameter(hidden = true) @AuthUser Long memberId,
-            @Valid @RequestBody List<ElderBulkRequest> requests
+            @Valid @NotEmpty @RequestBody List<@Valid ElderBulkRequest> requests
     ){
         log.info("어르신 정보 일괄 등록 요청: memberId={}, 요청 건수={}", memberId, requests.size());
         ElderBulkResponse response = elderService.bulkRegisterElders(memberId.intValue(), requests);
