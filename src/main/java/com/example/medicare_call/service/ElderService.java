@@ -1,6 +1,7 @@
 package com.example.medicare_call.service;
 
 import com.example.medicare_call.dto.ElderRegisterRequest;
+import com.example.medicare_call.dto.ElderRegisterResponse;
 import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.dto.ElderResponse;
 import com.example.medicare_call.dto.ElderUpdateRequest;
@@ -91,5 +92,39 @@ public class ElderService {
         if(!elder.getGuardian().getId().equals(memberId)) throw new CustomException(ErrorCode.HANDLE_ACCESS_DENIED);
 
         elderRepository.delete(elder);
+    }
+
+    @Transactional
+    public List<ElderRegisterResponse> bulkRegisterElders(Integer memberId, List<ElderRegisterRequest> requests) {
+        Member guardian = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        List<Elder> elders = requests.stream()
+                .map(request -> Elder.builder()
+                        .name(request.getName())
+                        .birthDate(request.getBirthDate())
+                        .gender((byte) (request.getGender() == Gender.MALE ? 0 : 1))
+                        .phone(request.getPhone())
+                        .relationship(request.getRelationship())
+                        .residenceType(request.getResidenceType())
+                        .guardian(guardian)
+                        .build())
+                .toList();
+
+        List<Elder> savedElders = elderRepository.saveAll(elders);
+
+        return savedElders.stream()
+                .map(elder -> ElderRegisterResponse.builder()
+                        .id(elder.getId())
+                        .name(elder.getName())
+                        .birthDate(elder.getBirthDate())
+                        .phone(elder.getPhone())
+                        .gender(elder.getGender() == 0 ? "MALE" : "FEMALE")
+                        .relationship(elder.getRelationship() != null ? elder.getRelationship().name() : null)
+                        .residenceType(elder.getResidenceType() != null ? elder.getResidenceType().name() : null)
+                        .guardianId(elder.getGuardian() != null ? elder.getGuardian().getId() : null)
+                        .guardianName(elder.getGuardian() != null ? elder.getGuardian().getName() : null)
+                        .build())
+                .toList();
     }
 } 
