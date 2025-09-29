@@ -1,9 +1,12 @@
 package com.example.medicare_call.global.annotation;
 
 import com.example.medicare_call.dto.ElderRegisterRequest;
+import com.example.medicare_call.dto.ElderHealthInfoCreateRequest;
+import com.example.medicare_call.dto.ElderHealthInfoCreateRequestWithElderId;
 import com.example.medicare_call.global.enums.ElderRelation;
 import com.example.medicare_call.global.enums.Gender;
 import com.example.medicare_call.global.enums.ResidenceType;
+import com.example.medicare_call.global.enums.ElderHealthNoteType;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -14,6 +17,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.util.Set;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -151,9 +155,29 @@ class ValidationTest {
 
         // then
         assertThat(violations).isNotEmpty();
-        assertThat(violations).anyMatch(violation -> 
+        assertThat(violations).anyMatch(violation ->
             violation.getPropertyPath().toString().equals("phone") &&
             violation.getMessage().contains("휴대폰 번호가 유효하지 않습니다")
+        );
+    }
+
+    @Test
+    @DisplayName("elderId가 null이면 Validation에 실패한다")
+    void nullElderId_failsValidation() {
+        // given
+        ElderHealthInfoCreateRequestWithElderId request = ElderHealthInfoCreateRequestWithElderId.builder()
+                .elderId(null) // null elderId
+                .diseaseNames(List.of("당뇨병"))
+                .build();
+
+        // when
+        Set<ConstraintViolation<ElderHealthInfoCreateRequestWithElderId>> violations = validator.validate(request);
+
+        // then
+        assertThat(violations).isNotEmpty();
+        assertThat(violations).anyMatch(violation ->
+            violation.getPropertyPath().toString().equals("elderId") &&
+            violation.getMessage().contains("어르신 ID는 필수입니다")
         );
     }
 } 
