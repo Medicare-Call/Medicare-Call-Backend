@@ -56,7 +56,10 @@ public enum ErrorCode {
     NO_DATA_FOR_WEEK(HttpStatus.NOT_FOUND, "D002", "이번주의 데이터가 없습니다."),
 
     // Subscription
-    SUBSCRIPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "S001", "구독 정보를 찾을 수 없습니다.");
+    SUBSCRIPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "S001", "구독 정보를 찾을 수 없습니다."),
+
+    // Firebase
+    FIREBASE_INITIALIZATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FB001", "Firebase 초기화 중 오류가 발생했습니다. 다시 시도해 주세요.");
 
 
     private final HttpStatus status;
