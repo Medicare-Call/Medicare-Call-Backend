@@ -93,7 +93,7 @@ management:
     prometheus-allowed-ips: 0.0.0.0/0 # 로컬이니 열어두긴 했는데 compose 네트워크 대역만 허용해도 상관없습니다
 
 firebase:
-  service-account-key-path: temp
+  service-account-key-path: classpath:firebase-service-account-key.json
 
 ---
 spring:
@@ -175,3 +175,6 @@ management:
       enabled: true
   server:
     prometheus-allowed-ips: ${MONITORING_SERVER_HOST}
+
+firebase:
+  service-account-key-path: classpath:firebase-service-account-key.json

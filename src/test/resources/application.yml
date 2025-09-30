@@ -56,3 +56,6 @@ base-url: https://example.com
 management:
   server:
     prometheus-allowed-ips: 0.0.0.0/0
+
+firebase:
+  service-account-key-path: classpath:firebase-service-account-key.json
