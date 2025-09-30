@@ -162,12 +162,6 @@ export default function (data) {
   if (res.status !== 200) console.log(`12. /elders/{elderId}/health-analysis GET Status: ${res.status}, Body: ${res.body.substring(0, 200)}...`);
   sleep(1);
 
-  // 13. 홈 화면 데이터 조회
-  res = http.get(`${BASE_URL}/elders/${ELDER_ID}/home`, { headers: authHeaders });
-  check(res, { '홈 화면 데이터 조회 상태 200 확인': (r) => r.status === 200 });
-  if (res.status !== 200) console.log(`13. /elders/{elderId}/home GET Status: ${res.status}, Body: ${res.body.substring(0, 200)}...`);
-  sleep(1);
-
   // 14. 날짜별 식사 데이터 조회
   res = http.get(`${BASE_URL}/elders/${ELDER_ID}/meals?date=${today}`, { headers: authHeaders });
   check(res, { '날짜별 식사 데이터 조회 상태 200 확인': (r) => r.status === 200 });
