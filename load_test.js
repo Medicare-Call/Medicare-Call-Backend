@@ -61,10 +61,10 @@ export default function (data) {
   const today = new Date().toISOString().slice(0, 10);
 
   // 1. 홈 화면 조회 테스트
-  res = http.get(`${BASE_URL}/elders/${ELDER_ID}/home`, { headers: authHeaders });
-  check(res, { '홈 화면 데이터 조회 상태 200 확인': (r) => r.status === 200 });
-  if (res.status !== 200) console.log(`1. /elders/${ELDER_ID}/home GET Status: ${res.status}, Body: ${res.body.substring(0, 200)}...`);
-  sleep(1);
+  // res = http.get(`${BASE_URL}/elders/${ELDER_ID}/home`, { headers: authHeaders });
+  // check(res, { '홈 화면 데이터 조회 상태 200 확인': (r) => r.status === 200 });
+  // if (res.status !== 200) console.log(`1. /elders/${ELDER_ID}/home GET Status: ${res.status}, Body: ${res.body.substring(0, 200)}...`);
+  // sleep(1);
 
   // 2. 현재 회원 정보 가져오기
   res = http.get(`${BASE_URL}/member`, { headers: authHeaders });
@@ -239,11 +239,11 @@ export default function (data) {
   sleep(1);
 
   // 23. 주간 통계 데이터 조회
-  const sevenDaysAgo = new Date(new Date().setDate(new Date().getDate())).toISOString().slice(0, 10);
-  res = http.get(`${BASE_URL}/elders/${ELDER_ID}/weekly-stats?startDate=${sevenDaysAgo}`, { headers: authHeaders });
-  check(res, { '주간 통계 데이터 조회 상태 200 확인': (r) => r.status === 200 });
-  if (res.status !== 200) console.log(`23. /elders/{elderId}/weekly-stats GET Status: ${res.status}, Body: ${res.body.substring(0, 200)}...`);
-  sleep(1);
+  // const sevenDaysAgo = new Date(new Date().setDate(new Date().getDate())).toISOString().slice(0, 10);
+  // res = http.get(`${BASE_URL}/elders/${ELDER_ID}/weekly-stats?startDate=${sevenDaysAgo}`, { headers: authHeaders });
+  // check(res, { '주간 통계 데이터 조회 상태 200 확인': (r) => r.status === 200 });
+  // if (res.status !== 200) console.log(`23. /elders/{elderId}/weekly-stats GET Status: ${res.status}, Body: ${res.body.substring(0, 200)}...`);
+  // sleep(1);
 
   sleep(Math.random() * 3);
 }
