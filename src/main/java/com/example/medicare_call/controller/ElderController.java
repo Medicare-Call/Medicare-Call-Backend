@@ -7,6 +7,7 @@ import com.example.medicare_call.global.annotation.AuthUser;
 import com.example.medicare_call.service.ElderService;
 import com.example.medicare_call.dto.ElderRegisterRequest;
 import com.example.medicare_call.dto.ElderRegisterResponse;
+import com.example.medicare_call.dto.BulkElderRegisterRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -86,5 +87,19 @@ public class ElderController {
         log.info("어르신 설정 정보 삭제 요청: memberId={}, elderId={}", memberId, elderId);
         elderService.deleteElder(memberId.intValue(), elderId);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(
+            summary = "어르신 정보 일괄 등록",
+            description = "여러 어르신의 기본 정보를 일괄로 등록합니다."
+    )
+    @PostMapping("/bulk")
+    public ResponseEntity<List<ElderRegisterResponse>> bulkRegisterElders(
+            @Parameter(hidden = true) @AuthUser Long memberId,
+            @Valid @RequestBody BulkElderRegisterRequest requestList
+    ){
+        log.info("어르신 정보 일괄 등록 요청: memberId={}, 요청 건수={}", memberId, requestList.getElders().size());
+        List<ElderRegisterResponse> responses = elderService.bulkRegisterElders(memberId.intValue(), requestList.getElders());
+        return ResponseEntity.ok(responses);
     }
 } 

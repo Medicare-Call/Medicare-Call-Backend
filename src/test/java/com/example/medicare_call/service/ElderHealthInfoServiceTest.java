@@ -3,6 +3,7 @@ package com.example.medicare_call.service;
 import com.example.medicare_call.domain.*;
 import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.dto.ElderHealthInfoCreateRequest;
+import com.example.medicare_call.dto.ElderHealthInfoCreateRequestWithElderId;
 import com.example.medicare_call.global.enums.ElderHealthNoteType;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.global.exception.CustomException;
@@ -136,4 +137,103 @@ class ElderHealthInfoServiceTest {
 //        assertEquals(Map.of(), res.getMedications());
 //        assertEquals(List.of(), res.getNotes());
 //    }
+
+    @Test
+    @DisplayName("어르신 건강정보 일괄 등록 성공")
+    void bulkUpsertElderHealthInfo_success() {
+        // given
+        Integer memberId = 1;
+        Member member = Member.builder().id(memberId).build();
+        Elder elder1 = Elder.builder().id(1).guardian(member).build();
+        Elder elder2 = Elder.builder().id(2).guardian(member).build();
+
+        ElderHealthInfoCreateRequestWithElderId request1 = ElderHealthInfoCreateRequestWithElderId.builder()
+                .elderId(1)
+                .diseaseNames(List.of("고혈압"))
+                .notes(List.of(ElderHealthNoteType.FORGET_MEDICATION))
+                .build();
+
+        ElderHealthInfoCreateRequestWithElderId request2 = ElderHealthInfoCreateRequestWithElderId.builder()
+                .elderId(2)
+                .diseaseNames(List.of("당뇨병"))
+                .notes(List.of(ElderHealthNoteType.INSOMNIA))
+                .build();
+
+        List<ElderHealthInfoCreateRequestWithElderId> requests = List.of(request1, request2);
+
+        when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
+        when(elderRepository.findById(1)).thenReturn(Optional.of(elder1));
+        when(elderRepository.findById(2)).thenReturn(Optional.of(elder2));
+        when(diseaseRepository.findByName(anyString())).thenAnswer(invocation -> Optional.of(new Disease()));
+        when(diseaseRepository.save(any(Disease.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // when
+        elderHealthInfoService.bulkUpsertElderHealthInfo(memberId, requests);
+
+        // then
+        verify(elderDiseaseRepository, times(2)).save(any(ElderDisease.class));
+        verify(elderHealthInfoRepository, times(2)).save(any(ElderHealthInfo.class));
+    }
+
+    @Test
+    @DisplayName("어르신 건강정보 일괄 등록 실패 - 보호자를 찾을 수 없음")
+    void bulkUpsertElderHealthInfo_fail_memberNotFound() {
+        // given
+        Integer memberId = 999;
+        List<ElderHealthInfoCreateRequestWithElderId> requests = List.of(
+                ElderHealthInfoCreateRequestWithElderId.builder().elderId(1).build()
+        );
+
+        when(memberRepository.findById(memberId)).thenReturn(Optional.empty());
+
+        // when & then
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            elderHealthInfoService.bulkUpsertElderHealthInfo(memberId, requests);
+        });
+        assertEquals(ErrorCode.MEMBER_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("어르신 건강정보 일괄 등록 실패 - 어르신을 찾을 수 없음")
+    void bulkUpsertElderHealthInfo_fail_elderNotFound() {
+        // given
+        Integer memberId = 1;
+        Member member = Member.builder().id(memberId).build();
+        List<ElderHealthInfoCreateRequestWithElderId> requests = List.of(
+                ElderHealthInfoCreateRequestWithElderId.builder().elderId(99).build()
+        );
+
+        when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
+        when(elderRepository.findById(99)).thenReturn(Optional.empty());
+
+        // when & then
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            elderHealthInfoService.bulkUpsertElderHealthInfo(memberId, requests);
+        });
+        assertEquals(ErrorCode.ELDER_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("어르신 건강정보 일괄 등록 실패 - 권한 없음")
+    void bulkUpsertElderHealthInfo_fail_accessDenied() {
+        // given
+        Integer memberId = 1;
+        Integer otherMemberId = 2;
+        Member member = Member.builder().id(memberId).build();
+        Member otherMember = Member.builder().id(otherMemberId).build();
+        Elder elder = Elder.builder().id(1).guardian(otherMember).build(); // 다른 보호자의 어르신
+
+        List<ElderHealthInfoCreateRequestWithElderId> requests = List.of(
+                ElderHealthInfoCreateRequestWithElderId.builder().elderId(1).build()
+        );
+
+        when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
+        when(elderRepository.findById(1)).thenReturn(Optional.of(elder));
+
+        // when & then
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            elderHealthInfoService.bulkUpsertElderHealthInfo(memberId, requests);
+        });
+        assertEquals(ErrorCode.HANDLE_ACCESS_DENIED, exception.getErrorCode());
+    }
 } 
