@@ -4,10 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import net.ttddyy.dsproxy.ExecutionInfo;
 import net.ttddyy.dsproxy.QueryInfo;
 import net.ttddyy.dsproxy.listener.QueryExecutionListener;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Slf4j
+@Component
 public class CustomQueryExecutionListener implements QueryExecutionListener {
 
     private static final long SLOW_QUERY_THRESHOLD_MS = 500;
