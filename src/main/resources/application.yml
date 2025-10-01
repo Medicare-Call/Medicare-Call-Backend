@@ -20,6 +20,10 @@ spring:
       on-profile: local
 
   datasource:
+    hikari:
+      connectionTimeout: '30000'
+      maximum-pool-size: '10'
+      max-lifetime: '1800000'
     url: ${LOCAL_MYSQL_URL}
     username: ${LOCAL_MYSQL_USER}
     password: ${LOCAL_MYSQL_PASSWORD}
