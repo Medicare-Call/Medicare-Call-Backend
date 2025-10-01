@@ -40,7 +40,7 @@ public class ElderHealthInfoController {
 
     @Operation(
             summary = "어르신 건강정보 일괄 등록",
-            description = "여러 어르신의 건강정보(질환, 복약주기, 특이사항)를 일괄로 등록 및 수정합니다."
+            description = "여러 어르신의 건강정보(질환, 복약주기, 특이사항)를 일괄로 등록합니다."
     )
     @PostMapping("/health-info/bulk")
     public ResponseEntity<Void> bulkUpsertElderHealthInfo(
