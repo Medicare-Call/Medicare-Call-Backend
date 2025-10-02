@@ -10,8 +10,7 @@ jwt:
 
 app:
   datasource-proxy:
-    exclude:
-      - exampleDataSourceName   # 제외할 DataSource 이름
+    exclude: [] # 제외할 DataSource 이름
 
 ---
 spring:
