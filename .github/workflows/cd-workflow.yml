@@ -70,6 +70,7 @@ jobs:
             NAVERPAY_API_URL="${{ secrets.NAVERPAY_API_URL }}"
             NAVERPAY_SDK_MODE="${{ secrets.NAVERPAY_SDK_MODE }}"
             MONITORING_SERVER_HOST="${{ secrets.MONITORING_SERVER_HOST }}"
+            FIREBASE_CREDENTIALS="${{ secrets.FIREBASE_CREDENTIALS }}"
 
 
             echo "✋🏻 Stopping existing container"
@@ -111,6 +112,7 @@ jobs:
             -e NAVERPAY_API_URL="${NAVERPAY_API_URL}" \
             -e NAVERPAY_SDK_MODE="${NAVERPAY_SDK_MODE}" \
             -e MONITORING_SERVER_HOST="${MONITORING_SERVER_HOST}" \
+            -e FIREBASE_CREDENTIALS="${FIREBASE_CREDENTIALS}" \
             "${DOCKER_USERNAME}/${DOCKER_IMAGE}"
 
             echo "⏳ Waiting for container to start..."

@@ -44,5 +44,3 @@ out/
 
 ### Grafana ###
 grafana-data/
-
-firebase-service-account-key.json
