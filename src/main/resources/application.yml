@@ -100,8 +100,10 @@ management:
     distribution:
       percentiles-histogram:
         http.db.io.time: true
+        http.server.requests: true
       percentiles:
         http.db.io.time: 0.5,0.95,0.99
+        http.server.requests: 0.5,0.95,0.99
 
 ---
 spring:
@@ -187,5 +189,7 @@ management:
     distribution:
       percentiles-histogram:
         http.db.io.time: true
+        http.server.requests: true
       percentiles:
         http.db.io.time: 0.5,0.95,0.99
+        http.server.requests: 0.5,0.95,0.99
