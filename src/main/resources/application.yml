@@ -112,6 +112,10 @@ spring:
       on-profile: prod
 
   datasource:
+    hikari:
+      connectionTimeout: '30000'
+      maximum-pool-size: '10'
+      max-lifetime: '1800000'
     url: ${MYSQL_URL}
     username: ${MYSQL_USER}
     password: ${MYSQL_PASSWORD}
