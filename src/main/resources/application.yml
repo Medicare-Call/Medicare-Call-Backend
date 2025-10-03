@@ -103,8 +103,10 @@ management:
     distribution:
       percentiles-histogram:
         http.db.io.time: true
+        http.server.requests: true
       percentiles:
         http.db.io.time: 0.5,0.95,0.99
+        http.server.requests: 0.5,0.95,0.99
 
 ---
 spring:
@@ -113,6 +115,10 @@ spring:
       on-profile: prod
 
   datasource:
+    hikari:
+      connectionTimeout: '30000'
+      maximum-pool-size: '10'
+      max-lifetime: '1800000'
     url: ${MYSQL_URL}
     username: ${MYSQL_USER}
     password: ${MYSQL_PASSWORD}
@@ -190,5 +196,7 @@ management:
     distribution:
       percentiles-histogram:
         http.db.io.time: true
+        http.server.requests: true
       percentiles:
         http.db.io.time: 0.5,0.95,0.99
+        http.server.requests: 0.5,0.95,0.99
