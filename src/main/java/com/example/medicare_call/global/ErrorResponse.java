@@ -4,9 +4,10 @@ import com.example.medicare_call.global.exception.ErrorCode;
 import lombok.*;
 import org.springframework.validation.BindingResult;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.stream.Collectors;
+import java.util.List;
 
 
 @Getter
@@ -15,18 +16,18 @@ import java.util.stream.Collectors;
 @Builder
 public class ErrorResponse {
 
-    private String message;
-    private int status;
-    private List<FieldError> errors;
+    @Builder.Default
+    private boolean success = false;
     private String code;
-
+    private String message;
 
     public static ErrorResponse of(final ErrorCode code, final BindingResult bindingResult) {
-        return new ErrorResponse(code.getMessage(), code.getStatus().value(), FieldError.of(bindingResult), code.getCode());
+        String errorMessage = code.getMessage() + ": " + FieldError.of(bindingResult).toString();
+        return new ErrorResponse(false, code.name(), errorMessage);
     }
 
     public static ErrorResponse of(final ErrorCode code) {
-        return new ErrorResponse(code.getMessage(), code.getStatus().value(), new ArrayList<>(), code.getCode());
+        return new ErrorResponse(false, code.name(), code.getMessage());
     }
 
 
@@ -43,19 +44,16 @@ public class ErrorResponse {
             this.reason = reason;
         }
 
-        public static List<FieldError> of(final String field, final String value, final String reason) {
-            List<FieldError> fieldErrors = new ArrayList<>();
-            fieldErrors.add(new FieldError(field, value, reason));
-            return fieldErrors;
-        }
-
-        private static List<FieldError> of(final BindingResult bindingResult) {
+        public static List<Map<String, String>> of(final BindingResult bindingResult) {
             final List<org.springframework.validation.FieldError> fieldErrors = bindingResult.getFieldErrors();
             return fieldErrors.stream()
-                    .map(error -> new FieldError(
-                            error.getField(),
-                            error.getRejectedValue() == null ? "" : error.getRejectedValue().toString(),
-                            error.getDefaultMessage()))
+                    .map(error -> {
+                        Map<String, String> errorDetail = new HashMap<>();
+                        errorDetail.put("field", error.getField());
+                        errorDetail.put("value", error.getRejectedValue() == null ? "" : error.getRejectedValue().toString());
+                        errorDetail.put("reason", error.getDefaultMessage());
+                        return errorDetail;
+                    })
                     .collect(Collectors.toList());
         }
     }
