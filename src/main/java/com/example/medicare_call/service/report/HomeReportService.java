@@ -47,7 +47,7 @@ public class HomeReportService {
     }
 
     public HomeReportResponse getHomeReport(Integer elderId, LocalDateTime now) {
-        LocalDate today = LocalDate.now();
+        LocalDate today = now.toLocalDate();
 
         // 어르신 정보 조회
         Elder elder = elderRepository.findById(elderId)
@@ -60,7 +60,7 @@ public class HomeReportService {
         // 복약 정보 조회
         List<MedicationSchedule> medicationSchedules = medicationScheduleRepository.findByElder(elder);
         List<MedicationTakenRecord> todayMedications = medicationTakenRecordRepository.findByElderIdAndDate(elderId, today);
-        HomeReportResponse.MedicationStatus medicationStatus = getMedicationStatus(elder, medicationSchedules, todayMedications, now.toLocalTime());
+        HomeReportResponse.MedicationStatus medicationStatus = getMedicationStatus(elder, medicationSchedules, todayMedications, now);
 
         // 수면 정보 조회
         HomeReportResponse.Sleep sleep = getSleepInfo(elderId, today);
@@ -74,11 +74,11 @@ public class HomeReportService {
 
         // 모든 데이터가 비어있는지 확인
         if (todayMeals.isEmpty() &&
-            todayMedications.isEmpty() &&
-            sleep == null &&
-            healthStatus == null &&
-            mentalStatus == null &&
-            bloodSugar == null
+                todayMedications.isEmpty() &&
+                sleep == null &&
+                healthStatus == null &&
+                mentalStatus == null &&
+                bloodSugar == null
         ) {
             throw new CustomException(ErrorCode.NO_DATA_FOR_TODAY);
         }
@@ -156,7 +156,7 @@ public class HomeReportService {
                 .build();
     }
 
-    private HomeReportResponse.MedicationStatus getMedicationStatus(Elder elder, List<MedicationSchedule> schedules, List<MedicationTakenRecord> todayMedications, LocalTime now) {
+    private HomeReportResponse.MedicationStatus getMedicationStatus(Elder elder, List<MedicationSchedule> schedules, List<MedicationTakenRecord> todayMedications, LocalDateTime now) {
         long totalTaken = todayMedications.stream()
                 .filter(record -> record.getTakenStatus() == MedicationTakenStatus.TAKEN)
                 .count();
@@ -179,7 +179,7 @@ public class HomeReportService {
                 .map(entry -> {
                     String medicationName = entry.getKey();
                     List<MedicationSchedule> medicationScheduleList = entry.getValue();
-                    
+
                     // 해당 약의 하루 목표 복용 횟수
                     int goal = medicationScheduleList.size();
                     int taken = medicationTakenCounts.getOrDefault(medicationName, 0L).intValue();
@@ -210,13 +210,13 @@ public class HomeReportService {
                 .build();
     }
 
-    private int calculateTotalGoal(Elder elder, List<MedicationSchedule> schedules, LocalTime now) {
+    private int calculateTotalGoal(Elder elder, List<MedicationSchedule> schedules, LocalDateTime now) {
         Optional<CareCallSetting> settingOpt = careCallSettingRepository.findByElder(elder);
         if (settingOpt.isEmpty()) {
             return schedules.size(); // 설정 없으면 전체
         }
 
-        LocalDate today = LocalDate.now();
+        LocalDate today = now.toLocalDate();
         List<CareCallRecord> todayCompletedCalls = careCallRecordRepository
                 .findByElderIdAndDateBetween(elder.getId(), today.atStartOfDay(), today.atTime(LocalTime.MAX))
                 .stream()
@@ -305,7 +305,7 @@ public class HomeReportService {
 
     private HomeReportResponse.Sleep getSleepInfo(Integer elderId, LocalDate date) {
         List<CareCallRecord> sleepRecords = careCallRecordRepository.findByElderIdAndDateWithSleepData(elderId, date);
-        
+
         if (sleepRecords.isEmpty()) {
             return null;
         }
@@ -319,7 +319,7 @@ public class HomeReportService {
                 // 수면 시간 계산 (LocalDateTime 형식)
                 LocalDateTime sleepStart = record.getSleepStart();
                 LocalDateTime sleepEnd = record.getSleepEnd();
-                
+
                 try {
                     long durationMinutes = Duration.between(sleepStart, sleepEnd).toMinutes();
                     totalMinutes += durationMinutes;
@@ -346,7 +346,7 @@ public class HomeReportService {
 
     private String getHealthStatus(Integer elderId, LocalDate date) {
         List<CareCallRecord> healthRecords = careCallRecordRepository.findByElderIdAndDateBetween(elderId, date.atStartOfDay(), date.atTime(LocalTime.MAX));
-        
+
         if (healthRecords == null || healthRecords.isEmpty()) {
             return null;
         }
@@ -364,7 +364,7 @@ public class HomeReportService {
 
     private String getMentalStatus(Integer elderId, LocalDate date) {
         List<CareCallRecord> mentalRecords = careCallRecordRepository.findByElderIdAndDateBetween(elderId, date.atStartOfDay(), date.atTime(LocalTime.MAX));
-        
+
         if (mentalRecords == null || mentalRecords.isEmpty()) {
             return null;
         }
@@ -382,7 +382,7 @@ public class HomeReportService {
 
     private HomeReportResponse.BloodSugar getBloodSugarInfo(Integer elderId, LocalDate date) {
         List<BloodSugarRecord> bloodSugarRecords = bloodSugarRecordRepository.findByElderIdAndDate(elderId, date);
-        
+
         if (bloodSugarRecords.isEmpty()) {
             return null;
         }
@@ -403,4 +403,4 @@ public class HomeReportService {
                 .meanValue(average.intValue())
                 .build();
     }
-} 
+}
