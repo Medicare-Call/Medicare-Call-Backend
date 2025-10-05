@@ -1,23 +1,13 @@
 package com.example.medicare_call.service.report;
 
-import com.example.medicare_call.domain.BloodSugarRecord;
-import com.example.medicare_call.domain.CareCallRecord;
-import com.example.medicare_call.domain.Elder;
-import com.example.medicare_call.domain.MealRecord;
-import com.example.medicare_call.domain.MedicationSchedule;
-import com.example.medicare_call.domain.MedicationTakenRecord;
+import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.report.HomeReportResponse;
 import com.example.medicare_call.global.enums.MedicationTakenStatus;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.global.enums.MealType;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
-import com.example.medicare_call.repository.BloodSugarRecordRepository;
-import com.example.medicare_call.repository.CareCallRecordRepository;
-import com.example.medicare_call.repository.ElderRepository;
-import com.example.medicare_call.repository.MealRecordRepository;
-import com.example.medicare_call.repository.MedicationScheduleRepository;
-import com.example.medicare_call.repository.MedicationTakenRecordRepository;
+import com.example.medicare_call.repository.*;
 import com.example.medicare_call.dto.report.HomeSummaryDto;
 import com.example.medicare_call.service.ai.AiSummaryService;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +26,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -49,8 +40,13 @@ public class HomeReportService {
     private final BloodSugarRecordRepository bloodSugarRecordRepository;
     private final CareCallRecordRepository careCallRecordRepository;
     private final AiSummaryService aiSummaryService;
+    private final CareCallSettingRepository careCallSettingRepository;
 
     public HomeReportResponse getHomeReport(Integer elderId) {
+        return getHomeReport(elderId, LocalDateTime.now());
+    }
+
+    public HomeReportResponse getHomeReport(Integer elderId, LocalDateTime now) {
         LocalDate today = LocalDate.now();
 
         // 어르신 정보 조회
@@ -64,7 +60,7 @@ public class HomeReportService {
         // 복약 정보 조회
         List<MedicationSchedule> medicationSchedules = medicationScheduleRepository.findByElder(elder);
         List<MedicationTakenRecord> todayMedications = medicationTakenRecordRepository.findByElderIdAndDate(elderId, today);
-        HomeReportResponse.MedicationStatus medicationStatus = getMedicationStatus(medicationSchedules, todayMedications);
+        HomeReportResponse.MedicationStatus medicationStatus = getMedicationStatus(elder, medicationSchedules, todayMedications, now.toLocalTime());
 
         // 수면 정보 조회
         HomeReportResponse.Sleep sleep = getSleepInfo(elderId, today);
@@ -160,7 +156,7 @@ public class HomeReportService {
                 .build();
     }
 
-    private HomeReportResponse.MedicationStatus getMedicationStatus(List<MedicationSchedule> schedules, List<MedicationTakenRecord> todayMedications) {
+    private HomeReportResponse.MedicationStatus getMedicationStatus(Elder elder, List<MedicationSchedule> schedules, List<MedicationTakenRecord> todayMedications, LocalTime now) {
         long totalTaken = todayMedications.stream()
                 .filter(record -> record.getTakenStatus() == MedicationTakenStatus.TAKEN)
                 .count();
@@ -200,8 +196,8 @@ public class HomeReportService {
                 })
                 .collect(Collectors.toList());
 
-        // 전체 목표 복용 횟수 계산
-        int totalGoal = schedules.size();
+        // 아침, 점심, 저녁 시간대 별 전체 목표 복용 횟수 계산
+        int totalGoal = calculateTotalGoal(elder, schedules, now);
 
         // 전체 다음 복약 시간 계산 (모든 약 중 가장 가까운 시간)
         MedicationScheduleTime nextTime = calculateNextMedicationTime(schedules);
@@ -212,6 +208,64 @@ public class HomeReportService {
                 .nextMedicationTime(nextTime)
                 .medicationList(medicationList)
                 .build();
+    }
+
+    private int calculateTotalGoal(Elder elder, List<MedicationSchedule> schedules, LocalTime now) {
+        Optional<CareCallSetting> settingOpt = careCallSettingRepository.findByElder(elder);
+        if (settingOpt.isEmpty()) {
+            return schedules.size(); // 설정 없으면 전체
+        }
+
+        LocalDate today = LocalDate.now();
+        List<CareCallRecord> todayCompletedCalls = careCallRecordRepository
+                .findByElderIdAndDateBetween(elder.getId(), today.atStartOfDay(), today.atTime(LocalTime.MAX))
+                .stream()
+                .filter(record -> "completed".equalsIgnoreCase(record.getCallStatus()))
+                .toList();
+
+        if (todayCompletedCalls.isEmpty()) {
+            return 0; // 오늘 완료된 케어콜이 없으면 0
+        }
+
+        CareCallSetting setting = settingOpt.get();
+        long totalGoal = 0;
+
+        // 1차(아침) 케어콜이 완료되었는지 확인하고 목표량 추가
+        boolean morningCallCompleted = todayCompletedCalls.stream()
+                .anyMatch(r -> isCallInTimeSlot(r.getCalledAt().toLocalTime(), setting.getFirstCallTime(), setting.getSecondCallTime()));
+        if (morningCallCompleted) {
+            totalGoal += schedules.stream().filter(s -> s.getScheduleTime() == MedicationScheduleTime.MORNING).count();
+        }
+
+        // 2차(점심) 케어콜이 완료되었는지 확인하고 목표량 추가
+        if (setting.getSecondCallTime() != null) {
+            boolean lunchCallCompleted = todayCompletedCalls.stream()
+                    .anyMatch(r -> isCallInTimeSlot(r.getCalledAt().toLocalTime(), setting.getSecondCallTime(), setting.getThirdCallTime()));
+            if (lunchCallCompleted) {
+                totalGoal += schedules.stream().filter(s -> s.getScheduleTime() == MedicationScheduleTime.LUNCH).count();
+            }
+        }
+
+        // 3차(저녁) 케어콜이 완료되었는지 확인하고 목표량 추가
+        if (setting.getThirdCallTime() != null) {
+            boolean dinnerCallCompleted = todayCompletedCalls.stream()
+                    .anyMatch(r -> isCallInTimeSlot(r.getCalledAt().toLocalTime(), setting.getThirdCallTime(), null));
+            if (dinnerCallCompleted) {
+                totalGoal += schedules.stream().filter(s -> s.getScheduleTime() == MedicationScheduleTime.DINNER).count();
+            }
+        }
+
+        return (int) totalGoal;
+    }
+
+    // 케어콜 시간이 특정 시간대(1,2,3차)에 속하는지 확인
+    private boolean isCallInTimeSlot(LocalTime callTime, LocalTime slotStartTime, LocalTime nextSlotStartTime) {
+        // 다음 콜 시간이 없는 경우 (3차 케어콜)
+        if (nextSlotStartTime == null) {
+            return !callTime.isBefore(slotStartTime);
+        }
+        // 시간대가 명확한 경우
+        return !callTime.isBefore(slotStartTime) && callTime.isBefore(nextSlotStartTime);
     }
 
     private MedicationScheduleTime calculateNextMedicationTime(List<MedicationSchedule> schedules) {

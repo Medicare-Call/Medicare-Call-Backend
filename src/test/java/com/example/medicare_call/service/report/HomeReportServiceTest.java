@@ -3,12 +3,8 @@ package com.example.medicare_call.service.report;
 import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.report.HomeReportResponse;
 import com.example.medicare_call.global.enums.MealType;
-import com.example.medicare_call.repository.BloodSugarRecordRepository;
-import com.example.medicare_call.repository.CareCallRecordRepository;
-import com.example.medicare_call.repository.ElderRepository;
-import com.example.medicare_call.repository.MealRecordRepository;
-import com.example.medicare_call.repository.MedicationScheduleRepository;
-import com.example.medicare_call.repository.MedicationTakenRecordRepository;
+import com.example.medicare_call.global.enums.MedicationTakenStatus;
+import com.example.medicare_call.repository.*;
 import com.example.medicare_call.dto.report.HomeSummaryDto;
 import com.example.medicare_call.service.ai.AiSummaryService;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -58,6 +55,10 @@ class HomeReportServiceTest {
 
     @Mock
     private CareCallRecordRepository careCallRecordRepository;
+
+    @Mock
+    private CareCallSettingRepository careCallSettingRepository;
+
     @Mock
     private AiSummaryService aiSummaryService;
 
@@ -545,4 +546,90 @@ class HomeReportServiceTest {
 
         assertThat(response.getMentalStatus()).isNull();
     }
+
+    @Test
+    @DisplayName("저녁 19시일 때, 점심 케어콜 누락 시 totalGoal이 올바르게 계산되는지 테스트")
+    void getHomeReport_calculatesTotalGoal_forEveningWithMissedCall() {
+        // given
+        Integer elderId = 1;
+        // 테스트 시간을 저녁 19시로 고정
+        LocalDateTime testTime = LocalDate.now().atTime(19, 0);
+
+        when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
+
+        // 케어콜 설정 (아침 9시, 점심 13시, 저녁 18시)
+        CareCallSetting setting = CareCallSetting.builder()
+                .firstCallTime(LocalTime.of(9, 0))
+                .secondCallTime(LocalTime.of(13, 0))
+                .thirdCallTime(LocalTime.of(18, 0))
+                .build();
+        when(careCallSettingRepository.findByElder(testElder)).thenReturn(Optional.of(setting));
+
+        // 복약 스케줄 (아침, 점심, 저녁 각각 1개씩)
+        List<MedicationSchedule> schedules = Arrays.asList(
+                MedicationSchedule.builder().name("아침약").scheduleTime(MedicationScheduleTime.MORNING).build(),
+                MedicationSchedule.builder().name("점심약").scheduleTime(MedicationScheduleTime.LUNCH).build(),
+                MedicationSchedule.builder().name("저녁약").scheduleTime(MedicationScheduleTime.DINNER).build()
+        );
+        when(medicationScheduleRepository.findByElder(testElder)).thenReturn(schedules);
+
+        // 아침/저녁 케어콜은 완료, 점심은 누락된 것으로 설정
+        List<CareCallRecord> completedCalls = Arrays.asList(
+                CareCallRecord.builder().callStatus("completed").calledAt(testTime.withHour(9).withMinute(5)).build(),
+                CareCallRecord.builder().callStatus("no-answer").calledAt(testTime.withHour(13).withMinute(5)).build(), // 점심 누락
+                CareCallRecord.builder().callStatus("completed").calledAt(testTime.withHour(18).withMinute(5)).build()
+        );
+        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), any(), any())).thenReturn(completedCalls);
+
+        // 나머지 데이터는 비어있다고 가정
+        when(mealRecordRepository.findByElderIdAndDate(any(), any())).thenReturn(Collections.emptyList());
+        when(medicationTakenRecordRepository.findByElderIdAndDate(any(), any())).thenReturn(Collections.singletonList(
+                MedicationTakenRecord.builder().name("저녁약").takenStatus(MedicationTakenStatus.NOT_TAKEN).build())); // 저녁 약 미복용 기록
+        when(bloodSugarRecordRepository.findByElderIdAndDate(any(), any())).thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithSleepData(any(), any())).thenReturn(Collections.emptyList());
+        when(aiSummaryService.getHomeSummary(any())).thenReturn("AI 요약");
+
+
+        // when
+        HomeReportResponse response = homeReportService.getHomeReport(elderId, testTime);
+
+        // then
+        // 점심 콜이 누락되었으므로 totalGoal은 아침(1) + 저녁(1) = 2가 되어야함
+        assertThat(response.getMedicationStatus().getTotalGoal()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("totalTaken(복약한 약의 총 개수)이 올바르게 계산되는지 테스트")
+    void getHomeReport_calculatesTotalTakenCorrectly() {
+        // given
+        Integer elderId = 1;
+        LocalDateTime testTime = LocalDate.now().atTime(19, 0);
+
+        when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
+        when(careCallSettingRepository.findByElder(testElder)).thenReturn(Optional.of(CareCallSetting.builder().build()));
+        when(medicationScheduleRepository.findByElder(testElder)).thenReturn(Collections.emptyList());
+
+        // 복약 기록: 2개는 TAKEN, 1개는 NOT_TAKEN
+        List<MedicationTakenRecord> takenRecords = Arrays.asList(
+                MedicationTakenRecord.builder().name("아침약").takenStatus(MedicationTakenStatus.TAKEN).build(),
+                MedicationTakenRecord.builder().name("점심약").takenStatus(MedicationTakenStatus.TAKEN).build(),
+                MedicationTakenRecord.builder().name("저녁약").takenStatus(MedicationTakenStatus.NOT_TAKEN).build()
+        );
+        when(medicationTakenRecordRepository.findByElderIdAndDate(eq(elderId), any())).thenReturn(takenRecords);
+
+        // 나머지 데이터는 비어있다고 가정
+        when(mealRecordRepository.findByElderIdAndDate(any(), any())).thenReturn(Collections.emptyList());
+        when(bloodSugarRecordRepository.findByElderIdAndDate(any(), any())).thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithSleepData(any(), any())).thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateBetween(any(), any(), any())).thenReturn(Collections.emptyList());
+        when(aiSummaryService.getHomeSummary(any())).thenReturn("AI 요약");
+
+        // when
+        HomeReportResponse response = homeReportService.getHomeReport(elderId, testTime);
+
+        // then
+        // `TAKEN` 상태인 기록은 2개이므로, totalTaken은 2가 되어야 한다.
+        assertThat(response.getMedicationStatus().getTotalTaken()).isEqualTo(2);
+    }
+
 }
