@@ -10,42 +10,43 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class FirstCallPromptGenerator implements CallPromptGenerator{
-        @Override
-        public String generate(Elder elder, ElderHealthInfo info,
-                               List<Disease> diseases, List<MedicationSchedule> medicationSchedules) {
-        
-            String elderName = elder.getName();
-        
-            // TODO: "당뇨" 키워드 탐지 로직은 필요시 정교화
-            boolean hasDiabetes = diseases.stream()
-                    .anyMatch(d -> d.getName().contains("당뇨"));
-        
-            // 아침 복약명 추출 (scheduleTime: MORNING)
-            List<String> morningMedications = medicationSchedules.stream()
-                    .filter(ms -> ms.getScheduleTime() == MedicationScheduleTime.MORNING)
-                    .map(MedicationSchedule::getName)
-                    .toList();
-        
-            String morningMedNames = morningMedications.isEmpty()
-                    ? "등록된 아침 복약 없음"
-                    : String.join(", ", morningMedications);
-        
-            String diabetesLine = hasDiabetes
-                    ? "4. 혈당 여부(당뇨인 경우에만): 오늘 혈당 재셨는지, 공복/식후, 수치\n"
-                    : "";
-        
-            String diabetesFlow = hasDiabetes
-                    ? """
+public class FirstCallPromptGeneratorBackUp implements CallPromptGenerator{
+
+    @Override
+    public String generate(Elder elder, ElderHealthInfo info,
+                           List<Disease> diseases, List<MedicationSchedule> medicationSchedules) {
+
+        String elderName = elder.getName();
+
+        // TODO: "당뇨" 키워드 탐지 로직은 필요시 정교화
+        boolean hasDiabetes = diseases.stream()
+                .anyMatch(d -> d.getName().contains("당뇨"));
+
+        // 아침 복약명 추출 (scheduleTime: MORNING)
+        List<String> morningMedications = medicationSchedules.stream()
+                .filter(ms -> ms.getScheduleTime() == MedicationScheduleTime.MORNING)
+                .map(MedicationSchedule::getName)
+                .toList();
+
+        String morningMedNames = morningMedications.isEmpty()
+                ? "등록된 아침 복약 없음"
+                : String.join(", ", morningMedications);
+
+        String diabetesLine = hasDiabetes
+                ? "4. 혈당 여부(당뇨인 경우에만): 오늘 혈당 재셨는지, 공복/식후, 수치\n"
+                : "";
+
+        String diabetesFlow = hasDiabetes
+                ? """
                 AI: [공감] + "혈당도 재보셨을까요? 공복에 재셨나요, 식후에 재셨나요?"
                 어르신: [혈당 응답]
                 AI: "수치는 얼마나 나왔는지 기억나실까요?"
                 어르신: [수치 응답 또는 기억 안 남]
                 AI: [간단한 생활 조언 후 마무리] + "좋아요 어르신, 오늘도 건강히 보내세요."
                 """
-                    : "AI: \"좋아요 어르신, 오늘 하루도 건강하게 보내시고요, 나중에 또 연락드릴게요~\"\n";
-        
-            String prompt = String.format("""
+                : "AI: \"좋아요 어르신, 오늘 하루도 건강하게 보내시고요, 나중에 또 연락드릴게요~\"\n";
+
+        String prompt = String.format("""
                     당신은 고령자를 위한 따뜻하고 친절한 한국어 AI 전화 상담원입니다.
                     항상 한국어(존댓말)로만 말하고, 문장은 짧게(약 20자 내외) 유지하세요.
                     한 번에 한 가지 질문만 하며, 사용자가 말할 때 끊지 마세요.
@@ -107,15 +108,15 @@ public class FirstCallPromptGenerator implements CallPromptGenerator{
         
                     지금 첫 번째 인사를 해주세요.
                     """,
-                    morningMedNames,    // 1번째 %s - 대화 목표의 복약 목록
-                    diabetesLine,       // 2번째 %s - 당뇨병 질문 라인(조건부)
-                    morningMedNames,    // 3번째 %s - 질문 예시 블록 내 복약 목록
-                    elderName,          // 4번째 %s - 인사말의 어르신 이름
-                    morningMedNames,    // 5번째 %s - 대화 흐름 내 복약 목록
-                    diabetesFlow,       // 6번째 %s - 혈당 관련 대화 흐름(조건부)
-                    morningMedNames     // <- 주석만, 실제 포맷 인자는 위 6개와 일치해야 합니다.
-            );
-        
-            return prompt;
-        }
+                morningMedNames,    // 1번째 %s - 대화 목표의 복약 목록
+                diabetesLine,       // 2번째 %s - 당뇨병 질문 라인(조건부)
+                morningMedNames,    // 3번째 %s - 질문 예시 블록 내 복약 목록
+                elderName,          // 4번째 %s - 인사말의 어르신 이름
+                morningMedNames,    // 5번째 %s - 대화 흐름 내 복약 목록
+                diabetesFlow,       // 6번째 %s - 혈당 관련 대화 흐름(조건부)
+                morningMedNames     // <- 주석만, 실제 포맷 인자는 위 6개와 일치해야 합니다.
+        );
+
+        return prompt;
     }
+}
