@@ -59,7 +59,8 @@ public enum ErrorCode {
     SUBSCRIPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "S001", "구독 정보를 찾을 수 없습니다."),
 
     // Firebase
-    FIREBASE_INITIALIZATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FB001", "Firebase 초기화 중 오류가 발생했습니다. 다시 시도해 주세요.");
+    FIREBASE_INITIALIZATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FB001", "Firebase 초기화 중 오류가 발생했습니다. 다시 시도해 주세요."),
+    FIREBASE_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FB002", "FCM 메세지 전송에 실패했습니다.");
 
 
     private final HttpStatus status;
