@@ -58,4 +58,4 @@ management:
     prometheus-allowed-ips: 0.0.0.0/0
 
 firebase:
-  credentials:
+  file-path: firebase.json

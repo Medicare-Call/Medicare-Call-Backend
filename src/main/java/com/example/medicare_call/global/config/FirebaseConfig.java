@@ -12,43 +12,37 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
-
-import javax.annotation.PostConstruct;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @Configuration
 public class FirebaseConfig {
 
-    @Value("${firebase.credentials:#{null}}")
-    private String credentialsJson;
+    @Value("${firebase.file-path}")
+    String filePath;
 
     @Bean
-    FirebaseApp firebaseApp() { // ㅎ
+    FirebaseApp firebaseApp() throws IOException {
 
-        if (credentialsJson == null || credentialsJson.trim().isEmpty()) {
-            log.warn("Firebase credentials이 설정되지 않아 초기화를 건너뜁니다. (환경 변수 'FIREBASE_CREDENTIALS' 필요)");
+        if (filePath== null || filePath.trim().isEmpty()) {
+            log.warn("Firebase 설정되지 않아 초기화를 건너뜁니다. (환경 변수 'FIlE_PATH' 필요)");
+            return FirebaseApp.getInstance();
         }
 
-        try (InputStream serviceAccount = new ByteArrayInputStream(credentialsJson.getBytes(StandardCharsets.UTF_8))) {
+        GoogleCredentials googleCredentials = GoogleCredentials
+                .fromStream(new ClassPathResource(filePath).getInputStream());
 
-            FirebaseOptions options = FirebaseOptions.builder()
-                    .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                    .build();
+        FirebaseOptions firebaseOptions = FirebaseOptions.builder()
+                .setCredentials(googleCredentials)
+                .build();
 
-            // FirebaseApp 중복 초기화 방지
-            if (FirebaseApp.getApps().isEmpty()) {
-                log.info("FirebaseApp이 환경 변수 credentials을 사용하여 성공적으로 초기화되었습니다.");
-                return FirebaseApp.initializeApp(options);
-            }
-
-        }  catch (IOException e) {
-            throw new CustomException(ErrorCode.FIREBASE_INITIALIZATION_FAILED);
+        //중복 초기화 방지
+        if (FirebaseApp.getApps().isEmpty()) {
+            log.info("FirebaseApp이 환경 변수 credentials을 사용하여 성공적으로 초기화되었습니다.");
+            return FirebaseApp.initializeApp(firebaseOptions);
         }
-        throw new CustomException(ErrorCode.FIREBASE_INITIALIZATION_FAILED);
+
+        return FirebaseApp.getInstance();
     }
 
     @Bean
