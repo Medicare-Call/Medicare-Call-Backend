@@ -1,13 +1,13 @@
 CREATE TABLE notification (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    member_id BIGINT NOT NULL,
+    member_id INT NOT NULL,
     title VARCHAR(120),
     body VARCHAR(1000),
     created_at DATETIME NOT NULL,
     is_read TINYINT(1) NOT NULL DEFAULT 0,
     CONSTRAINT fk_notification_member
         FOREIGN KEY (member_id)
-            REFERENCES member(id)
+            REFERENCES Member(id)
             ON DELETE CASCADE
             ON UPDATE CASCADE
 );
