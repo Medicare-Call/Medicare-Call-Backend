@@ -26,10 +26,14 @@ public class ElderHealthInfoService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public void upsertElderHealthInfo(Integer elderId, ElderHealthInfoCreateRequest request) {
+    public void upsertElderHealthInfo(Integer memberId, Integer elderId, ElderHealthInfoCreateRequest request) {
         // TODO : 이쪽 Exception에 대한 Monitoring 추가 필요. 데이터의 무결성이 깨졌을 확률이 높다
         Elder elder = elderRepository.findById(elderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ELDER_NOT_FOUND));
+
+        if (!elder.getGuardian().getId().equals(memberId)) {
+            throw new CustomException(ErrorCode.HANDLE_ACCESS_DENIED);
+        }
 
         // 질환 정보 업데이트
         if (request.getDiseaseNames() != null) {
@@ -102,25 +106,17 @@ public class ElderHealthInfoService {
 
     @Transactional
     public void bulkUpsertElderHealthInfo(Integer memberId, List<ElderHealthInfoCreateRequestWithElderId> requests) {
-        Member member = memberRepository.findById(memberId)
+        memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
         for (ElderHealthInfoCreateRequestWithElderId request : requests) {
-            // elderId 유효성 검증 및 해당 어르신이 요청자의 어르신인지 확인
-            Elder elder = elderRepository.findById(request.getElderId())
-                    .orElseThrow(() -> new CustomException(ErrorCode.ELDER_NOT_FOUND));
-
-            if (!elder.getGuardian().getId().equals(memberId)) {
-                throw new CustomException(ErrorCode.HANDLE_ACCESS_DENIED);
-            }
-
             ElderHealthInfoCreateRequest elderHealthInfoRequest = ElderHealthInfoCreateRequest.builder()
                     .diseaseNames(request.getDiseaseNames())
                     .medicationSchedules(request.getMedicationSchedules())
                     .notes(request.getNotes())
                     .build();
 
-            upsertElderHealthInfo(request.getElderId(), elderHealthInfoRequest);
+            upsertElderHealthInfo(memberId, request.getElderId(), elderHealthInfoRequest);
         }
     }
 

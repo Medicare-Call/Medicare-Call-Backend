@@ -27,8 +27,12 @@ public class ElderHealthInfoController {
 
     @Operation(summary = "어르신 건강정보 등록 및 수정", description = "질환, 복약주기, 특이사항을 등록 및 수정합니다.")
     @PostMapping("/{elderId}/health-info")
-    public ResponseEntity<Void> upsertElderHealthInfo(@PathVariable Integer elderId, @Valid @RequestBody ElderHealthInfoCreateRequest request) {
-        elderHealthInfoService.upsertElderHealthInfo(elderId, request);
+    public ResponseEntity<Void> upsertElderHealthInfo(
+            @Parameter(hidden = true) @AuthUser Long memberId,
+            @PathVariable Integer elderId,
+            @Valid @RequestBody ElderHealthInfoCreateRequest request
+    ) {
+        elderHealthInfoService.upsertElderHealthInfo(memberId.intValue(), elderId, request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
