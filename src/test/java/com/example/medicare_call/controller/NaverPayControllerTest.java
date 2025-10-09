@@ -106,33 +106,32 @@ class NaverPayControllerTest {
                 .andExpect(jsonPath("$.body.code").value("550e8400-e29b-41d4-a716-446655440000"));
     }
 
-    // TODO: 주문 내역 생성 실패에 대한 예외 처리 추가
-//    @Test
-//    @DisplayName("주문 내역 생성 실패")
-//    void createPaymentReserve_failure() throws Exception {
-//        // given
-//        NaverPayReserveRequest request = NaverPayReserveRequest.builder()
-//                .productName("의료 상담 서비스")
-//                .productCount(1)
-//                .totalPayAmount(10000)
-//                .taxScopeAmount(10000)
-//                .taxExScopeAmount(0)
-//                .elderIds(Arrays.asList(1L))
-//                .build();
-//
-//        when(naverPayService.createPaymentReserve(any(NaverPayReserveRequest.class), any(Long.class)))
-//                .thenThrow(new RuntimeException("주문 내역 생성 중 오류가 발생했습니다."));
-//
-//        // when & then
-//        mockMvc.perform(post("/payments/reserve")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(objectMapper.writeValueAsString(request)))
-//                .andExpect(status().isInternalServerError())
-//                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(jsonPath("$.status").value(500))
-//                .andExpect(jsonPath("$.error").value("서버 오류"))
-//                .andExpect(jsonPath("$.message").value("주문 내역 생성 중 오류가 발생했습니다."));
-//    }
+    @Test
+    @DisplayName("주문 내역 생성 실패")
+    void createPaymentReserve_failure() throws Exception {
+        // given
+        NaverPayReserveRequest request = NaverPayReserveRequest.builder()
+                .productName("의료 상담 서비스")
+                .productCount(1)
+                .totalPayAmount(10000)
+                .taxScopeAmount(10000)
+                .taxExScopeAmount(0)
+                .elderIds(Arrays.asList(1L))
+                .build();
+
+        when(naverPayService.createPaymentReserve(any(NaverPayReserveRequest.class), any(Long.class)))
+                .thenThrow(new CustomException(ErrorCode.NAVER_PAY_API_ERROR)); // RuntimeException 대신 CustomException 사용
+
+        // when & then
+        mockMvc.perform(post("/payments/reserve")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.code").value("NAVER_PAY_API_ERROR"))
+                .andExpect(jsonPath("$.message").value("결제 처리 중 오류가 발생했습니다. 다시 시도해 주세요."));
+    }
 
     @Test
     @DisplayName("결제 승인 성공")
@@ -179,7 +178,8 @@ class NaverPayControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isInternalServerError())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.status").value(500))
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.code").value("NAVER_PAY_API_ERROR"))
                 .andExpect(jsonPath("$.message").value("결제 처리 중 오류가 발생했습니다. 다시 시도해 주세요."));
     }
 }
