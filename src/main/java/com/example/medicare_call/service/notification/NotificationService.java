@@ -39,4 +39,12 @@ public class NotificationService {
         return notificationRepository.save(notification);
     }
 
+    @Transactional
+    public void updateIsRead(Long notificationId, boolean isRead) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+
+        notification.updateIsRead(isRead);
+    }
+
 }
