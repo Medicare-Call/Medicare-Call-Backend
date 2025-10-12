@@ -7,6 +7,7 @@ import com.example.medicare_call.dto.carecall.CareCallTestRequest;
 import com.example.medicare_call.dto.data_processor.CareCallDataProcessRequest;
 import com.example.medicare_call.dto.carecall.ImmediateCareCallRequest;
 import com.example.medicare_call.global.annotation.AuthUser;
+import com.example.medicare_call.global.event.Events;
 import com.example.medicare_call.service.carecall.CareCallRequestSenderService;
 import com.example.medicare_call.service.carecall.CareCallSettingService;
 import com.example.medicare_call.service.data_processor.CareCallDataProcessingService;
@@ -49,6 +50,7 @@ public class CareCallController {
     public ResponseEntity<CareCallRecord> receiveCallData(@Valid @RequestBody CareCallDataProcessRequest request) {
         log.info("통화 데이터 수신: elderId={}, settingId={}", request.getElderId(), request.getSettingId());
         CareCallRecord savedRecord = careCallDataProcessingService.saveCallData(request);
+        Events.raise(savedRecord);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

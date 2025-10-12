@@ -23,25 +23,14 @@ public class FirebaseConfig {
 
     @Bean
     FirebaseApp firebaseApp() throws IOException {
-
-        if (filePath== null || filePath.trim().isEmpty()) {
-            log.warn("Firebase 설정되지 않아 초기화를 건너뜁니다. (환경 변수 'FIlE_PATH' 필요)");
-            return FirebaseApp.getInstance();
-        }
-
         GoogleCredentials googleCredentials = GoogleCredentials
                 .fromStream(new ClassPathResource(filePath).getInputStream());
-
         FirebaseOptions firebaseOptions = FirebaseOptions.builder()
                 .setCredentials(googleCredentials)
                 .build();
-
-        //중복 초기화 방지
         if (FirebaseApp.getApps().isEmpty()) {
-            log.info("FirebaseApp이 환경 변수 credentials을 사용하여 성공적으로 초기화되었습니다.");
             return FirebaseApp.initializeApp(firebaseOptions);
         }
-
         return FirebaseApp.getInstance();
     }
 

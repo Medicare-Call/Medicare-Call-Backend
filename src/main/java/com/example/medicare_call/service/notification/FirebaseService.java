@@ -1,12 +1,12 @@
 package com.example.medicare_call.service.notification;
 
+import com.example.medicare_call.domain.Notification;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
-import com.google.firebase.messaging.Notification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,22 +21,22 @@ class FirebaseService {
     private final FirebaseMessaging firebaseMessaging;
     private final ObjectMapper objectMapper;
 
-    public void sendNotification(NotificationDto notificationDto) {
+    public void sendNotification(Notification notification) {
         try {
-            Message newMessage = createMessageFromDto(notificationDto);
+            Message newMessage = createMessageFromDto(notification);
             send(newMessage);
         } catch (FirebaseMessagingException exception) {
             throw new CustomException(ErrorCode.FIREBASE_SEND_FAILED);
         }
     }
-    private Message createMessageFromDto(NotificationDto notificationDto) {
+    private Message createMessageFromDto(Notification notification) {
         return Message.builder()
-                .setNotification(Notification
+                .setNotification(com.google.firebase.messaging.Notification
                         .builder()
-                        .setTitle(notificationDto.title())
-                        .setBody(notificationDto.body())
+                        .setTitle(notification.getTitle())
+                        .setBody(notification.getBody())
                         .build())
-                .putAllData(objectMapper.convertValue(notificationDto, Map.class))
+                .putAllData(objectMapper.convertValue(notification, Map.class))
                 .setTopic("필요하다면 추가")
                 .build();
     }

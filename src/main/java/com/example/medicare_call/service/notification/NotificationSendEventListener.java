@@ -1,7 +1,8 @@
 package com.example.medicare_call.service.notification;
 
+import com.example.medicare_call.domain.CareCallRecord;
 import com.example.medicare_call.domain.Notification;
-import com.example.medicare_call.global.event.CareCallCompleteEvent;
+import com.example.medicare_call.global.event.CareCallEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -21,26 +22,26 @@ class NotificationSendEventListener {
     private final FirebaseService firebaseService;
 
     /**
-     * 이메일 전송 로직큰 흐름
-     * 1. 이벤트로부터 Notification 을 저장한다.
-     * 2. pk 포함해서, 알람을 보낼 데이터를 정의해서 파이어베이스로 전송
+     * 알람 전송 로직 흐름
+     * careCallRecord != null 케어콜 수신 / null 케어콜 미수신
+     * 1. CareCallRecord 로부터 알림 데이터 추철
+     * 2. Notification 엔티티를 저장
+     * 3. 파이어베이스에 관련된 데이터 전송 ( Notification 엔티티의 PK ) 전송해야함을 유의
      * */
     @EventListener
-    public void listenCareCallCompleteEvent(CareCallCompleteEvent careCallCompleteEvent) {
-        NotificationDto notificationDto = parseToNotificationDto(careCallCompleteEvent);
+    public void listenCareCallEvent(CareCallEvent careCallEvent) {
+        CareCallRecord careCallRecord = careCallEvent.careCallRecord();
+        NotificationDto notificationDto = parseToNotificationDto(careCallRecord);
         Notification notification = notificationService.saveNotification(notificationDto);
-        // 파이어베이스에
-//        firebaseService.sendNotification();
-
+        firebaseService.sendNotification(notification);
     }
 
-    @EventListener
-    public void listenCareCallMissEvent(CareCallCompleteEvent careCallCompleteEvent) {
 
-    }
-
-    private NotificationDto parseToNotificationDto(CareCallCompleteEvent careCallCompleteEvent) {
-        return null;
+    private NotificationDto parseToNotificationDto(CareCallRecord careCallRecord) {
+        //Todo careCallRecord 로부터 알람 메시지 구성
+        // 1차 2차 3차 구분 ( 3차 일 경우 건강 이상징후 확인)
+        // null이 들어올 경우, 케어콜을 못받았다는 알람 전송 (하드코딩)
+        return new NotificationDto(1, "","");
     }
 
 }
