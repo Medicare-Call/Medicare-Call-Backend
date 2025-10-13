@@ -9,6 +9,7 @@ import com.example.medicare_call.global.enums.MealType;
 import com.example.medicare_call.global.enums.PsychologicalStatus;
 import com.example.medicare_call.repository.CareCallRecordRepository;
 import com.example.medicare_call.repository.MealRecordRepository;
+import com.example.medicare_call.service.ai.AiSummaryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Arrays;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -23,34 +26,36 @@ import java.time.LocalTime;
 public class HealthDataProcessingService {
     private final CareCallRecordRepository careCallRecordRepository;
     private final MealRecordRepository mealRecordRepository;
+    private final AiSummaryService aiSummaryService;
 
     @Transactional
     public void updateCareCallRecordWithHealthData(CareCallRecord callRecord, HealthDataExtractionResponse healthData) {
         CareCallRecord updatedRecord = callRecord;
-        
+
         // 식사 데이터 처리
         if (healthData.getMealData() != null) {
             saveMealData(updatedRecord, healthData.getMealData());
         }
-        
+
         // 수면 데이터 처리
         if (healthData.getSleepData() != null) {
             updatedRecord = updateSleepData(updatedRecord, healthData.getSleepData());
         }
-        
+
         // 심리 상태 처리
         if (healthData.getPsychologicalState() != null && !healthData.getPsychologicalState().isEmpty()) {
             updatedRecord = updatePsychologicalStatus(updatedRecord, healthData.getPsychologicalState(), healthData.getPsychologicalStatus());
         }
-        
+
         // 건강 징후 처리
         if (healthData.getHealthSigns() != null && !healthData.getHealthSigns().isEmpty()) {
             updatedRecord = updateHealthStatus(updatedRecord, healthData.getHealthSigns(), healthData.getHealthStatus());
         }
-        
-        // 업데이트된 CareCallRecord 저장
-        careCallRecordRepository.save(updatedRecord);
-        log.info("CareCallRecord 건강 데이터 업데이트 완료: callId={}", updatedRecord.getId());
+
+        CareCallRecord finalRecord = generateAiCommentAndBuildFinalRecord(updatedRecord);
+
+        careCallRecordRepository.save(finalRecord);
+        log.info("CareCallRecord 건강 데이터 업데이트 완료: callId={}", finalRecord.getId());
     }
     
     private void saveMealData(CareCallRecord callRecord, HealthDataExtractionResponse.MealData mealData) {
@@ -137,7 +142,7 @@ public class HealthDataProcessingService {
         return callRecord;
     }
     
-    private CareCallRecord updatePsychologicalStatus(CareCallRecord callRecord, java.util.List<String> psychologicalState, String psychologicalStatus) {
+    private CareCallRecord updatePsychologicalStatus(CareCallRecord callRecord, List<String> psychologicalState, String psychologicalStatus) {
         // OpenAiHealthDataService 에서 고정값을 내려줘서 리터럴을 사용하여 비교함
         Byte psychStatus = null;
         if ("좋음".equals(psychologicalStatus)) {
@@ -174,7 +179,7 @@ public class HealthDataProcessingService {
         return callRecord;
     }
     
-    private CareCallRecord updateHealthStatus(CareCallRecord callRecord, java.util.List<String> healthSigns, String healthStatus) {
+    private CareCallRecord updateHealthStatus(CareCallRecord callRecord, List<String> healthSigns, String healthStatus) {
         // OpenAiHealthDataService 에서 고정값을 내려줘서 리터럴을 사용하여 비교함
         Byte healthStatusValue = null;
         if ("좋음".equals(healthStatus)) {
@@ -209,5 +214,33 @@ public class HealthDataProcessingService {
         log.info("건강 징후 업데이트 완료: healthSigns={}, healthStatus={}", healthSigns, healthStatus);
         
         return callRecord;
+    }
+
+    private CareCallRecord generateAiCommentAndBuildFinalRecord(CareCallRecord updatedRecord) {
+        String healthDetails = updatedRecord.getHealthDetails();
+        String aiComment = null;
+        if (healthDetails != null && !healthDetails.isBlank()) {
+            List<String> symptomList = Arrays.stream(healthDetails.split(",")).map(String::trim).toList();
+            aiComment = aiSummaryService.getSymptomAnalysis(symptomList);
+        }
+
+        return CareCallRecord.builder()
+                .id(updatedRecord.getId())
+                .elder(updatedRecord.getElder())
+                .setting(updatedRecord.getSetting())
+                .calledAt(updatedRecord.getCalledAt())
+                .responded(updatedRecord.getResponded())
+                .sleepStart(updatedRecord.getSleepStart())
+                .sleepEnd(updatedRecord.getSleepEnd())
+                .healthStatus(updatedRecord.getHealthStatus())
+                .psychStatus(updatedRecord.getPsychStatus())
+                .startTime(updatedRecord.getStartTime())
+                .endTime(updatedRecord.getEndTime())
+                .callStatus(updatedRecord.getCallStatus())
+                .transcriptionText(updatedRecord.getTranscriptionText())
+                .psychologicalDetails(updatedRecord.getPsychologicalDetails())
+                .healthDetails(updatedRecord.getHealthDetails())
+                .aiHealthAnalysisComment(aiComment)
+                .build();
     }
 } 
