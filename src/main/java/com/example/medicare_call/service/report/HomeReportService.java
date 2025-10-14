@@ -114,7 +114,6 @@ public class HomeReportService {
                 .dinner(finalMealStatus.getDinner())
                 .totalTakenMedication(medicationStatus != null ? medicationStatus.getTotalTaken() : 0)
                 .totalGoalMedication(medicationStatus != null ? medicationStatus.getTotalGoal() : 0)
-                .nextMedicationTime(medicationStatus != null ? medicationStatus.getNextMedicationTime() : null)
                 .sleepHours(sleep != null ? sleep.getMeanHours() : null)
                 .sleepMinutes(sleep != null ? sleep.getMeanMinutes() : null)
                 .healthStatus(healthStatus)
@@ -187,11 +186,37 @@ public class HomeReportService {
                     // 다음 복약 시간 계산 (해당 약의 스케줄 중 가장 가까운 시간)
                     MedicationScheduleTime nextTime = calculateNextMedicationTimeForMedication(medicationScheduleList);
 
+                    List<HomeReportResponse.DoseStatus> doseStatusList = Stream.of(MedicationScheduleTime.MORNING, MedicationScheduleTime.LUNCH, MedicationScheduleTime.DINNER)
+                            .map(scheduleTime -> {
+                                Optional<MedicationTakenRecord> matchingRecord = todayMedications.stream()
+                                        .filter(mtr -> mtr.getMedicationSchedule() != null &&
+                                                mtr.getMedicationSchedule().getName().equals(medicationName) &&
+                                                mtr.getMedicationSchedule().getScheduleTime() == scheduleTime)
+                                        .findFirst();
+
+                                Boolean takenStatus = matchingRecord.map(record -> {
+                                    if (record.getTakenStatus() == MedicationTakenStatus.TAKEN) {
+                                        return true;
+                                    } else if (record.getTakenStatus() == MedicationTakenStatus.NOT_TAKEN) {
+                                        return false;
+                                    } else {
+                                        return null;
+                                    }
+                                }).orElse(null);
+
+                                return HomeReportResponse.DoseStatus.builder()
+                                        .time(scheduleTime)
+                                        .taken(takenStatus)
+                                        .build();
+                            })
+                            .collect(Collectors.toList());
+
                     return HomeReportResponse.MedicationInfo.builder()
                             .type(medicationName)
                             .taken(taken)
                             .goal(goal)
                             .nextTime(nextTime)
+                            .doseStatusList(doseStatusList)
                             .build();
                 })
                 .collect(Collectors.toList());
@@ -205,7 +230,6 @@ public class HomeReportService {
         return HomeReportResponse.MedicationStatus.builder()
                 .totalTaken((int) totalTaken)
                 .totalGoal(totalGoal)
-                .nextMedicationTime(nextTime)
                 .medicationList(medicationList)
                 .build();
     }
