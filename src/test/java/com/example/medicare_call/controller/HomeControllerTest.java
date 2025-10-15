@@ -14,7 +14,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -50,11 +52,35 @@ class HomeControllerTest {
                 .dinner(false)
                 .build();
 
+        // doseStatusList 생성
+        HomeReportResponse.DoseStatus morningDose = HomeReportResponse.DoseStatus.builder().time(MedicationScheduleTime.MORNING).taken(true).build();
+        HomeReportResponse.DoseStatus lunchDose = HomeReportResponse.DoseStatus.builder().time(MedicationScheduleTime.LUNCH).taken(null).build();
+        HomeReportResponse.DoseStatus dinnerDose = HomeReportResponse.DoseStatus.builder().time(MedicationScheduleTime.DINNER).taken(true).build();
+        List<HomeReportResponse.DoseStatus> doseStatusList1 = Arrays.asList(morningDose, lunchDose, dinnerDose);
+
+        HomeReportResponse.MedicationInfo medicationInfo1 = HomeReportResponse.MedicationInfo.builder()
+                .type("당뇨약")
+                .taken(2)
+                .goal(3)
+                .doseStatusList(doseStatusList1)
+                .build();
+
+        HomeReportResponse.DoseStatus morningDose2 = HomeReportResponse.DoseStatus.builder().time(MedicationScheduleTime.MORNING).taken(true).build();
+        HomeReportResponse.DoseStatus lunchDose2 = HomeReportResponse.DoseStatus.builder().time(MedicationScheduleTime.LUNCH).taken(null).build();
+        HomeReportResponse.DoseStatus dinnerDose2 = HomeReportResponse.DoseStatus.builder().time(MedicationScheduleTime.DINNER).taken(null).build();
+        List<HomeReportResponse.DoseStatus> doseStatusList2 = Arrays.asList(morningDose2, lunchDose2, dinnerDose2);
+
+        HomeReportResponse.MedicationInfo medicationInfo2 = HomeReportResponse.MedicationInfo.builder()
+                .type("혈압약")
+                .taken(1)
+                .goal(3)
+                .doseStatusList(doseStatusList2)
+                .build();
+
         HomeReportResponse.MedicationStatus medicationStatus = HomeReportResponse.MedicationStatus.builder()
-                .totalTaken(2)
-                .totalGoal(3)
-                .nextMedicationTime(MedicationScheduleTime.DINNER)
-                .medicationList(Collections.emptyList())
+                .totalTaken(3) // 2 (당뇨약) + 1 (혈압약)
+                .totalGoal(6)  // 3 (당뇨약) + 3 (혈압약)
+                .medicationList(Arrays.asList(medicationInfo1, medicationInfo2))
                 .build();
 
         HomeReportResponse.Sleep sleep = HomeReportResponse.Sleep.builder()
@@ -88,9 +114,26 @@ class HomeControllerTest {
                 .andExpect(jsonPath("$.mealStatus.breakfast").value(true))
                 .andExpect(jsonPath("$.mealStatus.lunch").value(true))
                 .andExpect(jsonPath("$.mealStatus.dinner").value(false))
-                .andExpect(jsonPath("$.medicationStatus.totalTaken").value(2))
-                .andExpect(jsonPath("$.medicationStatus.totalGoal").value(3))
-                .andExpect(jsonPath("$.medicationStatus.nextMedicationTime").value("DINNER"))
+                .andExpect(jsonPath("$.medicationStatus.totalTaken").value(3))
+                .andExpect(jsonPath("$.medicationStatus.totalGoal").value(6))
+                .andExpect(jsonPath("$.medicationStatus.medicationList[0].type").value("당뇨약"))
+                .andExpect(jsonPath("$.medicationStatus.medicationList[0].taken").value(2))
+                .andExpect(jsonPath("$.medicationStatus.medicationList[0].goal").value(3))
+                .andExpect(jsonPath("$.medicationStatus.medicationList[0].doseStatusList[0].time").value("MORNING"))
+                .andExpect(jsonPath("$.medicationStatus.medicationList[0].doseStatusList[0].taken").value(true))
+                .andExpect(jsonPath("$.medicationStatus.medicationList[0].doseStatusList[1].time").value("LUNCH"))
+                .andExpect(jsonPath("$.medicationStatus.medicationList[0].doseStatusList[1].taken").doesNotExist())
+                .andExpect(jsonPath("$.medicationStatus.medicationList[0].doseStatusList[2].time").value("DINNER"))
+                .andExpect(jsonPath("$.medicationStatus.medicationList[0].doseStatusList[2].taken").value(true))
+                .andExpect(jsonPath("$.medicationStatus.medicationList[1].type").value("혈압약"))
+                .andExpect(jsonPath("$.medicationStatus.medicationList[1].taken").value(1))
+                .andExpect(jsonPath("$.medicationStatus.medicationList[1].goal").value(3))
+                .andExpect(jsonPath("$.medicationStatus.medicationList[1].doseStatusList[0].time").value("MORNING"))
+                .andExpect(jsonPath("$.medicationStatus.medicationList[1].doseStatusList[0].taken").value(true))
+                .andExpect(jsonPath("$.medicationStatus.medicationList[1].doseStatusList[1].time").value("LUNCH"))
+                .andExpect(jsonPath("$.medicationStatus.medicationList[1].doseStatusList[1].taken").doesNotExist())
+                .andExpect(jsonPath("$.medicationStatus.medicationList[1].doseStatusList[2].time").value("DINNER"))
+                .andExpect(jsonPath("$.medicationStatus.medicationList[1].doseStatusList[2].taken").doesNotExist())
                 .andExpect(jsonPath("$.sleep.meanHours").value(7))
                 .andExpect(jsonPath("$.sleep.meanMinutes").value(30))
                 .andExpect(jsonPath("$.healthStatus").value("좋음"))
@@ -113,7 +156,6 @@ class HomeControllerTest {
         HomeReportResponse.MedicationStatus medicationStatus = HomeReportResponse.MedicationStatus.builder()
                 .totalTaken(0)
                 .totalGoal(3)
-                .nextMedicationTime(MedicationScheduleTime.MORNING)
                 .medicationList(Collections.emptyList())
                 .build();
 
@@ -141,7 +183,7 @@ class HomeControllerTest {
                 .andExpect(jsonPath("$.mealStatus.dinner").value(false))
                 .andExpect(jsonPath("$.medicationStatus.totalTaken").value(0))
                 .andExpect(jsonPath("$.medicationStatus.totalGoal").value(3))
-                .andExpect(jsonPath("$.medicationStatus.nextMedicationTime").value("MORNING"))
+                .andExpect(jsonPath("$.medicationStatus.medicationList").isEmpty())
                 .andExpect(jsonPath("$.healthStatus").value("나쁨"))
                 .andExpect(jsonPath("$.mentalStatus").value("나쁨"))
                 .andExpect(jsonPath("$.sleep").doesNotExist())

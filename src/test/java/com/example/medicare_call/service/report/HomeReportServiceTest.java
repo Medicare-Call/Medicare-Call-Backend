@@ -581,10 +581,16 @@ class HomeReportServiceTest {
         );
         when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), any(), any())).thenReturn(completedCalls);
 
+        // 복약 기록: 아침약 복용, 저녁약 복용, 점심약 미복용
+        List<MedicationTakenRecord> takenRecords = Arrays.asList(
+                MedicationTakenRecord.builder().name("아침약").medicationSchedule(schedules.get(0)).takenStatus(MedicationTakenStatus.TAKEN).takenTime(MedicationScheduleTime.MORNING).build(),
+                MedicationTakenRecord.builder().name("점심약").medicationSchedule(schedules.get(1)).takenStatus(MedicationTakenStatus.NOT_TAKEN).takenTime(MedicationScheduleTime.LUNCH).build(),
+                MedicationTakenRecord.builder().name("저녁약").medicationSchedule(schedules.get(2)).takenStatus(MedicationTakenStatus.TAKEN).takenTime(MedicationScheduleTime.DINNER).build()
+        );
+        when(medicationTakenRecordRepository.findByElderIdAndDate(any(), any())).thenReturn(takenRecords);
+
         // 나머지 데이터는 비어있다고 가정
         when(mealRecordRepository.findByElderIdAndDate(any(), any())).thenReturn(Collections.emptyList());
-        when(medicationTakenRecordRepository.findByElderIdAndDate(any(), any())).thenReturn(Collections.singletonList(
-                MedicationTakenRecord.builder().name("저녁약").takenStatus(MedicationTakenStatus.NOT_TAKEN).build())); // 저녁 약 미복용 기록
         when(bloodSugarRecordRepository.findByElderIdAndDate(any(), any())).thenReturn(Collections.emptyList());
         when(careCallRecordRepository.findByElderIdAndDateWithSleepData(any(), any())).thenReturn(Collections.emptyList());
         when(aiSummaryService.getHomeSummary(any())).thenReturn("AI 요약");
@@ -596,6 +602,27 @@ class HomeReportServiceTest {
         // then
         // 점심 콜이 누락되었으므로 totalGoal은 아침(1) + 저녁(1) = 2가 되어야함
         assertThat(response.getMedicationStatus().getTotalGoal()).isEqualTo(2);
+        assertThat(response.getMedicationStatus().getTotalTaken()).isEqualTo(2); // 아침약, 저녁약
+
+        assertThat(response.getMedicationStatus().getMedicationList()).hasSize(3);
+        HomeReportResponse.MedicationInfo morningMedication = response.getMedicationStatus().getMedicationList().stream()
+                .filter(m -> m.getType().equals("아침약")).findFirst().orElseThrow();
+        assertThat(morningMedication.getDoseStatusList()).hasSize(3);
+        assertThat(morningMedication.getDoseStatusList().get(0).getTime()).isEqualTo(MedicationScheduleTime.MORNING);
+        assertThat(morningMedication.getDoseStatusList().get(0).getTaken()).isTrue();
+
+        HomeReportResponse.MedicationInfo lunchMedication = response.getMedicationStatus().getMedicationList().stream()
+                .filter(m -> m.getType().equals("점심약")).findFirst().orElseThrow();
+        assertThat(lunchMedication.getDoseStatusList()).hasSize(3);
+        assertThat(lunchMedication.getDoseStatusList().get(1).getTime()).isEqualTo(MedicationScheduleTime.LUNCH);
+        assertThat(lunchMedication.getDoseStatusList().get(1).getTaken()).isFalse(); // NOT_TAKEN이므로 false
+
+        HomeReportResponse.MedicationInfo dinnerMedication = response.getMedicationStatus().getMedicationList().stream()
+                .filter(m -> m.getType().equals("저녁약")).findFirst().orElseThrow();
+        assertThat(dinnerMedication.getDoseStatusList()).hasSize(3);
+        assertThat(dinnerMedication.getDoseStatusList().get(2).getTime()).isEqualTo(MedicationScheduleTime.DINNER);
+        assertThat(dinnerMedication.getDoseStatusList().get(2).getTaken()).isTrue();
+
     }
 
     @Test
@@ -607,13 +634,20 @@ class HomeReportServiceTest {
 
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
         when(careCallSettingRepository.findByElder(testElder)).thenReturn(Optional.of(CareCallSetting.builder().build()));
-        when(medicationScheduleRepository.findByElder(testElder)).thenReturn(Collections.emptyList());
+
+        // 복약 스케줄 (아침약, 점심약, 저녁약)
+        List<MedicationSchedule> schedules = Arrays.asList(
+                MedicationSchedule.builder().name("아침약").scheduleTime(MedicationScheduleTime.MORNING).build(),
+                MedicationSchedule.builder().name("점심약").scheduleTime(MedicationScheduleTime.LUNCH).build(),
+                MedicationSchedule.builder().name("저녁약").scheduleTime(MedicationScheduleTime.DINNER).build()
+        );
+        when(medicationScheduleRepository.findByElder(testElder)).thenReturn(schedules);
 
         // 복약 기록: 2개는 TAKEN, 1개는 NOT_TAKEN
         List<MedicationTakenRecord> takenRecords = Arrays.asList(
-                MedicationTakenRecord.builder().name("아침약").takenStatus(MedicationTakenStatus.TAKEN).build(),
-                MedicationTakenRecord.builder().name("점심약").takenStatus(MedicationTakenStatus.TAKEN).build(),
-                MedicationTakenRecord.builder().name("저녁약").takenStatus(MedicationTakenStatus.NOT_TAKEN).build()
+                MedicationTakenRecord.builder().name("아침약").medicationSchedule(schedules.get(0)).takenStatus(MedicationTakenStatus.TAKEN).takenTime(MedicationScheduleTime.MORNING).build(),
+                MedicationTakenRecord.builder().name("점심약").medicationSchedule(schedules.get(1)).takenStatus(MedicationTakenStatus.TAKEN).takenTime(MedicationScheduleTime.LUNCH).build(),
+                MedicationTakenRecord.builder().name("저녁약").medicationSchedule(schedules.get(2)).takenStatus(MedicationTakenStatus.NOT_TAKEN).build()
         );
         when(medicationTakenRecordRepository.findByElderIdAndDate(eq(elderId), any())).thenReturn(takenRecords);
 
@@ -630,6 +664,90 @@ class HomeReportServiceTest {
         // then
         // `TAKEN` 상태인 기록은 2개이므로, totalTaken은 2가 되어야 한다.
         assertThat(response.getMedicationStatus().getTotalTaken()).isEqualTo(2);
+
+        // medicationList의 doseStatusList
+        assertThat(response.getMedicationStatus().getMedicationList()).hasSize(3);
+
+        // 아침약 (TAKEN)
+        HomeReportResponse.MedicationInfo morningMedication = response.getMedicationStatus().getMedicationList().stream()
+                .filter(m -> m.getType().equals("아침약")).findFirst().orElseThrow();
+        assertThat(morningMedication.getDoseStatusList()).hasSize(3);
+        assertThat(morningMedication.getDoseStatusList().get(0).getTime()).isEqualTo(MedicationScheduleTime.MORNING);
+        assertThat(morningMedication.getDoseStatusList().get(0).getTaken()).isTrue();
+
+        // 점심약 (TAKEN)
+        HomeReportResponse.MedicationInfo lunchMedication = response.getMedicationStatus().getMedicationList().stream()
+                .filter(m -> m.getType().equals("점심약")).findFirst().orElseThrow();
+        assertThat(lunchMedication.getDoseStatusList()).hasSize(3);
+        assertThat(lunchMedication.getDoseStatusList().get(1).getTime()).isEqualTo(MedicationScheduleTime.LUNCH);
+        assertThat(lunchMedication.getDoseStatusList().get(1).getTaken()).isTrue();
+
+        // 저녁약 (NOT_TAKEN)
+        HomeReportResponse.MedicationInfo dinnerMedication = response.getMedicationStatus().getMedicationList().stream()
+                .filter(m -> m.getType().equals("저녁약")).findFirst().orElseThrow();
+        assertThat(dinnerMedication.getDoseStatusList()).hasSize(3);
+        assertThat(dinnerMedication.getDoseStatusList().get(2).getTime()).isEqualTo(MedicationScheduleTime.DINNER);
+        assertThat(dinnerMedication.getDoseStatusList().get(2).getTaken()).isFalse(); // NOT_TAKEN이므로 false
     }
 
+    @Test
+    @DisplayName("복약 정보의 doseStatusList가 올바르게 생성되는지 테스트")
+    void getHomeReport_generatesDoseStatusListCorrectly() {
+        // given
+        Integer elderId = 1;
+        LocalDateTime testTime = LocalDate.now().atTime(10, 0); // 아침약 복용 후, 점심약 복용 전 시간
+
+        when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
+
+        // 복약 스케줄 (혈압약: 아침, 점심, 저녁)
+        MedicationSchedule morningSchedule = createMedicationSchedule(1, "혈압약", MedicationScheduleTime.MORNING);
+        MedicationSchedule lunchSchedule = createMedicationSchedule(2, "혈압약", MedicationScheduleTime.LUNCH);
+        MedicationSchedule dinnerSchedule = createMedicationSchedule(3, "혈압약", MedicationScheduleTime.DINNER);
+        List<MedicationSchedule> schedules = Arrays.asList(morningSchedule, lunchSchedule, dinnerSchedule);
+        when(medicationScheduleRepository.findByElder(testElder)).thenReturn(schedules);
+
+        // 복약 기록 (아침 혈압약만 복용)
+        MedicationTakenRecord morningTaken = MedicationTakenRecord.builder()
+                .id(1)
+                .name("혈압약")
+                .medicationSchedule(morningSchedule)
+                .takenStatus(MedicationTakenStatus.TAKEN)
+                .takenTime(MedicationScheduleTime.MORNING) // LocalDateTime 대신 MedicationScheduleTime 할당
+                .build();
+        List<MedicationTakenRecord> takenRecords = Arrays.asList(morningTaken);
+        when(medicationTakenRecordRepository.findByElderIdAndDate(eq(elderId), any(LocalDate.class))).thenReturn(takenRecords);
+
+        // 나머지 데이터는 비어있다고 가정
+        when(mealRecordRepository.findByElderIdAndDate(any(), any())).thenReturn(Collections.emptyList());
+        when(bloodSugarRecordRepository.findByElderIdAndDate(any(), any())).thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateWithSleepData(any(), any())).thenReturn(Collections.emptyList());
+        when(careCallRecordRepository.findByElderIdAndDateBetween(any(), any(), any())).thenReturn(Collections.emptyList());
+        when(careCallSettingRepository.findByElder(testElder)).thenReturn(Optional.of(CareCallSetting.builder().build()));
+        when(aiSummaryService.getHomeSummary(any())).thenReturn("AI 요약");
+
+        // when
+        HomeReportResponse response = homeReportService.getHomeReport(elderId, testTime);
+
+        // then
+        assertThat(response.getMedicationStatus().getMedicationList()).hasSize(1);
+        HomeReportResponse.MedicationInfo medicationInfo = response.getMedicationStatus().getMedicationList().get(0);
+        assertThat(medicationInfo.getType()).isEqualTo("혈압약");
+        assertThat(medicationInfo.getTaken()).isEqualTo(1);
+        assertThat(medicationInfo.getGoal()).isEqualTo(3);
+
+        List<HomeReportResponse.DoseStatus> doseStatusList = medicationInfo.getDoseStatusList();
+        assertThat(doseStatusList).hasSize(3);
+
+        // 아침 (복용)
+        assertThat(doseStatusList.get(0).getTime()).isEqualTo(MedicationScheduleTime.MORNING);
+        assertThat(doseStatusList.get(0).getTaken()).isTrue();
+
+        // 점심 (미복용 - null)
+        assertThat(doseStatusList.get(1).getTime()).isEqualTo(MedicationScheduleTime.LUNCH);
+        assertThat(doseStatusList.get(1).getTaken()).isNull();
+
+        // 저녁 (미복용 - null)
+        assertThat(doseStatusList.get(2).getTime()).isEqualTo(MedicationScheduleTime.DINNER);
+        assertThat(doseStatusList.get(2).getTaken()).isNull();
+    }
 }
