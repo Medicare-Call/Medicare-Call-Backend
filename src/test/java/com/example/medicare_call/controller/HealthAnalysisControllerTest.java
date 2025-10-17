@@ -111,7 +111,8 @@ class HealthAnalysisControllerTest {
                         .param("date", "invalid-date")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.code").value("INVALID_TYPE_VALUE"))
                 .andExpect(jsonPath("$.message").value("Invalid value 'invalid-date' for parameter 'date'."));
     }
 } 
