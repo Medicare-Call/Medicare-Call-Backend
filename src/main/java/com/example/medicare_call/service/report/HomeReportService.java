@@ -1,32 +1,24 @@
 package com.example.medicare_call.service.report;
 
-import com.example.medicare_call.domain.*;
+import com.example.medicare_call.domain.DailyStatistics;
+import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.dto.report.HomeReportResponse;
-import com.example.medicare_call.global.enums.MedicationTakenStatus;
+import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
-import com.example.medicare_call.global.enums.MealType;
-import com.example.medicare_call.global.enums.MedicationScheduleTime;
-import com.example.medicare_call.repository.*;
-import com.example.medicare_call.dto.report.HomeSummaryDto;
-import com.example.medicare_call.service.ai.AiSummaryService;
+import com.example.medicare_call.repository.DailyStatisticsRepository;
+import com.example.medicare_call.repository.ElderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.Optional;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -34,58 +26,34 @@ import java.util.stream.Stream;
 public class HomeReportService {
 
     private final ElderRepository elderRepository;
-    private final MealRecordRepository mealRecordRepository;
-    private final MedicationScheduleRepository medicationScheduleRepository;
-    private final MedicationTakenRecordRepository medicationTakenRecordRepository;
-    private final BloodSugarRecordRepository bloodSugarRecordRepository;
-    private final CareCallRecordRepository careCallRecordRepository;
-    private final AiSummaryService aiSummaryService;
-    private final CareCallSettingRepository careCallSettingRepository;
+    private final DailyStatisticsRepository dailyStatisticsRepository;
 
     public HomeReportResponse getHomeReport(Integer elderId) {
         return getHomeReport(elderId, LocalDateTime.now());
     }
 
-    public HomeReportResponse getHomeReport(Integer elderId, LocalDateTime now) {
-        LocalDate today = now.toLocalDate();
+    public HomeReportResponse getHomeReport(Integer elderId, LocalDateTime dateTime) {
+        LocalDate today = dateTime.toLocalDate();
+        LocalTime now = dateTime.toLocalTime();
 
         // 어르신 정보 조회
         Elder elder = elderRepository.findById(elderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ELDER_NOT_FOUND));
 
-        // 오늘의 식사 기록 조회
-        List<MealRecord> todayMeals = mealRecordRepository.findByElderIdAndDate(elderId, today);
-        HomeReportResponse.MealStatus mealStatus = getMealStatus(todayMeals);
+        // 오늘 날짜에 해당하는 통계 데이터 조회
+        DailyStatistics dailyStatistics = dailyStatisticsRepository.findByElderAndDate(elder, today)
+                .orElseThrow(() -> new CustomException(ErrorCode.NO_DATA_FOR_TODAY));
 
-        // 복약 정보 조회
-        List<MedicationSchedule> medicationSchedules = medicationScheduleRepository.findByElder(elder);
-        List<MedicationTakenRecord> todayMedications = medicationTakenRecordRepository.findByElderIdAndDate(elderId, today);
-        HomeReportResponse.MedicationStatus medicationStatus = getMedicationStatus(elder, medicationSchedules, todayMedications, now);
+        HomeReportResponse.MealStatus mealStatus = convertMealStatus(dailyStatistics);
+        HomeReportResponse.MedicationStatus medicationStatus = convertMedicationStatus(dailyStatistics, now);
 
-        // 수면 정보 조회
-        HomeReportResponse.Sleep sleep = getSleepInfo(elderId, today);
+        HomeReportResponse.Sleep sleep = convertSleep(dailyStatistics);
+        HomeReportResponse.BloodSugar bloodSugar = convertBloodSugar(dailyStatistics);
 
         // 건강 상태 및 심리 상태 조회
-        String healthStatus = getHealthStatus(elderId, today);
-        String mentalStatus = getMentalStatus(elderId, today);
-
-        // 혈당 정보 조회
-        HomeReportResponse.BloodSugar bloodSugar = getBloodSugarInfo(elderId, today);
-
-        // 모든 데이터가 비어있는지 확인
-        if (todayMeals.isEmpty() &&
-                todayMedications.isEmpty() &&
-                sleep == null &&
-                healthStatus == null &&
-                mentalStatus == null &&
-                bloodSugar == null
-        ) {
-            throw new CustomException(ErrorCode.NO_DATA_FOR_TODAY);
-        }
-
-        // AI 요약 생성
-        HomeSummaryDto summaryDto = createHomeSummaryDto(mealStatus, medicationStatus, sleep, healthStatus, mentalStatus, bloodSugar);
-        String aiSummary = aiSummaryService.getHomeSummary(summaryDto);
+        String healthStatus = dailyStatistics.getHealthStatus();
+        String mentalStatus = dailyStatistics.getMentalStatus();
+        String aiSummary = dailyStatistics.getAiSummary();
 
         return HomeReportResponse.builder()
                 .elderName(elder.getName())
@@ -99,216 +67,95 @@ public class HomeReportService {
                 .build();
     }
 
-    private HomeSummaryDto createHomeSummaryDto(HomeReportResponse.MealStatus mealStatus,
-                                                HomeReportResponse.MedicationStatus medicationStatus,
-                                                HomeReportResponse.Sleep sleep,
-                                                String healthStatus,
-                                                String mentalStatus,
-                                                HomeReportResponse.BloodSugar bloodSugar) {
-        HomeReportResponse.MealStatus finalMealStatus = Optional.ofNullable(mealStatus)
-                .orElse(HomeReportResponse.MealStatus.builder().build());
-
-        return HomeSummaryDto.builder()
-                .breakfast(finalMealStatus.getBreakfast())
-                .lunch(finalMealStatus.getLunch())
-                .dinner(finalMealStatus.getDinner())
-                .totalTakenMedication(medicationStatus != null ? medicationStatus.getTotalTaken() : 0)
-                .totalGoalMedication(medicationStatus != null ? medicationStatus.getTotalGoal() : 0)
-                .sleepHours(sleep != null ? sleep.getMeanHours() : null)
-                .sleepMinutes(sleep != null ? sleep.getMeanMinutes() : null)
-                .healthStatus(healthStatus)
-                .mentalStatus(mentalStatus)
-                .averageBloodSugar(bloodSugar != null ? bloodSugar.getMeanValue() : null)
+    private HomeReportResponse.MealStatus convertMealStatus(DailyStatistics dailyStatistics) {
+        return HomeReportResponse.MealStatus.builder()
+                .breakfast(dailyStatistics.getBreakfastTaken())
+                .lunch(dailyStatistics.getLunchTaken())
+                .dinner(dailyStatistics.getDinnerTaken())
                 .build();
     }
 
-    private HomeReportResponse.MealStatus getMealStatus(List<MealRecord> todayMeals) {
-        Boolean breakfast = null;
-        Boolean lunch = null;
-        Boolean dinner = null;
+    private HomeReportResponse.MedicationStatus convertMedicationStatus(DailyStatistics dailyStatistics, LocalTime now) {
+        Integer totalTaken = dailyStatistics.getMedicationTotalTaken();
+        Integer totalGoal = dailyStatistics.getMedicationTotalGoal();
 
-        if(!todayMeals.isEmpty()) {
-            for (MealRecord meal : todayMeals) {
-
-                if (meal == null) continue;
-                MealType mealType = MealType.fromValue(meal.getMealType());
-                if (mealType != null) {
-                    switch (mealType) {
-                        case BREAKFAST:
-                            breakfast = meal.getEatenStatus() == (byte) 1;
-                            break;
-                        case LUNCH:
-                            lunch = meal.getEatenStatus() == (byte) 1;
-                            break;
-                        case DINNER:
-                            dinner = meal.getEatenStatus() == (byte) 1;
-                            break;
-                    }
-                }
-            }
+        if (dailyStatistics.getMedicationList() == null) {
+            return HomeReportResponse.MedicationStatus.builder()
+                    .totalTaken(totalTaken)
+                    .totalGoal(totalGoal)
+                    .medicationList(List.of())
+                    .build();
         }
 
-        return HomeReportResponse.MealStatus.builder()
-                .breakfast(breakfast)
-                .lunch(lunch)
-                .dinner(dinner)
-                .build();
-    }
-
-    private HomeReportResponse.MedicationStatus getMedicationStatus(Elder elder, List<MedicationSchedule> schedules, List<MedicationTakenRecord> todayMedications, LocalDateTime now) {
-        long totalTaken = todayMedications.stream()
-                .filter(record -> record.getTakenStatus() == MedicationTakenStatus.TAKEN)
-                .count();
-
-        // 약 종류별로 스케줄을 그룹화하여 목표 복용 횟수 계산
-        Map<String, List<MedicationSchedule>> medicationSchedules = schedules.stream()
-                .collect(Collectors.groupingBy(
-                        MedicationSchedule::getName
-                ));
-
-        // 약 종류별 복용 횟수 계산
-        Map<String, Long> medicationTakenCounts = todayMedications.stream()
-                .filter(mtr -> mtr.getMedicationSchedule() != null && mtr.getTakenStatus() == MedicationTakenStatus.TAKEN)
-                .collect(Collectors.groupingBy(
-                        MedicationTakenRecord::getName,
-                        Collectors.counting()
-                ));
-
-        List<HomeReportResponse.MedicationInfo> medicationList = medicationSchedules.entrySet().stream()
-                .map(entry -> {
-                    String medicationName = entry.getKey();
-                    List<MedicationSchedule> medicationScheduleList = entry.getValue();
-
-                    // 해당 약의 하루 목표 복용 횟수
-                    int goal = medicationScheduleList.size();
-                    int taken = medicationTakenCounts.getOrDefault(medicationName, 0L).intValue();
-
-                    // 다음 복약 시간 계산 (해당 약의 스케줄 중 가장 가까운 시간)
-                    MedicationScheduleTime nextTime = calculateNextMedicationTimeForMedication(medicationScheduleList);
-
-                    List<HomeReportResponse.DoseStatus> doseStatusList = Stream.of(MedicationScheduleTime.MORNING, MedicationScheduleTime.LUNCH, MedicationScheduleTime.DINNER)
-                            .map(scheduleTime -> {
-                                Optional<MedicationTakenRecord> matchingRecord = todayMedications.stream()
-                                        .filter(mtr -> mtr.getMedicationSchedule() != null &&
-                                                mtr.getMedicationSchedule().getName().equals(medicationName) &&
-                                                mtr.getMedicationSchedule().getScheduleTime() == scheduleTime)
-                                        .findFirst();
-
-                                Boolean takenStatus = matchingRecord.map(record -> {
-                                    if (record.getTakenStatus() == MedicationTakenStatus.TAKEN) {
-                                        return true;
-                                    } else if (record.getTakenStatus() == MedicationTakenStatus.NOT_TAKEN) {
-                                        return false;
-                                    } else {
-                                        return null;
-                                    }
-                                }).orElse(null);
-
-                                return HomeReportResponse.DoseStatus.builder()
-                                        .time(scheduleTime)
-                                        .taken(takenStatus)
-                                        .build();
-                            })
+        List<HomeReportResponse.MedicationInfo> medicationList = dailyStatistics.getMedicationList().stream()
+                .map(dailyMedicationInfo -> {
+                    List<HomeReportResponse.DoseStatus> doseStatusList = dailyMedicationInfo.getDoseStatusList().stream()
+                            .map(dailyDoseStatus -> HomeReportResponse.DoseStatus.builder()
+                                    .time(dailyDoseStatus.getTime())
+                                    .taken(dailyDoseStatus.getTaken())
+                                    .build())
                             .collect(Collectors.toList());
 
+                    MedicationScheduleTime nextTime = calculateNextTime(dailyMedicationInfo.getDoseStatusList(), now);
+
                     return HomeReportResponse.MedicationInfo.builder()
-                            .type(medicationName)
-                            .taken(taken)
-                            .goal(goal)
-                            .nextTime(nextTime)
+                            .type(dailyMedicationInfo.getType())
+                            .taken(dailyMedicationInfo.getTaken())
+                            .goal(dailyMedicationInfo.getGoal())
                             .doseStatusList(doseStatusList)
+                            .nextTime(nextTime)
                             .build();
                 })
                 .collect(Collectors.toList());
 
-        // 아침, 점심, 저녁 시간대 별 전체 목표 복용 횟수 계산
-        int totalGoal = calculateTotalGoal(elder, schedules, now);
-
-        // 전체 다음 복약 시간 계산 (모든 약 중 가장 가까운 시간)
-        MedicationScheduleTime nextTime = calculateNextMedicationTime(schedules);
-
         return HomeReportResponse.MedicationStatus.builder()
-                .totalTaken((int) totalTaken)
+                .totalTaken(totalTaken)
                 .totalGoal(totalGoal)
                 .medicationList(medicationList)
                 .build();
     }
 
-    private int calculateTotalGoal(Elder elder, List<MedicationSchedule> schedules, LocalDateTime now) {
-        Optional<CareCallSetting> settingOpt = careCallSettingRepository.findByElder(elder);
-        if (settingOpt.isEmpty()) {
-            return schedules.size(); // 설정 없으면 전체
+    private HomeReportResponse.Sleep convertSleep(DailyStatistics dailyStatistics) {
+        Integer avgSleepMinutes = dailyStatistics.getAvgSleepMinutes();
+
+        return HomeReportResponse.Sleep.builder()
+                .meanHours(avgSleepMinutes != null ? avgSleepMinutes/60 : null)
+                .meanMinutes(avgSleepMinutes != null ? avgSleepMinutes%60 : null)
+                .build();
+    }
+
+    private HomeReportResponse.BloodSugar convertBloodSugar(DailyStatistics dailyStatistics) {
+        Integer avgBloodSugar = dailyStatistics.getAvgBloodSugar();
+
+        return HomeReportResponse.BloodSugar.builder()
+                .meanValue(avgBloodSugar)
+                .build();
+    }
+
+    private MedicationScheduleTime calculateNextTime(List<DailyStatistics.DoseStatus> doseStatuses, LocalTime now) {
+        if (doseStatuses == null || doseStatuses.isEmpty()) {
+            return null;
         }
 
-        LocalDate today = now.toLocalDate();
-        List<CareCallRecord> todayCompletedCalls = careCallRecordRepository
-                .findByElderIdAndDateBetween(elder.getId(), today.atStartOfDay(), today.atTime(LocalTime.MAX))
-                .stream()
-                .filter(record -> "completed".equalsIgnoreCase(record.getCallStatus()))
+        // 시간 순으로 정렬
+        List<DailyStatistics.DoseStatus> sortedStatuses = doseStatuses.stream()
+                .sorted(Comparator.comparing(ds -> getLocalTimeFromScheduleTime(ds.getTime())))
                 .toList();
 
-        if (todayCompletedCalls.isEmpty()) {
-            return 0; // 오늘 완료된 케어콜이 없으면 0
+        // 현재 시각 이후 & 아직 복용하지 않은 시간대
+        Optional<DailyStatistics.DoseStatus> nextDose = sortedStatuses.stream()
+                .filter(ds -> !Boolean.TRUE.equals(ds.getTaken()))
+                .filter(ds -> getLocalTimeFromScheduleTime(ds.getTime()).isAfter(now))
+                .findFirst();
+
+        if (nextDose.isPresent()) {
+            return nextDose.get().getTime();
         }
 
-        CareCallSetting setting = settingOpt.get();
-        long totalGoal = 0;
-
-        // 1차(아침) 케어콜이 완료되었는지 확인하고 목표량 추가
-        boolean morningCallCompleted = todayCompletedCalls.stream()
-                .anyMatch(r -> isCallInTimeSlot(r.getCalledAt().toLocalTime(), setting.getFirstCallTime(), setting.getSecondCallTime()));
-        if (morningCallCompleted) {
-            totalGoal += schedules.stream().filter(s -> s.getScheduleTime() == MedicationScheduleTime.MORNING).count();
-        }
-
-        // 2차(점심) 케어콜이 완료되었는지 확인하고 목표량 추가
-        if (setting.getSecondCallTime() != null) {
-            boolean lunchCallCompleted = todayCompletedCalls.stream()
-                    .anyMatch(r -> isCallInTimeSlot(r.getCalledAt().toLocalTime(), setting.getSecondCallTime(), setting.getThirdCallTime()));
-            if (lunchCallCompleted) {
-                totalGoal += schedules.stream().filter(s -> s.getScheduleTime() == MedicationScheduleTime.LUNCH).count();
-            }
-        }
-
-        // 3차(저녁) 케어콜이 완료되었는지 확인하고 목표량 추가
-        if (setting.getThirdCallTime() != null) {
-            boolean dinnerCallCompleted = todayCompletedCalls.stream()
-                    .anyMatch(r -> isCallInTimeSlot(r.getCalledAt().toLocalTime(), setting.getThirdCallTime(), null));
-            if (dinnerCallCompleted) {
-                totalGoal += schedules.stream().filter(s -> s.getScheduleTime() == MedicationScheduleTime.DINNER).count();
-            }
-        }
-
-        return (int) totalGoal;
+        // 오늘 이후 남은 미복용이 없거나 모두 복용했을 경우, 전체 중 첫 번째 시간대 반환
+        return sortedStatuses.get(0).getTime();
     }
 
-    // 케어콜 시간이 특정 시간대(1,2,3차)에 속하는지 확인
-    private boolean isCallInTimeSlot(LocalTime callTime, LocalTime slotStartTime, LocalTime nextSlotStartTime) {
-        // 다음 콜 시간이 없는 경우 (3차 케어콜)
-        if (nextSlotStartTime == null) {
-            return !callTime.isBefore(slotStartTime);
-        }
-        // 시간대가 명확한 경우
-        return !callTime.isBefore(slotStartTime) && callTime.isBefore(nextSlotStartTime);
-    }
-
-    private MedicationScheduleTime calculateNextMedicationTime(List<MedicationSchedule> schedules) {
-        return calculateNextMedicationTimeFrom(schedules);
-    }
-
-    private MedicationScheduleTime calculateNextMedicationTimeFrom(List<MedicationSchedule> schedules) {
-        LocalTime now = LocalTime.now();
-
-        Optional<MedicationScheduleTime> nextTimeToday = schedules.stream()
-                .map(MedicationSchedule::getScheduleTime)
-                .filter(scheduleTime -> getLocalTimeFromScheduleTime(scheduleTime).isAfter(now))
-                .min(Comparator.comparing(this::getLocalTimeFromScheduleTime));
-
-        return nextTimeToday.orElseGet(() -> schedules.stream()
-                .map(MedicationSchedule::getScheduleTime)
-                .min(Comparator.comparing(this::getLocalTimeFromScheduleTime))
-                .orElse(MedicationScheduleTime.MORNING));
-    }
 
     private LocalTime getLocalTimeFromScheduleTime(MedicationScheduleTime scheduleTime) {
         switch (scheduleTime) {
@@ -321,110 +168,5 @@ public class HomeReportService {
             default:
                 return LocalTime.of(8, 0);
         }
-    }
-
-    private MedicationScheduleTime calculateNextMedicationTimeForMedication(List<MedicationSchedule> medicationSchedules) {
-        return calculateNextMedicationTimeFrom(medicationSchedules);
-    }
-
-    private HomeReportResponse.Sleep getSleepInfo(Integer elderId, LocalDate date) {
-        List<CareCallRecord> sleepRecords = careCallRecordRepository.findByElderIdAndDateWithSleepData(elderId, date);
-
-        if (sleepRecords.isEmpty()) {
-            return null;
-        }
-
-        // 수면 시간 계산
-        long totalMinutes = 0;
-        int validRecords = 0;
-
-        for (CareCallRecord record : sleepRecords) {
-            if (record.getSleepStart() != null && record.getSleepEnd() != null) {
-                // 수면 시간 계산 (LocalDateTime 형식)
-                LocalDateTime sleepStart = record.getSleepStart();
-                LocalDateTime sleepEnd = record.getSleepEnd();
-
-                try {
-                    long durationMinutes = Duration.between(sleepStart, sleepEnd).toMinutes();
-                    totalMinutes += durationMinutes;
-                    validRecords++;
-                } catch (Exception e) {
-                    log.warn("수면 시간 계산 실패: start={}, end={}", sleepStart, sleepEnd);
-                }
-            }
-        }
-
-        if (validRecords == 0) {
-            return null;
-        }
-
-        long averageMinutes = totalMinutes / validRecords;
-        int hours = (int) (averageMinutes / 60);
-        int minutes = (int) (averageMinutes % 60);
-
-        return HomeReportResponse.Sleep.builder()
-                .meanHours(hours)
-                .meanMinutes(minutes)
-                .build();
-    }
-
-    private String getHealthStatus(Integer elderId, LocalDate date) {
-        List<CareCallRecord> healthRecords = careCallRecordRepository.findByElderIdAndDateBetween(elderId, date.atStartOfDay(), date.atTime(LocalTime.MAX));
-
-        if (healthRecords == null || healthRecords.isEmpty()) {
-            return null;
-        }
-
-        // 오늘 데이터 중 null이 아닌 최신 건강 상태 반환
-        for (int i = healthRecords.size() - 1; i >= 0; i--) {
-            Byte healthStatus = healthRecords.get(i).getHealthStatus();
-            if (healthStatus != null) {
-                return healthStatus == 1 ? "좋음" : "나쁨";
-            }
-        }
-
-        return null;
-    }
-
-    private String getMentalStatus(Integer elderId, LocalDate date) {
-        List<CareCallRecord> mentalRecords = careCallRecordRepository.findByElderIdAndDateBetween(elderId, date.atStartOfDay(), date.atTime(LocalTime.MAX));
-
-        if (mentalRecords == null || mentalRecords.isEmpty()) {
-            return null;
-        }
-
-        // 오늘 데이터 중 null이 아닌 최신 심리 상태 반환
-        for (int i = mentalRecords.size() - 1; i >= 0; i--) {
-            Byte psychStatus = mentalRecords.get(i).getPsychStatus();
-            if (psychStatus != null) {
-                return psychStatus == 1 ? "좋음" : "나쁨";
-            }
-        }
-
-        return null;
-    }
-
-    private HomeReportResponse.BloodSugar getBloodSugarInfo(Integer elderId, LocalDate date) {
-        List<BloodSugarRecord> bloodSugarRecords = bloodSugarRecordRepository.findByElderIdAndDate(elderId, date);
-
-        if (bloodSugarRecords.isEmpty()) {
-            return null;
-        }
-
-        // 평균 혈당 계산
-        BigDecimal sum = bloodSugarRecords.stream()
-                .map(BloodSugarRecord::getBlood_sugar_value)
-                .filter(Objects::nonNull)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        if (sum.equals(BigDecimal.ZERO)) {
-            return null;
-        }
-
-        BigDecimal average = sum.divide(BigDecimal.valueOf(bloodSugarRecords.size()), 0, RoundingMode.HALF_UP);
-
-        return HomeReportResponse.BloodSugar.builder()
-                .meanValue(average.intValue())
-                .build();
     }
 }
