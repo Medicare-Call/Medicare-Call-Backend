@@ -1,7 +1,7 @@
 package com.example.medicare_call.service.ai.prompt;
 
-import com.example.medicare_call.dto.report.WeeklyReportResponse;
 import com.example.medicare_call.dto.report.WeeklySummaryDto;
+import com.example.medicare_call.service.statistics.WeeklyStatisticsService;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.stereotype.Component;
 
@@ -55,19 +55,19 @@ public class WeeklySummaryPromptBuilder implements PromptBuilder<WeeklySummaryDt
         promptTemplate.add("healthSignals", weeklySummaryDto.getHealthSignals());
         promptTemplate.add("missedCalls", weeklySummaryDto.getMissedCalls());
         var bloodSugar = weeklySummaryDto.getBloodSugar();
-        promptTemplate.add("bloodSugarBeforeMeal", formatBloodSugarStats(bloodSugar != null ? bloodSugar.getBeforeMeal() : null));
-        promptTemplate.add("bloodSugarAfterMeal", formatBloodSugarStats(bloodSugar != null ? bloodSugar.getAfterMeal() : null));
+        promptTemplate.add("bloodSugarBeforeMeal", formatBloodSugarStats(bloodSugar != null ? bloodSugar.beforeMeal() : null));
+        promptTemplate.add("bloodSugarAfterMeal", formatBloodSugarStats(bloodSugar != null ? bloodSugar.afterMeal() : null));
 
         return promptTemplate.create().getContents();
     }
 
-    private String formatBloodSugarStats(WeeklyReportResponse.BloodSugarType bloodSugarType) {
+    private String formatBloodSugarStats(WeeklyStatisticsService.WeeklyBloodSugarType bloodSugarType) {
         if (bloodSugarType == null) {
             return "측정 기록 없음";
         }
         return String.format("정상 %d회, 고혈당 %d회, 저혈당 %d회",
-                bloodSugarType.getNormal(),
-                bloodSugarType.getHigh(),
-                bloodSugarType.getLow());
+                bloodSugarType.normal(),
+                bloodSugarType.high(),
+                bloodSugarType.low());
     }
 }

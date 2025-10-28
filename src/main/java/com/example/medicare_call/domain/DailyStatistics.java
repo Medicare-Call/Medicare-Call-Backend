@@ -62,16 +62,16 @@ public class DailyStatistics {
     @Column(name = "avg_blood_sugar")
     private Integer avgBloodSugar;
 
-    // 상태 및 요약
-    @Column(name = "ai_summary", columnDefinition = "TEXT")
-    private String aiSummary;
-
     // TODO: Enum 변환 고려
     @Column(name = "health_status")
     private String healthStatus; // "좋음", "나쁨"
 
     @Column(name = "mental_status")
     private String mentalStatus; // "좋음", "나쁨"
+
+    // 상태 및 요약
+    @Column(name = "ai_summary", columnDefinition = "TEXT")
+    private String aiSummary;
 
     @Getter
     @Builder

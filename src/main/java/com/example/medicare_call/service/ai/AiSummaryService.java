@@ -1,10 +1,10 @@
 package com.example.medicare_call.service.ai;
 
-import com.example.medicare_call.dto.report.HomeSummaryDto;
 import com.example.medicare_call.dto.data_processor.ai.OpenAiRequest;
 import com.example.medicare_call.dto.data_processor.ai.OpenAiResponse;
-import com.example.medicare_call.dto.report.WeeklyReportResponse;
+import com.example.medicare_call.dto.report.HomeSummaryDto;
 import com.example.medicare_call.dto.report.WeeklySummaryDto;
+import com.example.medicare_call.service.statistics.WeeklyStatisticsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -203,19 +203,19 @@ public class AiSummaryService {
                 weeklySummaryDto.getNegativePsychologicalCount(),
                 weeklySummaryDto.getHealthSignals(),
                 weeklySummaryDto.getMissedCalls(),
-                formatBloodSugarStats(weeklySummaryDto.getBloodSugar().getBeforeMeal()),
-                formatBloodSugarStats(weeklySummaryDto.getBloodSugar().getAfterMeal())
+                formatBloodSugarStats(weeklySummaryDto.getBloodSugar().beforeMeal()),
+                formatBloodSugarStats(weeklySummaryDto.getBloodSugar().afterMeal())
         );
     }
 
-    private String formatBloodSugarStats(WeeklyReportResponse.BloodSugarType bloodSugarType) {
+    private String formatBloodSugarStats(WeeklyStatisticsService.WeeklyBloodSugarType bloodSugarType) {
         if (bloodSugarType == null) {
             return "측정 기록 없음";
         }
         return String.format("정상 %d회, 고혈당 %d회, 저혈당 %d회",
-                bloodSugarType.getNormal(),
-                bloodSugarType.getHigh(),
-                bloodSugarType.getLow());
+                bloodSugarType.normal(),
+                bloodSugarType.high(),
+                bloodSugarType.low());
     }
 
     public String getSymptomAnalysis(List<String> symptomList) {

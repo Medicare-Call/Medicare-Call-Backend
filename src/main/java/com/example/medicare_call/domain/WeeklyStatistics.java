@@ -61,6 +61,19 @@ public class WeeklyStatistics {
     @Column(name = "medication_stats", columnDefinition = "json")
     private Map<String, MedicationStats> medicationStats;
 
+    // 평균 수면 시간
+    // TODO: Embedded Type 전환 고려 - AverageSleep
+    @Column(name = "avg_sleep_hours")
+    private Integer avgSleepHours;
+
+    @Column(name = "avg_sleep_minutes")
+    private Integer avgSleepMinutes;
+
+    // 혈당 상태 통계
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "blood_sugar_stats", columnDefinition = "json")
+    private BloodSugarStats bloodSugarStats;
+
     // 심리 상태 통계
     // TODO: Embedded Type 전환 고려 - PsychSummary
     @Column(name = "psych_good_count")
@@ -71,19 +84,6 @@ public class WeeklyStatistics {
 
     @Column(name = "psych_bad_count")
     private Integer psychBadCount;
-
-    // 혈당 상태 통계
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "blood_sugar_stats", columnDefinition = "json")
-    private BloodSugarStats bloodSugarStats;
-
-    // 평균 수면 시간
-    // TODO: Embedded Type 전환 고려 - AverageSleep
-    @Column(name = "avg_sleep_hours")
-    private Integer avgSleepHours;
-
-    @Column(name = "avg_sleep_minutes")
-    private Integer avgSleepMinutes;
 
     // AI가 생성한 건강 상태 요약 문장
     @Column(name = "ai_health_summary", columnDefinition = "TEXT")
@@ -112,5 +112,39 @@ public class WeeklyStatistics {
         private Integer normal;
         private Integer high;
         private Integer low;
+    }
+
+    public void updateDetails(LocalDate endDate,
+                              Integer mealRate,
+                              Integer medicationRate,
+                              Integer healthSignals,
+                              Integer missedCalls,
+                              Integer breakfastCount,
+                              Integer lunchCount,
+                              Integer dinnerCount,
+                              Map<String, MedicationStats> medicationStats,
+                              Integer psychGoodCount,
+                              Integer psychNormalCount,
+                              Integer psychBadCount,
+                              BloodSugarStats bloodSugarStats,
+                              Integer avgSleepHours,
+                              Integer avgSleepMinutes,
+                              String aiHealthSummary) {
+        this.endDate = endDate;
+        this.mealRate = mealRate;
+        this.medicationRate = medicationRate;
+        this.healthSignals = healthSignals;
+        this.missedCalls = missedCalls;
+        this.breakfastCount = breakfastCount;
+        this.lunchCount = lunchCount;
+        this.dinnerCount = dinnerCount;
+        this.medicationStats = medicationStats;
+        this.psychGoodCount = psychGoodCount;
+        this.psychNormalCount = psychNormalCount;
+        this.psychBadCount = psychBadCount;
+        this.bloodSugarStats = bloodSugarStats;
+        this.avgSleepHours = avgSleepHours;
+        this.avgSleepMinutes = avgSleepMinutes;
+        this.aiHealthSummary = aiHealthSummary;
     }
 }

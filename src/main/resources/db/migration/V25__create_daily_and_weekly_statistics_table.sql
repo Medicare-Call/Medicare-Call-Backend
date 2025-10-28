@@ -2,7 +2,6 @@ CREATE TABLE daily_statistics (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     elder_id INT NOT NULL,
     date DATE NOT NULL,
-    ai_summary TEXT,
     breakfast_taken BOOLEAN,
     lunch_taken BOOLEAN,
     dinner_taken BOOLEAN,
@@ -10,9 +9,10 @@ CREATE TABLE daily_statistics (
     medication_total_goal INT,
     medication_details JSON,
     avg_sleep_minutes INT,
+    avg_blood_sugar INT,
     health_status VARCHAR(255),
     mental_status VARCHAR(255),
-    avg_blood_sugar INT,
+    ai_summary TEXT,
     CONSTRAINT fk_daily_statistics_elder FOREIGN KEY (elder_id) REFERENCES elder (id),
     UNIQUE KEY uk_daily_statistics_elder_date (elder_id, date)
 );
@@ -24,7 +24,6 @@ CREATE TABLE weekly_statistics (
     elder_id INT NOT NULL,
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
-    ai_health_summary TEXT,
     meal_rate INT,
     medication_rate INT,
     health_signals INT,
@@ -35,10 +34,11 @@ CREATE TABLE weekly_statistics (
     medication_stats JSON,
     avg_sleep_hours INT,
     avg_sleep_minutes INT,
+    blood_sugar_stats JSON,
     psych_good_count INT,
     psych_normal_count INT,
     psych_bad_count INT,
-    blood_sugar_stats JSON,
+    ai_health_summary TEXT,
     CONSTRAINT fk_weekly_statistics_elder FOREIGN KEY (elder_id) REFERENCES elder (id),
     UNIQUE KEY uk_weekly_statistics_elder_start_date (elder_id, start_date)
 );
