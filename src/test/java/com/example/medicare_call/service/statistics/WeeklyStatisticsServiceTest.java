@@ -38,13 +38,7 @@ class WeeklyStatisticsServiceTest {
     private WeeklyStatisticsRepository weeklyStatisticsRepository;
 
     @Mock
-    private MealRecordRepository mealRecordRepository;
-
-    @Mock
-    private MedicationScheduleRepository medicationScheduleRepository;
-
-    @Mock
-    private MedicationTakenRecordRepository medicationTakenRecordRepository;
+    private DailyStatisticsRepository dailyStatisticsRepository;
 
     @Mock
     private CareCallRecordRepository careCallRecordRepository;
@@ -146,25 +140,11 @@ class WeeklyStatisticsServiceTest {
     }
 
     @Test
-    @DisplayName("주간 통계 업데이트 실패 - 완료된 통화가 없음")
+    @DisplayName("주간 통계 업데이트 실패 - DailyStatistics 데이터가 없음")
     void updateWeeklyStatistics_fail_noCompletedCall() {
         // given
-        when(medicationScheduleRepository.findByElderId(testElder.getId()))
+        when(dailyStatisticsRepository.findByElderAndDateBetween(any(Elder.class), any(LocalDate.class), any(LocalDate.class)))
                 .thenReturn(Collections.emptyList());
-        when(mealRecordRepository.findByElderIdAndDateBetween(anyInt(), any(), any()))
-                .thenReturn(Collections.emptyList());
-        when(medicationTakenRecordRepository.findByElderIdAndDateBetween(anyInt(), any(), any()))
-                .thenReturn(Collections.emptyList());
-        when(bloodSugarRecordRepository.findByElderIdAndDateBetween(anyInt(), any(), any()))
-                .thenReturn(Collections.emptyList());
-
-        // 완료되지 않은 통화만 있음
-        CareCallRecord noAnswerRecord = CareCallRecord.builder()
-                .callStatus("no-answer")
-                .calledAt(testDate.atTime(10, 0))
-                .build();
-        when(careCallRecordRepository.findByElderIdAndDateBetween(anyInt(), any(), any()))
-                .thenReturn(List.of(noAnswerRecord));
 
         // when & then
         CustomException exception = assertThrows(CustomException.class, () -> {
@@ -177,19 +157,16 @@ class WeeklyStatisticsServiceTest {
     @DisplayName("식사 통계 계산 - 식사 횟수 및 식사율")
     void updateWeeklyStatistics_mealStats_countsCorrectly() {
         // given
-        List<MealRecord> mealRecords = Arrays.asList(
-                createMealRecord(MealType.BREAKFAST, (byte) 1),
-                createMealRecord(MealType.BREAKFAST, (byte) 1),
-                createMealRecord(MealType.LUNCH, (byte) 1),
-                createMealRecord(MealType.LUNCH, (byte) 0),  // 안 먹음
-                createMealRecord(MealType.DINNER, (byte) 1),
-                createMealRecord(MealType.DINNER, (byte) 1),
-                createMealRecord(MealType.DINNER, (byte) 1)
+        // 3일치 데이터: 아침2개, 점심1개(1개는 false), 저녁3개
+        List<DailyStatistics> dailyStatsList = Arrays.asList(
+                createDailyStatistics(testMonday, true, null, true, Collections.emptyList()),        // 아침O, 저녁O
+                createDailyStatistics(testMonday.plusDays(1), true, true, true, Collections.emptyList()),  // 전부O
+                createDailyStatistics(testMonday.plusDays(2), null, false, true, Collections.emptyList())  // 점심X, 저녁O
         );
 
         setupMockRepositories();
-        when(mealRecordRepository.findByElderIdAndDateBetween(testElder.getId(), testMonday, testDate))
-                .thenReturn(mealRecords);
+        when(dailyStatisticsRepository.findByElderAndDateBetween(testElder, testMonday, testDate))
+                .thenReturn(dailyStatsList);
         when(weeklyStatisticsRepository.findByElderAndStartDate(testElder, testMonday))
                 .thenReturn(Optional.empty());
 
@@ -201,32 +178,32 @@ class WeeklyStatisticsServiceTest {
         verify(weeklyStatisticsRepository).save(captor.capture());
 
         WeeklyStatistics savedStats = captor.getValue();
-        assertThat(savedStats.getBreakfastCount()).isEqualTo(2);
-        assertThat(savedStats.getLunchCount()).isEqualTo(1);  // 1개는 먹음, 1개는 안 먹음 = 먹은 것만 카운트
-        assertThat(savedStats.getDinnerCount()).isEqualTo(3);
-        // (2+1+3)/21 * 100 = 28.57... ≈ 29
-        assertThat(savedStats.getMealRate()).isEqualTo(29);
+        assertThat(savedStats.getBreakfastCount()).isEqualTo(2);  // true 2개
+        assertThat(savedStats.getLunchCount()).isEqualTo(1);      // true 1개, false 1개
+        assertThat(savedStats.getDinnerCount()).isEqualTo(3);     // true 3개
+        // 분자: 2+1+3 = 6, 분모: 2+2+3 = 7 (null 제외), 6/7*100 ≈ 86
+        assertThat(savedStats.getMealRate()).isEqualTo(86);
     }
 
     @Test
     @DisplayName("복약 통계 계산 - 약물별 복용 횟수 및 복약률")
     void updateWeeklyStatistics_medicationStats_countsCorrectly() {
         // given
-        MedicationSchedule schedule1 = createMedicationSchedule(1, "혈압약", MedicationScheduleTime.MORNING);
-        MedicationSchedule schedule2 = createMedicationSchedule(2, "혈압약", MedicationScheduleTime.DINNER);
-        MedicationSchedule schedule3 = createMedicationSchedule(3, "당뇨약", MedicationScheduleTime.MORNING);
+        // 혈압약: goal=2, taken=1 (하루에 2번 복용 스케줄, 1번만 복용)
+        // 당뇨약: goal=1, taken=0 (하루에 1번 복용 스케줄, 복용 안함)
+        DailyStatistics.MedicationInfo bloodPressureMed = createMedicationInfo("혈압약", 1, 2);
+        DailyStatistics.MedicationInfo diabetesMed = createMedicationInfo("당뇨약", 0, 1);
 
-        List<MedicationTakenRecord> takenRecords = Arrays.asList(
-                createTakenRecord("혈압약", schedule1, MedicationTakenStatus.TAKEN),
-                createTakenRecord("혈압약", schedule2, MedicationTakenStatus.TAKEN),
-                createTakenRecord("당뇨약", schedule3, MedicationTakenStatus.NOT_TAKEN)
+        // 3일치 데이터
+        List<DailyStatistics> dailyStatsList = Arrays.asList(
+                createDailyStatistics(testMonday, true, true, true, Arrays.asList(bloodPressureMed, diabetesMed)),
+                createDailyStatistics(testMonday.plusDays(1), true, true, true, Arrays.asList(bloodPressureMed, diabetesMed)),
+                createDailyStatistics(testMonday.plusDays(2), true, true, true, Arrays.asList(bloodPressureMed, diabetesMed))
         );
 
         setupMockRepositories();
-        when(medicationScheduleRepository.findByElderId(testElder.getId()))
-                .thenReturn(Arrays.asList(schedule1, schedule2, schedule3));
-        when(medicationTakenRecordRepository.findByElderIdAndDateBetween(testElder.getId(), testMonday, testDate))
-                .thenReturn(takenRecords);
+        when(dailyStatisticsRepository.findByElderAndDateBetween(testElder, testMonday, testDate))
+                .thenReturn(dailyStatsList);
         when(weeklyStatisticsRepository.findByElderAndStartDate(testElder, testMonday))
                 .thenReturn(Optional.empty());
 
@@ -239,12 +216,12 @@ class WeeklyStatisticsServiceTest {
 
         WeeklyStatistics savedStats = captor.getValue();
         assertThat(savedStats.getMedicationStats()).hasSize(2);
-        assertThat(savedStats.getMedicationStats().get("혈압약").getTotalCount()).isEqualTo(14); // 2*7
-        assertThat(savedStats.getMedicationStats().get("혈압약").getTakenCount()).isEqualTo(2);
-        assertThat(savedStats.getMedicationStats().get("당뇨약").getTotalCount()).isEqualTo(7);  // 1*7
-        assertThat(savedStats.getMedicationStats().get("당뇨약").getTakenCount()).isEqualTo(0);
-        // 2/(14+7) * 100 ≈ 10
-        assertThat(savedStats.getMedicationRate()).isEqualTo(10);
+        assertThat(savedStats.getMedicationStats().get("혈압약").getTotalCount()).isEqualTo(6);  // 2*3일
+        assertThat(savedStats.getMedicationStats().get("혈압약").getTakenCount()).isEqualTo(3);  // 1*3일
+        assertThat(savedStats.getMedicationStats().get("당뇨약").getTotalCount()).isEqualTo(3);  // 1*3일
+        assertThat(savedStats.getMedicationStats().get("당뇨약").getTakenCount()).isEqualTo(0);  // 0*3일
+        // 3/(6+3) * 100 -> 33
+        assertThat(savedStats.getMedicationRate()).isEqualTo(33);
     }
 
     @Test
@@ -260,20 +237,11 @@ class WeeklyStatisticsServiceTest {
                 testMonday.plusDays(2).atTime(7, 30)  // 8시간 30분
         );
 
-        when(medicationScheduleRepository.findByElderId(testElder.getId()))
-                .thenReturn(Collections.emptyList());
-        when(mealRecordRepository.findByElderIdAndDateBetween(anyInt(), any(), any()))
-                .thenReturn(Collections.emptyList());
-        when(medicationTakenRecordRepository.findByElderIdAndDateBetween(anyInt(), any(), any()))
-                .thenReturn(Collections.emptyList());
-        when(bloodSugarRecordRepository.findByElderIdAndDateBetween(anyInt(), any(), any()))
-                .thenReturn(Collections.emptyList());
+        setupMockRepositories();
         when(careCallRecordRepository.findByElderIdAndDateBetween(eq(testElder.getId()), any(), any()))
                 .thenReturn(Arrays.asList(testCareCallRecord, sleep1, sleep2));
         when(weeklyStatisticsRepository.findByElderAndStartDate(testElder, testMonday))
                 .thenReturn(Optional.empty());
-        when(aiSummaryService.getWeeklyStatsSummary(any()))
-                .thenReturn("주간 AI 요약");
 
         // when
         weeklyStatisticsService.updateWeeklyStatistics(testCareCallRecord);
@@ -296,20 +264,11 @@ class WeeklyStatisticsServiceTest {
         CareCallRecord psych2 = createCareCallWithPsych("기분 좋음", (byte) 1);
         CareCallRecord psych3 = createCareCallWithPsych("우울함", (byte) 0);
 
-        when(medicationScheduleRepository.findByElderId(testElder.getId()))
-                .thenReturn(Collections.emptyList());
-        when(mealRecordRepository.findByElderIdAndDateBetween(anyInt(), any(), any()))
-                .thenReturn(Collections.emptyList());
-        when(medicationTakenRecordRepository.findByElderIdAndDateBetween(anyInt(), any(), any()))
-                .thenReturn(Collections.emptyList());
-        when(bloodSugarRecordRepository.findByElderIdAndDateBetween(anyInt(), any(), any()))
-                .thenReturn(Collections.emptyList());
+        setupMockRepositories();
         when(careCallRecordRepository.findByElderIdAndDateBetween(eq(testElder.getId()), any(), any()))
                 .thenReturn(Arrays.asList(testCareCallRecord, psych1, psych2, psych3));
         when(weeklyStatisticsRepository.findByElderAndStartDate(testElder, testMonday))
                 .thenReturn(Optional.empty());
-        when(aiSummaryService.getWeeklyStatsSummary(any()))
-                .thenReturn("주간 AI 요약");
 
         // when
         weeklyStatisticsService.updateWeeklyStatistics(testCareCallRecord);
@@ -370,20 +329,11 @@ class WeeklyStatisticsServiceTest {
         CareCallRecord noAnswer1 = createCareCallNoAnswer();
         CareCallRecord noAnswer2 = createCareCallNoAnswer();
 
-        when(medicationScheduleRepository.findByElderId(testElder.getId()))
-                .thenReturn(Collections.emptyList());
-        when(mealRecordRepository.findByElderIdAndDateBetween(anyInt(), any(), any()))
-                .thenReturn(Collections.emptyList());
-        when(medicationTakenRecordRepository.findByElderIdAndDateBetween(anyInt(), any(), any()))
-                .thenReturn(Collections.emptyList());
-        when(bloodSugarRecordRepository.findByElderIdAndDateBetween(anyInt(), any(), any()))
-                .thenReturn(Collections.emptyList());
+        setupMockRepositories();
         when(careCallRecordRepository.findByElderIdAndDateBetween(eq(testElder.getId()), any(), any()))
                 .thenReturn(Arrays.asList(testCareCallRecord, withHealth, noAnswer1, noAnswer2));
         when(weeklyStatisticsRepository.findByElderAndStartDate(testElder, testMonday))
                 .thenReturn(Optional.empty());
-        when(aiSummaryService.getWeeklyStatsSummary(any()))
-                .thenReturn("주간 AI 요약");
 
         // when
         weeklyStatisticsService.updateWeeklyStatistics(testCareCallRecord);
@@ -443,20 +393,11 @@ class WeeklyStatisticsServiceTest {
     @DisplayName("수면 데이터 없을 때 - null 반환")
     void updateWeeklyStatistics_noSleepData_returnsNull() {
         // given
-        when(medicationScheduleRepository.findByElderId(testElder.getId()))
-                .thenReturn(Collections.emptyList());
-        when(mealRecordRepository.findByElderIdAndDateBetween(anyInt(), any(), any()))
-                .thenReturn(Collections.emptyList());
-        when(medicationTakenRecordRepository.findByElderIdAndDateBetween(anyInt(), any(), any()))
-                .thenReturn(Collections.emptyList());
-        when(bloodSugarRecordRepository.findByElderIdAndDateBetween(anyInt(), any(), any()))
-                .thenReturn(Collections.emptyList());
+        setupMockRepositories();
         when(careCallRecordRepository.findByElderIdAndDateBetween(eq(testElder.getId()), any(), any()))
                 .thenReturn(List.of(testCareCallRecord));  // sleepStart/sleepEnd 없음
         when(weeklyStatisticsRepository.findByElderAndStartDate(testElder, testMonday))
                 .thenReturn(Optional.empty());
-        when(aiSummaryService.getWeeklyStatsSummary(any()))
-                .thenReturn("주간 AI 요약");
 
         // when
         weeklyStatisticsService.updateWeeklyStatistics(testCareCallRecord);
@@ -471,16 +412,15 @@ class WeeklyStatisticsServiceTest {
     }
 
     @Test
-    @DisplayName("복약 기록이 없을 때 - takenCount null")
+    @DisplayName("복약 기록이 없을 때 - medicationList가 비어있음")
     void updateWeeklyStatistics_noTakenRecords_takenCountNull() {
         // given
-        MedicationSchedule schedule = createMedicationSchedule(1, "혈압약", MedicationScheduleTime.MORNING);
+        // medicationList가 비어있는 DailyStatistics
+        DailyStatistics dailyWithNoMedication = createDailyStatistics(testMonday, true, true, true, Collections.emptyList());
 
         setupMockRepositories();
-        when(medicationScheduleRepository.findByElderId(testElder.getId()))
-                .thenReturn(List.of(schedule));
-        when(medicationTakenRecordRepository.findByElderIdAndDateBetween(testElder.getId(), testMonday, testDate))
-                .thenReturn(Collections.emptyList());  // 복용 기록 없음
+        when(dailyStatisticsRepository.findByElderAndDateBetween(testElder, testMonday, testDate))
+                .thenReturn(List.of(dailyWithNoMedication));
         when(weeklyStatisticsRepository.findByElderAndStartDate(testElder, testMonday))
                 .thenReturn(Optional.empty());
 
@@ -492,19 +432,25 @@ class WeeklyStatisticsServiceTest {
         verify(weeklyStatisticsRepository).save(captor.capture());
 
         WeeklyStatistics savedStats = captor.getValue();
-        assertThat(savedStats.getMedicationStats().get("혈압약").getTotalCount()).isEqualTo(7);
-        assertThat(savedStats.getMedicationStats().get("혈압약").getTakenCount()).isNull();
+        assertThat(savedStats.getMedicationStats()).isEmpty();
         assertThat(savedStats.getMedicationRate()).isEqualTo(0);
     }
 
     // Helper methods
     private void setupMockRepositories() {
-        lenient().when(medicationScheduleRepository.findByElderId(testElder.getId()))
-                .thenReturn(Collections.emptyList());
-        lenient().when(mealRecordRepository.findByElderIdAndDateBetween(anyInt(), any(), any()))
-                .thenReturn(Collections.emptyList());
-        lenient().when(medicationTakenRecordRepository.findByElderIdAndDateBetween(anyInt(), any(), any()))
-                .thenReturn(Collections.emptyList());
+        DailyStatistics emptyDaily = DailyStatistics.builder()
+                .elder(testElder)
+                .date(testDate)
+                .breakfastTaken(null)
+                .lunchTaken(null)
+                .dinnerTaken(null)
+                .medicationTotalGoal(0)
+                .medicationTotalTaken(0)
+                .medicationList(Collections.emptyList())
+                .build();
+
+        lenient().when(dailyStatisticsRepository.findByElderAndDateBetween(any(Elder.class), any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of(emptyDaily));
         lenient().when(bloodSugarRecordRepository.findByElderIdAndDateBetween(anyInt(), any(), any()))
                 .thenReturn(Collections.emptyList());
         lenient().when(careCallRecordRepository.findByElderIdAndDateBetween(eq(testElder.getId()), any(), any()))
@@ -513,31 +459,37 @@ class WeeklyStatisticsServiceTest {
                 .thenReturn("주간 AI 요약");
     }
 
-    private MealRecord createMealRecord(MealType mealType, Byte eatenStatus) {
-        return MealRecord.builder()
-                .careCallRecord(testCareCallRecord)
-                .mealType(mealType.getValue())
-                .eatenStatus(eatenStatus)
-                .recordedAt(testDate.atTime(10, 0))
-                .build();
-    }
+    private DailyStatistics createDailyStatistics(LocalDate date,
+                                                  Boolean breakfast, Boolean lunch, Boolean dinner,
+                                                  List<DailyStatistics.MedicationInfo> medicationList) {
+        int totalGoal = 0;
+        int totalTaken = 0;
 
-    private MedicationSchedule createMedicationSchedule(Integer id, String name, MedicationScheduleTime scheduleTime) {
-        return MedicationSchedule.builder()
-                .id(id)
+        if (medicationList != null) {
+            for (DailyStatistics.MedicationInfo med : medicationList) {
+                totalGoal += (med.getGoal() != null ? med.getGoal() : 0);
+                totalTaken += (med.getTaken() != null ? med.getTaken() : 0);
+            }
+        }
+
+        return DailyStatistics.builder()
                 .elder(testElder)
-                .name(name)
-                .scheduleTime(scheduleTime)
+                .date(date)
+                .breakfastTaken(breakfast)
+                .lunchTaken(lunch)
+                .dinnerTaken(dinner)
+                .medicationTotalGoal(totalGoal)
+                .medicationTotalTaken(totalTaken)
+                .medicationList(medicationList != null ? medicationList : Collections.emptyList())
                 .build();
     }
 
-    private MedicationTakenRecord createTakenRecord(String name, MedicationSchedule schedule, MedicationTakenStatus status) {
-        return MedicationTakenRecord.builder()
-                .careCallRecord(testCareCallRecord)
-                .name(name)
-                .medicationSchedule(schedule)
-                .takenStatus(status)
-                .takenTime(schedule.getScheduleTime())
+    private DailyStatistics.MedicationInfo createMedicationInfo(String type, int taken, int goal) {
+        return DailyStatistics.MedicationInfo.builder()
+                .type(type)
+                .taken(taken)
+                .goal(goal)
+                .doseStatusList(Collections.emptyList())
                 .build();
     }
 
