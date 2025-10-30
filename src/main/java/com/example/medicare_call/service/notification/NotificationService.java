@@ -3,6 +3,7 @@ package com.example.medicare_call.service.notification;
 import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.domain.Member;
 import com.example.medicare_call.domain.Notification;
+import com.example.medicare_call.dto.NotificationDto;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.ElderRepository;

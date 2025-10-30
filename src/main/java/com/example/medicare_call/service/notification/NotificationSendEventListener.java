@@ -2,6 +2,7 @@ package com.example.medicare_call.service.notification;
 
 import com.example.medicare_call.domain.CareCallRecord;
 import com.example.medicare_call.domain.Notification;
+import com.example.medicare_call.dto.NotificationDto;
 import com.example.medicare_call.global.event.CareCallEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
