@@ -1,4 +1,4 @@
 package com.example.medicare_call.dto;
 
-public record NotificationDto(Integer memberId, String title, String body){
+public record NotificationDto(Integer elderId, String title, String body){
 }

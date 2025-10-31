@@ -27,7 +27,7 @@ public class NotificationService {
 
     @Transactional
     public Notification saveNotification(NotificationDto notificationDto) {
-        Elder elder = elderRepository.findById(notificationDto.memberId()).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+        Elder elder = elderRepository.findById(notificationDto.elderId()).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
         Member member = memberRepository.findById(elder.getId()).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
 
         Notification notification = Notification.builder()
