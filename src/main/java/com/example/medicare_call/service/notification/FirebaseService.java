@@ -19,7 +19,6 @@ import java.util.Map;
 class FirebaseService {
 
     private final FirebaseMessaging firebaseMessaging;
-    private final ObjectMapper objectMapper;
 
     public void sendNotification(Notification notification) {
         try {
@@ -36,8 +35,8 @@ class FirebaseService {
                         .setTitle(notification.getTitle())
                         .setBody(notification.getBody())
                         .build())
-                .putAllData(objectMapper.convertValue(notification, Map.class))
-                .setTopic("필요하다면 추가")
+                .putAllData(Map.of("notificationId",""+notification.getId()))
+                .setTopic("케어콜 알람")
                 .build();
     }
 

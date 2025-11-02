@@ -1,6 +1,7 @@
 package com.example.medicare_call.service.notification;
 
 import com.example.medicare_call.domain.CareCallRecord;
+import com.example.medicare_call.domain.CareCallSetting;
 import com.example.medicare_call.domain.Notification;
 import com.example.medicare_call.dto.NotificationDto;
 import com.example.medicare_call.global.event.CareCallEvent;
@@ -8,6 +9,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 
 @Slf4j
@@ -32,12 +36,56 @@ class NotificationSendEventListener {
         firebaseService.sendNotification(notification);
     }
 
-
     private NotificationDto parseToNotificationDto(CareCallRecord careCallRecord) {
-        //Todo careCallRecord 로부터 알람 메시지 구성
-        // 1차 2차 3차 구분 ( 3차 일 경우 건강 이상징후 확인)
-        // careCallRecord의 callStatus 필드로, 케어콜 수신 & 미수신 파악
-        return new NotificationDto(1, "","");
+        String callStatus = careCallRecord.getCallStatus();
+        String body;
+        if(callStatus.equals("failed") || callStatus.equals("no-answer")){
+            body = String.format("📞 %s 어르신 케어콜 부재중 상태입니다. 확인해 주세요!", careCallRecord.getElder().getName());
+        }else{ // completed
+            int order = determineCallOrder(careCallRecord.getStartTime(), careCallRecord.getSetting());
+            body = String.format("✅ %d차 케어콜이 완료되었어요. 확인해보세요!", order);
+            if(order == 3 && careCallRecord.getHealthDetails()!=null)
+                body += "\n 추가적으로, 건강 징후가 탐지되었어요.";
+        }
+        return new NotificationDto(careCallRecord.getElder().getId(), "메디케어콜",body);
     }
+
+    private int determineCallOrder(LocalDateTime startTime, CareCallSetting careCallSetting) {
+        LocalTime callTime = startTime.toLocalTime();
+
+        LocalTime firstCallTime = careCallSetting.getFirstCallTime();
+        LocalTime secondCallTime = careCallSetting.getSecondCallTime();
+        LocalTime thirdCallTime = careCallSetting.getThirdCallTime();
+
+        // second, third 둘 다 없으면 무조건 1
+        if (secondCallTime == null && thirdCallTime == null) {
+            return 1;
+        }
+        
+        // third가 없고 first, second만 있는 경우
+        if (thirdCallTime == null) {
+            // first ≤ call < second
+            if (!callTime.isBefore(firstCallTime) && callTime.isBefore(secondCallTime)) {
+                return 1;
+            } else {
+                return 2;
+            }
+        }
+
+        // second, third 둘 다 있는 일반 케이스
+        // first ≤ call < second
+        if (!callTime.isBefore(firstCallTime) && callTime.isBefore(secondCallTime)) {
+            return 1;
+        }
+        // second ≤ call < third
+        else if (!callTime.isBefore(secondCallTime) && callTime.isBefore(thirdCallTime)) {
+            return 2;
+        }
+        // 나머지: third ≤ call < first (자정 걸쳐 있는 구간까지 포함)
+        else {
+            return 3;
+        }
+    }
+    
 
 }
