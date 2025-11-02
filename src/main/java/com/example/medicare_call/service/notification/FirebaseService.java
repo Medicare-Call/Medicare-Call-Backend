@@ -16,7 +16,7 @@ import java.util.Map;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-class FirebaseService {
+public class FirebaseService {
 
     private final FirebaseMessaging firebaseMessaging;
 
