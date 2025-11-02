@@ -12,7 +12,6 @@ public class HomeSummaryDto {
     private final Boolean dinner;
     private final Integer totalTakenMedication;
     private final Integer totalGoalMedication;
-    private final MedicationScheduleTime nextMedicationTime;
     private final Integer sleepHours;
     private final Integer sleepMinutes;
     private final String healthStatus;

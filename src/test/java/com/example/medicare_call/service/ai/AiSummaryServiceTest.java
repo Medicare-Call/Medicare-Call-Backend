@@ -3,7 +3,6 @@ package com.example.medicare_call.service.ai;
 import com.example.medicare_call.dto.data_processor.ai.OpenAiResponse;
 import com.example.medicare_call.dto.report.HomeSummaryDto;
 import com.example.medicare_call.dto.report.WeeklySummaryDto;
-import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.service.statistics.WeeklyStatisticsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,7 +45,6 @@ class AiSummaryServiceTest {
         HomeSummaryDto summaryDto = HomeSummaryDto.builder()
                 .breakfast(true).lunch(true).dinner(false)
                 .totalTakenMedication(2).totalGoalMedication(3)
-                .nextMedicationTime(MedicationScheduleTime.DINNER)
                 .sleepHours(7).sleepMinutes(30)
                 .healthStatus("양호").mentalStatus("행복")
                 .averageBloodSugar(110)

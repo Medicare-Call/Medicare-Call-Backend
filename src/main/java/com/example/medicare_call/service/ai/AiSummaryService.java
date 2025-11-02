@@ -130,8 +130,8 @@ public class AiSummaryService {
                 formatMealStatus(dto.getBreakfast(), "저녁")
         ).collect(Collectors.joining(", "));
 
-        String medicationSummary = String.format("오늘 복약 %d/%d, 다음 복약: %s",
-                dto.getTotalTakenMedication(), dto.getTotalGoalMedication(), dto.getNextMedicationTime());
+        String medicationSummary = String.format("오늘 복약 %d/%d",
+                dto.getTotalTakenMedication(), dto.getTotalGoalMedication());
 
         String sleepSummary = String.format("최근 수면 시간: %d시간 %d분",
                 dto.getSleepHours(), dto.getSleepMinutes());
