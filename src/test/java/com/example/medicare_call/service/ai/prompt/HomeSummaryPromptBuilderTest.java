@@ -2,7 +2,6 @@ package com.example.medicare_call.service.ai.prompt;
 
 import com.example.medicare_call.dto.report.HomeSummaryDto;
 import com.example.medicare_call.global.enums.HealthStatus;
-import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.global.enums.PsychologicalStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -76,7 +75,7 @@ class HomeSummaryPromptBuilderTest {
         // Then
         assertThat(prompt).isNotNull();
         assertThat(prompt).contains("식사: 아침 기록되지 않음, 점심 기록되지 않음, 저녁 기록되지 않음");
-        assertThat(prompt).contains("복약: 오늘 복약 0/0, 다음 복약: 기록 없음");
+        assertThat(prompt).contains("복약: 오늘 복약 0/0");
         assertThat(prompt).contains("수면: 최근 수면 시간: 0시간 0분");
         assertThat(prompt).contains("건강상태: 기록 없음");
         assertThat(prompt).contains("심리상태: 기록 없음");

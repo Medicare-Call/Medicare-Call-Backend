@@ -1,6 +1,5 @@
 package com.example.medicare_call.dto.report;
 
-import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import lombok.Builder;
 import lombok.Getter;
 
