@@ -36,7 +36,7 @@ class FirebaseService {
                         .setBody(notification.getBody())
                         .build())
                 .putAllData(Map.of("notificationId",""+notification.getId()))
-                .setTopic("케어콜 알람")
+                .setTopic("carecall_alarm")
                 .build();
     }
 
