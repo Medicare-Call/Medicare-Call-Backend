@@ -11,6 +11,10 @@ jwt:
   phoneTokenExpiration: ${JWT_PHONE_EXPIRATION}
   refreshTokenExpirationDays: ${JWT_REFRESH_EXPIRATION_DAYS}
 
+app:
+  datasource-proxy:
+    exclude: [] # 제외할 DataSource 이름
+
 ---
 spring:
   config:
@@ -18,6 +22,10 @@ spring:
       on-profile: local
 
   datasource:
+    hikari:
+      connectionTimeout: '30000'
+      maximum-pool-size: '10'
+      max-lifetime: '1800000'
     url: ${LOCAL_MYSQL_URL}
     username: ${LOCAL_MYSQL_USER}
     password: ${LOCAL_MYSQL_PASSWORD}
@@ -102,6 +110,10 @@ spring:
       on-profile: prod
 
   datasource:
+    hikari:
+      connectionTimeout: '30000'
+      maximum-pool-size: '10'
+      max-lifetime: '1800000'
     url: ${MYSQL_URL}
     username: ${MYSQL_USER}
     password: ${MYSQL_PASSWORD}
@@ -175,6 +187,15 @@ management:
       enabled: true
   server:
     prometheus-allowed-ips: ${MONITORING_SERVER_HOST}
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.db.io.time: true
+        http.server.requests: true
+      percentiles:
+        http.db.io.time: 0.5,0.95,0.99
+        http.server.requests: 0.5,0.95,0.99
+
 
 firebase:
   file-path: firebase.json

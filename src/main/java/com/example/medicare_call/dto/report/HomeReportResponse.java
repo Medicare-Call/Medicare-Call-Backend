@@ -60,9 +60,6 @@ public class HomeReportResponse {
         @Schema(description = "하루 복약 목표 횟수 총합", example = "5")
         private Integer totalGoal;
 
-        @Schema(description = "다음 복약 예정 시간", example = "LUNCH")
-        private MedicationScheduleTime nextMedicationTime;
-
         @Schema(description = "약 종류별 복약 정보 목록")
         private List<MedicationInfo> medicationList;
     }
@@ -82,6 +79,19 @@ public class HomeReportResponse {
 
         @Schema(description = "해당 약의 다음 복약 예정 시간", example = "LUNCH")
         private MedicationScheduleTime nextTime;
+        @Schema(description = "약 시간대별 복용 상태 목록")
+        private List<DoseStatus> doseStatusList;
+    }
+
+    @Getter
+    @Builder
+    @Schema(description = "약 시간대별 복용 상태")
+    public static class DoseStatus {
+        @Schema(description = "복약 예정 시간", example = "MORNING")
+        private MedicationScheduleTime time;
+
+        @Schema(description = "복약 여부", example = "true")
+        private Boolean taken;
     }
 
     @Getter

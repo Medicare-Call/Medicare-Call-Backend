@@ -69,6 +69,10 @@ dependencies {
 	// Monitoring
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+	implementation 'net.ttddyy:datasource-proxy:1.7'
+
+	// AOP 설정
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
 
 	// FCM
 	implementation 'com.google.firebase:firebase-admin:9.2.0'

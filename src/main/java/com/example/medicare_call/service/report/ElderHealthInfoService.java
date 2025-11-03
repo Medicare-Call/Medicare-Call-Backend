@@ -2,6 +2,7 @@ package com.example.medicare_call.service.report;
 
 import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.ElderHealthInfoCreateRequest;
+import com.example.medicare_call.dto.ElderHealthInfoCreateRequestWithElderId;
 import com.example.medicare_call.dto.ElderHealthInfoResponse;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.global.exception.CustomException;
@@ -25,10 +26,14 @@ public class ElderHealthInfoService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public void upsertElderHealthInfo(Integer elderId, ElderHealthInfoCreateRequest request) {
+    public void upsertElderHealthInfo(Integer memberId, Integer elderId, ElderHealthInfoCreateRequest request) {
         // TODO : 이쪽 Exception에 대한 Monitoring 추가 필요. 데이터의 무결성이 깨졌을 확률이 높다
         Elder elder = elderRepository.findById(elderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ELDER_NOT_FOUND));
+
+        if (!elder.getGuardian().getId().equals(memberId)) {
+            throw new CustomException(ErrorCode.HANDLE_ACCESS_DENIED);
+        }
 
         // 질환 정보 업데이트
         if (request.getDiseaseNames() != null) {
@@ -98,6 +103,23 @@ public class ElderHealthInfoService {
             elderHealthInfoRepository.deleteAllByElder(elder);
         }
     }
+
+    @Transactional
+    public void bulkUpsertElderHealthInfo(Integer memberId, List<ElderHealthInfoCreateRequestWithElderId> requests) {
+        memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        for (ElderHealthInfoCreateRequestWithElderId request : requests) {
+            ElderHealthInfoCreateRequest elderHealthInfoRequest = ElderHealthInfoCreateRequest.builder()
+                    .diseaseNames(request.getDiseaseNames())
+                    .medicationSchedules(request.getMedicationSchedules())
+                    .notes(request.getNotes())
+                    .build();
+
+            upsertElderHealthInfo(memberId, request.getElderId(), elderHealthInfoRequest);
+        }
+    }
+
     public List<ElderHealthInfoResponse> getElderHealth(Integer memberId){
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
