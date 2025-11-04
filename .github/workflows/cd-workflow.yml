@@ -76,6 +76,7 @@ jobs:
             NAVERPAY_API_URL="${{ secrets.NAVERPAY_API_URL }}"
             NAVERPAY_SDK_MODE="${{ secrets.NAVERPAY_SDK_MODE }}"
             MONITORING_SERVER_HOST="${{ secrets.MONITORING_SERVER_HOST }}"
+            FIREBASE_CREDENTIALS="${{ secrets.FIREBASE_CREDENTIALS }}"
 
             echo "✋🏻 Stopping existing container"
             sudo docker stop medicare-call || true
