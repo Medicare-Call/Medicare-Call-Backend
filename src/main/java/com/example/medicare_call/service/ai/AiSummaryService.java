@@ -203,8 +203,8 @@ public class AiSummaryService {
                 weeklySummaryDto.getNegativePsychologicalCount(),
                 weeklySummaryDto.getHealthSignals(),
                 weeklySummaryDto.getMissedCalls(),
-                formatBloodSugarStats(weeklySummaryDto.getBloodSugar().beforeMeal()),
-                formatBloodSugarStats(weeklySummaryDto.getBloodSugar().afterMeal())
+                formatBloodSugarStats(weeklySummaryDto.getBloodSugar() != null ? weeklySummaryDto.getBloodSugar().beforeMeal() : null),
+                formatBloodSugarStats(weeklySummaryDto.getBloodSugar() != null ? weeklySummaryDto.getBloodSugar().afterMeal() : null)
         );
     }
 
