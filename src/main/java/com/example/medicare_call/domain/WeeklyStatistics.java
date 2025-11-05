@@ -1,7 +1,10 @@
 package com.example.medicare_call.domain;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -93,8 +96,9 @@ public class WeeklyStatistics {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class MedicationStats {
-        private Integer totalCount;
-        private Integer takenCount;
+        private Integer totalScheduled;  // 주간 전체 스케줄 횟수 합계
+        private Integer totalGoal;       // 주간 완료된 케어콜 기준 목표 횟수 합계
+        private Integer totalTaken;      // 주간 실제 복용 횟수 합계
     }
 
     @Getter

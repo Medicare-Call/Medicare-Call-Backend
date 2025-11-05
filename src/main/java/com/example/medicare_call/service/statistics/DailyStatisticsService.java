@@ -21,8 +21,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.Set;
 
 @Slf4j
 @Service
@@ -39,7 +37,7 @@ public class DailyStatisticsService {
     private final AiSummaryService aiSummaryService;
 
     @Transactional
-    public void updateDailyStatistics(CareCallRecord record) {
+    public void upsertDailyStatistics(CareCallRecord record) {
         LocalDate callDay = record.getCalledAt().toLocalDate();
         Elder elder = record.getElder();
         Integer elderId = elder.getId();
@@ -54,36 +52,31 @@ public class DailyStatisticsService {
         DailyMedicationStatus medicationStatus = getMedicationStatus(elder, medicationSchedules, todayMedications, callDay);
 
         // 수면 정보 조회
-        // TODO 현재 로직에서는 sleepStart가 null이 아닌 최근 전화 정보를 가져온다. 오늘게 null 이라면 과거꺼를 가져와 처리할 수도 있다는 뜻..
-        Integer avgSleepMinutes = getSleepInfo(elder.getId(), callDay);
+        Integer avgSleepMinutes = getSleepInfo(elderId, callDay);
 
         // 혈당 정보 조회
         Integer avgBloodSugar = getBloodSugarInfo(elderId, callDay);
 
         // 건강 상태 및 심리 상태 조회
-        String healthStatus = getHealthStatus(elder.getId(), callDay);
+        String healthStatus = getHealthStatus(elderId, callDay);
         String mentalStatus = getMentalStatus(elderId, callDay);
 
         // 모든 데이터가 비어있는지 확인
-        if (todayMeals.isEmpty() &&
-                todayMedications.isEmpty() &&
-                avgSleepMinutes == null &&
-                avgBloodSugar == null &&
-                healthStatus == null &&
-                mentalStatus == null
-        ) {
-            /*
-             * TODO: DailyStatistics 생성 시 내부 데이터가 비어있을 때 처리
-             * 데이터가 하나도 없으면 기존에는 throw new CustomException(ErrorCode.NO_DATA_FOR_TODAY);
-             * Batch 처리에서는 클라이언트 요청에 의한 것이 아니기에, 어떻게 처리할 지 고민해보기
-             */
-            log.warn("DailyStatistics 생성 실패 - elderId: {}, date: {}", elderId, callDay);
-            return;
-        }
+        boolean hasData = !todayMeals.isEmpty() ||
+                !todayMedications.isEmpty() ||
+                avgSleepMinutes != null ||
+                avgBloodSugar != null ||
+                healthStatus != null ||
+                mentalStatus != null;
 
-        // AI 요약 생성
-        HomeSummaryDto summaryDto = createHomeSummaryDto(mealStatus, medicationStatus, avgSleepMinutes, avgBloodSugar, healthStatus, mentalStatus);
-        String aiSummary = aiSummaryService.getHomeSummary(summaryDto);
+        // AI 요약 생성 (데이터가 있을 때만)
+        String aiSummary = null;
+        if (hasData) {
+            HomeSummaryDto summaryDto = createHomeSummaryDto(mealStatus, medicationStatus, avgSleepMinutes, avgBloodSugar, healthStatus, mentalStatus);
+            aiSummary = aiSummaryService.getHomeSummary(summaryDto);
+        } else {
+            log.info("데이터가 비어있어 AI 요약 생성 생략 - elderId: {}, date: {}", elderId, callDay);
+        }
 
         Optional<DailyStatistics> existingDs = dailyStatisticsRepository.findByElderAndDate(elder, callDay);
 
@@ -185,7 +178,10 @@ public class DailyStatisticsService {
                 .filter(record -> record.getTakenStatus() == MedicationTakenStatus.TAKEN)
                 .count();
 
-        // 약 종류별로 스케줄을 그룹화하여 목표 복용 횟수 계산
+        // 완료된 케어콜 시간대 조회
+        Set<MedicationScheduleTime> completedTimeSlots = getCompletedCallTimeSlots(elder, callDay);
+
+        // 약 종류별로 스케줄을 그룹화
         Map<String, List<MedicationSchedule>> medicationSchedules = schedules.stream()
                 .collect(Collectors.groupingBy(
                         MedicationSchedule::getName
@@ -199,13 +195,25 @@ public class DailyStatisticsService {
                         Collectors.counting()
                 ));
 
+        // 전체 목표 복약 횟수: 완료된 케어콜 시간대의 모든 스케줄 합계
+        int totalGoal = (int) schedules.stream()
+                .filter(schedule -> completedTimeSlots.contains(schedule.getScheduleTime()))
+                .count();
+
         List<DailyStatistics.MedicationInfo> medicationList = medicationSchedules.entrySet().stream()
                 .map(entry -> {
                     String medicationName = entry.getKey();
                     List<MedicationSchedule> medicationScheduleList = entry.getValue();
 
-                    // 해당 약의 하루 목표 복용 횟수
-                    int goal = medicationScheduleList.size();
+                    // scheduled: 전체 스케줄 횟수
+                    int scheduled = medicationScheduleList.size();
+
+                    // goal: 완료된 케어콜 기준 목표 복약 횟수
+                    long goal = medicationScheduleList.stream()
+                            .filter(schedule -> completedTimeSlots.contains(schedule.getScheduleTime()))
+                            .count();
+
+                    // taken: 실제 복용 횟수
                     int taken = medicationTakenCounts.getOrDefault(medicationName, 0L).intValue();
 
                     // 해당 약의 실제 스케줄 시간대만 DoseStatus 생성
@@ -238,15 +246,13 @@ public class DailyStatisticsService {
 
                     return DailyStatistics.MedicationInfo.builder()
                             .type(medicationName)
+                            .scheduled(scheduled)
+                            .goal((int) goal)
                             .taken(taken)
-                            .goal(goal)
                             .doseStatusList(doseStatusList)
                             .build();
                 })
                 .collect(Collectors.toList());
-
-        // 아침, 점심, 저녁 시간대 별 전체 목표 복용 횟수 계산
-        int totalGoal = calculateTotalGoal(elder, schedules, callDay);
 
         return DailyMedicationStatus.builder()
                 .totalTaken((int) totalTaken)
@@ -255,10 +261,13 @@ public class DailyStatisticsService {
                 .build();
     }
 
-    private int calculateTotalGoal(Elder elder, List<MedicationSchedule> schedules, LocalDate callDay) {
+    private Set<MedicationScheduleTime> getCompletedCallTimeSlots(Elder elder, LocalDate callDay) {
+        Set<MedicationScheduleTime> completedTimeSlots = new HashSet<>();
+
         Optional<CareCallSetting> settingOpt = careCallSettingRepository.findByElder(elder);
         if (settingOpt.isEmpty()) {
-            return schedules.size(); // 설정 없으면 전체
+            // 설정이 없으면 모든 시간대를 목표로 간주
+            return EnumSet.allOf(MedicationScheduleTime.class);
         }
 
         List<CareCallRecord> todayCompletedCalls = careCallRecordRepository
@@ -268,38 +277,37 @@ public class DailyStatisticsService {
                 .toList();
 
         if (todayCompletedCalls.isEmpty()) {
-            return 0; // 오늘 완료된 케어콜이 없으면 0
+            return completedTimeSlots;
         }
 
         CareCallSetting setting = settingOpt.get();
-        long totalGoal = 0;
 
-        // 1차(아침) 케어콜이 완료되었는지 확인하고 목표량 추가
+        // 1차(아침) 케어콜 완료 여부
         boolean morningCallCompleted = todayCompletedCalls.stream()
                 .anyMatch(r -> isCallInTimeSlot(r.getCalledAt().toLocalTime(), setting.getFirstCallTime(), setting.getSecondCallTime()));
         if (morningCallCompleted) {
-            totalGoal += schedules.stream().filter(s -> s.getScheduleTime() == MedicationScheduleTime.MORNING).count();
+            completedTimeSlots.add(MedicationScheduleTime.MORNING);
         }
 
-        // 2차(점심) 케어콜이 완료되었는지 확인하고 목표량 추가
+        // 2차(점심) 케어콜 완료 여부
         if (setting.getSecondCallTime() != null) {
             boolean lunchCallCompleted = todayCompletedCalls.stream()
                     .anyMatch(r -> isCallInTimeSlot(r.getCalledAt().toLocalTime(), setting.getSecondCallTime(), setting.getThirdCallTime()));
             if (lunchCallCompleted) {
-                totalGoal += schedules.stream().filter(s -> s.getScheduleTime() == MedicationScheduleTime.LUNCH).count();
+                completedTimeSlots.add(MedicationScheduleTime.LUNCH);
             }
         }
 
-        // 3차(저녁) 케어콜이 완료되었는지 확인하고 목표량 추가
+        // 3차(저녁) 케어콜 완료 여부
         if (setting.getThirdCallTime() != null) {
             boolean dinnerCallCompleted = todayCompletedCalls.stream()
                     .anyMatch(r -> isCallInTimeSlot(r.getCalledAt().toLocalTime(), setting.getThirdCallTime(), null));
             if (dinnerCallCompleted) {
-                totalGoal += schedules.stream().filter(s -> s.getScheduleTime() == MedicationScheduleTime.DINNER).count();
+                completedTimeSlots.add(MedicationScheduleTime.DINNER);
             }
         }
 
-        return (int) totalGoal;
+        return completedTimeSlots;
     }
 
     // 케어콜 시간이 특정 시간대(1,2,3차)에 속하는지 확인

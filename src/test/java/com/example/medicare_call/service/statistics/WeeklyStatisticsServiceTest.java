@@ -2,10 +2,12 @@ package com.example.medicare_call.service.statistics;
 
 import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.report.WeeklySummaryDto;
-import com.example.medicare_call.global.enums.*;
-import com.example.medicare_call.global.exception.CustomException;
-import com.example.medicare_call.global.exception.ErrorCode;
-import com.example.medicare_call.repository.*;
+import com.example.medicare_call.global.enums.BloodSugarMeasurementType;
+import com.example.medicare_call.global.enums.BloodSugarStatus;
+import com.example.medicare_call.repository.BloodSugarRecordRepository;
+import com.example.medicare_call.repository.CareCallRecordRepository;
+import com.example.medicare_call.repository.DailyStatisticsRepository;
+import com.example.medicare_call.repository.WeeklyStatisticsRepository;
 import com.example.medicare_call.service.ai.AiSummaryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -26,7 +28,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -86,7 +87,7 @@ class WeeklyStatisticsServiceTest {
                 .thenReturn(Optional.empty());
 
         // when
-        weeklyStatisticsService.updateWeeklyStatistics(testCareCallRecord);
+        weeklyStatisticsService.upsertWeeklyStatistics(testCareCallRecord);
 
         // then
         ArgumentCaptor<WeeklyStatistics> captor = ArgumentCaptor.forClass(WeeklyStatistics.class);
@@ -129,7 +130,7 @@ class WeeklyStatisticsServiceTest {
                 .thenReturn(Optional.of(existingStats));
 
         // when
-        weeklyStatisticsService.updateWeeklyStatistics(testCareCallRecord);
+        weeklyStatisticsService.upsertWeeklyStatistics(testCareCallRecord);
 
         // then
         verify(weeklyStatisticsRepository, never()).save(any(WeeklyStatistics.class));
@@ -137,20 +138,6 @@ class WeeklyStatisticsServiceTest {
         // updateDetails 메소드가 호출되어 엔티티가 업데이트됨
         assertThat(existingStats.getEndDate()).isEqualTo(testDate);
         assertThat(existingStats.getAiHealthSummary()).isEqualTo("주간 AI 요약");
-    }
-
-    @Test
-    @DisplayName("주간 통계 업데이트 실패 - DailyStatistics 데이터가 없음")
-    void updateWeeklyStatistics_fail_noCompletedCall() {
-        // given
-        when(dailyStatisticsRepository.findByElderAndDateBetween(any(Elder.class), any(LocalDate.class), any(LocalDate.class)))
-                .thenReturn(Collections.emptyList());
-
-        // when & then
-        CustomException exception = assertThrows(CustomException.class, () -> {
-            weeklyStatisticsService.updateWeeklyStatistics(testCareCallRecord);
-        });
-        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NO_DATA_FOR_WEEK);
     }
 
     @Test
@@ -171,7 +158,7 @@ class WeeklyStatisticsServiceTest {
                 .thenReturn(Optional.empty());
 
         // when
-        weeklyStatisticsService.updateWeeklyStatistics(testCareCallRecord);
+        weeklyStatisticsService.upsertWeeklyStatistics(testCareCallRecord);
 
         // then
         ArgumentCaptor<WeeklyStatistics> captor = ArgumentCaptor.forClass(WeeklyStatistics.class);
@@ -189,10 +176,10 @@ class WeeklyStatisticsServiceTest {
     @DisplayName("복약 통계 계산 - 약물별 복용 횟수 및 복약률")
     void updateWeeklyStatistics_medicationStats_countsCorrectly() {
         // given
-        // 혈압약: goal=2, taken=1 (하루에 2번 복용 스케줄, 1번만 복용)
-        // 당뇨약: goal=1, taken=0 (하루에 1번 복용 스케줄, 복용 안함)
-        DailyStatistics.MedicationInfo bloodPressureMed = createMedicationInfo("혈압약", 1, 2);
-        DailyStatistics.MedicationInfo diabetesMed = createMedicationInfo("당뇨약", 0, 1);
+        // 혈압약: scheduled=2, goal=2, taken=1 (하루에 2번 복용 스케줄, 1번만 복용)
+        // 당뇨약: scheduled=1, goal=1, taken=0 (하루에 1번 복용 스케줄, 복용 안함)
+        DailyStatistics.MedicationInfo bloodPressureMed = createMedicationInfo("혈압약", 2, 2, 1);
+        DailyStatistics.MedicationInfo diabetesMed = createMedicationInfo("당뇨약", 1, 1, 0);
 
         // 3일치 데이터
         List<DailyStatistics> dailyStatsList = Arrays.asList(
@@ -208,7 +195,7 @@ class WeeklyStatisticsServiceTest {
                 .thenReturn(Optional.empty());
 
         // when
-        weeklyStatisticsService.updateWeeklyStatistics(testCareCallRecord);
+        weeklyStatisticsService.upsertWeeklyStatistics(testCareCallRecord);
 
         // then
         ArgumentCaptor<WeeklyStatistics> captor = ArgumentCaptor.forClass(WeeklyStatistics.class);
@@ -216,11 +203,12 @@ class WeeklyStatisticsServiceTest {
 
         WeeklyStatistics savedStats = captor.getValue();
         assertThat(savedStats.getMedicationStats()).hasSize(2);
-        assertThat(savedStats.getMedicationStats().get("혈압약").getTotalCount()).isEqualTo(6);  // 2*3일
-        assertThat(savedStats.getMedicationStats().get("혈압약").getTakenCount()).isEqualTo(3);  // 1*3일
-        assertThat(savedStats.getMedicationStats().get("당뇨약").getTotalCount()).isEqualTo(3);  // 1*3일
-        assertThat(savedStats.getMedicationStats().get("당뇨약").getTakenCount()).isEqualTo(0);  // 0*3일
-        // 3/(6+3) * 100 -> 33
+        assertThat(savedStats.getMedicationStats().get("혈압약").getTotalScheduled()).isEqualTo(6);  // 2*3일
+        assertThat(savedStats.getMedicationStats().get("혈압약").getTotalGoal()).isEqualTo(6);  // 2*3일
+        assertThat(savedStats.getMedicationStats().get("혈압약").getTotalTaken()).isEqualTo(3);  // 1*3일
+        assertThat(savedStats.getMedicationStats().get("당뇨약").getTotalScheduled()).isEqualTo(3);  // 1*3일
+        assertThat(savedStats.getMedicationStats().get("당뇨약").getTotalGoal()).isEqualTo(3);  // 1*3일
+        assertThat(savedStats.getMedicationStats().get("당뇨약").getTotalTaken()).isEqualTo(0);  // 0*3일
         assertThat(savedStats.getMedicationRate()).isEqualTo(33);
     }
 
@@ -244,7 +232,7 @@ class WeeklyStatisticsServiceTest {
                 .thenReturn(Optional.empty());
 
         // when
-        weeklyStatisticsService.updateWeeklyStatistics(testCareCallRecord);
+        weeklyStatisticsService.upsertWeeklyStatistics(testCareCallRecord);
 
         // then
         ArgumentCaptor<WeeklyStatistics> captor = ArgumentCaptor.forClass(WeeklyStatistics.class);
@@ -271,7 +259,7 @@ class WeeklyStatisticsServiceTest {
                 .thenReturn(Optional.empty());
 
         // when
-        weeklyStatisticsService.updateWeeklyStatistics(testCareCallRecord);
+        weeklyStatisticsService.upsertWeeklyStatistics(testCareCallRecord);
 
         // then
         ArgumentCaptor<WeeklyStatistics> captor = ArgumentCaptor.forClass(WeeklyStatistics.class);
@@ -303,7 +291,7 @@ class WeeklyStatisticsServiceTest {
                 .thenReturn(Optional.empty());
 
         // when
-        weeklyStatisticsService.updateWeeklyStatistics(testCareCallRecord);
+        weeklyStatisticsService.upsertWeeklyStatistics(testCareCallRecord);
 
         // then
         ArgumentCaptor<WeeklyStatistics> captor = ArgumentCaptor.forClass(WeeklyStatistics.class);
@@ -336,7 +324,7 @@ class WeeklyStatisticsServiceTest {
                 .thenReturn(Optional.empty());
 
         // when
-        weeklyStatisticsService.updateWeeklyStatistics(testCareCallRecord);
+        weeklyStatisticsService.upsertWeeklyStatistics(testCareCallRecord);
 
         // then
         ArgumentCaptor<WeeklyStatistics> captor = ArgumentCaptor.forClass(WeeklyStatistics.class);
@@ -358,7 +346,7 @@ class WeeklyStatisticsServiceTest {
                 .thenReturn("테스트 주간 AI 요약");
 
         // when
-        weeklyStatisticsService.updateWeeklyStatistics(testCareCallRecord);
+        weeklyStatisticsService.upsertWeeklyStatistics(testCareCallRecord);
 
         // then
         verify(aiSummaryService, times(1)).getWeeklyStatsSummary(any(WeeklySummaryDto.class));
@@ -377,7 +365,7 @@ class WeeklyStatisticsServiceTest {
                 .thenReturn(Optional.empty());
 
         // when
-        weeklyStatisticsService.updateWeeklyStatistics(testCareCallRecord);
+        weeklyStatisticsService.upsertWeeklyStatistics(testCareCallRecord);
 
         // then
         ArgumentCaptor<WeeklyStatistics> captor = ArgumentCaptor.forClass(WeeklyStatistics.class);
@@ -400,7 +388,7 @@ class WeeklyStatisticsServiceTest {
                 .thenReturn(Optional.empty());
 
         // when
-        weeklyStatisticsService.updateWeeklyStatistics(testCareCallRecord);
+        weeklyStatisticsService.upsertWeeklyStatistics(testCareCallRecord);
 
         // then
         ArgumentCaptor<WeeklyStatistics> captor = ArgumentCaptor.forClass(WeeklyStatistics.class);
@@ -425,7 +413,7 @@ class WeeklyStatisticsServiceTest {
                 .thenReturn(Optional.empty());
 
         // when
-        weeklyStatisticsService.updateWeeklyStatistics(testCareCallRecord);
+        weeklyStatisticsService.upsertWeeklyStatistics(testCareCallRecord);
 
         // then
         ArgumentCaptor<WeeklyStatistics> captor = ArgumentCaptor.forClass(WeeklyStatistics.class);
@@ -484,11 +472,12 @@ class WeeklyStatisticsServiceTest {
                 .build();
     }
 
-    private DailyStatistics.MedicationInfo createMedicationInfo(String type, int taken, int goal) {
+    private DailyStatistics.MedicationInfo createMedicationInfo(String type, int scheduled, int goal, int taken) {
         return DailyStatistics.MedicationInfo.builder()
                 .type(type)
-                .taken(taken)
+                .scheduled(scheduled)
                 .goal(goal)
+                .taken(taken)
                 .doseStatusList(Collections.emptyList())
                 .build();
     }

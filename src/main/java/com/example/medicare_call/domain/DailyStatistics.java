@@ -79,8 +79,9 @@ public class DailyStatistics {
     @AllArgsConstructor
     public static class MedicationInfo {
         private String type;
-        private Integer taken;
-        private Integer goal;
+        private Integer scheduled;  // 전체 스케줄 횟수
+        private Integer goal;       // 완료된 케어콜 기준 목표 복약 횟수
+        private Integer taken;      // 실제 복용 횟수
         private List<DoseStatus> doseStatusList;
     }
 

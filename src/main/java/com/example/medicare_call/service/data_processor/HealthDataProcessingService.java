@@ -54,15 +54,16 @@ public class HealthDataProcessingService {
             updatedRecord = updateHealthStatus(updatedRecord, healthData.getHealthSigns(), healthData.getHealthStatus());
         }
 
-        CareCallRecord finalRecord = generateAiCommentAndBuildFinalRecord(updatedRecord);
+        // AI 건강분석 코멘트 처리
+        updatedRecord = updateAiHealthAnalysisComment(updatedRecord);
 
-        careCallRecordRepository.save(finalRecord);
-        log.info("CareCallRecord 건강 데이터 업데이트 완료: callId={}", finalRecord.getId());
+        careCallRecordRepository.save(updatedRecord);
+        log.info("CareCallRecord 건강 데이터 업데이트 완료: callId={}", updatedRecord.getId());
 
         try {
-            statisticsUpdateService.updateStatistics(finalRecord);
+            statisticsUpdateService.updateStatistics(updatedRecord);
         } catch (Exception e) {
-            log.error("통계 데이터 업데이트 중 오류 발생: callId={}", finalRecord.getId(), e);
+            log.error("통계 데이터 업데이트 중 오류 발생: callId={}", updatedRecord.getId(), e);
         }
     }
 
@@ -224,31 +225,35 @@ public class HealthDataProcessingService {
         return callRecord;
     }
 
-    private CareCallRecord generateAiCommentAndBuildFinalRecord(CareCallRecord updatedRecord) {
-        String healthDetails = updatedRecord.getHealthDetails();
+    private CareCallRecord updateAiHealthAnalysisComment(CareCallRecord callRecord) {
+        String healthDetails = callRecord.getHealthDetails();
         String aiComment = null;
         if (healthDetails != null && !healthDetails.isBlank()) {
             List<String> symptomList = Arrays.stream(healthDetails.split(",")).map(String::trim).toList();
             aiComment = aiSummaryService.getSymptomAnalysis(symptomList);
         }
 
-        return CareCallRecord.builder()
-                .id(updatedRecord.getId())
-                .elder(updatedRecord.getElder())
-                .setting(updatedRecord.getSetting())
-                .calledAt(updatedRecord.getCalledAt())
-                .responded(updatedRecord.getResponded())
-                .sleepStart(updatedRecord.getSleepStart())
-                .sleepEnd(updatedRecord.getSleepEnd())
-                .healthStatus(updatedRecord.getHealthStatus())
-                .psychStatus(updatedRecord.getPsychStatus())
-                .startTime(updatedRecord.getStartTime())
-                .endTime(updatedRecord.getEndTime())
-                .callStatus(updatedRecord.getCallStatus())
-                .transcriptionText(updatedRecord.getTranscriptionText())
-                .psychologicalDetails(updatedRecord.getPsychologicalDetails())
-                .healthDetails(updatedRecord.getHealthDetails())
+        callRecord = CareCallRecord.builder()
+                .id(callRecord.getId())
+                .elder(callRecord.getElder())
+                .setting(callRecord.getSetting())
+                .calledAt(callRecord.getCalledAt())
+                .responded(callRecord.getResponded())
+                .sleepStart(callRecord.getSleepStart())
+                .sleepEnd(callRecord.getSleepEnd())
+                .healthStatus(callRecord.getHealthStatus())
+                .psychStatus(callRecord.getPsychStatus())
+                .startTime(callRecord.getStartTime())
+                .endTime(callRecord.getEndTime())
+                .callStatus(callRecord.getCallStatus())
+                .transcriptionText(callRecord.getTranscriptionText())
+                .psychologicalDetails(callRecord.getPsychologicalDetails())
+                .healthDetails(callRecord.getHealthDetails())
                 .aiHealthAnalysisComment(aiComment)
                 .build();
+
+        log.info("AI 건강분석 코멘트 업데이트 완료: aiComment={}", aiComment);
+
+        return callRecord;
     }
 } 

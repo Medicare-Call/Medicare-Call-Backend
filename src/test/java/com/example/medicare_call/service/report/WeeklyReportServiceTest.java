@@ -74,8 +74,8 @@ class WeeklyReportServiceTest {
         Integer elderId = 1;
 
         Map<String, WeeklyStatistics.MedicationStats> medicationStats = new HashMap<>();
-        medicationStats.put("혈압약", new WeeklyStatistics.MedicationStats(14, 12));
-        medicationStats.put("당뇨약", new WeeklyStatistics.MedicationStats(21, 18));
+        medicationStats.put("혈압약", new WeeklyStatistics.MedicationStats(14, 12, 10));
+        medicationStats.put("당뇨약", new WeeklyStatistics.MedicationStats(21, 18, 14));
 
         WeeklyStatistics.BloodSugarStats bloodSugarStats = new WeeklyStatistics.BloodSugarStats(
                 new WeeklyStatistics.BloodSugarType(5, 2, 0),
@@ -88,7 +88,7 @@ class WeeklyReportServiceTest {
                 .startDate(testStartDate)
                 .endDate(testEndDate)
                 .mealRate(85)
-                .medicationRate(90)
+                .medicationRate(80)
                 .healthSignals(1)
                 .missedCalls(2)
                 .breakfastCount(6)
@@ -118,15 +118,15 @@ class WeeklyReportServiceTest {
         assertThat(response).isNotNull();
         assertThat(response.getElderName()).isEqualTo("김옥자");
         assertThat(response.getSummaryStats().getMealRate()).isEqualTo(85);
-        assertThat(response.getSummaryStats().getMedicationRate()).isEqualTo(90);
+        assertThat(response.getSummaryStats().getMedicationRate()).isEqualTo(80);
         assertThat(response.getSummaryStats().getHealthSignals()).isEqualTo(1);
         assertThat(response.getSummaryStats().getMissedCalls()).isEqualTo(2);
         assertThat(response.getMealStats().getBreakfast()).isEqualTo(6);
         assertThat(response.getMealStats().getLunch()).isEqualTo(5);
         assertThat(response.getMealStats().getDinner()).isEqualTo(7);
         assertThat(response.getMedicationStats()).hasSize(2);
-        assertThat(response.getMedicationStats().get("혈압약").getTotalCount()).isEqualTo(14);
-        assertThat(response.getMedicationStats().get("혈압약").getTakenCount()).isEqualTo(12);
+        assertThat(response.getMedicationStats().get("혈압약").getTotalCount()).isEqualTo(12);
+        assertThat(response.getMedicationStats().get("혈압약").getTakenCount()).isEqualTo(10);
         assertThat(response.getAverageSleep().getHours()).isEqualTo(7);
         assertThat(response.getAverageSleep().getMinutes()).isEqualTo(30);
         assertThat(response.getPsychSummary().getGood()).isEqualTo(5);

@@ -4,9 +4,10 @@ import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.report.WeeklySummaryDto;
 import com.example.medicare_call.global.enums.BloodSugarMeasurementType;
 import com.example.medicare_call.global.enums.BloodSugarStatus;
-import com.example.medicare_call.global.exception.CustomException;
-import com.example.medicare_call.global.exception.ErrorCode;
-import com.example.medicare_call.repository.*;
+import com.example.medicare_call.repository.BloodSugarRecordRepository;
+import com.example.medicare_call.repository.CareCallRecordRepository;
+import com.example.medicare_call.repository.DailyStatisticsRepository;
+import com.example.medicare_call.repository.WeeklyStatisticsRepository;
 import com.example.medicare_call.service.ai.AiSummaryService;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
@@ -37,15 +38,7 @@ public class WeeklyStatisticsService {
     private final AiSummaryService aiSummaryService;
 
     @Transactional
-    public void updateWeeklyStatistics(CareCallRecord record) {
-        /*
-         * TODO: CareCallRecord 정보 기반, WeeklyStatistics Entity Upsert 진행
-         * 기존의 DTO를 Entity로 변환하는 방식이 아닌, Entity 생성이 독립적으로 이뤄져야 함
-         * 즉, 현재 존재하는 WeeklyReportService의 데이터 추출 및 AI 분석 형태는 착안하되, 내부의 DTO 등을 이곳의 로직에 사용해서는 절대 안됨
-         * WeeklyReportService에 맞춘 추출이 아닌, WeeklyReportService Entity에 대응하는 데이터를 추출하도록 기존 로직의 일부 수정 필요
-         * 추후 WeeklyReportService.getWeeklyReport() 에서 WeeklyStatistics 테이블 조회를 통해 WeeklyReportResponse를 구성하도록 수정 예정
-         */
-
+    public void upsertWeeklyStatistics(CareCallRecord record) {
         Elder elder = record.getElder();
         Integer elderId = elder.getId();
 
@@ -55,11 +48,6 @@ public class WeeklyStatisticsService {
 
         // DailyStatistics 조회 (월요일부터 현재까지)
         List<DailyStatistics> dailyStatsList = dailyStatisticsRepository.findByElderAndDateBetween(elder, startDate, endDate);
-
-        if (dailyStatsList.isEmpty()) {
-            log.warn("No DailyStatistics found for elder {} between {} and {}", elderId, startDate, endDate);
-            throw new CustomException(ErrorCode.NO_DATA_FOR_WEEK);
-        }
 
         // CareCallRecord 및 BloodSugarRecord 조회 (기존 로직 유지)
         List<BloodSugarRecord> bloodSugarRecords = bloodSugarRecordRepository.findByElderIdAndDateBetween(elderId, startDate, endDate);
@@ -84,7 +72,7 @@ public class WeeklyStatisticsService {
         WeeklyBloodSugar bloodSugar = getBloodSugarStats(bloodSugarRecords);
 
         WeeklySummaryStats summaryStats = calculateSummaryStats(
-                dailyStatsList, mealStats, medicationStats, healthRecords, callRecords);
+                dailyStatsList, healthRecords, callRecords);
 
         WeeklySummaryDto weeklySummaryDto = createWeeklySummaryDto(mealStats, medicationStats, averageSleep, psychSummary, bloodSugar, summaryStats);
         String healthSummary = aiSummaryService.getWeeklyStatsSummary(weeklySummaryDto);
@@ -158,11 +146,11 @@ public class WeeklyStatisticsService {
         int totalMedicationTaken = 0;
         int totalMedicationMissed = 0;
         for (WeeklyMedicationStats stats : medicationStatsMap.values()) {
-            if (stats.takenCount != null) {
-                totalMedicationTaken += stats.takenCount;
-                totalMedicationMissed += (stats.totalCount - stats.takenCount);
+            if (stats.totalTaken != null) {
+                totalMedicationTaken += stats.totalTaken;
+                totalMedicationMissed += (stats.totalGoal - stats.totalTaken);
             } else {
-                totalMedicationMissed += stats.totalCount;
+                totalMedicationMissed += stats.totalGoal;
             }
         }
 
@@ -180,10 +168,6 @@ public class WeeklyStatisticsService {
                 .build();
     }
 
-    /**
-     * DailyStatistics 기반으로 식사 통계 계산
-     * - breakfastTaken, lunchTaken, dinnerTaken 필드에서 true인 개수를 집계
-     */
     private WeeklyMealStats getMealStatsFromDaily(List<DailyStatistics> dailyStatsList) {
         int breakfastCount = 0;
         int lunchCount = 0;
@@ -208,12 +192,6 @@ public class WeeklyStatisticsService {
                 .build();
     }
 
-    /**
-     * DailyStatistics 기반으로 복약 통계 계산
-     * - 각 DailyStatistics의 medicationList에서 약물별로 goal과 taken을 집계
-     * - totalCount = 각 약물의 goal의 합
-     * - takenCount = 각 약물의 taken의 합
-     */
     private Map<String, WeeklyMedicationStats> getMedicationStatsFromDaily(List<DailyStatistics> dailyStatsList) {
         Map<String, WeeklyMedicationStats> result = new HashMap<>();
 
@@ -226,6 +204,7 @@ public class WeeklyStatisticsService {
 
             for (DailyStatistics.MedicationInfo medicationInfo : medicationList) {
                 String medicationType = medicationInfo.getType();
+                Integer scheduled = medicationInfo.getScheduled();
                 Integer goal = medicationInfo.getGoal();
                 Integer taken = medicationInfo.getTaken();
 
@@ -238,17 +217,20 @@ public class WeeklyStatisticsService {
                 if (existingStats == null) {
                     // 새로운 약물 추가
                     result.put(medicationType, WeeklyMedicationStats.builder()
-                            .totalCount(goal != null ? goal : 0)
-                            .takenCount(taken != null ? taken : 0)
+                            .totalScheduled(scheduled != null ? scheduled : 0)
+                            .totalGoal(goal != null ? goal : 0)
+                            .totalTaken(taken != null ? taken : 0)
                             .build());
                 } else {
                     // 기존 약물에 누적
-                    int newTotalCount = existingStats.totalCount() + (goal != null ? goal : 0);
-                    int newTakenCount = existingStats.takenCount() + (taken != null ? taken : 0);
+                    int newTotalScheduled = existingStats.totalScheduled() + (scheduled != null ? scheduled : 0);
+                    int newTotalGoal = existingStats.totalGoal() + (goal != null ? goal : 0);
+                    int newTotalTaken = existingStats.totalTaken() + (taken != null ? taken : 0);
 
                     result.put(medicationType, WeeklyMedicationStats.builder()
-                            .totalCount(newTotalCount)
-                            .takenCount(newTakenCount)
+                            .totalScheduled(newTotalScheduled)
+                            .totalGoal(newTotalGoal)
+                            .totalTaken(newTotalTaken)
                             .build());
                 }
             }
@@ -353,51 +335,33 @@ public class WeeklyStatisticsService {
                 .build();
     }
 
-    /**
-     * DailyStatistics 기반으로 요약 통계 계산
-     * - mealRate: DailyStatistics의 식사 데이터 기반 (true/false 포함, null 제외)
-     * - medicationRate: DailyStatistics의 medicationTotalGoal/medicationTotalTaken 합산
-     */
     private WeeklySummaryStats calculateSummaryStats(
             List<DailyStatistics> dailyStatsList,
-            WeeklyMealStats mealStats,
-            Map<String, WeeklyMedicationStats> medicationStats,
             List<CareCallRecord> healthRecords,
             List<CareCallRecord> callRecords) {
 
-        // 식사율 계산 (DailyStatistics 기반)
-        // 분모 = breakfast/lunch/dinner 중 null이 아닌 항목 수 (true + false)
-        // 분자 = true인 항목 수
         int totalMealSlots = 0;  // 식사 응답 개수 (true + false)
         int totalMealsTaken = 0; // 식사한 개수 (true만)
 
         for (DailyStatistics daily : dailyStatsList) {
             if (daily.getBreakfastTaken() != null) {
                 totalMealSlots++;
-                if (Boolean.TRUE.equals(daily.getBreakfastTaken())) {
-                    totalMealsTaken++;
-                }
+                if (daily.getBreakfastTaken()) totalMealsTaken++;
             }
             if (daily.getLunchTaken() != null) {
                 totalMealSlots++;
-                if (Boolean.TRUE.equals(daily.getLunchTaken())) {
-                    totalMealsTaken++;
-                }
+                if (daily.getLunchTaken()) totalMealsTaken++;
             }
             if (daily.getDinnerTaken() != null) {
                 totalMealSlots++;
-                if (Boolean.TRUE.equals(daily.getDinnerTaken())) {
-                    totalMealsTaken++;
-                }
+                if (daily.getDinnerTaken()) totalMealsTaken++;
             }
         }
 
         int mealRate = totalMealSlots == 0 ? 0 : (int) Math.round((double) totalMealsTaken / totalMealSlots * 100);
 
-        // 복약률 계산 (DailyStatistics 기반)
-        // 각 DailyStatistics의 medicationTotalGoal과 medicationTotalTaken을 합산
-        int totalMedicationGoal = 0;
-        int totalMedicationTaken = 0;
+        int totalMedicationGoal = 0; // 각 DailyStatistics의 medicationTotalGoal 합산
+        int totalMedicationTaken = 0; // 각 DailyStatistics의 medicationTotalTaken 합산
 
         for (DailyStatistics daily : dailyStatsList) {
             if (daily.getMedicationTotalGoal() != null) {
@@ -439,8 +403,9 @@ public class WeeklyStatisticsService {
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         entry -> new WeeklyStatistics.MedicationStats(
-                                entry.getValue().totalCount(),
-                                entry.getValue().takenCount()
+                                entry.getValue().totalScheduled(),
+                                entry.getValue().totalGoal(),
+                                entry.getValue().totalTaken()
                         )
                 ));
     }
@@ -479,7 +444,7 @@ public class WeeklyStatisticsService {
     private record WeeklyMealStats (Integer breakfast, Integer lunch, Integer dinner) { }
 
     @Builder
-    private record WeeklyMedicationStats (Integer totalCount, Integer takenCount) { }
+    private record WeeklyMedicationStats (Integer totalScheduled, Integer totalGoal, Integer totalTaken) { }
 
     @Builder
     private record WeeklyAverageSleep (Integer hours, Integer minutes) { }

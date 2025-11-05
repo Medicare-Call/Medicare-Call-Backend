@@ -101,7 +101,7 @@ public class HomeReportService {
                     return HomeReportResponse.MedicationInfo.builder()
                             .type(dailyMedicationInfo.getType())
                             .taken(dailyMedicationInfo.getTaken())
-                            .goal(dailyMedicationInfo.getGoal())
+                            .goal(dailyMedicationInfo.getScheduled()) // 기획 의도에 따라 전체 스케쥴 개수 반환
                             .doseStatusList(doseStatusList)
                             .nextTime(nextTime)
                             .build();

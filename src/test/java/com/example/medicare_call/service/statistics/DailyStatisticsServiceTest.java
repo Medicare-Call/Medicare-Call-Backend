@@ -107,7 +107,7 @@ class DailyStatisticsServiceTest {
         when(aiSummaryService.getHomeSummary(any())).thenReturn("AI 요약");
 
         // when
-        dailyStatisticsService.updateDailyStatistics(testCareCallRecord);
+        dailyStatisticsService.upsertDailyStatistics(testCareCallRecord);
 
         // then
         verify(dailyStatisticsRepository, times(1)).save(any(DailyStatistics.class));
@@ -144,39 +144,13 @@ class DailyStatisticsServiceTest {
         when(aiSummaryService.getHomeSummary(any())).thenReturn("AI 요약");
 
         // when
-        dailyStatisticsService.updateDailyStatistics(testCareCallRecord);
+        dailyStatisticsService.upsertDailyStatistics(testCareCallRecord);
 
         // then
         verify(dailyStatisticsRepository, never()).save(any(DailyStatistics.class));
         verify(dailyStatisticsRepository, times(1)).findByElderAndDate(testElder, testDate);
         // updateDetails 메서드가 호출되어 기존 통계가 업데이트됨
         assertThat(existingStats.getBreakfastTaken()).isTrue();
-    }
-
-    @Test
-    @DisplayName("통계 업데이트 건너뛰기 - 모든 데이터가 비어있는 경우")
-    void updateDailyStatistics_skip_allDataEmpty() {
-        // given
-        when(mealRecordRepository.findByElderIdAndDate(testElder.getId(), testDate))
-                .thenReturn(Collections.emptyList());
-        when(medicationScheduleRepository.findByElder(testElder))
-                .thenReturn(Collections.emptyList());
-        when(medicationTakenRecordRepository.findByElderIdAndDate(testElder.getId(), testDate))
-                .thenReturn(Collections.emptyList());
-        when(careCallRecordRepository.findByElderIdAndDateWithSleepData(testElder.getId(), testDate))
-                .thenReturn(Collections.emptyList());
-        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(testElder.getId()), any(), any()))
-                .thenReturn(Collections.emptyList());
-        when(bloodSugarRecordRepository.findByElderIdAndDate(testElder.getId(), testDate))
-                .thenReturn(Collections.emptyList());
-
-        // when
-        dailyStatisticsService.updateDailyStatistics(testCareCallRecord);
-
-        // then
-        verify(dailyStatisticsRepository, never()).save(any(DailyStatistics.class));
-        verify(dailyStatisticsRepository, never()).findByElderAndDate(any(), any());
-        verify(aiSummaryService, never()).getHomeSummary(any());
     }
 
     @Test
@@ -204,7 +178,7 @@ class DailyStatisticsServiceTest {
         when(aiSummaryService.getHomeSummary(any())).thenReturn("AI 요약");
 
         // when
-        dailyStatisticsService.updateDailyStatistics(testCareCallRecord);
+        dailyStatisticsService.upsertDailyStatistics(testCareCallRecord);
 
         // then
         verify(dailyStatisticsRepository).save(argThat(stats ->
@@ -240,7 +214,7 @@ class DailyStatisticsServiceTest {
         when(aiSummaryService.getHomeSummary(any())).thenReturn("AI 요약");
 
         // when
-        dailyStatisticsService.updateDailyStatistics(testCareCallRecord);
+        dailyStatisticsService.upsertDailyStatistics(testCareCallRecord);
 
         // then
         verify(dailyStatisticsRepository).save(argThat(stats ->
@@ -295,7 +269,7 @@ class DailyStatisticsServiceTest {
         when(aiSummaryService.getHomeSummary(any())).thenReturn("AI 요약");
 
         // when
-        dailyStatisticsService.updateDailyStatistics(testCareCallRecord);
+        dailyStatisticsService.upsertDailyStatistics(testCareCallRecord);
 
         // then
         verify(dailyStatisticsRepository).save(argThat(stats ->
@@ -360,7 +334,7 @@ class DailyStatisticsServiceTest {
         when(aiSummaryService.getHomeSummary(any())).thenReturn("AI 요약");
 
         // when
-        dailyStatisticsService.updateDailyStatistics(testCareCallRecord);
+        dailyStatisticsService.upsertDailyStatistics(testCareCallRecord);
 
         // then
         verify(dailyStatisticsRepository).save(argThat(stats ->
@@ -405,7 +379,7 @@ class DailyStatisticsServiceTest {
         when(aiSummaryService.getHomeSummary(any())).thenReturn("AI 요약");
 
         // when
-        dailyStatisticsService.updateDailyStatistics(testCareCallRecord);
+        dailyStatisticsService.upsertDailyStatistics(testCareCallRecord);
 
         // then
         verify(dailyStatisticsRepository).save(argThat(stats ->
@@ -440,7 +414,7 @@ class DailyStatisticsServiceTest {
         when(aiSummaryService.getHomeSummary(any())).thenReturn("AI 요약");
 
         // when
-        dailyStatisticsService.updateDailyStatistics(testCareCallRecord);
+        dailyStatisticsService.upsertDailyStatistics(testCareCallRecord);
 
         // then
         verify(dailyStatisticsRepository).save(argThat(stats ->
@@ -474,7 +448,7 @@ class DailyStatisticsServiceTest {
         when(aiSummaryService.getHomeSummary(any())).thenReturn("AI 요약");
 
         // when
-        dailyStatisticsService.updateDailyStatistics(testCareCallRecord);
+        dailyStatisticsService.upsertDailyStatistics(testCareCallRecord);
 
         // then
         verify(dailyStatisticsRepository).save(argThat(stats ->
@@ -511,7 +485,7 @@ class DailyStatisticsServiceTest {
         when(aiSummaryService.getHomeSummary(any())).thenReturn("AI 요약");
 
         // when
-        dailyStatisticsService.updateDailyStatistics(testCareCallRecord);
+        dailyStatisticsService.upsertDailyStatistics(testCareCallRecord);
 
         // then
         verify(dailyStatisticsRepository).save(argThat(stats ->
@@ -546,7 +520,7 @@ class DailyStatisticsServiceTest {
         when(aiSummaryService.getHomeSummary(any())).thenReturn("AI 요약");
 
         // when
-        dailyStatisticsService.updateDailyStatistics(testCareCallRecord);
+        dailyStatisticsService.upsertDailyStatistics(testCareCallRecord);
 
         // then
         verify(dailyStatisticsRepository).save(argThat(stats ->
@@ -580,7 +554,7 @@ class DailyStatisticsServiceTest {
         when(aiSummaryService.getHomeSummary(any())).thenReturn("AI 요약");
 
         // when
-        dailyStatisticsService.updateDailyStatistics(testCareCallRecord);
+        dailyStatisticsService.upsertDailyStatistics(testCareCallRecord);
 
         // then
         verify(dailyStatisticsRepository).save(argThat(stats ->
@@ -617,7 +591,7 @@ class DailyStatisticsServiceTest {
         when(aiSummaryService.getHomeSummary(any())).thenReturn("AI 요약");
 
         // when
-        dailyStatisticsService.updateDailyStatistics(testCareCallRecord);
+        dailyStatisticsService.upsertDailyStatistics(testCareCallRecord);
 
         // then
         verify(dailyStatisticsRepository).save(argThat(stats ->
@@ -657,7 +631,7 @@ class DailyStatisticsServiceTest {
         when(aiSummaryService.getHomeSummary(any())).thenReturn("AI 요약");
 
         // when
-        dailyStatisticsService.updateDailyStatistics(testCareCallRecord);
+        dailyStatisticsService.upsertDailyStatistics(testCareCallRecord);
 
         // then
         // sleep1: 8시간(480분), sleep2: 8시간(480분) → 평균 480분
@@ -698,7 +672,7 @@ class DailyStatisticsServiceTest {
         when(aiSummaryService.getHomeSummary(any())).thenReturn("AI 요약");
 
         // when
-        dailyStatisticsService.updateDailyStatistics(testCareCallRecord);
+        dailyStatisticsService.upsertDailyStatistics(testCareCallRecord);
 
         // then
         // (100 + 120) / 2 = 110
@@ -732,7 +706,7 @@ class DailyStatisticsServiceTest {
         when(aiSummaryService.getHomeSummary(any())).thenReturn("테스트 AI 요약");
 
         // when
-        dailyStatisticsService.updateDailyStatistics(testCareCallRecord);
+        dailyStatisticsService.upsertDailyStatistics(testCareCallRecord);
 
         // then
         verify(aiSummaryService, times(1)).getHomeSummary(any());
@@ -847,7 +821,7 @@ class DailyStatisticsServiceTest {
         when(aiSummaryService.getHomeSummary(any())).thenReturn("AI 요약");
 
         // when
-        dailyStatisticsService.updateDailyStatistics(eveningCallRecord);
+        dailyStatisticsService.upsertDailyStatistics(eveningCallRecord);
 
         // then
         // 점심 콜이 누락되었으므로 totalGoal은 아침(1) + 저녁(1) = 2가 되어야함
@@ -929,7 +903,7 @@ class DailyStatisticsServiceTest {
         when(aiSummaryService.getHomeSummary(any())).thenReturn("AI 요약");
 
         // when
-        dailyStatisticsService.updateDailyStatistics(testCareCallRecord);
+        dailyStatisticsService.upsertDailyStatistics(testCareCallRecord);
 
         // then
         // TAKEN 상태인 기록은 2개이므로, totalTaken은 2가 되어야 한다.
@@ -999,15 +973,16 @@ class DailyStatisticsServiceTest {
         when(aiSummaryService.getHomeSummary(any())).thenReturn("AI 요약");
 
         // when
-        dailyStatisticsService.updateDailyStatistics(testCareCallRecord);
+        dailyStatisticsService.upsertDailyStatistics(testCareCallRecord);
 
         // then
         verify(dailyStatisticsRepository).save(argThat(stats -> {
             assertThat(stats.getMedicationList()).hasSize(1);
             DailyStatistics.MedicationInfo medicationInfo = stats.getMedicationList().get(0);
             assertThat(medicationInfo.getType()).isEqualTo("혈압약");
-            assertThat(medicationInfo.getTaken()).isEqualTo(1);
+            assertThat(medicationInfo.getScheduled()).isEqualTo(3);
             assertThat(medicationInfo.getGoal()).isEqualTo(3);
+            assertThat(medicationInfo.getTaken()).isEqualTo(1);
 
             List<DailyStatistics.DoseStatus> doseStatusList = medicationInfo.getDoseStatusList();
             assertThat(doseStatusList).hasSize(3);
