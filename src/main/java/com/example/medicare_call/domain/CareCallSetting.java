@@ -26,10 +26,11 @@ public class CareCallSetting {
     @Column(name = "first_call_time", nullable = false)
     private LocalTime firstCallTime;
 
-    @Column(name = "second_call_time")
+    // second, third 는 멤버십에 따라 차별화를 두는 기획을 두게디면 nullable = true 가 될 수 있을 것 같다
+    @Column(name = "second_call_time", nullable = false)
     private LocalTime secondCallTime;
 
-    @Column(name = "third_call_time")
+    @Column(name = "third_call_time", nullable = false)
     private LocalTime thirdCallTime;
 
     @Column(name = "recurrence", nullable = false)

@@ -3,11 +3,12 @@ package com.example.medicare_call.controller;
 import com.example.medicare_call.domain.CareCallRecord;
 import com.example.medicare_call.domain.CareCallSetting;
 import com.example.medicare_call.domain.Elder;
-import com.example.medicare_call.domain.Member;
 import com.example.medicare_call.dto.carecall.CareCallSettingRequest;
 import com.example.medicare_call.dto.carecall.CareCallSettingResponse;
 import com.example.medicare_call.dto.carecall.CareCallTestRequest;
 import com.example.medicare_call.dto.data_processor.CareCallDataProcessRequest;
+import com.example.medicare_call.global.event.CareCallEvent;
+import com.example.medicare_call.global.event.Events;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.global.jwt.JwtProvider;
@@ -17,33 +18,28 @@ import com.example.medicare_call.service.carecall.CareCallRequestSenderService;
 import com.example.medicare_call.service.carecall.CareCallSettingService;
 import com.example.medicare_call.service.data_processor.CareCallDataProcessingService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Arrays;
-import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
@@ -68,6 +64,8 @@ class CareCallControllerTest {
     private JwtProvider jwtProvider;
     @MockBean
     private MemberRepository memberRepository;
+    @MockBean
+    ApplicationEventPublisher publisher;
 
     @Test
     @DisplayName("통화 데이터 수신 성공")
@@ -114,11 +112,14 @@ class CareCallControllerTest {
         when(careCallDataProcessingService.saveCallData(any(CareCallDataProcessRequest.class))).thenReturn(savedRecord);
 
         // when & then
-        mockMvc.perform(post("/call-data")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andExpect(content().string(""));
+        try (var mocked = org.mockito.Mockito.mockStatic(Events.class)) {
+            mockMvc.perform(post("/call-data")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isCreated())
+                    .andExpect(content().string(""));
+            mocked.verify(() -> Events.raise(org.mockito.ArgumentMatchers.isA(CareCallEvent.class)));
+        }
     }
     
     @Test
@@ -211,10 +212,14 @@ class CareCallControllerTest {
         when(careCallDataProcessingService.saveCallData(any(CareCallDataProcessRequest.class))).thenReturn(savedRecord);
 
         // when & then
-        mockMvc.perform(post("/call-data")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(content().string(""));
+        try (var mocked = org.mockito.Mockito.mockStatic(Events.class)) {
+            mockMvc.perform(post("/call-data")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isCreated())
+                    .andExpect(content().string(""));
+            mocked.verify(() -> Events.raise(org.mockito.ArgumentMatchers.isA(CareCallEvent.class)));
+        }
     }
 
     @Test

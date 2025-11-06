@@ -44,3 +44,6 @@ out/
 
 ### Grafana ###
 grafana-data/
+
+### Firebase.Json ###
+src/main/resources/firebase.json

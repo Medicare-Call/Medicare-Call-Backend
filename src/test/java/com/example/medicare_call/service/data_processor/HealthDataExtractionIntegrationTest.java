@@ -4,7 +4,10 @@ import com.example.medicare_call.dto.data_processor.HealthDataExtractionRequest;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
 import com.example.medicare_call.dto.data_processor.ai.OpenAiResponse;
 import com.example.medicare_call.service.ai.AiHealthDataExtractorService;
+import com.example.medicare_call.service.notification.NotificationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.messaging.FirebaseMessaging;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +36,16 @@ class HealthDataExtractionIntegrationTest {
 
     @MockBean(name = "openAiRestTemplate")
     private RestTemplate restTemplate;
+
+    @MockBean
+    private NotificationService notificationService;
+
+    @MockBean
+    private FirebaseApp firebaseApp;
+
+    @MockBean
+    private FirebaseMessaging firebaseMessaging;
+
 
     @Autowired
     private ObjectMapper objectMapper;

@@ -108,6 +108,9 @@ management:
         http.db.io.time: 0.5,0.95,0.99
         http.server.requests: 0.5,0.95,0.99
 
+firebase:
+  file-path: firebase.json
+
 ---
 spring:
   config:
@@ -200,3 +203,7 @@ management:
       percentiles:
         http.db.io.time: 0.5,0.95,0.99
         http.server.requests: 0.5,0.95,0.99
+
+
+firebase:
+  file-path: firebase.json

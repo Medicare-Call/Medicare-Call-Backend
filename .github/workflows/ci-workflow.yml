@@ -8,6 +8,9 @@ on:
     branches:
       - '**'
 
+env:
+  GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+
 permissions:
   contents: read
 
@@ -24,6 +27,9 @@ jobs:
           distribution: 'temurin'
           server-id: github
           settings-path: ${{ github.workspace }}
+
+      - name: Decrypt Secrets
+        run: sh .github/workflows/decrypt.sh
 
       - name: 👏🏻 grant execute permission for gradlew
         run: chmod +x gradlew

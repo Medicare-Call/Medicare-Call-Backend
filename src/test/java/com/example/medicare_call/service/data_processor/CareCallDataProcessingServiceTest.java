@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -84,6 +85,9 @@ class CareCallDataProcessingServiceTest {
         
         CareCallSetting setting = CareCallSetting.builder()
                 .id(2)
+                .firstCallTime(LocalTime.parse("06:00:00"))
+                .secondCallTime(LocalTime.parse("08:00:00"))
+                .thirdCallTime(LocalTime.parse("10:01:00"))
                 .build();
         
         CareCallRecord expectedRecord = CareCallRecord.builder()
@@ -336,11 +340,14 @@ class CareCallDataProcessingServiceTest {
         Elder elder = Elder.builder()
                 .id(1)
                 .build();
-        
+
         CareCallSetting setting = CareCallSetting.builder()
                 .id(2)
+                .firstCallTime(LocalTime.parse("06:00:00"))
+                .secondCallTime(LocalTime.parse("08:00:00"))
+                .thirdCallTime(LocalTime.parse("10:01:00"))
                 .build();
-        
+
         CareCallRecord expectedRecord = CareCallRecord.builder()
                 .id(1)
                 .elder(elder)

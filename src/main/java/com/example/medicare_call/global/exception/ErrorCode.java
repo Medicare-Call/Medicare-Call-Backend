@@ -37,6 +37,7 @@ public enum ErrorCode {
 
     // CareCall
     CARE_CALL_SETTING_NOT_FOUND(HttpStatus.NOT_FOUND, "CC001", "케어콜 설정 정보를 찾을 수 없습니다."),
+    CARE_CALL_WRONG_TIME(HttpStatus.BAD_REQUEST, "CC002","케어콜이 설정되지 않은 시간에 실행 되었습니다"),
 
     // Medication
     MEDICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "MD001", "해당 복용약 정보를 찾을 수 없습니다."),
@@ -56,7 +57,11 @@ public enum ErrorCode {
     NO_DATA_FOR_WEEK(HttpStatus.NOT_FOUND, "D002", "이번주의 데이터가 없습니다."),
 
     // Subscription
-    SUBSCRIPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "S001", "구독 정보를 찾을 수 없습니다.");
+    SUBSCRIPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "S001", "구독 정보를 찾을 수 없습니다."),
+
+    // Firebase
+    FIREBASE_INITIALIZATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FB001", "Firebase 초기화 중 오류가 발생했습니다. 다시 시도해 주세요."),
+    FIREBASE_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FB002", "FCM 메세지 전송에 실패했습니다.");
 
 
     private final HttpStatus status;
