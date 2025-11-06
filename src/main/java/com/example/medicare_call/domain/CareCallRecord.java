@@ -64,9 +64,12 @@ public class CareCallRecord {
     @Column(name = "health_details", columnDefinition = "TEXT")
     private String healthDetails; // 건강 징후 상세 내용
 
+    @Column(name = "ai_health_analysis_comment", columnDefinition = "TEXT")
+    private String aiHealthAnalysisComment; // AI 건강 분석 코멘트
+
     @Builder
     public CareCallRecord(Integer id, Elder elder, CareCallSetting setting, LocalDateTime calledAt, Byte responded, LocalDateTime sleepStart, LocalDateTime sleepEnd, Byte healthStatus, Byte psychStatus,
-                          LocalDateTime startTime, LocalDateTime endTime, String callStatus, String transcriptionText, String psychologicalDetails, String healthDetails) {
+                          LocalDateTime startTime, LocalDateTime endTime, String callStatus, String transcriptionText, String psychologicalDetails, String healthDetails, String aiHealthAnalysisComment) {
         this.id = id;
         this.elder = elder;
         this.setting = setting;
@@ -82,5 +85,6 @@ public class CareCallRecord {
         this.transcriptionText = transcriptionText;
         this.psychologicalDetails = psychologicalDetails;
         this.healthDetails = healthDetails;
+        this.aiHealthAnalysisComment = aiHealthAnalysisComment;
     }
 } 

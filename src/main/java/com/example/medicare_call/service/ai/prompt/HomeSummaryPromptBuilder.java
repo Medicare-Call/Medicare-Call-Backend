@@ -43,9 +43,8 @@ public class HomeSummaryPromptBuilder implements PromptBuilder<HomeSummaryDto> {
                 formatMealStatus(dto.getDinner(), "저녁")
         ).collect(Collectors.joining(", "));
 
-        String medicationSummary = String.format("오늘 복약 %d/%d, 다음 복약: %s",
-                dto.getTotalTakenMedication(), dto.getTotalGoalMedication(),
-                dto.getNextMedicationTime() != null ? dto.getNextMedicationTime().getDescription() : "기록 없음");
+        String medicationSummary = String.format("오늘 복약 %d/%d",
+                dto.getTotalTakenMedication(), dto.getTotalGoalMedication());
 
 
         String sleepSummary = (dto.getSleepHours() == null || dto.getSleepMinutes() == null)

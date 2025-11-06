@@ -1,11 +1,9 @@
 package com.example.medicare_call.service.ai;
 
-import com.example.medicare_call.dto.report.HomeSummaryDto;
 import com.example.medicare_call.dto.data_processor.ai.OpenAiResponse;
-import com.example.medicare_call.dto.report.WeeklyReportResponse;
+import com.example.medicare_call.dto.report.HomeSummaryDto;
 import com.example.medicare_call.dto.report.WeeklySummaryDto;
-import com.example.medicare_call.global.enums.MedicationScheduleTime;
-import com.example.medicare_call.service.ai.AiSummaryService;
+import com.example.medicare_call.service.statistics.WeeklyStatisticsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -47,7 +45,6 @@ class AiSummaryServiceTest {
         HomeSummaryDto summaryDto = HomeSummaryDto.builder()
                 .breakfast(true).lunch(true).dinner(false)
                 .totalTakenMedication(2).totalGoalMedication(3)
-                .nextMedicationTime(MedicationScheduleTime.DINNER)
                 .sleepHours(7).sleepMinutes(30)
                 .healthStatus("양호").mentalStatus("행복")
                 .averageBloodSugar(110)
@@ -73,9 +70,9 @@ class AiSummaryServiceTest {
     @DisplayName("주간 건강 데이터 요약 성공")
     void getWeeklyStatsSummary_success() {
         // given
-        WeeklyReportResponse.BloodSugarType beforeMeal = WeeklyReportResponse.BloodSugarType.builder().normal(5).high(1).low(0).build();
-        WeeklyReportResponse.BloodSugarType afterMeal = WeeklyReportResponse.BloodSugarType.builder().normal(4).high(2).low(0).build();
-        WeeklyReportResponse.BloodSugar bloodSugar = WeeklyReportResponse.BloodSugar.builder().beforeMeal(beforeMeal).afterMeal(afterMeal).build();
+        WeeklyStatisticsService.WeeklyBloodSugarType beforeMeal = WeeklyStatisticsService.WeeklyBloodSugarType.builder().normal(5).high(1).low(0).build();
+        WeeklyStatisticsService.WeeklyBloodSugarType afterMeal = WeeklyStatisticsService.WeeklyBloodSugarType.builder().normal(4).high(2).low(0).build();
+        WeeklyStatisticsService.WeeklyBloodSugar bloodSugar = WeeklyStatisticsService.WeeklyBloodSugar.builder().beforeMeal(beforeMeal).afterMeal(afterMeal).build();
 
         WeeklySummaryDto weeklySummaryDto = WeeklySummaryDto.builder()
                 .mealCount(15)
@@ -91,7 +88,7 @@ class AiSummaryServiceTest {
                 .build();
 
         String expectedSummary = "이번 주 어르신은 건강 이상 신호가 3회, 케어콜 미응답이 1회 있었습니다. 어르신께 무슨 일이 없는지 확인이 필요해 보입니다. 약도 2회 누락되어 꾸준한 복용 지도가 필요합니다.";
-        
+
         OpenAiResponse.Message message = OpenAiResponse.Message.builder()
                 .content(expectedSummary)
                 .build();

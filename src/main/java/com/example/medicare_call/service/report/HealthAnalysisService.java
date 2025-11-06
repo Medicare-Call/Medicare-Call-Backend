@@ -6,7 +6,6 @@ import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.CareCallRecordRepository;
 import com.example.medicare_call.repository.ElderRepository;
-import com.example.medicare_call.service.ai.AiSummaryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +18,6 @@ import java.util.List;
 public class HealthAnalysisService {
     private final CareCallRecordRepository careCallRecordRepository;
     private final ElderRepository elderRepository;
-    private final AiSummaryService aiSummaryService;
 
     public DailyHealthAnalysisResponse getDailyHealthAnalysis(Integer elderId, LocalDate date) {
         elderRepository.findById(elderId)
@@ -34,7 +32,8 @@ public class HealthAnalysisService {
         CareCallRecord latestRecord = healthRecords.get(healthRecords.size() - 1);
         String healthDetails = latestRecord.getHealthDetails();
         List<String> symptomList = (healthDetails == null || healthDetails.isBlank()) ? List.of() : Arrays.stream(healthDetails.split(",")).map(String::trim).toList();
-        String analysisComment = aiSummaryService.getSymptomAnalysis(symptomList);
+        String analysisComment = latestRecord.getAiHealthAnalysisComment();
+
         return DailyHealthAnalysisResponse.builder()
                 .date(date)
                 .symptomList(symptomList)
