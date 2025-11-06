@@ -13,7 +13,7 @@ CREATE TABLE daily_statistics (
     health_status VARCHAR(255),
     mental_status VARCHAR(255),
     ai_summary TEXT,
-    CONSTRAINT fk_daily_statistics_elder FOREIGN KEY (elder_id) REFERENCES elder (id),
+    CONSTRAINT fk_daily_statistics_elder FOREIGN KEY (elder_id) REFERENCES Elder (id),
     UNIQUE KEY uk_daily_statistics_elder_date (elder_id, date)
 );
 
@@ -39,7 +39,7 @@ CREATE TABLE weekly_statistics (
     psych_normal_count INT,
     psych_bad_count INT,
     ai_health_summary TEXT,
-    CONSTRAINT fk_weekly_statistics_elder FOREIGN KEY (elder_id) REFERENCES elder (id),
+    CONSTRAINT fk_weekly_statistics_elder FOREIGN KEY (elder_id) REFERENCES Elder (id),
     UNIQUE KEY uk_weekly_statistics_elder_start_date (elder_id, start_date)
 );
 
