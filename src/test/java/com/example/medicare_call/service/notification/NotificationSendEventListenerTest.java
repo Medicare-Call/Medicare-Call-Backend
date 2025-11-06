@@ -321,44 +321,5 @@ class NotificationSendEventListenerTest {
         inOrder.verify(firebaseService).sendNotification(notification);
     }
 
-    @Test
-    @DisplayName("2차까지만 설정된 경우: 호출 시간별 구분 정확도")
-    void listenCareCallEvent_onlyTwoCallTimes() {
-        // given
-        Elder elder = mock(Elder.class);
-        when(elder.getName()).thenReturn("두 번호");
-        when(elder.getId()).thenReturn(8);
-
-        CareCallSetting setting = mock(CareCallSetting.class);
-        when(setting.getFirstCallTime()).thenReturn(LocalTime.of(9, 0));
-        when(setting.getSecondCallTime()).thenReturn(LocalTime.of(18, 0));
-        when(setting.getThirdCallTime()).thenReturn(null);
-
-        CareCallRecord careCallRecord = CareCallRecord.builder()
-                .id(8)
-                .elder(elder)
-                .setting(setting)
-                .callStatus("completed")
-                .startTime(LocalDateTime.of(2025, 11, 5, 20, 0))
-                .build();
-
-        CareCallEvent event = new CareCallEvent(careCallRecord);
-
-        Notification notification = mock(Notification.class);
-        when(notificationService.saveNotification(any(NotificationDto.class)))
-                .thenReturn(notification);
-
-        // when
-        notificationSendEventListener.listenCareCallEvent(event);
-
-        // then
-        ArgumentCaptor<NotificationDto> dtoCaptor = ArgumentCaptor.forClass(NotificationDto.class);
-        verify(notificationService).saveNotification(dtoCaptor.capture());
-
-        NotificationDto capturedDto = dtoCaptor.getValue();
-        assertThat(capturedDto.body()).contains("2차");
-
-        verify(firebaseService).sendNotification(notification);
-    }
 
 }

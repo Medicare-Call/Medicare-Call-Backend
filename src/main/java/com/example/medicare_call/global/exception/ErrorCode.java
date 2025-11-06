@@ -37,6 +37,7 @@ public enum ErrorCode {
 
     // CareCall
     CARE_CALL_SETTING_NOT_FOUND(HttpStatus.NOT_FOUND, "CC001", "케어콜 설정 정보를 찾을 수 없습니다."),
+    CARE_CALL_WRONG_TIME(HttpStatus.BAD_REQUEST, "CC002","케어콜이 설정되지 않은 시간에 실행 되었습니다"),
 
     // Medication
     MEDICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "MD001", "해당 복용약 정보를 찾을 수 없습니다."),

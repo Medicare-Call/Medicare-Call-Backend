@@ -8,6 +8,7 @@ import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.*;
 import com.example.medicare_call.service.ai.AiHealthDataExtractorService;
+import com.example.medicare_call.util.CareCallUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -62,10 +63,11 @@ public class CareCallDataProcessingService {
         log.info("통화 데이터 저장 완료: id={}", saved.getId());
         
         // OpenAI를 통한 건강 데이터 추출
-        // Todo 재훈님의 요구사항대로, 저녁(3차) 케어콜일 때만 health Detail을 추출할 수 있도록 변경
         if (transcriptionText != null && !transcriptionText.trim().isEmpty()) {
             try {
-                extractHealthDataFromCall(saved, transcriptionText);
+                int callOrder = CareCallUtil.extractCareCallOrder(record.getCalledAt(), record.getSetting());
+                if(callOrder == 3)
+                    extractHealthDataFromCall(saved, transcriptionText);
             } catch (Exception e) {
                 log.error("건강 데이터 추출 중 오류 발생", e);
             }
