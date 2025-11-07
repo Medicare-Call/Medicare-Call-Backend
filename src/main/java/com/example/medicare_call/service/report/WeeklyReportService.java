@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -45,8 +46,15 @@ public class WeeklyReportService {
         }
 
         // WeeklyStatistics 조회
-        WeeklyStatistics weeklyStats = weeklyStatisticsRepository.findByElderAndStartDate(elder, startDate)
-                .orElseThrow(() -> new CustomException(ErrorCode.NO_DATA_FOR_WEEK));
+        Optional<WeeklyStatistics> weeklyStatsOpt = weeklyStatisticsRepository.findByElderAndStartDate(elder, startDate);
+
+        // 주간 통계 데이터가 없을 때 빈 응답 반환
+        if (weeklyStatsOpt.isEmpty()) {
+            log.info("주간 통계 데이터가 없어 빈 응답 반환 - elderId: {}, startDate: {}", elderId, startDate);
+            return createEmptyWeeklyReport(elder, subscriptionStartDate);
+        }
+
+        WeeklyStatistics weeklyStats = weeklyStatsOpt.get();
 
         // Entity -> DTO 변환
         WeeklyReportResponse.SummaryStats summaryStats = WeeklyReportResponse.SummaryStats.builder()
@@ -141,6 +149,20 @@ public class WeeklyReportService {
                 .normal(entityType.getNormal())
                 .high(entityType.getHigh())
                 .low(entityType.getLow())
+                .build();
+    }
+
+    private WeeklyReportResponse createEmptyWeeklyReport(Elder elder, LocalDate subscriptionStartDate) {
+        return WeeklyReportResponse.builder()
+                .elderName(elder.getName())
+                .summaryStats(null)
+                .mealStats(null)
+                .medicationStats(null)
+                .healthSummary(null)
+                .averageSleep(null)
+                .psychSummary(null)
+                .bloodSugar(null)
+                .subscriptionStartDate(subscriptionStartDate)
                 .build();
     }
 } 

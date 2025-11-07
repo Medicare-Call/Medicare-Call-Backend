@@ -2,12 +2,14 @@ package com.example.medicare_call.service.report;
 
 import com.example.medicare_call.domain.DailyStatistics;
 import com.example.medicare_call.domain.Elder;
+import com.example.medicare_call.domain.MedicationSchedule;
 import com.example.medicare_call.dto.report.HomeReportResponse;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.DailyStatisticsRepository;
 import com.example.medicare_call.repository.ElderRepository;
+import com.example.medicare_call.repository.MedicationScheduleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -27,6 +30,7 @@ public class HomeReportService {
 
     private final ElderRepository elderRepository;
     private final DailyStatisticsRepository dailyStatisticsRepository;
+    private final MedicationScheduleRepository medicationScheduleRepository;
 
     public HomeReportResponse getHomeReport(Integer elderId) {
         return getHomeReport(elderId, LocalDateTime.now());
@@ -41,8 +45,15 @@ public class HomeReportService {
                 .orElseThrow(() -> new CustomException(ErrorCode.ELDER_NOT_FOUND));
 
         // 오늘 날짜에 해당하는 통계 데이터 조회
-        DailyStatistics dailyStatistics = dailyStatisticsRepository.findByElderAndDate(elder, today)
-                .orElseThrow(() -> new CustomException(ErrorCode.NO_DATA_FOR_TODAY));
+        Optional<DailyStatistics> dailyStatisticsOpt = dailyStatisticsRepository.findByElderAndDate(elder, today);
+
+        // 오늘 날짜 데이터가 없을 때만 빈 응답 반환
+        if (dailyStatisticsOpt.isEmpty()) {
+            log.info("오늘 날짜 통계 데이터가 없어 빈 응답 반환 - elderId: {}, date: {}", elderId, today);
+            return createEmptyHomeReport(elder, now);
+        }
+
+        DailyStatistics dailyStatistics = dailyStatisticsOpt.get();
 
         HomeReportResponse.MealStatus mealStatus = convertMealStatus(dailyStatistics);
         HomeReportResponse.MedicationStatus medicationStatus = convertMedicationStatus(dailyStatistics, now);
@@ -168,5 +179,72 @@ public class HomeReportService {
             default:
                 return LocalTime.of(8, 0);
         }
+    }
+
+    private HomeReportResponse createEmptyHomeReport(Elder elder, LocalTime now) {
+        List<MedicationSchedule> schedules = medicationScheduleRepository.findByElder(elder);
+
+        // 약 종류별로 스케줄을 그룹화
+        Map<String, List<MedicationSchedule>> medicationSchedules = schedules.stream()
+                .collect(Collectors.groupingBy(MedicationSchedule::getName));
+
+        List<HomeReportResponse.MedicationInfo> medicationList = medicationSchedules.entrySet().stream()
+                .map(entry -> {
+                    String medicationName = entry.getKey();
+                    List<MedicationSchedule> medicationScheduleList = entry.getValue();
+
+                    // doseStatusList 생성 (taken은 null)
+                    List<HomeReportResponse.DoseStatus> doseStatusList = medicationScheduleList.stream()
+                            .map(schedule -> HomeReportResponse.DoseStatus.builder()
+                                    .time(schedule.getScheduleTime())
+                                    .taken(null)
+                                    .build())
+                            .collect(Collectors.toList());
+
+                    // nextTime 계산
+                    List<DailyStatistics.DoseStatus> emptyDoseStatuses = medicationScheduleList.stream()
+                            .map(schedule -> DailyStatistics.DoseStatus.builder()
+                                    .time(schedule.getScheduleTime())
+                                    .taken(null)
+                                    .build())
+                            .collect(Collectors.toList());
+
+                    MedicationScheduleTime nextTime = calculateNextTime(emptyDoseStatuses, now);
+
+                    return HomeReportResponse.MedicationInfo.builder()
+                            .type(medicationName)
+                            .taken(null)
+                            .goal(medicationScheduleList.size())
+                            .nextTime(nextTime)
+                            .doseStatusList(doseStatusList)
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        HomeReportResponse.MedicationStatus medicationStatus = HomeReportResponse.MedicationStatus.builder()
+                .totalTaken(null)
+                .totalGoal(null)
+                .medicationList(medicationList)
+                .build();
+
+        return HomeReportResponse.builder()
+                .elderName(elder.getName())
+                .aiSummary(null)
+                .mealStatus(HomeReportResponse.MealStatus.builder()
+                        .breakfast(null)
+                        .lunch(null)
+                        .dinner(null)
+                        .build())
+                .medicationStatus(medicationStatus)
+                .sleep(HomeReportResponse.Sleep.builder()
+                        .meanHours(null)
+                        .meanMinutes(null)
+                        .build())
+                .healthStatus(null)
+                .mentalStatus(null)
+                .bloodSugar(HomeReportResponse.BloodSugar.builder()
+                        .meanValue(null)
+                        .build())
+                .build();
     }
 }

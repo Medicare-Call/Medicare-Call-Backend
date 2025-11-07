@@ -198,8 +198,8 @@ class WeeklyReportServiceTest {
     }
 
     @Test
-    @DisplayName("주간 통계 조회 실패 - 해당 주차 통계 데이터 없음")
-    void getWeeklyReport_fail_noDataForWeek() {
+    @DisplayName("주간 통계 조회 - 해당 주차 통계 데이터 없음, 빈 응답 반환")
+    void getWeeklyReport_emptyResponse_noDataForWeek() {
         // given
         Integer elderId = 1;
         when(subscriptionRepository.findByElderId(elderId))
@@ -209,11 +209,22 @@ class WeeklyReportServiceTest {
         when(weeklyStatisticsRepository.findByElderAndStartDate(testElder, testStartDate))
                 .thenReturn(Optional.empty());
 
-        // when & then
-        CustomException exception = assertThrows(CustomException.class, () -> {
-            weeklyReportService.getWeeklyReport(elderId, testStartDate);
-        });
-        assertEquals(ErrorCode.NO_DATA_FOR_WEEK, exception.getErrorCode());
+        // when
+        WeeklyReportResponse response = weeklyReportService.getWeeklyReport(elderId, testStartDate);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getElderName()).isEqualTo("김옥자");
+        assertThat(response.getSubscriptionStartDate()).isEqualTo(LocalDate.of(2025, 1, 1));
+
+        // 나머지 필드는 null
+        assertThat(response.getSummaryStats()).isNull();
+        assertThat(response.getMealStats()).isNull();
+        assertThat(response.getMedicationStats()).isNull();
+        assertThat(response.getHealthSummary()).isNull();
+        assertThat(response.getAverageSleep()).isNull();
+        assertThat(response.getPsychSummary()).isNull();
+        assertThat(response.getBloodSugar()).isNull();
     }
 
     @Test
