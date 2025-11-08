@@ -63,12 +63,15 @@ public class Member {
     @OneToMany(mappedBy = "guardian", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Elder> elders = new ArrayList<>();
 
+    @Column(name = "fcm_token", unique = true, nullable = false)
+    private String fcmToken;
+
     public Gender getGenderEnum() {
         return Gender.fromCode(gender); // byte값 → Enum 변환
     }
 
     @Builder
-    public Member(Integer id, String name, String phone, LocalDate birthDate, Byte gender, LocalDateTime termsAgreedAt, Byte plan) {
+    public Member(Integer id, String name, String phone, LocalDate birthDate, Byte gender, LocalDateTime termsAgreedAt, Byte plan, String fcmToken) {
         this.id = id;
         this.name = name;
         this.phone = phone;
@@ -76,6 +79,7 @@ public class Member {
         this.gender = gender;
         this.termsAgreedAt = termsAgreedAt;
         this.plan = plan;
+        this.fcmToken = fcmToken;
     }
 
     public void updateInfo(String name, LocalDate birthDate, Byte gender, String phone,
