@@ -63,7 +63,8 @@ public class Member {
     @OneToMany(mappedBy = "guardian", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Elder> elders = new ArrayList<>();
 
-    @Column(name = "fcm_token", unique = true, nullable = false)
+    // 성공적인 마이그레이션을 위해, 우선 nullable = true 로 설정
+    @Column(name = "fcm_token", unique = true, nullable = true)
     private String fcmToken;
 
     public Gender getGenderEnum() {
