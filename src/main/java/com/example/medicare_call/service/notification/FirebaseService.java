@@ -30,6 +30,7 @@ public class FirebaseService {
     }
     private Message createMessageFromDto(Notification notification) {
         return Message.builder()
+                .setToken(notification.getMember().getFcmToken())
                 .setNotification(com.google.firebase.messaging.Notification
                         .builder()
                         .setTitle(notification.getTitle())

@@ -37,6 +37,7 @@ public class AuthService {
                 .gender(req.getGender().getCode())
                 .plan((byte) 0)
                 .termsAgreedAt(LocalDateTime.now())
+                .fcmToken(req.getFcmToken())
                 .build();
 
         Member savedMember = memberRepository.save(member);
