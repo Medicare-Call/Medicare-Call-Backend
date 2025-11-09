@@ -1,6 +1,7 @@
 package com.example.medicare_call.service.data_processor;
 
 import com.example.medicare_call.domain.CareCallRecord;
+import com.example.medicare_call.domain.CareCallSetting;
 import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.domain.MealRecord;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
@@ -15,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -34,6 +36,7 @@ public class HealthDataProcessingServiceTest {
     @InjectMocks
     private HealthDataProcessingService healthDataProcessingService;
 
+    private CareCallSetting callSetting;
     private CareCallRecord callRecord;
     private Elder elder;
 
@@ -44,10 +47,17 @@ public class HealthDataProcessingServiceTest {
                 .name("테스트 어르신")
                 .build();
 
+        callSetting = CareCallSetting.builder()
+                .firstCallTime(LocalTime.of(9,0))
+                .secondCallTime(LocalTime.of(13,0))
+                .thirdCallTime(LocalTime.of(19,0))
+                .build();
+
         callRecord = CareCallRecord.builder()
                 .id(1)
                 .elder(elder)
-                .calledAt(LocalDateTime.now())
+                .setting(callSetting)
+                .calledAt(LocalDateTime.of(2025, 11, 6, 20, 0))
                 .responded((byte) 1)
                 .psychologicalDetails(null)
                 .healthDetails(null)
