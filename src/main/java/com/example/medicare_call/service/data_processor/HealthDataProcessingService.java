@@ -11,6 +11,7 @@ import com.example.medicare_call.repository.CareCallRecordRepository;
 import com.example.medicare_call.repository.MealRecordRepository;
 import com.example.medicare_call.service.ai.AiSummaryService;
 import com.example.medicare_call.service.statistics.StatisticsUpdateService;
+import com.example.medicare_call.util.CareCallUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
