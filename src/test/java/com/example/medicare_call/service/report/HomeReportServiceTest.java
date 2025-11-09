@@ -3,6 +3,7 @@ package com.example.medicare_call.service.report;
 import com.example.medicare_call.domain.DailyStatistics;
 import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.domain.MedicationSchedule;
+import com.example.medicare_call.domain.Member;
 import com.example.medicare_call.dto.report.HomeReportResponse;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.global.exception.CustomException;
@@ -10,6 +11,7 @@ import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.DailyStatisticsRepository;
 import com.example.medicare_call.repository.ElderRepository;
 import com.example.medicare_call.repository.MedicationScheduleRepository;
+import com.example.medicare_call.service.notification.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,15 +46,28 @@ class HomeReportServiceTest {
     @Mock
     private MedicationScheduleRepository medicationScheduleRepository;
 
+    @Mock
+    private NotificationService notificationService;
+
     @InjectMocks
     private HomeReportService homeReportService;
 
     private Elder testElder;
+    private Member testMember;
+    private Integer testMemberId;
     private LocalDate testDate;
     private LocalDateTime testDateTime;
 
     @BeforeEach
     void setUp() {
+        testMemberId = 1;
+
+        testMember = Member.builder()
+                .id(testMemberId)
+                .name("홍길동")
+                .phone("01012345678")
+                .build();
+
         testElder = Elder.builder()
                 .id(1)
                 .name("김옥자")
@@ -80,9 +95,10 @@ class HomeReportServiceTest {
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
         when(dailyStatisticsRepository.findByElderAndDate(testElder, testDate))
                 .thenReturn(Optional.of(dailyStatistics));
+        when(notificationService.getUnreadCount(testMemberId)).thenReturn(5);
 
         // when
-        HomeReportResponse response = homeReportService.getHomeReport(elderId, testDateTime);
+        HomeReportResponse response = homeReportService.getHomeReport(testMemberId, elderId, testDateTime);
 
         // then
         assertThat(response).isNotNull();
@@ -98,6 +114,7 @@ class HomeReportServiceTest {
         assertThat(response.getBloodSugar().getMeanValue()).isEqualTo(110);
         assertThat(response.getHealthStatus()).isEqualTo("좋음");
         assertThat(response.getMentalStatus()).isEqualTo("좋음");
+        assertThat(response.getUnreadNotification()).isEqualTo(5);
     }
 
     @Test
@@ -109,7 +126,7 @@ class HomeReportServiceTest {
 
         // when & then
         CustomException exception = assertThrows(CustomException.class, () -> {
-            homeReportService.getHomeReport(elderId, testDateTime);
+            homeReportService.getHomeReport(testMemberId, elderId, testDateTime);
         });
         assertEquals(ErrorCode.ELDER_NOT_FOUND, exception.getErrorCode());
     }
@@ -130,9 +147,10 @@ class HomeReportServiceTest {
                 .thenReturn(Optional.empty());
         when(medicationScheduleRepository.findByElder(testElder))
                 .thenReturn(medicationSchedules);
+        when(notificationService.getUnreadCount(testMemberId)).thenReturn(5);
 
         // when
-        HomeReportResponse response = homeReportService.getHomeReport(elderId, testDateTime);
+        HomeReportResponse response = homeReportService.getHomeReport(testMemberId, elderId, testDateTime);
 
         // then
         assertThat(response).isNotNull();
@@ -177,6 +195,7 @@ class HomeReportServiceTest {
         assertThat(response.getBloodSugar().getMeanValue()).isNull();
         assertThat(response.getHealthStatus()).isNull();
         assertThat(response.getMentalStatus()).isNull();
+        assertThat(response.getUnreadNotification()).isEqualTo(5);
     }
 
     @Test
@@ -192,9 +211,10 @@ class HomeReportServiceTest {
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
         when(dailyStatisticsRepository.findByElderAndDate(testElder, testDate))
                 .thenReturn(Optional.of(dailyStatistics));
+        when(notificationService.getUnreadCount(testMemberId)).thenReturn(0);
 
         // when
-        HomeReportResponse response = homeReportService.getHomeReport(elderId, testDateTime);
+        HomeReportResponse response = homeReportService.getHomeReport(testMemberId, elderId, testDateTime);
 
         // then
         assertThat(response.getMealStatus().getBreakfast()).isTrue();
@@ -217,9 +237,10 @@ class HomeReportServiceTest {
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
         when(dailyStatisticsRepository.findByElderAndDate(testElder, testDate))
                 .thenReturn(Optional.of(dailyStatistics));
+        when(notificationService.getUnreadCount(testMemberId)).thenReturn(0);
 
         // when
-        HomeReportResponse response = homeReportService.getHomeReport(elderId, testDateTime);
+        HomeReportResponse response = homeReportService.getHomeReport(testMemberId, elderId, testDateTime);
 
         // then
         assertThat(response.getSleep().getMeanHours()).isEqualTo(8);
@@ -241,9 +262,10 @@ class HomeReportServiceTest {
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
         when(dailyStatisticsRepository.findByElderAndDate(testElder, testDate))
                 .thenReturn(Optional.of(dailyStatistics));
+        when(notificationService.getUnreadCount(testMemberId)).thenReturn(0);
 
         // when
-        HomeReportResponse response = homeReportService.getHomeReport(elderId, testDateTime);
+        HomeReportResponse response = homeReportService.getHomeReport(testMemberId, elderId, testDateTime);
 
         // then
         assertThat(response.getSleep().getMeanHours()).isNull();
@@ -265,9 +287,10 @@ class HomeReportServiceTest {
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
         when(dailyStatisticsRepository.findByElderAndDate(testElder, testDate))
                 .thenReturn(Optional.of(dailyStatistics));
+        when(notificationService.getUnreadCount(testMemberId)).thenReturn(0);
 
         // when
-        HomeReportResponse response = homeReportService.getHomeReport(elderId, testDateTime);
+        HomeReportResponse response = homeReportService.getHomeReport(testMemberId, elderId, testDateTime);
 
         // then
         assertThat(response.getBloodSugar().getMeanValue()).isEqualTo(120);
@@ -289,9 +312,10 @@ class HomeReportServiceTest {
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
         when(dailyStatisticsRepository.findByElderAndDate(testElder, testDate))
                 .thenReturn(Optional.of(dailyStatistics));
+        when(notificationService.getUnreadCount(testMemberId)).thenReturn(0);
 
         // when
-        HomeReportResponse response = homeReportService.getHomeReport(elderId, testDateTime);
+        HomeReportResponse response = homeReportService.getHomeReport(testMemberId, elderId, testDateTime);
 
         // then
         assertThat(response.getHealthStatus()).isEqualTo("좋음");
@@ -313,9 +337,10 @@ class HomeReportServiceTest {
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
         when(dailyStatisticsRepository.findByElderAndDate(testElder, testDate))
                 .thenReturn(Optional.of(dailyStatistics));
+        when(notificationService.getUnreadCount(testMemberId)).thenReturn(0);
 
         // when
-        HomeReportResponse response = homeReportService.getHomeReport(elderId, testDateTime);
+        HomeReportResponse response = homeReportService.getHomeReport(testMemberId, elderId, testDateTime);
 
         // then
         assertThat(response.getMedicationStatus().getTotalTaken()).isEqualTo(0);
@@ -337,9 +362,10 @@ class HomeReportServiceTest {
 
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
         when(dailyStatisticsRepository.findByElderAndDate(testElder, testDate)).thenReturn(Optional.of(dailyStatistics));
+        when(notificationService.getUnreadCount(testMemberId)).thenReturn(0);
 
         // when
-        HomeReportResponse response = homeReportService.getHomeReport(elderId, testDateTime);
+        HomeReportResponse response = homeReportService.getHomeReport(testMemberId, elderId, testDateTime);
 
         // then
         assertThat(response.getMedicationStatus().getMedicationList().get(0).getNextTime()).isNull();
@@ -363,9 +389,10 @@ class HomeReportServiceTest {
 
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
         when(dailyStatisticsRepository.findByElderAndDate(testElder, testDate)).thenReturn(Optional.of(dailyStatistics));
+        when(notificationService.getUnreadCount(testMemberId)).thenReturn(0);
 
         // when
-        HomeReportResponse response = homeReportService.getHomeReport(elderId, testDateTime);
+        HomeReportResponse response = homeReportService.getHomeReport(testMemberId, elderId, testDateTime);
 
         // then
         assertThat(response.getMedicationStatus().getMedicationList().get(0).getNextTime()).isEqualTo(MedicationScheduleTime.LUNCH);
@@ -389,9 +416,10 @@ class HomeReportServiceTest {
 
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
         when(dailyStatisticsRepository.findByElderAndDate(testElder, testDate)).thenReturn(Optional.of(dailyStatistics));
+        when(notificationService.getUnreadCount(testMemberId)).thenReturn(0);
 
         // when
-        HomeReportResponse response = homeReportService.getHomeReport(elderId, testDateTime);
+        HomeReportResponse response = homeReportService.getHomeReport(testMemberId, elderId, testDateTime);
 
         // then
         assertThat(response.getMedicationStatus().getMedicationList().get(0).getNextTime()).isEqualTo(MedicationScheduleTime.DINNER);
@@ -415,9 +443,10 @@ class HomeReportServiceTest {
 
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
         when(dailyStatisticsRepository.findByElderAndDate(testElder, testDate)).thenReturn(Optional.of(dailyStatistics));
+        when(notificationService.getUnreadCount(testMemberId)).thenReturn(0);
 
         // when
-        HomeReportResponse response = homeReportService.getHomeReport(elderId, testDateTime);
+        HomeReportResponse response = homeReportService.getHomeReport(testMemberId, elderId, testDateTime);
 
         // then
         assertThat(response.getMedicationStatus().getMedicationList().get(0).getNextTime()).isEqualTo(MedicationScheduleTime.MORNING);
@@ -441,9 +470,10 @@ class HomeReportServiceTest {
 
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
         when(dailyStatisticsRepository.findByElderAndDate(testElder, testDate)).thenReturn(Optional.of(dailyStatistics));
+        when(notificationService.getUnreadCount(testMemberId)).thenReturn(0);
 
         // when
-        HomeReportResponse response = homeReportService.getHomeReport(elderId, testDateTime);
+        HomeReportResponse response = homeReportService.getHomeReport(testMemberId, elderId, testDateTime);
 
         // then
         assertThat(response.getMedicationStatus().getMedicationList().get(0).getNextTime()).isEqualTo(MedicationScheduleTime.MORNING);
@@ -467,9 +497,10 @@ class HomeReportServiceTest {
 
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(testElder));
         when(dailyStatisticsRepository.findByElderAndDate(testElder, testDate)).thenReturn(Optional.of(dailyStatistics));
+        when(notificationService.getUnreadCount(testMemberId)).thenReturn(0);
 
         // when
-        HomeReportResponse response = homeReportService.getHomeReport(elderId, testDateTime);
+        HomeReportResponse response = homeReportService.getHomeReport(testMemberId, elderId, testDateTime);
 
         // then
         assertThat(response.getMedicationStatus().getMedicationList().get(0).getNextTime()).isEqualTo(MedicationScheduleTime.MORNING);

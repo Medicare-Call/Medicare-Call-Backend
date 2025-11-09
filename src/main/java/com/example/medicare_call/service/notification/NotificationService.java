@@ -48,4 +48,8 @@ public class NotificationService {
         notification.updateIsRead(isRead);
     }
 
+    @Transactional(readOnly = true)
+    public int getUnreadCount(Integer memberId) {
+        return notificationRepository.countByMemberIdAndIsReadFalse(memberId);
+    }
 }

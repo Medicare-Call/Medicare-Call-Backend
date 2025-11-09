@@ -36,6 +36,9 @@ public class HomeReportResponse {
     @Schema(description = "혈당 정보")
     private BloodSugar bloodSugar;
 
+    @Schema(description = "읽지 않은 알림 개수", example = "5")
+    private Integer unreadNotification;
+
     @Getter
     @Builder
     @Schema(description = "식사 여부 상태 정보")

@@ -39,6 +39,9 @@ public class WeeklyReportResponse {
     @Schema(description = "회원의 구독 시작 날짜")
     private LocalDate subscriptionStartDate;
 
+    @Schema(description = "읽지 않은 알림 개수", example = "5")
+    private Integer unreadNotification;
+
     @Getter
     @Builder
     @Schema(description = "주간 요약 통계 정보")

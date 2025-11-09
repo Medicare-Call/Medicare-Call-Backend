@@ -1,6 +1,7 @@
 package com.example.medicare_call.controller;
 
 import com.example.medicare_call.dto.report.WeeklyReportResponse;
+import com.example.medicare_call.global.annotation.AuthUser;
 import com.example.medicare_call.service.report.WeeklyReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -53,6 +54,7 @@ public class WeeklyStatsController {
     })
     @GetMapping("/{elderId}/weekly-stats")
     public ResponseEntity<WeeklyReportResponse> getWeeklyStats(
+        @Parameter(hidden = true) @AuthUser Long memberId,
         @Parameter(description = "어르신 식별자", required = true, example = "1")
         @PathVariable("elderId") Integer elderId,
 
@@ -61,7 +63,7 @@ public class WeeklyStatsController {
     ) {
         log.info("주간 통계 데이터 조회 요청: elderId={}, startDate={}", elderId, startDate);
 
-        WeeklyReportResponse response = weeklyReportService.getWeeklyReport(elderId, startDate);
+        WeeklyReportResponse response = weeklyReportService.getWeeklyReport(memberId.intValue(), elderId, startDate);
 
         return ResponseEntity.ok(response);
     }

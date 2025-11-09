@@ -10,6 +10,7 @@ import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.DailyStatisticsRepository;
 import com.example.medicare_call.repository.ElderRepository;
 import com.example.medicare_call.repository.MedicationScheduleRepository;
+import com.example.medicare_call.service.notification.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,12 +32,13 @@ public class HomeReportService {
     private final ElderRepository elderRepository;
     private final DailyStatisticsRepository dailyStatisticsRepository;
     private final MedicationScheduleRepository medicationScheduleRepository;
+    private final NotificationService notificationService;
 
-    public HomeReportResponse getHomeReport(Integer elderId) {
-        return getHomeReport(elderId, LocalDateTime.now());
+    public HomeReportResponse getHomeReport(Integer memberId, Integer elderId) {
+        return getHomeReport(memberId, elderId, LocalDateTime.now());
     }
 
-    public HomeReportResponse getHomeReport(Integer elderId, LocalDateTime dateTime) {
+    public HomeReportResponse getHomeReport(Integer memberId, Integer elderId, LocalDateTime dateTime) {
         LocalDate today = dateTime.toLocalDate();
         LocalTime now = dateTime.toLocalTime();
 
@@ -47,10 +49,13 @@ public class HomeReportService {
         // 오늘 날짜에 해당하는 통계 데이터 조회
         Optional<DailyStatistics> dailyStatisticsOpt = dailyStatisticsRepository.findByElderAndDate(elder, today);
 
+        // 미읽음 알림 개수 조회
+        int unreadCount = notificationService.getUnreadCount(memberId);
+
         // 오늘 날짜 데이터가 없을 때만 빈 응답 반환
         if (dailyStatisticsOpt.isEmpty()) {
             log.info("오늘 날짜 통계 데이터가 없어 빈 응답 반환 - elderId: {}, date: {}", elderId, today);
-            return createEmptyHomeReport(elder, now);
+            return createEmptyHomeReport(elder, unreadCount, now);
         }
 
         DailyStatistics dailyStatistics = dailyStatisticsOpt.get();
@@ -75,6 +80,7 @@ public class HomeReportService {
                 .healthStatus(healthStatus)
                 .mentalStatus(mentalStatus)
                 .bloodSugar(bloodSugar)
+                .unreadNotification(unreadCount)
                 .build();
     }
 
@@ -181,7 +187,7 @@ public class HomeReportService {
         }
     }
 
-    private HomeReportResponse createEmptyHomeReport(Elder elder, LocalTime now) {
+    private HomeReportResponse createEmptyHomeReport(Elder elder, int unreadCount, LocalTime now) {
         List<MedicationSchedule> schedules = medicationScheduleRepository.findByElder(elder);
 
         // 약 종류별로 스케줄을 그룹화
@@ -245,6 +251,7 @@ public class HomeReportService {
                 .bloodSugar(HomeReportResponse.BloodSugar.builder()
                         .meanValue(null)
                         .build())
+                .unreadNotification(unreadCount)
                 .build();
     }
 }
