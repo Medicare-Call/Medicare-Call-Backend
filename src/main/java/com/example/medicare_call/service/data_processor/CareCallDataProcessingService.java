@@ -65,9 +65,7 @@ public class CareCallDataProcessingService {
         // OpenAI를 통한 건강 데이터 추출
         if (transcriptionText != null && !transcriptionText.trim().isEmpty()) {
             try {
-                int callOrder = CareCallUtil.extractCareCallOrder(record.getCalledAt(), record.getSetting());
-                if(callOrder == 3)
-                    extractHealthDataFromCall(saved, transcriptionText);
+                extractHealthDataFromCall(saved, transcriptionText);
             } catch (Exception e) {
                 log.error("건강 데이터 추출 중 오류 발생", e);
             }
