@@ -11,6 +11,7 @@ import com.example.medicare_call.repository.CareCallRecordRepository;
 import com.example.medicare_call.repository.MealRecordRepository;
 import com.example.medicare_call.service.ai.AiSummaryService;
 import com.example.medicare_call.service.statistics.StatisticsUpdateService;
+import com.example.medicare_call.util.CareCallUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -51,7 +52,10 @@ public class HealthDataProcessingService {
 
         // 건강 징후 처리
         if (healthData.getHealthSigns() != null && !healthData.getHealthSigns().isEmpty()) {
-            updatedRecord = updateHealthStatus(updatedRecord, healthData.getHealthSigns(), healthData.getHealthStatus());
+            int callOrder = CareCallUtil.extractCareCallOrder(callRecord.getCalledAt(), callRecord.getSetting());
+            if(callOrder == 3) {
+                updatedRecord = updateHealthStatus(updatedRecord, healthData.getHealthSigns(), healthData.getHealthStatus());
+            }
         }
 
         // AI 건강분석 코멘트 처리
