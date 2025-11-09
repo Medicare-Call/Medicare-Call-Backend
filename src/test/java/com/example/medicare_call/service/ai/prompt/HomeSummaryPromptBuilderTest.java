@@ -2,7 +2,6 @@ package com.example.medicare_call.service.ai.prompt;
 
 import com.example.medicare_call.dto.report.HomeSummaryDto;
 import com.example.medicare_call.global.enums.HealthStatus;
-import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.global.enums.PsychologicalStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,7 +32,6 @@ class HomeSummaryPromptBuilderTest {
                 .dinner(null)
                 .totalTakenMedication(2)
                 .totalGoalMedication(3)
-                .nextMedicationTime(MedicationScheduleTime.LUNCH)
                 .sleepHours(7)
                 .sleepMinutes(30)
                 .healthStatus(HealthStatus.GOOD.name())
@@ -47,7 +45,7 @@ class HomeSummaryPromptBuilderTest {
         // Then
         assertThat(prompt).isNotNull();
         assertThat(prompt).contains("식사: 아침 식사 완료, 점심 식사하지 않음, 저녁 기록되지 않음");
-        assertThat(prompt).contains("복약: 오늘 복약 2/3, 다음 복약: 점심");
+        assertThat(prompt).contains("복약: 오늘 복약 2/3");
         assertThat(prompt).contains("수면: 최근 수면 시간: 7시간 30분");
         assertThat(prompt).contains("건강상태: GOOD");
         assertThat(prompt).contains("심리상태: GOOD");
@@ -64,7 +62,6 @@ class HomeSummaryPromptBuilderTest {
                 .dinner(null)
                 .totalTakenMedication(0)
                 .totalGoalMedication(0)
-                .nextMedicationTime(null)
                 .sleepHours(0)
                 .sleepMinutes(0)
                 .healthStatus(null)
@@ -78,7 +75,7 @@ class HomeSummaryPromptBuilderTest {
         // Then
         assertThat(prompt).isNotNull();
         assertThat(prompt).contains("식사: 아침 기록되지 않음, 점심 기록되지 않음, 저녁 기록되지 않음");
-        assertThat(prompt).contains("복약: 오늘 복약 0/0, 다음 복약: 기록 없음");
+        assertThat(prompt).contains("복약: 오늘 복약 0/0");
         assertThat(prompt).contains("수면: 최근 수면 시간: 0시간 0분");
         assertThat(prompt).contains("건강상태: 기록 없음");
         assertThat(prompt).contains("심리상태: 기록 없음");

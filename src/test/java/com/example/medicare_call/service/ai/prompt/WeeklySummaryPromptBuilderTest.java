@@ -1,7 +1,7 @@
 package com.example.medicare_call.service.ai.prompt;
 
-import com.example.medicare_call.dto.report.WeeklyReportResponse;
 import com.example.medicare_call.dto.report.WeeklySummaryDto;
+import com.example.medicare_call.service.statistics.WeeklyStatisticsService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -25,7 +25,27 @@ class WeeklySummaryPromptBuilderTest {
     @DisplayName("buildPrompt 메서드는 PromptTemplate을 사용하여 올바른 프롬프트를 생성해야 한다")
     void buildPrompt_shouldCreateCorrectPromptUsingPromptTemplate() {
         // Given
-        WeeklySummaryDto.WeeklySummaryDtoBuilder dtoBuilder = WeeklySummaryDto.builder()
+        WeeklyStatisticsService.WeeklyBloodSugarType beforeMeal =
+                WeeklyStatisticsService.WeeklyBloodSugarType.builder()
+                        .normal(2)
+                        .high(0)
+                        .low(0)
+                        .build();
+
+        WeeklyStatisticsService.WeeklyBloodSugarType afterMeal =
+                WeeklyStatisticsService.WeeklyBloodSugarType.builder()
+                        .normal(3)
+                        .high(1)
+                        .low(0)
+                        .build();
+
+        WeeklyStatisticsService.WeeklyBloodSugar bloodSugar =
+                WeeklyStatisticsService.WeeklyBloodSugar.builder()
+                        .beforeMeal(beforeMeal)
+                        .afterMeal(afterMeal)
+                        .build();
+
+        WeeklySummaryDto dto = WeeklySummaryDto.builder()
                 .mealCount(18)
                 .mealRate(85)
                 .averageSleepHours(7.5)
@@ -34,14 +54,9 @@ class WeeklySummaryPromptBuilderTest {
                 .positivePsychologicalCount(5)
                 .negativePsychologicalCount(1)
                 .healthSignals(0)
-                .missedCalls(0);
-
-        WeeklyReportResponse.BloodSugarType beforeMeal = WeeklyReportResponse.BloodSugarType.builder().normal(2).high(0).low(0).build();
-        WeeklyReportResponse.BloodSugarType afterMeal = WeeklyReportResponse.BloodSugarType.builder().normal(3).high(1).low(0).build();
-        WeeklyReportResponse.BloodSugar bloodSugar = WeeklyReportResponse.BloodSugar.builder().beforeMeal(beforeMeal).afterMeal(afterMeal).build();
-        dtoBuilder.bloodSugar(bloodSugar);
-
-        WeeklySummaryDto dto = dtoBuilder.build();
+                .missedCalls(0)
+                .bloodSugar(bloodSugar)
+                .build();
 
         // When
         String prompt = weeklySummaryPromptBuilder.buildPrompt(dto);
@@ -62,10 +77,16 @@ class WeeklySummaryPromptBuilderTest {
     }
 
     @Test
-    @DisplayName("buildPrompt 메서드는 모든 필드가 null일 때도 올바른 프롬프트를 생성해야 한다")
-    void buildPrompt_shouldHandleNullFieldsCorrectly() {
+    @DisplayName("buildPrompt 메서드는 bloodSugar의 모든 필드가 null일 때도 올바른 프롬프트를 생성해야 한다")
+    void buildPrompt_shouldHandleNullBloodSugarFieldsCorrectly() {
         // Given
-        WeeklySummaryDto.WeeklySummaryDtoBuilder dtoBuilder = WeeklySummaryDto.builder()
+        WeeklyStatisticsService.WeeklyBloodSugar bloodSugar =
+                WeeklyStatisticsService.WeeklyBloodSugar.builder()
+                        .beforeMeal(null)
+                        .afterMeal(null)
+                        .build();
+
+        WeeklySummaryDto dto = WeeklySummaryDto.builder()
                 .mealCount(0)
                 .mealRate(0)
                 .averageSleepHours(0.0)
@@ -74,12 +95,9 @@ class WeeklySummaryPromptBuilderTest {
                 .positivePsychologicalCount(0)
                 .negativePsychologicalCount(0)
                 .healthSignals(0)
-                .missedCalls(0);
-
-        WeeklyReportResponse.BloodSugar bloodSugar = WeeklyReportResponse.BloodSugar.builder().beforeMeal(null).afterMeal(null).build();
-        dtoBuilder.bloodSugar(bloodSugar);
-
-        WeeklySummaryDto dto = dtoBuilder.build();
+                .missedCalls(0)
+                .bloodSugar(bloodSugar)
+                .build();
 
         // When
         String prompt = weeklySummaryPromptBuilder.buildPrompt(dto);
@@ -122,6 +140,84 @@ class WeeklySummaryPromptBuilderTest {
         // Then
         assertThat(prompt).isNotNull();
         assertThat(prompt).contains("식전: 측정 기록 없음");
+        assertThat(prompt).contains("식후: 측정 기록 없음");
+    }
+
+    @Test
+    @DisplayName("buildPrompt 메서드는 WeeklySummaryDto의 bloodSugar 에서 식전만 null인 경우 올바르게 처리해야 한다")
+    void buildPrompt_shouldHandleNullBeforeMealCorrectly() {
+        // Given
+        WeeklyStatisticsService.WeeklyBloodSugarType afterMeal =
+                WeeklyStatisticsService.WeeklyBloodSugarType.builder()
+                        .normal(3)
+                        .high(1)
+                        .low(0)
+                        .build();
+
+        WeeklyStatisticsService.WeeklyBloodSugar bloodSugar =
+                WeeklyStatisticsService.WeeklyBloodSugar.builder()
+                        .beforeMeal(null)
+                        .afterMeal(afterMeal)
+                        .build();
+
+        WeeklySummaryDto dto = WeeklySummaryDto.builder()
+                .mealCount(15)
+                .mealRate(71)
+                .averageSleepHours(7.0)
+                .medicationTakenCount(8)
+                .medicationMissedCount(1)
+                .positivePsychologicalCount(4)
+                .negativePsychologicalCount(0)
+                .healthSignals(0)
+                .missedCalls(0)
+                .bloodSugar(bloodSugar)
+                .build();
+
+        // When
+        String prompt = weeklySummaryPromptBuilder.buildPrompt(dto);
+
+        // Then
+        assertThat(prompt).isNotNull();
+        assertThat(prompt).contains("식전: 측정 기록 없음");
+        assertThat(prompt).contains("식후: 정상 3회, 고혈당 1회, 저혈당 0회");
+    }
+
+    @Test
+    @DisplayName("buildPrompt 메서드는 WeeklySummaryDto의 bloodSugar 에서 식후만 null인 경우에도 올바르게 처리해야 한다")
+    void buildPrompt_shouldHandleNullAfterMealCorrectly() {
+        // Given
+        WeeklyStatisticsService.WeeklyBloodSugarType beforeMeal =
+                WeeklyStatisticsService.WeeklyBloodSugarType.builder()
+                        .normal(2)
+                        .high(1)
+                        .low(0)
+                        .build();
+
+        WeeklyStatisticsService.WeeklyBloodSugar bloodSugar =
+                WeeklyStatisticsService.WeeklyBloodSugar.builder()
+                        .beforeMeal(beforeMeal)
+                        .afterMeal(null)
+                        .build();
+
+        WeeklySummaryDto dto = WeeklySummaryDto.builder()
+                .mealCount(15)
+                .mealRate(71)
+                .averageSleepHours(7.0)
+                .medicationTakenCount(8)
+                .medicationMissedCount(1)
+                .positivePsychologicalCount(4)
+                .negativePsychologicalCount(0)
+                .healthSignals(0)
+                .missedCalls(0)
+                .bloodSugar(bloodSugar)
+                .build();
+
+        // When
+        String prompt = weeklySummaryPromptBuilder.buildPrompt(dto);
+
+        // Then
+        assertThat(prompt).isNotNull();
+        assertThat(prompt).contains("식전: 정상 2회, 고혈당 1회, 저혈당 0회");
         assertThat(prompt).contains("식후: 측정 기록 없음");
     }
 }

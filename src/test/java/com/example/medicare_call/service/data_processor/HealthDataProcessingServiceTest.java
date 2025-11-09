@@ -7,6 +7,7 @@ import com.example.medicare_call.domain.MealRecord;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
 import com.example.medicare_call.repository.CareCallRecordRepository;
 import com.example.medicare_call.repository.MealRecordRepository;
+import com.example.medicare_call.service.ai.AiSummaryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,6 @@ import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -32,6 +32,9 @@ public class HealthDataProcessingServiceTest {
 
     @Mock
     private MealRecordRepository mealRecordRepository;
+
+    @Mock
+    private AiSummaryService aiSummaryService;
 
     @InjectMocks
     private HealthDataProcessingService healthDataProcessingService;
@@ -179,5 +182,30 @@ public class HealthDataProcessingServiceTest {
         // then
         verify(mealRecordRepository, never()).save(any(MealRecord.class));
         verify(careCallRecordRepository).save(any(CareCallRecord.class));
+    }
+
+    @Test
+    @DisplayName("AI 건강 분석 코멘트 생성 및 저장 검증")
+    void updateCareCallRecordWithHealthData_generatesAndSavesAiComment() {
+        // given
+        List<String> healthSigns = Arrays.asList("두통", "어지러움");
+        HealthDataExtractionResponse healthData = HealthDataExtractionResponse.builder()
+                .healthSigns(healthSigns)
+                .healthStatus("나쁨")
+                .build();
+
+        String expectedComment = "두통과 어지러움 증상이 있습니다. 휴식을 취하고, 증상이 계속되면 병원 방문을 고려해 보세요.";
+        when(aiSummaryService.getSymptomAnalysis(healthSigns)).thenReturn(expectedComment);
+        when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(callRecord);
+
+        // when
+        healthDataProcessingService.updateCareCallRecordWithHealthData(callRecord, healthData);
+
+        // then
+        verify(aiSummaryService).getSymptomAnalysis(healthSigns);
+        verify(careCallRecordRepository).save(argThat(record ->
+            record.getAiHealthAnalysisComment().equals(expectedComment) &&
+            record.getHealthDetails().equals("두통, 어지러움")
+        ));
     }
 } 
