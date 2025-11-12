@@ -95,4 +95,8 @@ public class Member {
         this.pushHealthAlert = pushHealthAlert;
         this.pushCarecallMissed = pushCarecallMissed;
     }
-} 
+
+    public void updateFcmToken(String fcmToken) {
+        this.fcmToken = fcmToken;
+    }
+}

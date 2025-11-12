@@ -6,6 +6,7 @@ import com.example.medicare_call.dto.MemberInfoUpdateRequest;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.MemberRepository;
+import com.google.api.gax.rpc.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -37,4 +38,13 @@ public class MemberService {
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
         return member.getFcmToken();
     }
+
+    @Transactional
+    public void updateFcmToken(Integer memberId, String fcmToken) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+        member.updateFcmToken(fcmToken);
+        memberRepository.save(member);
+    }
+
 }
