@@ -1,6 +1,7 @@
 package com.example.medicare_call.controller;
 
 import com.example.medicare_call.dto.report.HomeReportResponse;
+import com.example.medicare_call.global.annotation.AuthenticationArgumentResolver;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.global.jwt.JwtProvider;
 import com.example.medicare_call.service.report.HomeReportService;
@@ -8,9 +9,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -18,13 +19,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(HomeController.class)
-@AutoConfigureMockMvc(addFilters = false) // security 필터 비활성화
+@WebMvcTest(controllers = HomeController.class,
+    excludeAutoConfiguration = {org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class})
+@Import(TestConfig.class)
 @ActiveProfiles("test")
 class HomeControllerTest {
 
@@ -36,6 +38,9 @@ class HomeControllerTest {
 
     @MockBean
     private JwtProvider jwtProvider;
+
+    @MockBean
+    private AuthenticationArgumentResolver authenticationArgumentResolver;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -103,7 +108,7 @@ class HomeControllerTest {
                 .bloodSugar(bloodSugar)
                 .build();
 
-        when(homeReportService.getHomeReport(eq(elderId)))
+        when(homeReportService.getHomeReport(anyInt(), eq(elderId)))
                 .thenReturn(expectedResponse);
 
         // when & then
@@ -170,7 +175,7 @@ class HomeControllerTest {
                 .bloodSugar(null)
                 .build();
 
-        when(homeReportService.getHomeReport(eq(elderId)))
+        when(homeReportService.getHomeReport(anyInt(), eq(elderId)))
                 .thenReturn(expectedResponse);
 
         // when & then
