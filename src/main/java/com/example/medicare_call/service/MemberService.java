@@ -31,4 +31,10 @@ public class MemberService {
         Member updatedMember = memberRepository.save(member);
         return MemberInfoResponse.from(updatedMember);
     }
+
+    public String getFcmToken(Integer memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+        return member.getFcmToken();
+    }
 }
