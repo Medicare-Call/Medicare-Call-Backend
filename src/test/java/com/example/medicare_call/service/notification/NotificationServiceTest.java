@@ -39,6 +39,7 @@ class NotificationServiceTest {
     private NotificationService notificationService;
 
     private final Integer elderId = 42;
+    private final Integer memberId = 4;
 
     private NotificationDto mockNotificationDto(Integer elderId, String title, String body) {
         NotificationDto dto = mock(NotificationDto.class);
@@ -55,12 +56,13 @@ class NotificationServiceTest {
         NotificationDto dto = mockNotificationDto(elderId, "제목", "내용");
 
         Elder elder = mock(Elder.class);
-        when(elder.getId()).thenReturn(elderId);
 
         Member member = mock(Member.class);
+        when(elder.getGuardian()).thenReturn(member);
+        when(member.getId()).thenReturn(memberId);
 
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(elder));
-        when(memberRepository.findById(elderId)).thenReturn(Optional.of(member));
+        when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
 
         when(notificationRepository.save(any(Notification.class))).thenAnswer(invocation -> {
             Notification arg = invocation.getArgument(0);
@@ -86,7 +88,7 @@ class NotificationServiceTest {
         assertThat(saved.getCreatedAt()).isNotNull();
 
         verify(elderRepository).findById(elderId);
-        verify(memberRepository).findById(elderId);
+        verify(memberRepository).findById(memberId);
     }
 
     @Test
@@ -102,7 +104,7 @@ class NotificationServiceTest {
                 () -> notificationService.saveNotification(dto));
 
         // then
-        assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.NOT_FOUND);
+        assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.ELDER_NOT_FOUND);
     }
 
     @Test
@@ -113,16 +115,20 @@ class NotificationServiceTest {
         when(dto.elderId()).thenReturn(elderId);
 
         Elder elder = mock(Elder.class);
-        when(elder.getId()).thenReturn(elderId);
+
+        Member member = mock(Member.class);
+        when(elder.getGuardian()).thenReturn(member);
+        when(member.getId()).thenReturn(memberId);
+
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(elder));
-        when(memberRepository.findById(elderId)).thenReturn(Optional.empty());
+        when(memberRepository.findById(memberId)).thenReturn(Optional.empty());
 
         // when
         CustomException ex = assertThrows(CustomException.class,
                 () -> notificationService.saveNotification(dto));
 
         // then
-        assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.NOT_FOUND);
+        assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.MEMBER_NOT_FOUND);
     }
 
 
