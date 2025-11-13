@@ -4,6 +4,7 @@ import com.example.medicare_call.domain.Member;
 import com.example.medicare_call.domain.Notification;
 import com.example.medicare_call.global.annotation.AuthUser;
 import com.example.medicare_call.global.exception.CustomException;
+import com.example.medicare_call.repository.MemberRepository;
 import com.example.medicare_call.service.MemberService;
 import com.example.medicare_call.service.notification.FirebaseService;
 import com.example.medicare_call.service.notification.NotificationService;
@@ -56,6 +57,7 @@ public class NotificationController {
     }
 
     private final FirebaseService firebaseService;
+    private final MemberRepository memberRepository;
 
     @PostMapping("/test-alarm")
     @Operation(
@@ -66,18 +68,18 @@ public class NotificationController {
             @ApiResponse(responseCode = "200", description = "알림 전송 성공"),
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
-    public ResponseEntity<Void> sendHardcodedCareCall() {
+    public ResponseEntity<Void> sendHardcodedCareCall(
+            @Parameter(hidden = true) @AuthUser Long memberId
+    ) {
         log.info("테스트 알람 전송 완료");
         Notification notification = Notification.builder()
-                .id(1L)
-                .member(Member.builder().id(1234).build())
+                .member(memberRepository.findById(memberId.intValue()).orElseThrow())
                 .createdAt(LocalDateTime.now())
                 .title("테스트 알림 타이틀")
                 .body("테스트 알림 바디")
                 .isRead(false)
                 .build();
         firebaseService.sendNotification(notification);
-
         return ResponseEntity.ok().build();
     }
 
