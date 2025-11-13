@@ -28,6 +28,16 @@ public class FirebaseService {
             throw new CustomException(ErrorCode.FIREBASE_SEND_FAILED);
         }
     }
+
+    public void validationToken(String token) {
+        try {
+            Message message = Message.builder().setToken(token).build();
+            send(message);
+        } catch (FirebaseMessagingException e) {
+            throw new CustomException(ErrorCode.FIREBASE_SEND_FAILED);
+        }
+    }
+
     private Message createMessageFromDto(Notification notification) {
         return Message.builder()
                 .setToken(notification.getMember().getFcmToken())

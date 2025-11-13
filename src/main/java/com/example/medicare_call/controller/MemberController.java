@@ -12,6 +12,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -46,4 +49,21 @@ public class MemberController {
         MemberInfoResponse response = memberService.updateMemberInfo(memberId.intValue(), request);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/member/fcm-token")
+    @Operation(summary = "FCM 토큰 갱신", description = "사용자의 FCM 토큰을 갱신합니다")
+    public ResponseEntity<Void> updateFcmToken(
+            @Parameter(hidden = true) @AuthUser Long memberId,
+            @RequestBody @Valid FcmTokenRequest request) {
+        memberService.updateFcmToken(memberId.intValue(), request.getFcmToken());
+        return ResponseEntity.ok().build();
+    }
+
+    @Getter
+    @NoArgsConstructor
+    static class FcmTokenRequest {
+        @NotBlank(message = "FCM 토큰은 필수입니다")
+        private String fcmToken;
+    }
+
 }
