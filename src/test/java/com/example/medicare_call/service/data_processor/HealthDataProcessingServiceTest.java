@@ -76,8 +76,10 @@ public class HealthDataProcessingServiceTest {
                 .mealSummary("김치찌개와 밥을 먹었음")
                 .build();
 
+        List<HealthDataExtractionResponse.MealData> mealDataList = List.of(mealData);
+
         HealthDataExtractionResponse healthData = HealthDataExtractionResponse.builder()
-                .mealData(mealData)
+                .mealData(mealDataList)
                 .build();
 
         when(mealRecordRepository.save(any(MealRecord.class))).thenReturn(MealRecord.builder().id(1).build());
@@ -88,6 +90,37 @@ public class HealthDataProcessingServiceTest {
 
         // then
         verify(mealRecordRepository).save(any(MealRecord.class));
+        verify(careCallRecordRepository).save(any(CareCallRecord.class));
+    }
+
+    @Test
+    @DisplayName("식사 데이터 목록(List) 저장 검증")
+    void updateCareCallRecordWithHealthData_savesMealDataList() {
+        // given
+        HealthDataExtractionResponse.MealData breakfast = HealthDataExtractionResponse.MealData.builder()
+                .mealType("아침")
+                .mealSummary("김치찌개와 밥을 먹었음")
+                .build();
+
+        HealthDataExtractionResponse.MealData lunch = HealthDataExtractionResponse.MealData.builder()
+                .mealType("점심")
+                .mealSummary("된장찌개와 밥")
+                .build();
+
+        List<HealthDataExtractionResponse.MealData> mealDataList = List.of(breakfast, lunch);
+
+        HealthDataExtractionResponse healthData = HealthDataExtractionResponse.builder()
+                .mealData(mealDataList)
+                .build();
+
+        when(mealRecordRepository.save(any(MealRecord.class))).thenReturn(MealRecord.builder().id(1).build());
+        when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(callRecord);
+
+        // when
+        healthDataProcessingService.updateCareCallRecordWithHealthData(callRecord, healthData);
+
+        // then
+        verify(mealRecordRepository, times(2)).save(any(MealRecord.class));
         verify(careCallRecordRepository).save(any(CareCallRecord.class));
     }
 
