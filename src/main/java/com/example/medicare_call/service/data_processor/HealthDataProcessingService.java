@@ -73,11 +73,11 @@ public class HealthDataProcessingService {
 
     private void saveMealData(CareCallRecord callRecord, List<HealthDataExtractionResponse.MealData> mealDataList) {
 
-        for (HealthDataExtractionResponse.MealData meadData : mealDataList) {
+        for (HealthDataExtractionResponse.MealData mealData : mealDataList) {
             // 식사 타입 결정
-            MealType mealType = MealType.fromDescription(meadData.getMealType());
+            MealType mealType = MealType.fromDescription(mealData.getMealType());
             if (mealType == null) {
-                log.warn("알 수 없는 식사 타입: {}", meadData.getMealType());
+                log.warn("알 수 없는 식사 타입: {}", mealData.getMealType());
                 return;
             }
 
@@ -86,12 +86,12 @@ public class HealthDataProcessingService {
                     .careCallRecord(callRecord)
                     .mealType(mealType.getValue())
                     .eatenStatus(MealEatenStatus.EATEN.getValue())
-                    .responseSummary(meadData.getMealSummary())
+                    .responseSummary(mealData.getMealSummary())
                     .recordedAt(LocalDateTime.now())
                     .build();
 
             mealRecordRepository.save(mealRecord);
-            log.info("식사 데이터 저장 완료: mealType={}, summary={}", mealRecord.getMealType(), meadData.getMealSummary());
+            log.info("식사 데이터 저장 완료: mealType={}, summary={}", mealRecord.getMealType(), mealData.getMealSummary());
         }
     }
 
