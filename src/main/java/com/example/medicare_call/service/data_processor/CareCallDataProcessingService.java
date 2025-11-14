@@ -96,10 +96,10 @@ public class CareCallDataProcessingService {
         log.info("건강 데이터 DB 저장 시작: callId={}", callRecord.getId());
         
         if (healthData != null) {
-            if (!healthData.getBloodSugarData().isEmpty()) {
+            if (healthData.getBloodSugarData() != null && !healthData.getBloodSugarData().isEmpty()) {
                 bloodSugarService.saveBloodSugarData(callRecord, healthData.getBloodSugarData());
             }
-            if (!healthData.getMedicationData().isEmpty()) {
+            if (healthData.getMedicationData() != null && !healthData.getMedicationData().isEmpty()) {
                 medicationService.saveMedicationTakenRecord(callRecord, healthData.getMedicationData());
             }
             healthDataProcessingService.updateCareCallRecordWithHealthData(callRecord, healthData);
