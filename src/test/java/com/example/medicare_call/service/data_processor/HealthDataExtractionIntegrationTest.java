@@ -56,7 +56,7 @@ class HealthDataExtractionIntegrationTest {
         // given
         HealthDataExtractionRequest request = HealthDataExtractionRequest.builder()
                 .transcriptionText("""
-//                    어르신: 오늘 아침에 밥을 먹었어요. 김치찌개랑 밥을 먹었는데 맛있었어요.
+                    어르신: 오늘 아침에 밥을 먹었어요. 김치찌개랑 밥을 먹었는데 맛있었어요.
                     상담사: 그렇군요. 혈당은 측정하셨나요?
                     어르신: 네, 아침 식사 후에 측정했는데 120이 나왔어요.
                     상담사: 좋은 수치네요. 기분은 어떠세요?
@@ -68,10 +68,10 @@ class HealthDataExtractionIntegrationTest {
         String mockOpenAiResponse = """
                 {
                   "date": "2024-01-01",
-                  "mealData": {
+                  "mealData": [{
                     "mealType": "아침",
                     "mealSummary": "김치찌개와 밥을 먹었음"
-                  },
+                  }],
                   "sleepData": null,
                   "psychologicalState": ["기분이 좋음", "잠을 잘 잤음"],
                   "psychologicalStatus": "좋음",
@@ -100,8 +100,10 @@ class HealthDataExtractionIntegrationTest {
 
         // 식사 데이터 검증
         assertThat(result.getMealData()).isNotNull();
-        assertThat(result.getMealData().getMealType()).isEqualTo("아침");
-        assertThat(result.getMealData().getMealSummary()).contains("김치찌개");
+        assertThat(result.getMealData()).hasSize(1);
+        HealthDataExtractionResponse.MealData meal = result.getMealData().get(0);
+        assertThat(meal.getMealType()).isEqualTo("아침");
+        assertThat(meal.getMealSummary()).contains("김치찌개");
         
         // 혈당 데이터 검증
         assertThat(result.getBloodSugarData()).isNotNull();

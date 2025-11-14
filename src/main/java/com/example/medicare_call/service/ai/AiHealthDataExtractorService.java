@@ -136,10 +136,12 @@ public class AiHealthDataExtractorService {
             응답은 반드시 다음 JSON 구조로 해주세요:
             {
               "date": "날짜",
-              "mealData": {
-                "mealType": "아침/점심/저녁",
-                "mealSummary": "식사 요약"
-              },
+              "mealData": [
+                  {
+                    "mealType": "아침/점심/저녁",
+                    "mealSummary": "식사 요약"
+                  }
+              ],
               "sleepData": {
                 "sleepStartTime": "취침 시작 시각",
                 "sleepEndTime": "취침 종료 시각",

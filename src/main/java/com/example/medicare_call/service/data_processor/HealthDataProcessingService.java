@@ -71,25 +71,28 @@ public class HealthDataProcessingService {
         }
     }
 
-    private void saveMealData(CareCallRecord callRecord, HealthDataExtractionResponse.MealData mealData) {
-        // 식사 타입 결정
-        MealType mealType = MealType.fromDescription(mealData.getMealType());
-        if (mealType == null) {
-            log.warn("알 수 없는 식사 타입: {}", mealData.getMealType());
-            return;
+    private void saveMealData(CareCallRecord callRecord, List<HealthDataExtractionResponse.MealData> mealDataList) {
+
+        for (HealthDataExtractionResponse.MealData mealData : mealDataList) {
+            // 식사 타입 결정
+            MealType mealType = MealType.fromDescription(mealData.getMealType());
+            if (mealType == null) {
+                log.warn("알 수 없는 식사 타입: {}", mealData.getMealType());
+                return;
+            }
+
+            // 식사 데이터 저장 (식사를 했다고 가정)
+            MealRecord mealRecord = MealRecord.builder()
+                    .careCallRecord(callRecord)
+                    .mealType(mealType.getValue())
+                    .eatenStatus(MealEatenStatus.EATEN.getValue())
+                    .responseSummary(mealData.getMealSummary())
+                    .recordedAt(LocalDateTime.now())
+                    .build();
+
+            mealRecordRepository.save(mealRecord);
+            log.info("식사 데이터 저장 완료: mealType={}, summary={}", mealRecord.getMealType(), mealData.getMealSummary());
         }
-
-        // 식사 데이터 저장 (식사를 했다고 가정)
-        MealRecord mealRecord = MealRecord.builder()
-                .careCallRecord(callRecord)
-                .mealType(mealType.getValue())
-                .eatenStatus(MealEatenStatus.EATEN.getValue())
-                .responseSummary(mealData.getMealSummary())
-                .recordedAt(LocalDateTime.now())
-                .build();
-
-        mealRecordRepository.save(mealRecord);
-        log.info("식사 데이터 저장 완료: mealType={}, summary={}", mealData.getMealType(), mealData.getMealSummary());
     }
 
     private CareCallRecord updateSleepData(CareCallRecord callRecord, HealthDataExtractionResponse.SleepData sleepData) {
