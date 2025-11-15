@@ -51,7 +51,7 @@ public class CareCallDataProcessingService {
         CareCallRecord record = CareCallRecord.builder()
                 .elder(elder)
                 .setting(setting)
-                .calledAt(LocalDateTime.now())
+                .calledAt(request.getStartTime() != null ? LocalDateTime.ofInstant(request.getStartTime(), ZoneOffset.UTC) : LocalDateTime.now())
                 .responded(request.getResponded())
                 .startTime(request.getStartTime() != null ? LocalDateTime.ofInstant(request.getStartTime(), ZoneOffset.UTC) : null)
                 .endTime(request.getEndTime() != null ? LocalDateTime.ofInstant(request.getEndTime(), ZoneOffset.UTC) : null)
