@@ -12,6 +12,8 @@ import com.example.medicare_call.repository.MealRecordRepository;
 import com.example.medicare_call.service.ai.AiSummaryService;
 import com.example.medicare_call.service.statistics.StatisticsUpdateService;
 import com.example.medicare_call.util.CareCallUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -57,9 +59,19 @@ public class HealthDataProcessingService {
                 updatedRecord = updateHealthStatus(updatedRecord, healthData.getHealthSigns(), healthData.getHealthStatus());
             }
         }
+        
+        // AI 추출 응답 JSON 데이터 저장 (사용성 테스트 이후 삭제)
+        ObjectMapper objectMapper = new ObjectMapper();
+        String aiExtractedDataJson = null;
+        try {
+            aiExtractedDataJson = objectMapper.writeValueAsString(healthData);
+            log.info("건강 데이터 JSON 변환 완료");
+        } catch (JsonProcessingException e) {
+            log.error("건강 데이터 JSON 변환 실패", e);
+        }
 
         // AI 건강분석 코멘트 처리
-        updatedRecord = updateAiHealthAnalysisComment(updatedRecord);
+        updatedRecord = updateAiHealthAnalysisComment(updatedRecord, aiExtractedDataJson);
 
         careCallRecordRepository.save(updatedRecord);
         log.info("CareCallRecord 건강 데이터 업데이트 완료: callId={}", updatedRecord.getId());
@@ -232,7 +244,7 @@ public class HealthDataProcessingService {
         return callRecord;
     }
 
-    private CareCallRecord updateAiHealthAnalysisComment(CareCallRecord callRecord) {
+    private CareCallRecord updateAiHealthAnalysisComment(CareCallRecord callRecord, String aiExtractedDataJson) {
         String healthDetails = callRecord.getHealthDetails();
         String aiComment = null;
         if (healthDetails != null && !healthDetails.isBlank()) {
@@ -257,6 +269,7 @@ public class HealthDataProcessingService {
                 .psychologicalDetails(callRecord.getPsychologicalDetails())
                 .healthDetails(callRecord.getHealthDetails())
                 .aiHealthAnalysisComment(aiComment)
+                .aiExtractedDataJson(aiExtractedDataJson)
                 .build();
 
         log.info("AI 건강분석 코멘트 업데이트 완료: aiComment={}", aiComment);
