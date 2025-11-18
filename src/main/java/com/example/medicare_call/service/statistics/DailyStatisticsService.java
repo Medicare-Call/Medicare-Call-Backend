@@ -195,10 +195,8 @@ public class DailyStatisticsService {
                         Collectors.counting()
                 ));
 
-        // 전체 목표 복약 횟수: 완료된 케어콜 시간대의 모든 스케줄 합계
-        int totalGoal = (int) schedules.stream()
-                .filter(schedule -> completedTimeSlots.contains(schedule.getScheduleTime()))
-                .count();
+        // 전체 목표 복약 횟수: 모든 스케줄의 합계
+        int totalGoal = schedules.size();
 
         List<DailyStatistics.MedicationInfo> medicationList = medicationSchedules.entrySet().stream()
                 .map(entry -> {

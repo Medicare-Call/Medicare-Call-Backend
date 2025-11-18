@@ -340,23 +340,21 @@ public class WeeklyStatisticsService {
             List<CareCallRecord> healthRecords,
             List<CareCallRecord> callRecords) {
 
-        int totalMealSlots = 0;  // 식사 응답 개수 (true + false)
         int totalMealsTaken = 0; // 식사한 개수 (true만)
 
         for (DailyStatistics daily : dailyStatsList) {
-            if (daily.getBreakfastTaken() != null) {
-                totalMealSlots++;
-                if (daily.getBreakfastTaken()) totalMealsTaken++;
+            if (Boolean.TRUE.equals(daily.getBreakfastTaken())) {
+                totalMealsTaken++;
             }
-            if (daily.getLunchTaken() != null) {
-                totalMealSlots++;
-                if (daily.getLunchTaken()) totalMealsTaken++;
+            if (Boolean.TRUE.equals(daily.getLunchTaken())) {
+                totalMealsTaken++;
             }
-            if (daily.getDinnerTaken() != null) {
-                totalMealSlots++;
-                if (daily.getDinnerTaken()) totalMealsTaken++;
+            if (Boolean.TRUE.equals(daily.getDinnerTaken())) {
+                totalMealsTaken++;
             }
         }
+
+        int totalMealSlots = dailyStatsList.size() * 3; // 유효일*3끼 (아침, 점심, 저녁)
 
         int mealRate = totalMealSlots == 0 ? 0 : (int) Math.round((double) totalMealsTaken / totalMealSlots * 100);
 

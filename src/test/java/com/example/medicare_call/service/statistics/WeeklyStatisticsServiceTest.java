@@ -168,8 +168,8 @@ class WeeklyStatisticsServiceTest {
         assertThat(savedStats.getBreakfastCount()).isEqualTo(2);  // true 2개
         assertThat(savedStats.getLunchCount()).isEqualTo(1);      // true 1개, false 1개
         assertThat(savedStats.getDinnerCount()).isEqualTo(3);     // true 3개
-        // 분자: 2+1+3 = 6, 분모: 2+2+3 = 7 (null 제외), 6/7*100 ≈ 86
-        assertThat(savedStats.getMealRate()).isEqualTo(86);
+        // 분자: 2+1+3 = 6, 분모: 유효일 3일 * 3끼 = 9, 6/9*100 -> 67
+        assertThat(savedStats.getMealRate()).isEqualTo(67);
     }
 
     @Test
