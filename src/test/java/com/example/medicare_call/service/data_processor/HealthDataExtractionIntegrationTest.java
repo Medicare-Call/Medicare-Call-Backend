@@ -70,6 +70,7 @@ class HealthDataExtractionIntegrationTest {
                   "date": "2024-01-01",
                   "mealData": [{
                     "mealType": "아침",
+                    "mealEatenStatus": "섭취함",
                     "mealSummary": "김치찌개와 밥을 먹었음"
                   }],
                   "sleepData": null,

@@ -153,13 +153,13 @@ public class DailyStatisticsService {
                 if (mealType != null) {
                     switch (mealType) {
                         case BREAKFAST:
-                            breakfast = meal.getEatenStatus() == (byte) 1;
+                            breakfast = meal.getEatenStatus() != null ? meal.getEatenStatus() == (byte) 1 : null;
                             break;
                         case LUNCH:
-                            lunch = meal.getEatenStatus() == (byte) 1;
+                            lunch = meal.getEatenStatus() != null ? meal.getEatenStatus() == (byte) 1 : null;
                             break;
                         case DINNER:
-                            dinner = meal.getEatenStatus() == (byte) 1;
+                            dinner = meal.getEatenStatus() != null ? meal.getEatenStatus() == (byte) 1 : null;
                             break;
                     }
                 }

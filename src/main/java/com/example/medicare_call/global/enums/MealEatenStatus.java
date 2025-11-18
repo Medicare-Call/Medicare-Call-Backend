@@ -23,4 +23,13 @@ public enum MealEatenStatus {
         }
         return null;
     }
+
+    public static MealEatenStatus fromDescription(String description) {
+        for (MealEatenStatus status : values()) {
+            if (status.getDescription().equals(description)) {
+                return status;
+            }
+        }
+        return null;
+    }
 } 

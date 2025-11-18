@@ -28,6 +28,8 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class HealthDataProcessingService {
+    public static final String MEAL_STATUS_UNKNOWN_MESSAGE = "해당 시간대 식사 여부를 명확히 확인하지 못했어요.";
+
     private final CareCallRecordRepository careCallRecordRepository;
     private final MealRecordRepository mealRecordRepository;
     private final AiSummaryService aiSummaryService;
@@ -93,17 +95,32 @@ public class HealthDataProcessingService {
                 return;
             }
 
-            // 식사 데이터 저장 (식사를 했다고 가정)
+            // 식사 여부 결정
+            MealEatenStatus mealEatenStatus = MealEatenStatus.fromDescription(mealData.getMealEatenStatus());
+            Byte eatenStatusValue = null;
+            String responseSummary = mealData.getMealSummary();
+
+            if (mealEatenStatus == null) {
+                // eatenStatus는 null로 저장, responseSummary는 고정 메시지
+                responseSummary = MEAL_STATUS_UNKNOWN_MESSAGE;
+            } else {
+                eatenStatusValue = mealEatenStatus.getValue();
+            }
+
+            // 식사 데이터 저장
             MealRecord mealRecord = MealRecord.builder()
                     .careCallRecord(callRecord)
                     .mealType(mealType.getValue())
-                    .eatenStatus(MealEatenStatus.EATEN.getValue())
-                    .responseSummary(mealData.getMealSummary())
+                    .eatenStatus(eatenStatusValue)
+                    .responseSummary(responseSummary)
                     .recordedAt(LocalDateTime.now())
                     .build();
 
             mealRecordRepository.save(mealRecord);
-            log.info("식사 데이터 저장 완료: mealType={}, summary={}", mealRecord.getMealType(), mealData.getMealSummary());
+            log.info("식사 데이터 저장 완료: mealType={}, mealEatenStatus={}, summary={}",
+                    mealRecord.getMealType(),
+                    mealEatenStatus != null ? mealEatenStatus.getDescription() : "알 수 없음",
+                    responseSummary);
         }
     }
 

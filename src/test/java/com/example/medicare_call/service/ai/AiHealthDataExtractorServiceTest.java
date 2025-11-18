@@ -55,19 +55,20 @@ class AiHealthDataExtractorServiceTest {
         String mockOpenAiResponse = """
             {
               "date": "2024-01-01",
-              "mealData": {
+              "mealData": [{
                 "mealType": "아침",
+                "mealEatenStatus": "섭취함",
                 "mealSummary": "아침 식사를 하였음"
-              },
+              }],
               "sleepData": null,
               "psychologicalState": ["기분이 좋음"],
-              "bloodSugarData": {
+              "bloodSugarData": [{
                 "measurementTime": "아침",
                 "mealTime": "식후",
                 "bloodSugarValue": 120,
                 "status": "NORMAL"
-              },
-              "medicationData": null,
+              }],
+              "medicationData": [],
               "healthSigns": ["혈당이 정상 범위"]
             }
             """;
@@ -85,7 +86,7 @@ class AiHealthDataExtractorServiceTest {
         HealthDataExtractionResponse.BloodSugarData bloodSugar = HealthDataExtractionResponse.BloodSugarData.builder()
                 .measurementTime("아침").mealTime("식후").bloodSugarValue(120).status("NORMAL").build();
         HealthDataExtractionResponse.MealData meal = HealthDataExtractionResponse.MealData.builder()
-                .mealType("아침").mealSummary("아침 식사를 하였음").build();
+                .mealType("아침").mealEatenStatus("섭취함").mealSummary("아침 식사를 하였음").build();
         HealthDataExtractionResponse expectedResponse = HealthDataExtractionResponse.builder()
                 .date("2024-01-01")
                 .mealData(List.of(meal))
@@ -124,7 +125,11 @@ class AiHealthDataExtractorServiceTest {
         String mockOpenAiResponse = """
                 {
                    "date": "2024-01-01",
-                   "mealData": { "mealType": "아침", "mealSummary": "아침 식사를 하였음" },
+                   "mealData": [{
+                     "mealType": "아침",
+                     "mealEatenStatus": "섭취함",
+                     "mealSummary": "아침 식사를 하였음"
+                   }],
                    "sleepData": null,
                    "psychologicalState": ["기분이 좋음"],
                    "bloodSugarData": [{
@@ -151,7 +156,7 @@ class AiHealthDataExtractorServiceTest {
         HealthDataExtractionResponse.BloodSugarData bloodSugar = HealthDataExtractionResponse.BloodSugarData.builder()
                 .measurementTime("아침").mealTime("식후").bloodSugarValue(120).status("NORMAL").build();
         HealthDataExtractionResponse.MealData meal = HealthDataExtractionResponse.MealData.builder()
-                .mealType("아침").mealSummary("아침 식사를 하였음").build();
+                .mealType("아침").mealEatenStatus("섭취함").mealSummary("아침 식사를 하였음").build();
 
         HealthDataExtractionResponse expectedResponse = HealthDataExtractionResponse.builder()
                 .date("2024-01-01")
