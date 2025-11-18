@@ -23,7 +23,7 @@ public class MemberRegisterRequest {
     @NotNull(message = "성별은 필수입니다.")
     private Gender gender;
 
-    @NotBlank(message = "fcm token은 필수입니다")
+    @NotNull(message = "fcm token은 필수입니다")
     private String fcmToken;
 
 }

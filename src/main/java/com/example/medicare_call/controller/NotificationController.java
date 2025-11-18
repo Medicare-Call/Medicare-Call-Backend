@@ -1,7 +1,7 @@
 package com.example.medicare_call.controller;
 
-import com.example.medicare_call.domain.Member;
 import com.example.medicare_call.domain.Notification;
+import com.example.medicare_call.dto.notification.NotificationPageResponse;
 import com.example.medicare_call.global.annotation.AuthUser;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.repository.MemberRepository;
@@ -29,6 +29,8 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @Tag(name = "Notification", description = "알림 API")
 public class NotificationController {
+
+    private static final int NOTIFICATION_PAGE_SIZE = 40;
 
     private final NotificationService notificationService;
     private final MemberService memberService;
@@ -80,6 +82,21 @@ public class NotificationController {
                 .build();
         firebaseService.sendNotification(notification);
         return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "알림 목록 조회", description = "특정 회원의 알림을 최신순으로 페이지네이션하여 제공합니다. 페이지당 40개의 알람 (페이지 0 ~ totalPages-1 까지 가능)")
+    @GetMapping
+    public ResponseEntity<NotificationPageResponse> getNotifications(
+            @Parameter(hidden = true) @AuthUser Long memberId,
+            @RequestParam(name = "page", defaultValue = "0") int page
+    ) {
+        int safePage = Math.max(page, 0);
+        NotificationPageResponse response = notificationService.getNotifications(
+                memberId.intValue(),
+                safePage,
+                NOTIFICATION_PAGE_SIZE
+        );
+        return ResponseEntity.ok(response);
     }
 
     @Operation(
