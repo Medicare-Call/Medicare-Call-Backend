@@ -47,7 +47,6 @@ public class FirebaseService {
                         .setBody(notification.getBody())
                         .build())
                 .putAllData(Map.of("notificationId",""+notification.getId()))
-                .setTopic("carecall_alarm")
                 .build();
     }
 

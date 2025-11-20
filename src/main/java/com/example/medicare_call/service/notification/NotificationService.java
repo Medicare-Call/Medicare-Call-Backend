@@ -4,6 +4,7 @@ import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.domain.Member;
 import com.example.medicare_call.domain.Notification;
 import com.example.medicare_call.dto.NotificationDto;
+import com.example.medicare_call.dto.notification.NotificationPageResponse;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.ElderRepository;
@@ -11,6 +12,7 @@ import com.example.medicare_call.repository.MemberRepository;
 import com.example.medicare_call.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,6 +48,13 @@ public class NotificationService {
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
 
         notification.updateIsRead(isRead);
+    }
+
+    public NotificationPageResponse getNotifications(Integer memberId, int page, int size) {
+        PageRequest pageable = PageRequest.of(page, size);
+        return NotificationPageResponse.from(
+                notificationRepository.findByMember_IdOrderByCreatedAtDesc(memberId, pageable)
+        );
     }
 
     @Transactional(readOnly = true)
