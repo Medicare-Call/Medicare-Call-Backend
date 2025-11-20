@@ -84,9 +84,11 @@ class AiHealthDataExtractorServiceTest {
 
         HealthDataExtractionResponse.BloodSugarData bloodSugar = HealthDataExtractionResponse.BloodSugarData.builder()
                 .measurementTime("아침").mealTime("식후").bloodSugarValue(120).status("NORMAL").build();
+        HealthDataExtractionResponse.MealData meal = HealthDataExtractionResponse.MealData.builder()
+                .mealType("아침").mealSummary("아침 식사를 하였음").build();
         HealthDataExtractionResponse expectedResponse = HealthDataExtractionResponse.builder()
                 .date("2024-01-01")
-                .mealData(HealthDataExtractionResponse.MealData.builder().mealType("아침").mealSummary("아침 식사를 하였음").build())
+                .mealData(List.of(meal))
                 .bloodSugarData(List.of(bloodSugar))
                 .medicationData(List.of())
                 .psychologicalState(List.of("기분이 좋음"))
@@ -105,7 +107,7 @@ class AiHealthDataExtractorServiceTest {
         // then
         assertThat(result).isNotNull();
         assertThat(result.getDate()).isEqualTo("2024-01-01");
-        assertThat(result.getMealData().getMealType()).isEqualTo("아침");
+        assertThat(result.getMealData().get(0).getMealType()).isEqualTo("아침");
         assertThat(result.getBloodSugarData().get(0).getBloodSugarValue()).isEqualTo(120);
         assertThat(result.getPsychologicalState()).contains("기분이 좋음");
     }
@@ -148,9 +150,12 @@ class AiHealthDataExtractorServiceTest {
 
         HealthDataExtractionResponse.BloodSugarData bloodSugar = HealthDataExtractionResponse.BloodSugarData.builder()
                 .measurementTime("아침").mealTime("식후").bloodSugarValue(120).status("NORMAL").build();
+        HealthDataExtractionResponse.MealData meal = HealthDataExtractionResponse.MealData.builder()
+                .mealType("아침").mealSummary("아침 식사를 하였음").build();
+
         HealthDataExtractionResponse expectedResponse = HealthDataExtractionResponse.builder()
                 .date("2024-01-01")
-                .mealData(HealthDataExtractionResponse.MealData.builder().mealType("아침").mealSummary("아침 식사를 하였음").build())
+                .mealData(List.of(meal))
                 .bloodSugarData(List.of(bloodSugar))
                 .medicationData(List.of())
                 .psychologicalState(List.of("기분이 좋음"))
@@ -169,7 +174,7 @@ class AiHealthDataExtractorServiceTest {
         // then
         assertThat(result).isNotNull();
         assertThat(result.getDate()).isEqualTo("2024-01-01");
-        assertThat(result.getMealData().getMealType()).isEqualTo("아침");
+        assertThat(result.getMealData().get(0).getMealType()).isEqualTo("아침");
         assertThat(result.getBloodSugarData()).hasSize(1);
         assertThat(result.getBloodSugarData().get(0).getBloodSugarValue()).isEqualTo(120);
         assertThat(result.getPsychologicalState()).contains("기분이 좋음");

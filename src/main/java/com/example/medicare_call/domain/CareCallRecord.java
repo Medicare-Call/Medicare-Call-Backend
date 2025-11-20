@@ -67,9 +67,13 @@ public class CareCallRecord {
     @Column(name = "ai_health_analysis_comment", columnDefinition = "TEXT")
     private String aiHealthAnalysisComment; // AI 건강 분석 코멘트
 
+    @Column(name = "ai_extracted_data_json", columnDefinition = "TEXT")
+    private String aiExtractedDataJson; // AI 로부터 추출된 건강 데이터 전체 JSON
+
     @Builder
     public CareCallRecord(Integer id, Elder elder, CareCallSetting setting, LocalDateTime calledAt, Byte responded, LocalDateTime sleepStart, LocalDateTime sleepEnd, Byte healthStatus, Byte psychStatus,
-                          LocalDateTime startTime, LocalDateTime endTime, String callStatus, String transcriptionText, String psychologicalDetails, String healthDetails, String aiHealthAnalysisComment) {
+                          LocalDateTime startTime, LocalDateTime endTime, String callStatus, String transcriptionText, String psychologicalDetails, String healthDetails, String aiHealthAnalysisComment,
+                          String aiExtractedDataJson) {
         this.id = id;
         this.elder = elder;
         this.setting = setting;
@@ -86,5 +90,6 @@ public class CareCallRecord {
         this.psychologicalDetails = psychologicalDetails;
         this.healthDetails = healthDetails;
         this.aiHealthAnalysisComment = aiHealthAnalysisComment;
+        this.aiExtractedDataJson = aiExtractedDataJson;
     }
 } 

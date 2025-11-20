@@ -9,4 +9,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
     // 추후에 Left 조인 최적화: 방안 Query DSL로 커스터마이징
     Page<Notification> findByMember_IdOrderByCreatedAtDesc(Integer memberId, Pageable pageable);
+
+    int countByMemberIdAndIsReadFalse(Integer memberId);
 }

@@ -12,6 +12,8 @@ import com.example.medicare_call.repository.MealRecordRepository;
 import com.example.medicare_call.service.ai.AiSummaryService;
 import com.example.medicare_call.service.statistics.StatisticsUpdateService;
 import com.example.medicare_call.util.CareCallUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -57,9 +59,19 @@ public class HealthDataProcessingService {
                 updatedRecord = updateHealthStatus(updatedRecord, healthData.getHealthSigns(), healthData.getHealthStatus());
             }
         }
+        
+        // AI 추출 응답 JSON 데이터 저장 (사용성 테스트 이후 삭제)
+        ObjectMapper objectMapper = new ObjectMapper();
+        String aiExtractedDataJson = null;
+        try {
+            aiExtractedDataJson = objectMapper.writeValueAsString(healthData);
+            log.info("건강 데이터 JSON 변환 완료");
+        } catch (JsonProcessingException e) {
+            log.error("건강 데이터 JSON 변환 실패", e);
+        }
 
         // AI 건강분석 코멘트 처리
-        updatedRecord = updateAiHealthAnalysisComment(updatedRecord);
+        updatedRecord = updateAiHealthAnalysisComment(updatedRecord, aiExtractedDataJson);
 
         careCallRecordRepository.save(updatedRecord);
         log.info("CareCallRecord 건강 데이터 업데이트 완료: callId={}", updatedRecord.getId());
@@ -71,25 +83,28 @@ public class HealthDataProcessingService {
         }
     }
 
-    private void saveMealData(CareCallRecord callRecord, HealthDataExtractionResponse.MealData mealData) {
-        // 식사 타입 결정
-        MealType mealType = MealType.fromDescription(mealData.getMealType());
-        if (mealType == null) {
-            log.warn("알 수 없는 식사 타입: {}", mealData.getMealType());
-            return;
+    private void saveMealData(CareCallRecord callRecord, List<HealthDataExtractionResponse.MealData> mealDataList) {
+
+        for (HealthDataExtractionResponse.MealData mealData : mealDataList) {
+            // 식사 타입 결정
+            MealType mealType = MealType.fromDescription(mealData.getMealType());
+            if (mealType == null) {
+                log.warn("알 수 없는 식사 타입: {}", mealData.getMealType());
+                return;
+            }
+
+            // 식사 데이터 저장 (식사를 했다고 가정)
+            MealRecord mealRecord = MealRecord.builder()
+                    .careCallRecord(callRecord)
+                    .mealType(mealType.getValue())
+                    .eatenStatus(MealEatenStatus.EATEN.getValue())
+                    .responseSummary(mealData.getMealSummary())
+                    .recordedAt(LocalDateTime.now())
+                    .build();
+
+            mealRecordRepository.save(mealRecord);
+            log.info("식사 데이터 저장 완료: mealType={}, summary={}", mealRecord.getMealType(), mealData.getMealSummary());
         }
-
-        // 식사 데이터 저장 (식사를 했다고 가정)
-        MealRecord mealRecord = MealRecord.builder()
-                .careCallRecord(callRecord)
-                .mealType(mealType.getValue())
-                .eatenStatus(MealEatenStatus.EATEN.getValue())
-                .responseSummary(mealData.getMealSummary())
-                .recordedAt(LocalDateTime.now())
-                .build();
-
-        mealRecordRepository.save(mealRecord);
-        log.info("식사 데이터 저장 완료: mealType={}, summary={}", mealData.getMealType(), mealData.getMealSummary());
     }
 
     private CareCallRecord updateSleepData(CareCallRecord callRecord, HealthDataExtractionResponse.SleepData sleepData) {
@@ -229,7 +244,7 @@ public class HealthDataProcessingService {
         return callRecord;
     }
 
-    private CareCallRecord updateAiHealthAnalysisComment(CareCallRecord callRecord) {
+    private CareCallRecord updateAiHealthAnalysisComment(CareCallRecord callRecord, String aiExtractedDataJson) {
         String healthDetails = callRecord.getHealthDetails();
         String aiComment = null;
         if (healthDetails != null && !healthDetails.isBlank()) {
@@ -254,6 +269,7 @@ public class HealthDataProcessingService {
                 .psychologicalDetails(callRecord.getPsychologicalDetails())
                 .healthDetails(callRecord.getHealthDetails())
                 .aiHealthAnalysisComment(aiComment)
+                .aiExtractedDataJson(aiExtractedDataJson)
                 .build();
 
         log.info("AI 건강분석 코멘트 업데이트 완료: aiComment={}", aiComment);

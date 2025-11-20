@@ -10,6 +10,7 @@ import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.ElderRepository;
 import com.example.medicare_call.repository.SubscriptionRepository;
 import com.example.medicare_call.repository.WeeklyStatisticsRepository;
+import com.example.medicare_call.service.notification.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,16 +42,22 @@ class WeeklyReportServiceTest {
     @Mock
     private SubscriptionRepository subscriptionRepository;
 
+    @Mock
+    private NotificationService notificationService;
+
     @InjectMocks
     private WeeklyReportService weeklyReportService;
 
     private Elder testElder;
     private Subscription testSubscription;
+    private Integer testMemberId;
     private LocalDate testStartDate;
     private LocalDate testEndDate;
 
     @BeforeEach
     void setUp() {
+        testMemberId = 1;
+
         testElder = Elder.builder()
                 .id(1)
                 .name("김옥자")
@@ -110,9 +117,10 @@ class WeeklyReportServiceTest {
                 .thenReturn(Optional.of(testElder));
         when(weeklyStatisticsRepository.findByElderAndStartDate(testElder, testStartDate))
                 .thenReturn(Optional.of(weeklyStatistics));
+        when(notificationService.getUnreadCount(testMemberId)).thenReturn(5);
 
         // when
-        WeeklyReportResponse response = weeklyReportService.getWeeklyReport(elderId, testStartDate);
+        WeeklyReportResponse response = weeklyReportService.getWeeklyReport(testMemberId, elderId, testStartDate);
 
         // then
         assertThat(response).isNotNull();
@@ -140,6 +148,7 @@ class WeeklyReportServiceTest {
         assertThat(response.getBloodSugar().getAfterMeal().getLow()).isEqualTo(1);
         assertThat(response.getHealthSummary()).isEqualTo("이번 주 전반적으로 건강하게 지내셨습니다.");
         assertThat(response.getSubscriptionStartDate()).isEqualTo(LocalDate.of(2025, 1, 1));
+        assertThat(response.getUnreadNotification()).isEqualTo(5);
     }
 
     @Test
@@ -152,7 +161,7 @@ class WeeklyReportServiceTest {
 
         // when & then
         CustomException exception = assertThrows(CustomException.class, () -> {
-            weeklyReportService.getWeeklyReport(elderId, testStartDate);
+            weeklyReportService.getWeeklyReport(testMemberId, elderId, testStartDate);
         });
         assertEquals(ErrorCode.SUBSCRIPTION_NOT_FOUND, exception.getErrorCode());
     }
@@ -169,7 +178,7 @@ class WeeklyReportServiceTest {
 
         // when & then
         CustomException exception = assertThrows(CustomException.class, () -> {
-            weeklyReportService.getWeeklyReport(elderId, testStartDate);
+            weeklyReportService.getWeeklyReport(testMemberId, elderId, testStartDate);
         });
         assertEquals(ErrorCode.ELDER_NOT_FOUND, exception.getErrorCode());
     }
@@ -192,14 +201,14 @@ class WeeklyReportServiceTest {
 
         // when & then
         CustomException exception = assertThrows(CustomException.class, () -> {
-            weeklyReportService.getWeeklyReport(elderId, testStartDate);
+            weeklyReportService.getWeeklyReport(testMemberId, elderId, testStartDate);
         });
         assertEquals(ErrorCode.ELDER_DELETED, exception.getErrorCode());
     }
 
     @Test
-    @DisplayName("주간 통계 조회 실패 - 해당 주차 통계 데이터 없음")
-    void getWeeklyReport_fail_noDataForWeek() {
+    @DisplayName("주간 통계 조회 - 해당 주차 통계 데이터 없음, 빈 응답 반환")
+    void getWeeklyReport_emptyResponse_noDataForWeek() {
         // given
         Integer elderId = 1;
         when(subscriptionRepository.findByElderId(elderId))
@@ -208,12 +217,24 @@ class WeeklyReportServiceTest {
                 .thenReturn(Optional.of(testElder));
         when(weeklyStatisticsRepository.findByElderAndStartDate(testElder, testStartDate))
                 .thenReturn(Optional.empty());
+        when(notificationService.getUnreadCount(testMemberId)).thenReturn(0);
 
-        // when & then
-        CustomException exception = assertThrows(CustomException.class, () -> {
-            weeklyReportService.getWeeklyReport(elderId, testStartDate);
-        });
-        assertEquals(ErrorCode.NO_DATA_FOR_WEEK, exception.getErrorCode());
+        // when
+        WeeklyReportResponse response = weeklyReportService.getWeeklyReport(testMemberId, elderId, testStartDate);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getElderName()).isEqualTo("김옥자");
+        assertThat(response.getSubscriptionStartDate()).isEqualTo(LocalDate.of(2025, 1, 1));
+
+        // 나머지 필드는 null
+        assertThat(response.getSummaryStats()).isNull();
+        assertThat(response.getMealStats()).isNull();
+        assertThat(response.getMedicationStats()).isNull();
+        assertThat(response.getHealthSummary()).isNull();
+        assertThat(response.getAverageSleep()).isNull();
+        assertThat(response.getPsychSummary()).isNull();
+        assertThat(response.getBloodSugar()).isNull();
     }
 
     @Test
@@ -246,9 +267,10 @@ class WeeklyReportServiceTest {
                 .thenReturn(Optional.of(testElder));
         when(weeklyStatisticsRepository.findByElderAndStartDate(testElder, testStartDate))
                 .thenReturn(Optional.of(weeklyStatistics));
+        when(notificationService.getUnreadCount(testMemberId)).thenReturn(0);
 
         // when
-        WeeklyReportResponse response = weeklyReportService.getWeeklyReport(elderId, testStartDate);
+        WeeklyReportResponse response = weeklyReportService.getWeeklyReport(testMemberId, elderId, testStartDate);
 
         // then
         assertThat(response.getMedicationStats()).isEmpty();
@@ -284,9 +306,10 @@ class WeeklyReportServiceTest {
                 .thenReturn(Optional.of(testElder));
         when(weeklyStatisticsRepository.findByElderAndStartDate(testElder, testStartDate))
                 .thenReturn(Optional.of(weeklyStatistics));
+        when(notificationService.getUnreadCount(testMemberId)).thenReturn(0);
 
         // when
-        WeeklyReportResponse response = weeklyReportService.getWeeklyReport(elderId, testStartDate);
+        WeeklyReportResponse response = weeklyReportService.getWeeklyReport(testMemberId, elderId, testStartDate);
 
         // then
         assertThat(response.getBloodSugar()).isNotNull();
@@ -333,9 +356,10 @@ class WeeklyReportServiceTest {
                 .thenReturn(Optional.of(testElder));
         when(weeklyStatisticsRepository.findByElderAndStartDate(testElder, testStartDate))
                 .thenReturn(Optional.of(weeklyStatistics));
+        when(notificationService.getUnreadCount(testMemberId)).thenReturn(0);
 
         // when
-        WeeklyReportResponse response = weeklyReportService.getWeeklyReport(elderId, testStartDate);
+        WeeklyReportResponse response = weeklyReportService.getWeeklyReport(testMemberId, elderId, testStartDate);
 
         // then
         assertThat(response.getBloodSugar()).isNotNull();

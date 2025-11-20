@@ -1,6 +1,7 @@
 package com.example.medicare_call.controller;
 
 import com.example.medicare_call.dto.report.HomeReportResponse;
+import com.example.medicare_call.global.annotation.AuthUser;
 import com.example.medicare_call.service.report.HomeReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -50,12 +51,13 @@ public class HomeController {
     })
     @GetMapping("/{elderId}/home")
     public ResponseEntity<HomeReportResponse> getHomeData(
+        @Parameter(hidden = true) @AuthUser Long memberId,
         @Parameter(description = "조회할 어르신의 식별자", required = true, example = "1")
         @PathVariable("elderId") Integer elderId
     ) {
         log.info("홈 화면 데이터 조회 요청: elderId={}", elderId);
 
-        HomeReportResponse response = homeReportService.getHomeReport(elderId);
+        HomeReportResponse response = homeReportService.getHomeReport(memberId.intValue(), elderId);
 
         return ResponseEntity.ok(response);
     }

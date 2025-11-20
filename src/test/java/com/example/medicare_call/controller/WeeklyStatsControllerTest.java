@@ -1,15 +1,16 @@
 package com.example.medicare_call.controller;
 
 import com.example.medicare_call.dto.report.WeeklyReportResponse;
+import com.example.medicare_call.global.annotation.AuthenticationArgumentResolver;
 import com.example.medicare_call.global.jwt.JwtProvider;
 import com.example.medicare_call.service.report.WeeklyReportService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -17,13 +18,14 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(WeeklyStatsController.class)
-@AutoConfigureMockMvc(addFilters = false) // security 필터 비활성화
+@WebMvcTest(controllers = WeeklyStatsController.class,
+    excludeAutoConfiguration = {org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class})
+@Import(TestConfig.class)
 @ActiveProfiles("test")
 class WeeklyStatsControllerTest {
 
@@ -35,6 +37,9 @@ class WeeklyStatsControllerTest {
 
     @MockBean
     private JwtProvider jwtProvider;
+
+    @MockBean
+    private AuthenticationArgumentResolver authenticationArgumentResolver;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -108,7 +113,7 @@ class WeeklyStatsControllerTest {
                 .bloodSugar(bloodSugar)
                 .build();
 
-        when(weeklyReportService.getWeeklyReport(eq(elderId), eq(startDate)))
+        when(weeklyReportService.getWeeklyReport(anyInt(), eq(elderId), eq(startDate)))
                 .thenReturn(expectedResponse);
 
         // when & then

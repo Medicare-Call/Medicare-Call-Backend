@@ -280,8 +280,8 @@ class DailyStatisticsServiceTest {
     }
 
     @Test
-    @DisplayName("복약 목표 계산 - 점심 케어콜 누락 시 목표에서 제외")
-    void updateDailyStatistics_calculatesTotalGoal_excludesMissedCall() {
+    @DisplayName("복약 목표 계산 - 전체 스케줄 기반")
+    void updateDailyStatistics_calculatesTotalGoal() {
         // given
         MedicationSchedule morningSchedule = createMedicationSchedule(1, "아침약", MedicationScheduleTime.MORNING);
         MedicationSchedule lunchSchedule = createMedicationSchedule(2, "점심약", MedicationScheduleTime.LUNCH);
@@ -338,7 +338,7 @@ class DailyStatisticsServiceTest {
 
         // then
         verify(dailyStatisticsRepository).save(argThat(stats ->
-            stats.getMedicationTotalGoal() == 2 && // 아침 + 저녁만 목표 (점심 제외)
+            stats.getMedicationTotalGoal() == 3 && // 전체 스케줄 (아침 + 점심 + 저녁)
             stats.getMedicationTotalTaken() == 2
         ));
     }
@@ -824,9 +824,9 @@ class DailyStatisticsServiceTest {
         dailyStatisticsService.upsertDailyStatistics(eveningCallRecord);
 
         // then
-        // 점심 콜이 누락되었으므로 totalGoal은 아침(1) + 저녁(1) = 2가 되어야함
+        // totalGoal은 전체 스케줄의 합: 아침(1) + 점심(1) + 저녁(1) = 3
         verify(dailyStatisticsRepository).save(argThat(stats -> {
-            assertThat(stats.getMedicationTotalGoal()).isEqualTo(2); // 아침 + 저녁만 목표
+            assertThat(stats.getMedicationTotalGoal()).isEqualTo(3); // 전체 스케줄
             assertThat(stats.getMedicationTotalTaken()).isEqualTo(2); // 아침약, 저녁약
             assertThat(stats.getMedicationList()).hasSize(3);
 

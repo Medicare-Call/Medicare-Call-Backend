@@ -51,7 +51,7 @@ public class CareCallDataProcessingService {
         CareCallRecord record = CareCallRecord.builder()
                 .elder(elder)
                 .setting(setting)
-                .calledAt(LocalDateTime.now())
+                .calledAt(request.getStartTime() != null ? LocalDateTime.ofInstant(request.getStartTime(), ZoneOffset.UTC) : LocalDateTime.now())
                 .responded(request.getResponded())
                 .startTime(request.getStartTime() != null ? LocalDateTime.ofInstant(request.getStartTime(), ZoneOffset.UTC) : null)
                 .endTime(request.getEndTime() != null ? LocalDateTime.ofInstant(request.getEndTime(), ZoneOffset.UTC) : null)
@@ -96,10 +96,10 @@ public class CareCallDataProcessingService {
         log.info("건강 데이터 DB 저장 시작: callId={}", callRecord.getId());
         
         if (healthData != null) {
-            if (!healthData.getBloodSugarData().isEmpty()) {
+            if (healthData.getBloodSugarData() != null && !healthData.getBloodSugarData().isEmpty()) {
                 bloodSugarService.saveBloodSugarData(callRecord, healthData.getBloodSugarData());
             }
-            if (!healthData.getMedicationData().isEmpty()) {
+            if (healthData.getMedicationData() != null && !healthData.getMedicationData().isEmpty()) {
                 medicationService.saveMedicationTakenRecord(callRecord, healthData.getMedicationData());
             }
             healthDataProcessingService.updateCareCallRecordWithHealthData(callRecord, healthData);

@@ -19,7 +19,7 @@ public class HealthDataExtractionResponse {
     private String date;
     
     @Schema(description = "식사 데이터")
-    private MealData mealData;
+    private List<MealData> mealData;
     
     @Schema(description = "수면 데이터")
     private SleepData sleepData;
