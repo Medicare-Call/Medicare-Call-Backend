@@ -73,6 +73,7 @@ public class HealthDataProcessingServiceTest {
         // given
         HealthDataExtractionResponse.MealData mealData = HealthDataExtractionResponse.MealData.builder()
                 .mealType("아침")
+                .mealEatenStatus("섭취함")
                 .mealSummary("김치찌개와 밥을 먹었음")
                 .build();
 
@@ -99,11 +100,13 @@ public class HealthDataProcessingServiceTest {
         // given
         HealthDataExtractionResponse.MealData breakfast = HealthDataExtractionResponse.MealData.builder()
                 .mealType("아침")
+                .mealEatenStatus("섭취함")
                 .mealSummary("김치찌개와 밥을 먹었음")
                 .build();
 
         HealthDataExtractionResponse.MealData lunch = HealthDataExtractionResponse.MealData.builder()
                 .mealType("점심")
+                .mealEatenStatus("섭취함")
                 .mealSummary("된장찌개와 밥")
                 .build();
 
@@ -240,5 +243,64 @@ public class HealthDataProcessingServiceTest {
             record.getAiHealthAnalysisComment().equals(expectedComment) &&
             record.getHealthDetails().equals("두통, 어지러움")
         ));
+    }
+
+    @Test
+    @DisplayName("식사하지 않음 상태 저장 검증")
+    void updateCareCallRecordWithHealthData_savesNotEatenStatus() {
+        // given
+        HealthDataExtractionResponse.MealData mealData = HealthDataExtractionResponse.MealData.builder()
+                .mealType("아침")
+                .mealEatenStatus("섭취하지 않음")
+                .mealSummary("아침 식사를 하지 않았음")
+                .build();
+
+        List<HealthDataExtractionResponse.MealData> mealDataList = List.of(mealData);
+
+        HealthDataExtractionResponse healthData = HealthDataExtractionResponse.builder()
+                .mealData(mealDataList)
+                .build();
+
+        when(mealRecordRepository.save(any(MealRecord.class))).thenReturn(MealRecord.builder().id(1).build());
+        when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(callRecord);
+
+        // when
+        healthDataProcessingService.updateCareCallRecordWithHealthData(callRecord, healthData);
+
+        // then
+        verify(mealRecordRepository).save(argThat(record ->
+            record.getEatenStatus() == (byte) 0 // NOT_EATEN
+        ));
+        verify(careCallRecordRepository).save(any(CareCallRecord.class));
+    }
+
+    @Test
+    @DisplayName("식사 여부가 null일 때 null로 저장하고 고정 메시지 설정")
+    void updateCareCallRecordWithHealthData_savesNullEatenStatusAndFixedMessageWhenNull() {
+        // given
+        HealthDataExtractionResponse.MealData mealData = HealthDataExtractionResponse.MealData.builder()
+                .mealType("아침")
+                .mealEatenStatus(null)
+                .mealSummary("아침 식사")
+                .build();
+
+        List<HealthDataExtractionResponse.MealData> mealDataList = List.of(mealData);
+
+        HealthDataExtractionResponse healthData = HealthDataExtractionResponse.builder()
+                .mealData(mealDataList)
+                .build();
+
+        when(mealRecordRepository.save(any(MealRecord.class))).thenReturn(MealRecord.builder().id(1).build());
+        when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(callRecord);
+
+        // when
+        healthDataProcessingService.updateCareCallRecordWithHealthData(callRecord, healthData);
+
+        // then
+        verify(mealRecordRepository).save(argThat(record ->
+            record.getEatenStatus() == null && // null로 저장
+            HealthDataProcessingService.MEAL_STATUS_UNKNOWN_MESSAGE.equals(record.getResponseSummary()) // 고정 메시지
+        ));
+        verify(careCallRecordRepository).save(any(CareCallRecord.class));
     }
 } 

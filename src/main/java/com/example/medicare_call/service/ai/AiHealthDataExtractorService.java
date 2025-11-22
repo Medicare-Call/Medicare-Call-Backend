@@ -110,6 +110,7 @@ public class AiHealthDataExtractorService {
             1. 금일의 날짜
             2. 식사 데이터
                - 식사의 종류 (아침/점심/저녁)
+               - 식사 여부 (반드시 "섭취함" 또는 "섭취하지 않음"으로 응답)
                - 식사 간단 요약
             3. 수면 데이터
                - 취침 시작 시각 (HH:mm 형식, 예: 22:00)
@@ -139,6 +140,7 @@ public class AiHealthDataExtractorService {
               "mealData": [
                   {
                     "mealType": "아침/점심/저녁",
+                    "mealEatenStatus": "섭취함/섭취하지 않음",
                     "mealSummary": "식사 요약"
                   }
               ],

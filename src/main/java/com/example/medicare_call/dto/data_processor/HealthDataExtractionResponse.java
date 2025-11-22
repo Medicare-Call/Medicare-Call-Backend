@@ -63,7 +63,14 @@ public class HealthDataExtractionResponse {
             allowableValues = {"아침", "점심", "저녁"}
         )
         private String mealType;
-        
+
+        @Schema(
+                description = "식사 여부",
+                example = "섭취함",
+                allowableValues = {"섭취함", "섭취하지 않음"}
+        )
+        private String mealEatenStatus;
+
         @Schema(description = "식사 요약", example = "아침 식사를 하였음")
         private String mealSummary;
     }
