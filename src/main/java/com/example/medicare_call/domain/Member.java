@@ -2,6 +2,7 @@ package com.example.medicare_call.domain;
 
 import com.example.medicare_call.global.enums.Gender;
 import com.example.medicare_call.global.enums.NotificationStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDate;
@@ -24,6 +25,10 @@ public class Member {
     @JsonManagedReference
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Subscription> subscriptions = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "guardian", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MemberElder> memberElders = new ArrayList<>();
 
     @Column(name = "name", nullable = false, length = 100)
     private String name;
@@ -58,10 +63,6 @@ public class Member {
     @Enumerated(EnumType.STRING)
     @Column(name = "push_carecall_missed", nullable = false)
     private NotificationStatus pushCarecallMissed = NotificationStatus.ON;
-
-    @JsonManagedReference
-    @OneToMany(mappedBy = "guardian", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Elder> elders = new ArrayList<>();
 
     // 성공적인 마이그레이션을 위해, 우선 nullable = true 로 설정
     @Column(name = "fcm_token", unique = true, nullable = true)
@@ -98,5 +99,13 @@ public class Member {
 
     public void updateFcmToken(String fcmToken) {
         this.fcmToken = fcmToken;
+    }
+
+    public void addMemberElder(MemberElder memberElder) {
+        this.memberElders.add(memberElder);
+    }
+
+    public void removeMemberElder(MemberElder memberElder) {
+        this.memberElders.remove(memberElder);
     }
 }

@@ -4,6 +4,7 @@ import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.ElderHealthInfoCreateRequest;
 import com.example.medicare_call.dto.ElderHealthInfoCreateRequestWithElderId;
 import com.example.medicare_call.global.enums.ElderHealthNoteType;
+import com.example.medicare_call.global.enums.MemberElderAuthority;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.*;
@@ -31,11 +32,20 @@ class ElderHealthInfoServiceTest {
     @Mock DiseaseRepository diseaseRepository;
     @Mock MedicationScheduleRepository medicationScheduleRepository;
     @Mock MemberRepository memberRepository;
+    @Mock MemberElderRepository memberElderRepository;
     @InjectMocks
     ElderHealthInfoService elderHealthInfoService;
 
     @BeforeEach
     void setUp() { MockitoAnnotations.openMocks(this); }
+
+    private MemberElder createRelation(Member member, Elder elder, MemberElderAuthority authority) {
+        return MemberElder.builder()
+                .guardian(member)
+                .elder(elder)
+                .authority(authority)
+                .build();
+    }
 
     @Test
     void registerElderHealthInfo_success() {
@@ -43,7 +53,7 @@ class ElderHealthInfoServiceTest {
         Integer memberId = 1;
         Integer elderId = 1;
         Member member = Member.builder().id(memberId).build();
-        Elder elder = Elder.builder().id(elderId).guardian(member).build();
+        Elder elder = Elder.builder().id(elderId).build();
 
         List<String> diseaseNames = Arrays.asList("고혈압, 당뇨", "치매");
         List<ElderHealthInfoCreateRequest.MedicationScheduleRequest> medicationSchedules = Arrays.asList(
@@ -57,6 +67,8 @@ class ElderHealthInfoServiceTest {
                 .build();
 
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(elder));
+        when(memberElderRepository.findByGuardian_IdAndElder_Id(memberId, elderId))
+                .thenReturn(Optional.of(createRelation(member, elder, MemberElderAuthority.MANAGE)));
         when(diseaseRepository.findByName(anyString())).thenAnswer(invocation -> Optional.of(new Disease()));
         when(diseaseRepository.save(any(Disease.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -89,13 +101,14 @@ class ElderHealthInfoServiceTest {
     void upsertElderHealthInfo_fail_accessDenied() {
         // given
         Integer memberId = 1;
-        Integer otherMemberId = 2;
         Integer elderId = 1;
-        Member otherMember = Member.builder().id(otherMemberId).build();
-        Elder elder = Elder.builder().id(elderId).guardian(otherMember).build();
+        Member member = Member.builder().id(memberId).build();
+        Elder elder = Elder.builder().id(elderId).build();
         ElderHealthInfoCreateRequest request = new ElderHealthInfoCreateRequest();
 
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(elder));
+        when(memberElderRepository.findByGuardian_IdAndElder_Id(memberId, elderId))
+                .thenReturn(Optional.of(createRelation(member, elder, MemberElderAuthority.VIEW)));
 
         // when & then
         CustomException exception = assertThrows(CustomException.class, () -> {
@@ -168,8 +181,8 @@ class ElderHealthInfoServiceTest {
         // given
         Integer memberId = 1;
         Member member = Member.builder().id(memberId).build();
-        Elder elder1 = Elder.builder().id(1).guardian(member).build();
-        Elder elder2 = Elder.builder().id(2).guardian(member).build();
+        Elder elder1 = Elder.builder().id(1).build();
+        Elder elder2 = Elder.builder().id(2).build();
 
         ElderHealthInfoCreateRequestWithElderId request1 = ElderHealthInfoCreateRequestWithElderId.builder()
                 .elderId(1)
@@ -188,6 +201,10 @@ class ElderHealthInfoServiceTest {
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
         when(elderRepository.findById(1)).thenReturn(Optional.of(elder1));
         when(elderRepository.findById(2)).thenReturn(Optional.of(elder2));
+        when(memberElderRepository.findByGuardian_IdAndElder_Id(memberId, 1))
+                .thenReturn(Optional.of(createRelation(member, elder1, MemberElderAuthority.MANAGE)));
+        when(memberElderRepository.findByGuardian_IdAndElder_Id(memberId, 2))
+                .thenReturn(Optional.of(createRelation(member, elder2, MemberElderAuthority.MANAGE)));
         when(diseaseRepository.findByName(anyString())).thenAnswer(invocation -> Optional.of(new Disease()));
         when(diseaseRepository.save(any(Disease.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -242,10 +259,8 @@ class ElderHealthInfoServiceTest {
     void bulkUpsertElderHealthInfo_fail_accessDenied() {
         // given
         Integer memberId = 1;
-        Integer otherMemberId = 2;
         Member member = Member.builder().id(memberId).build();
-        Member otherMember = Member.builder().id(otherMemberId).build();
-        Elder elder = Elder.builder().id(1).guardian(otherMember).build(); // 다른 보호자의 어르신
+        Elder elder = Elder.builder().id(1).build(); // 다른 보호자의 어르신
 
         List<ElderHealthInfoCreateRequestWithElderId> requests = List.of(
                 ElderHealthInfoCreateRequestWithElderId.builder().elderId(1).build()
@@ -253,6 +268,8 @@ class ElderHealthInfoServiceTest {
 
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
         when(elderRepository.findById(1)).thenReturn(Optional.of(elder));
+        when(memberElderRepository.findByGuardian_IdAndElder_Id(memberId, 1))
+                .thenReturn(Optional.of(createRelation(member, elder, MemberElderAuthority.VIEW)));
 
         // when & then
         CustomException exception = assertThrows(CustomException.class, () -> {

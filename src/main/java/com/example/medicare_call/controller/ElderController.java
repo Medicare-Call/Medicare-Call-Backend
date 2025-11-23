@@ -1,6 +1,8 @@
 package com.example.medicare_call.controller;
 
 import com.example.medicare_call.domain.Elder;
+import com.example.medicare_call.domain.Member;
+import com.example.medicare_call.domain.MemberElder;
 import com.example.medicare_call.dto.ElderResponse;
 import com.example.medicare_call.dto.ElderUpdateRequest;
 import com.example.medicare_call.global.annotation.AuthUser;
@@ -32,18 +34,20 @@ public class ElderController {
     public ResponseEntity<ElderRegisterResponse> registerElder(
             @Parameter(hidden = true) @AuthUser Long memberId,
             @Valid @RequestBody ElderRegisterRequest request) {
-        Elder elder = elderService.registerElder(memberId.intValue(), request);
+        MemberElder memberElder = elderService.registerElder(memberId.intValue(), request);
+        Elder elder = memberElder.getElder();
+        Member guardian = memberElder.getGuardian();
         ElderRegisterResponse response = ElderRegisterResponse.builder()
-            .id(elder.getId())
-            .name(elder.getName())
-            .birthDate(elder.getBirthDate())
-            .phone(elder.getPhone())
-            .gender(elder.getGender() == 0 ? "MALE" : "FEMALE")
-            .relationship(elder.getRelationship() != null ? elder.getRelationship().name() : null)
-            .residenceType(elder.getResidenceType() != null ? elder.getResidenceType().name() : null)
-            .guardianId(elder.getGuardian() != null ? elder.getGuardian().getId() : null)
-            .guardianName(elder.getGuardian() != null ? elder.getGuardian().getName() : null)
-            .build();
+                .id(elder.getId())
+                .name(elder.getName())
+                .birthDate(elder.getBirthDate())
+                .phone(elder.getPhone())
+                .gender(elder.getGender() == 0 ? "MALE" : "FEMALE")
+                .relationship(elder.getRelationship() != null ? elder.getRelationship().name() : null)
+                .residenceType(elder.getResidenceType() != null ? elder.getResidenceType().name() : null)
+                .guardianId(guardian != null ? guardian.getId() : null)
+                .guardianName(guardian != null ? guardian.getName() : null)
+                .build();
         return ResponseEntity.ok(response);
     }
 
@@ -102,4 +106,4 @@ public class ElderController {
         List<ElderRegisterResponse> responses = elderService.bulkRegisterElders(memberId.intValue(), requestList.getElders());
         return ResponseEntity.ok(responses);
     }
-} 
+}

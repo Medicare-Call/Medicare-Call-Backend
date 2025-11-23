@@ -77,7 +77,6 @@ class CareCallRequestSenderServiceImmediateTest {
 
         testElder = Elder.builder()
                 .id(1)
-                .guardian(testMember)
                 .name("김할머니")
                 .phone("01087654321")
                 .build();
