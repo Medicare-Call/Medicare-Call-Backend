@@ -8,15 +8,17 @@ import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.*;
 import com.example.medicare_call.service.ai.AiHealthDataExtractorService;
-import com.example.medicare_call.util.CareCallUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.TemporalAdjusters;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -30,6 +32,7 @@ public class CareCallDataProcessingService {
     private final BloodSugarService bloodSugarService;
     private final MedicationService medicationService;
     private final HealthDataProcessingService healthDataProcessingService;
+    private final WeeklyStatisticsRepository weeklyStatisticsRepository;
 
     @Transactional
     public CareCallRecord saveCallData(CareCallDataProcessRequest request) {
@@ -70,7 +73,16 @@ public class CareCallDataProcessingService {
                 log.error("건강 데이터 추출 중 오류 발생", e);
             }
         }
-        
+
+        if ("no-answer".equals(request.getStatus())){
+            LocalDate callDate = saved.getCalledAt().toLocalDate();
+            LocalDate startDate = callDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+
+            Optional<WeeklyStatistics> weeklyStatsOpt = weeklyStatisticsRepository.findByElderAndStartDate(elder, startDate);
+
+            weeklyStatsOpt.ifPresent(WeeklyStatistics::incrementMissedCalls);
+        }
+
         return saved;
     }
     

@@ -7,6 +7,7 @@ import com.example.medicare_call.dto.report.WeeklyReportResponse;
 import com.example.medicare_call.global.enums.ElderStatus;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
+import com.example.medicare_call.repository.CareCallRecordRepository;
 import com.example.medicare_call.repository.ElderRepository;
 import com.example.medicare_call.repository.SubscriptionRepository;
 import com.example.medicare_call.repository.WeeklyStatisticsRepository;
@@ -16,7 +17,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -31,6 +35,7 @@ public class WeeklyReportService {
     private final WeeklyStatisticsRepository weeklyStatisticsRepository;
     private final SubscriptionRepository subscriptionRepository;
     private final NotificationService notificationService;
+    private final CareCallRecordRepository careCallRecordRepository;
 
     @Transactional(readOnly = true)
     public WeeklyReportResponse getWeeklyReport(Integer memberId, Integer elderId, LocalDate startDate) {
@@ -56,7 +61,7 @@ public class WeeklyReportService {
         // 주간 통계 데이터가 없을 때 빈 응답 반환
         if (weeklyStatsOpt.isEmpty()) {
             log.info("주간 통계 데이터가 없어 빈 응답 반환 - elderId: {}, startDate: {}", elderId, startDate);
-            return createEmptyWeeklyReport(elder, subscriptionStartDate, unreadCount);
+            return createEmptyWeeklyReport(elder, startDate, subscriptionStartDate, unreadCount);
         }
 
         WeeklyStatistics weeklyStats = weeklyStatsOpt.get();
@@ -158,10 +163,26 @@ public class WeeklyReportService {
                 .build();
     }
 
-    private WeeklyReportResponse createEmptyWeeklyReport(Elder elder, LocalDate subscriptionStartDate, int unreadCount) {
+    private WeeklyReportResponse createEmptyWeeklyReport(Elder elder, LocalDate startDate, LocalDate subscriptionStartDate, int unreadCount) {
+        LocalDate endDate = startDate.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+
+        // 해당 주간의 "no-answer" CareCallRecord 개수 조회
+        int missedCalls = (int) careCallRecordRepository
+                .findByElderIdAndDateBetween(elder.getId(), startDate.atStartOfDay(), endDate.atTime(LocalTime.MAX))
+                .stream()
+                .filter(record -> "no-answer".equals(record.getCallStatus()))
+                .count();
+
+        WeeklyReportResponse.SummaryStats summaryStats = WeeklyReportResponse.SummaryStats.builder()
+                .mealRate(null)
+                .medicationRate(null)
+                .healthSignals(null)
+                .missedCalls(missedCalls)
+                .build();
+
         return WeeklyReportResponse.builder()
                 .elderName(elder.getName())
-                .summaryStats(null)
+                .summaryStats(summaryStats)
                 .mealStats(null)
                 .medicationStats(null)
                 .healthSummary(null)
