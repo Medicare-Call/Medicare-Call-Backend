@@ -48,6 +48,9 @@ class CareCallDataProcessingServiceTest {
     @Mock
     private AiHealthDataExtractorService aiHealthDataExtractorService;
 
+    @Mock
+    private WeeklyStatisticsRepository weeklyStatisticsRepository;
+
     @InjectMocks
     private CareCallDataProcessingService careCallDataProcessingService;
 
@@ -270,8 +273,8 @@ class CareCallDataProcessingServiceTest {
     }
 
     @Test
-    @DisplayName("통화 데이터 저장 성공 - 시간 정보 없음")
-    void saveCallData_success_noTimeInfo() {
+    @DisplayName("통화 데이터 저장 성공 - no-answer 시 missedCalls 증가")
+    void saveCallData_success_noAnswer_incrementsMissedCalls() {
         // given
         CareCallDataProcessRequest request = CareCallDataProcessRequest.builder()
                 .elderId(1)
@@ -291,14 +294,23 @@ class CareCallDataProcessingServiceTest {
                 .id(1)
                 .elder(elder)
                 .setting(setting)
+                .calledAt(LocalDateTime.now())
                 .callStatus("no-answer")
                 .psychologicalDetails(null)
                 .healthDetails(null)
                 .build();
 
+        WeeklyStatistics weeklyStats = WeeklyStatistics.builder()
+                .id(1L)
+                .elder(elder)
+                .missedCalls(0)
+                .build();
+
         when(elderRepository.findById(1)).thenReturn(Optional.of(elder));
         when(careCallSettingRepository.findById(2)).thenReturn(Optional.of(setting));
         when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(expectedRecord);
+        when(weeklyStatisticsRepository.findByElderAndStartDate(any(Elder.class), any(LocalDate.class)))
+                .thenReturn(Optional.of(weeklyStats));
 
         // when
         CareCallRecord result = careCallDataProcessingService.saveCallData(request);
@@ -314,6 +326,7 @@ class CareCallDataProcessingServiceTest {
         verify(careCallSettingRepository).findById(2);
         verify(careCallRecordRepository).save(any(CareCallRecord.class));
         verify(aiHealthDataExtractorService, never()).extractHealthData(any());
+        verify(weeklyStatisticsRepository).findByElderAndStartDate(any(Elder.class), any(LocalDate.class));
     }
 
     @Test

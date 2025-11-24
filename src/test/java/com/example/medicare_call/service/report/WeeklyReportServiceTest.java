@@ -1,5 +1,6 @@
 package com.example.medicare_call.service.report;
 
+import com.example.medicare_call.domain.CareCallRecord;
 import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.domain.Subscription;
 import com.example.medicare_call.domain.WeeklyStatistics;
@@ -7,6 +8,7 @@ import com.example.medicare_call.dto.report.WeeklyReportResponse;
 import com.example.medicare_call.global.enums.ElderStatus;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
+import com.example.medicare_call.repository.CareCallRecordRepository;
 import com.example.medicare_call.repository.ElderRepository;
 import com.example.medicare_call.repository.SubscriptionRepository;
 import com.example.medicare_call.repository.WeeklyStatisticsRepository;
@@ -20,13 +22,18 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,6 +51,9 @@ class WeeklyReportServiceTest {
 
     @Mock
     private NotificationService notificationService;
+
+    @Mock
+    private CareCallRecordRepository careCallRecordRepository;
 
     @InjectMocks
     private WeeklyReportService weeklyReportService;
@@ -218,6 +228,8 @@ class WeeklyReportServiceTest {
         when(weeklyStatisticsRepository.findByElderAndStartDate(testElder, testStartDate))
                 .thenReturn(Optional.empty());
         when(notificationService.getUnreadCount(testMemberId)).thenReturn(0);
+        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), any(LocalDateTime.class), any(LocalDateTime.class)))
+                .thenReturn(Collections.emptyList());
 
         // when
         WeeklyReportResponse response = weeklyReportService.getWeeklyReport(testMemberId, elderId, testStartDate);
@@ -227,8 +239,13 @@ class WeeklyReportServiceTest {
         assertThat(response.getElderName()).isEqualTo("김옥자");
         assertThat(response.getSubscriptionStartDate()).isEqualTo(LocalDate.of(2025, 1, 1));
 
+        assertThat(response.getSummaryStats()).isNotNull();
+        assertThat(response.getSummaryStats().getMealRate()).isNull();
+        assertThat(response.getSummaryStats().getMedicationRate()).isNull();
+        assertThat(response.getSummaryStats().getHealthSignals()).isNull();
+        assertThat(response.getSummaryStats().getMissedCalls()).isEqualTo(0);
+
         // 나머지 필드는 null
-        assertThat(response.getSummaryStats()).isNull();
         assertThat(response.getMealStats()).isNull();
         assertThat(response.getMedicationStats()).isNull();
         assertThat(response.getHealthSummary()).isNull();
@@ -369,5 +386,54 @@ class WeeklyReportServiceTest {
         assertThat(response.getBloodSugar().getAfterMeal().getNormal()).isEqualTo(5);
         assertThat(response.getBloodSugar().getAfterMeal().getHigh()).isEqualTo(2);
         assertThat(response.getBloodSugar().getAfterMeal().getLow()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("주간 통계 조회 - 빈 응답에서 no-answer CareCallRecord가 있는 경우 missedCalls 포함")
+    void getWeeklyReport_emptyResponse_withNoAnswerRecords() {
+        // given
+        Integer elderId = 1;
+
+        CareCallRecord noAnswerRecord1 = CareCallRecord.builder()
+                .id(1)
+                .elder(testElder)
+                .callStatus("no-answer")
+                .calledAt(testStartDate.atTime(10, 0))
+                .build();
+
+        CareCallRecord noAnswerRecord2 = CareCallRecord.builder()
+                .id(2)
+                .elder(testElder)
+                .callStatus("no-answer")
+                .calledAt(testStartDate.plusDays(2).atTime(14, 0))
+                .build();
+
+        CareCallRecord completedRecord = CareCallRecord.builder()
+                .id(3)
+                .elder(testElder)
+                .callStatus("completed")
+                .calledAt(testStartDate.plusDays(3).atTime(11, 0))
+                .build();
+
+        List<CareCallRecord> careCallRecords = List.of(noAnswerRecord1, noAnswerRecord2, completedRecord);
+
+        when(subscriptionRepository.findByElderId(elderId))
+                .thenReturn(Optional.of(testSubscription));
+        when(elderRepository.findById(elderId))
+                .thenReturn(Optional.of(testElder));
+        when(weeklyStatisticsRepository.findByElderAndStartDate(testElder, testStartDate))
+                .thenReturn(Optional.empty());
+        when(notificationService.getUnreadCount(testMemberId)).thenReturn(0);
+        when(careCallRecordRepository.findByElderIdAndDateBetween(eq(elderId), any(LocalDateTime.class), any(LocalDateTime.class)))
+                .thenReturn(careCallRecords);
+
+        // when
+        WeeklyReportResponse response = weeklyReportService.getWeeklyReport(testMemberId, elderId, testStartDate);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getElderName()).isEqualTo("김옥자");
+        assertThat(response.getSummaryStats()).isNotNull();
+        assertThat(response.getSummaryStats().getMissedCalls()).isEqualTo(2); // no-answer 2건
     }
 }
