@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Table(
         name = "Member_Elder",
         uniqueConstraints = {
-                @UniqueConstraint(name = "UK_member_elder_member_id_elder_id", columnNames = {"member_id", "elder_id"})
+                @UniqueConstraint(name = "UK_member_elder_member_id_elder_id", columnNames = {"guardian_id", "elder_id"})
         }
 )
 @Getter

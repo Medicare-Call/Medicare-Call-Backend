@@ -133,7 +133,7 @@ class WeeklyReportServiceTest {
         assertThat(response.getMealStats().getLunch()).isEqualTo(5);
         assertThat(response.getMealStats().getDinner()).isEqualTo(7);
         assertThat(response.getMedicationStats()).hasSize(2);
-        assertThat(response.getMedicationStats().get("혈압약").getTotalCount()).isEqualTo(14);
+        assertThat(response.getMedicationStats().get("혈압약").getTotalCount()).isEqualTo(12);
         assertThat(response.getMedicationStats().get("혈압약").getTakenCount()).isEqualTo(10);
         assertThat(response.getAverageSleep().getHours()).isEqualTo(7);
         assertThat(response.getAverageSleep().getMinutes()).isEqualTo(30);

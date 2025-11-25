@@ -116,7 +116,7 @@ public class WeeklyReportService {
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         entry -> WeeklyReportResponse.MedicationStats.builder()
-                                .totalCount(entry.getValue().getTotalScheduled())
+                                .totalCount(entry.getValue().getTotalGoal())
                                 .takenCount(entry.getValue().getTotalTaken())
                                 .build()
                 ));
