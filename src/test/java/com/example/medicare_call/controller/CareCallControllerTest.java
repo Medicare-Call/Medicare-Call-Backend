@@ -32,6 +32,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -41,6 +44,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -413,5 +417,161 @@ class CareCallControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value("해당 작업에 대한 권한이 없습니다."));
+    }
+
+    @Test
+    @DisplayName("베타테스트 통화 데이터 업로드 성공")
+    void uploadAndProcessCallData_success() throws Exception {
+        // given
+        MockMultipartFile mockAudioFile = new MockMultipartFile(
+                "recordingFile",
+                "할머니님과 통화 (1).m4a",
+                "audio/mp4",
+                "mock audio content".getBytes()
+        );
+
+        Elder elder = Elder.builder().id(1002).name("할머니").build();
+        CareCallSetting setting = CareCallSetting.builder()
+                .id(4)
+                .firstCallTime(LocalTime.parse("06:00:00"))
+                .secondCallTime(LocalTime.parse("14:00:00"))
+                .thirdCallTime(LocalTime.parse("20:00:00"))
+                .build();
+
+        CareCallRecord savedRecord = CareCallRecord.builder()
+                .id(1131)
+                .elder(elder)
+                .setting(setting)
+                .callStatus("completed")
+                .transcriptionText("안녕하세요, 오늘 컨디션은 어떠세요? 네, 오늘은 컨디션이 좋아요.")
+                .build();
+
+        when(callDataUploadService.processUploadedCallData(any(com.example.medicare_call.dto.data_processor.CallDataUploadRequest.class)))
+                .thenReturn(savedRecord);
+
+        // when & then
+        mockMvc.perform(multipart("/call-data-for-betatest")
+                        .file(mockAudioFile)
+                        .param("elderId", "1002")
+                        .param("settingId", "4"))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    @DisplayName("베타테스트 통화 데이터 업로드 실패 - 오디오 파일 없음")
+    void uploadAndProcessCallData_fail_emptyFile() throws Exception {
+        // given
+        when(callDataUploadService.processUploadedCallData(any(com.example.medicare_call.dto.data_processor.CallDataUploadRequest.class)))
+                .thenThrow(new CustomException(ErrorCode.INVALID_INPUT_VALUE, "오디오 파일이 없습니다."));
+
+        // when & then
+        mockMvc.perform(multipart("/call-data-for-betatest")
+                        .file(new MockMultipartFile("recordingFile", new byte[0]))
+                        .param("elderId", "1002")
+                        .param("settingId", "4"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("베타테스트 통화 데이터 업로드 실패 - elderId 누락")
+    void uploadAndProcessCallData_fail_missingElderId() throws Exception {
+        // given
+        MockMultipartFile mockAudioFile = new MockMultipartFile(
+                "recordingFile",
+                "할머니님과 통화.m4a",
+                "audio/mp4",
+                "mock audio content".getBytes()
+        );
+
+        // when & then
+        mockMvc.perform(multipart("/call-data-for-betatest")
+                        .file(mockAudioFile)
+                        .param("settingId", "4"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("베타테스트 통화 데이터 업로드 실패 - settingId 누락")
+    void uploadAndProcessCallData_fail_missingSettingId() throws Exception {
+        // given
+        MockMultipartFile mockAudioFile = new MockMultipartFile(
+                "recordingFile",
+                "할머니님과 통화.m4a",
+                "audio/mp4",
+                "mock audio content".getBytes()
+        );
+
+        // when & then
+        mockMvc.perform(multipart("/call-data-for-betatest")
+                        .file(mockAudioFile)
+                        .param("elderId", "1002"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("베타테스트 통화 데이터 업로드 실패 - 어르신 없음")
+    void uploadAndProcessCallData_fail_elderNotFound() throws Exception {
+        // given
+        MockMultipartFile mockAudioFile = new MockMultipartFile(
+                "recordingFile",
+                "할머니님과 통화.m4a",
+                "audio/mp4",
+                "mock audio content".getBytes()
+        );
+
+        when(callDataUploadService.processUploadedCallData(any(com.example.medicare_call.dto.data_processor.CallDataUploadRequest.class)))
+                .thenThrow(new CustomException(ErrorCode.ELDER_NOT_FOUND, "어르신을 찾을 수 없습니다."));
+
+        // when & then
+        mockMvc.perform(multipart("/call-data-for-betatest")
+                        .file(mockAudioFile)
+                        .param("elderId", "999")
+                        .param("settingId", "4"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("등록되지 않은 어르신입니다."));
+    }
+
+    @Test
+    @DisplayName("베타테스트 통화 데이터 업로드 실패 - 통화 설정 없음")
+    void uploadAndProcessCallData_fail_settingNotFound() throws Exception {
+        // given
+        MockMultipartFile mockAudioFile = new MockMultipartFile(
+                "recordingFile",
+                "할머니님과 통화.m4a",
+                "audio/mp4",
+                "mock audio content".getBytes()
+        );
+
+        when(callDataUploadService.processUploadedCallData(any(com.example.medicare_call.dto.data_processor.CallDataUploadRequest.class)))
+                .thenThrow(new CustomException(ErrorCode.CARE_CALL_SETTING_NOT_FOUND, "통화 설정을 찾을 수 없습니다."));
+
+        // when & then
+        mockMvc.perform(multipart("/call-data-for-betatest")
+                        .file(mockAudioFile)
+                        .param("elderId", "1002")
+                        .param("settingId", "999"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("베타테스트 통화 데이터 업로드 실패 - STT 처리 오류")
+    void uploadAndProcessCallData_fail_sttError() throws Exception {
+        // given
+        MockMultipartFile mockAudioFile = new MockMultipartFile(
+                "recordingFile",
+                "할머니님과 통화.m4a",
+                "audio/mp4",
+                "mock audio content".getBytes()
+        );
+
+        when(callDataUploadService.processUploadedCallData(any(com.example.medicare_call.dto.data_processor.CallDataUploadRequest.class)))
+                .thenThrow(new CustomException(ErrorCode.STT_PROCESSING_FAILED, "STT 처리 실패"));
+
+        // when & then
+        mockMvc.perform(multipart("/call-data-for-betatest")
+                        .file(mockAudioFile)
+                        .param("elderId", "1002")
+                        .param("settingId", "4"))
+                .andExpect(status().isInternalServerError());
     }
 }
