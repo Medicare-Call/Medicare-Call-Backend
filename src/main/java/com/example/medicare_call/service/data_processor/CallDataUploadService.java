@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import com.example.medicare_call.dto.data_processor.CallDataUploadRequest;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 @Service
 @Slf4j
@@ -31,6 +33,14 @@ public class CallDataUploadService {
                                 .build())
                         .toList();
 
+        LocalDateTime calledAtTime = request.getStartTime() != null
+                ? request.getStartTime()
+                : LocalDateTime.now();
+
+        LocalDateTime endedAtTime = request.getEndTime() != null
+                ? request.getEndTime()
+                : LocalDateTime.now();
+
         CareCallDataProcessRequest.TranscriptionData transcriptionData =
                 CareCallDataProcessRequest.TranscriptionData.builder()
                         .language("ko")
@@ -41,9 +51,9 @@ public class CallDataUploadService {
                 .elderId(request.getElderId())
                 .settingId(request.getSettingId())
                 .status("completed")
+                .startTime(calledAtTime.atZone(ZoneOffset.UTC).toInstant())
+                .endTime(endedAtTime.atZone(ZoneOffset.UTC).toInstant())
                 .responded((byte) 1)
-                .startTime(java.time.Instant.now())
-                .endTime(java.time.Instant.now())
                 .transcription(transcriptionData)
                 .build();
 
