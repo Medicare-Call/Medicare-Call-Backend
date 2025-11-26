@@ -16,9 +16,7 @@ import com.example.medicare_call.service.data_processor.CallDataUploadService;
 import com.example.medicare_call.service.data_processor.CareCallDataProcessingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import org.springframework.web.bind.annotation.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -80,10 +78,16 @@ public class CareCallController {
     }
 
     //TODO: 베타테스트용 API. 삭제 필요
-    @Operation(summary = "[베타테스트용] 전화 데이터 처리", description = "전화 녹음본을 업로드 하면 STT 후 분석 데이터가 저장됩니다.")
-    @RequestBody(
-        description = "폼 데이터",
-        content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(
+            summary = "[베타테스트용] 전화 데이터 처리",
+            description = "전화 녹음본을 업로드 하면 STT 후 분석 데이터가 저장됩니다.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @io.swagger.v3.oas.annotations.media.Content(
+                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+                            schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = CallDataUploadRequest.class)
+                    )
+            )
     )
     @PostMapping(value = "/call-data-for-betatest", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CareCallRecord> uploadAndProcessCallData(
