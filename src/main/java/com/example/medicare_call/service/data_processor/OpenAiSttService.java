@@ -27,7 +27,7 @@ public class OpenAiSttService {
 
     private final RestTemplate restTemplate;
 
-    public OpenAiSttService(@Qualifier("openAiRestTemplate") RestTemplate restTemplate) {
+    public OpenAiSttService(@Qualifier("openAiSttTemplate") RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 

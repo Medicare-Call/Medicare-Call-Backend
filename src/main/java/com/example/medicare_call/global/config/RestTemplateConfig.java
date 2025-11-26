@@ -30,6 +30,15 @@ public class RestTemplateConfig {
                 .setReadTimeout(Duration.ofSeconds(20))
                 .build();
     }
+
+    @Bean
+    @Qualifier("openAiSttTemplate")
+    public RestTemplate openAiSttTemplate(RestTemplateBuilder builder) {
+        return builder
+                .setConnectTimeout(Duration.ofSeconds(10))
+                .setReadTimeout(Duration.ofSeconds(30))
+                .build();
+    }
     
     @Bean
     @Primary
