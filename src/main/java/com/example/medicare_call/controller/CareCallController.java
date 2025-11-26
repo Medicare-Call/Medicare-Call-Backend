@@ -4,6 +4,7 @@ import com.example.medicare_call.domain.CareCallRecord;
 import com.example.medicare_call.dto.carecall.CareCallSettingRequest;
 import com.example.medicare_call.dto.carecall.CareCallSettingResponse;
 import com.example.medicare_call.dto.carecall.CareCallTestRequest;
+import com.example.medicare_call.dto.data_processor.CallDataUploadRequest;
 import com.example.medicare_call.dto.data_processor.CareCallDataProcessRequest;
 import com.example.medicare_call.dto.carecall.ImmediateCareCallRequest;
 import com.example.medicare_call.global.annotation.AuthUser;
@@ -11,14 +12,19 @@ import com.example.medicare_call.global.event.CareCallEvent;
 import com.example.medicare_call.global.event.Events;
 import com.example.medicare_call.service.carecall.CareCallRequestSenderService;
 import com.example.medicare_call.service.carecall.CareCallSettingService;
+import com.example.medicare_call.service.data_processor.CallDataUploadService;
 import com.example.medicare_call.service.data_processor.CareCallDataProcessingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +37,8 @@ public class CareCallController {
     private final CareCallSettingService careCallSettingService;
     private final CareCallDataProcessingService careCallDataProcessingService;
     private final CareCallRequestSenderService careCallRequestSenderService;
+    private final CallDataUploadService callDataUploadService;
+
 
     @Operation(summary = "어르신 전화 시간대 등록 및 수정", description = "3번의 케어콜 시간대를 저장 및 수정합니다.")
     @PostMapping("/elders/{elderId}/care-call-setting")
@@ -70,4 +78,20 @@ public class CareCallController {
         careCallRequestSenderService.sendTestCall(req);
         return ResponseEntity.ok(req.prompt());
     }
+
+    //TODO: 베타테스트용 API. 삭제 필요
+    @Operation(summary = "[베타테스트용] 전화 데이터 처리", description = "전화 녹음본을 업로드 하면 STT 후 분석 데이터가 저장됩니다.")
+    @RequestBody(
+        description = "폼 데이터",
+        content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)
+    )
+    @PostMapping(value = "/call-data-for-betatest", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<CareCallRecord> uploadAndProcessCallData(
+            @ModelAttribute @Valid CallDataUploadRequest request
+    ) {
+        log.info("베타 테스트용 전화 데이터 업로드 요청 수신: elderId={}", request.getElderId());
+        CareCallRecord savedRecord = callDataUploadService.processUploadedCallData(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedRecord);
+    }
 }
+

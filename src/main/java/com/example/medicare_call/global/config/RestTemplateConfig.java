@@ -27,7 +27,7 @@ public class RestTemplateConfig {
     public RestTemplate openAiRestTemplate(RestTemplateBuilder builder) {
         return builder
                 .setConnectTimeout(Duration.ofSeconds(10))
-                .setReadTimeout(Duration.ofSeconds(20))
+                .setReadTimeout(Duration.ofSeconds(100))
                 .build();
     }
     

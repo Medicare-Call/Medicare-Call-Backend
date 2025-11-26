@@ -51,6 +51,7 @@ public enum ErrorCode {
 
     // OpenAI
     OPENAI_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "AI001", "OpenAI API 호출 중 오류가 발생했습니다. 다시 시도해 주세요."),
+    STT_PROCESSING_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "AI002", "음성 텍스트 변환(STT) 처리에 실패했습니다."),
 
     // Data
     NO_DATA_FOR_TODAY(HttpStatus.NOT_FOUND, "D001", "오늘의 데이터가 없습니다."),
