@@ -43,6 +43,7 @@ public class OpenAiSttService {
         }
 
         log.info("STT API 호출 시작. 파일명: {}", audioFile.getOriginalFilename());
+        long startTime = System.currentTimeMillis();
 
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -51,21 +52,28 @@ public class OpenAiSttService {
 
             HttpEntity<MultiValueMap<String, Object>> requestEntity = getMultiValueMapHttpEntity(audioFile, headers);
 
+            long apiStartTime = System.currentTimeMillis();
             ResponseEntity<OpenAiSttResponse> response = restTemplate.postForEntity(
                     openaiAudioUrl,
                     requestEntity,
                     OpenAiSttResponse.class
             );
+            long apiEndTime = System.currentTimeMillis();
 
             if (response.getBody() == null) {
                 throw new CustomException(ErrorCode.OPENAI_API_ERROR, "STT 응답이 비어있습니다.");
             }
 
-            log.info("STT 변환 성공. 텍스트 길이: {}", response.getBody().getText().length());
+            long endTime = System.currentTimeMillis();
+            log.info("STT 변환 성공. 텍스트 길이: {}, 전체 소요시간: {}ms, API 호출시간: {}ms",
+                    response.getBody().getText().length(),
+                    endTime - startTime,
+                    apiEndTime - apiStartTime);
             return response.getBody();
 
         } catch (Exception e) {
-            log.error("STT 처리 중 오류 발생", e);
+            long endTime = System.currentTimeMillis();
+            log.error("STT 처리 중 오류 발생. 소요시간: {}ms", endTime - startTime, e);
             throw new CustomException(ErrorCode.STT_PROCESSING_FAILED, "STT 처리 실패");
         }
     }
