@@ -8,6 +8,8 @@ import com.example.medicare_call.global.jwt.JwtProvider;
 import com.example.medicare_call.repository.ElderRepository;
 import com.example.medicare_call.repository.MemberRepository;
 import com.example.medicare_call.service.carecall.CareCallRequestSenderService;
+import com.example.medicare_call.service.data_processor.CallDataUploadService;
+import com.example.medicare_call.service.data_processor.OpenAiSttService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -68,6 +70,12 @@ class CareCallControllerImmediateTest {
 
     @MockBean
     private AuthenticationArgumentResolver authenticationArgumentResolver;
+
+    @MockBean
+    private CallDataUploadService callDataUploadService;
+
+    @MockBean
+    private OpenAiSttService openAiSttService;
 
     @Autowired
     private ObjectMapper objectMapper;

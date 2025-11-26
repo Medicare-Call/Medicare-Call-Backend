@@ -25,7 +25,6 @@ import java.io.IOException;
 @Service
 public class OpenAiSttService {
 
-    @Qualifier("openAiRestTemplate")
     private final RestTemplate restTemplate;
 
     public OpenAiSttService(@Qualifier("openAiRestTemplate") RestTemplate restTemplate) {

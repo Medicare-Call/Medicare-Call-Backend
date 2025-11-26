@@ -16,7 +16,9 @@ import com.example.medicare_call.global.jwt.JwtTokenAuthentication;
 import com.example.medicare_call.repository.MemberRepository;
 import com.example.medicare_call.service.carecall.CareCallRequestSenderService;
 import com.example.medicare_call.service.carecall.CareCallSettingService;
+import com.example.medicare_call.service.data_processor.CallDataUploadService;
 import com.example.medicare_call.service.data_processor.CareCallDataProcessingService;
+import com.example.medicare_call.service.data_processor.OpenAiSttService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -66,6 +68,10 @@ class CareCallControllerTest {
     private MemberRepository memberRepository;
     @MockBean
     ApplicationEventPublisher publisher;
+    @MockBean
+    private CallDataUploadService callDataUploadService;
+    @MockBean
+    private OpenAiSttService openAiSttService;
 
     @Test
     @DisplayName("통화 데이터 수신 성공")
