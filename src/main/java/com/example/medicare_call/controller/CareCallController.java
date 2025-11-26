@@ -12,7 +12,7 @@ import com.example.medicare_call.global.event.CareCallEvent;
 import com.example.medicare_call.global.event.Events;
 import com.example.medicare_call.service.carecall.CareCallRequestSenderService;
 import com.example.medicare_call.service.carecall.CareCallSettingService;
-import com.example.medicare_call.service.data_processor.CallDataUploadService;
+import com.example.medicare_call.service.data_processor.CareCallMediaProcessingService;
 import com.example.medicare_call.service.data_processor.CareCallDataProcessingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -35,7 +35,7 @@ public class CareCallController {
     private final CareCallSettingService careCallSettingService;
     private final CareCallDataProcessingService careCallDataProcessingService;
     private final CareCallRequestSenderService careCallRequestSenderService;
-    private final CallDataUploadService callDataUploadService;
+    private final CareCallMediaProcessingService callDataUploadService;
 
 
     @Operation(summary = "어르신 전화 시간대 등록 및 수정", description = "3번의 케어콜 시간대를 저장 및 수정합니다.")

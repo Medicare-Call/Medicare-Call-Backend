@@ -16,7 +16,7 @@ import com.example.medicare_call.global.jwt.JwtTokenAuthentication;
 import com.example.medicare_call.repository.MemberRepository;
 import com.example.medicare_call.service.carecall.CareCallRequestSenderService;
 import com.example.medicare_call.service.carecall.CareCallSettingService;
-import com.example.medicare_call.service.data_processor.CallDataUploadService;
+import com.example.medicare_call.service.data_processor.CareCallMediaProcessingService;
 import com.example.medicare_call.service.data_processor.CareCallDataProcessingService;
 import com.example.medicare_call.service.data_processor.OpenAiSttService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,7 +33,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -73,7 +72,7 @@ class CareCallControllerTest {
     @MockBean
     ApplicationEventPublisher publisher;
     @MockBean
-    private CallDataUploadService callDataUploadService;
+    private CareCallMediaProcessingService callDataUploadService;
     @MockBean
     private OpenAiSttService openAiSttService;
 

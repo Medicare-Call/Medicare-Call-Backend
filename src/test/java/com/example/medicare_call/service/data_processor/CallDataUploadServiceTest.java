@@ -38,7 +38,7 @@ class CallDataUploadServiceTest {
     private CareCallDataProcessingService careCallDataProcessingService;
 
     @InjectMocks
-    private CallDataUploadService callDataUploadService;
+    private CareCallMediaProcessingService callDataUploadService;
 
     private MultipartFile mockAudioFile;
     private CallDataUploadRequest uploadRequest;
