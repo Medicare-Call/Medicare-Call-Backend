@@ -7,6 +7,7 @@ import com.example.medicare_call.dto.carecall.CareCallSettingRequest;
 import com.example.medicare_call.dto.carecall.CareCallSettingResponse;
 import com.example.medicare_call.dto.carecall.CareCallTestRequest;
 import com.example.medicare_call.dto.data_processor.CareCallDataProcessRequest;
+import com.example.medicare_call.global.enums.CareCallStatus;
 import com.example.medicare_call.global.event.CareCallEvent;
 import com.example.medicare_call.global.event.Events;
 import com.example.medicare_call.global.exception.CustomException;
@@ -91,7 +92,7 @@ class CareCallControllerTest {
                 .settingId(2)
                 .startTime(Instant.parse("2025-01-27T10:00:00Z"))
                 .endTime(Instant.parse("2025-01-27T10:15:00Z"))
-                .status("completed")
+                .status(CareCallStatus.COMPLETED)
                 .responded((byte)1)
                 .transcription(transcriptionData)
                 .build();
@@ -128,7 +129,7 @@ class CareCallControllerTest {
         // given
         CareCallDataProcessRequest request = CareCallDataProcessRequest.builder()
                 .settingId(2)
-                .status("completed")
+                .status(CareCallStatus.COMPLETED)
                 .responded((byte)1)
                 .build();
 
@@ -145,7 +146,7 @@ class CareCallControllerTest {
         // given
         CareCallDataProcessRequest request = CareCallDataProcessRequest.builder()
                 .elderId(1)
-                .status("completed")
+                .status(CareCallStatus.COMPLETED)
                 .build();
 
         // when & then
@@ -178,7 +179,7 @@ class CareCallControllerTest {
         CareCallDataProcessRequest request = CareCallDataProcessRequest.builder()
                 .elderId(1)
                 .settingId(2)
-                .status("invalid-status")
+                .status(null)
                 .build();
 
         // when & then
@@ -195,7 +196,7 @@ class CareCallControllerTest {
         CareCallDataProcessRequest request = CareCallDataProcessRequest.builder()
                 .elderId(1)
                 .settingId(2)
-                .status("completed")
+                .status(CareCallStatus.COMPLETED)
                 .responded((byte)1)
                 .build();
 
@@ -231,7 +232,7 @@ class CareCallControllerTest {
                 .settingId(2)
                 .startTime(Instant.now())
                 .endTime(Instant.now().plusSeconds(60))
-                .status("completed")
+                .status(CareCallStatus.COMPLETED)
                 .responded((byte) 1)
                 .build();
 
@@ -255,7 +256,7 @@ class CareCallControllerTest {
                 .settingId(999) // 존재하지 않는 설정 ID
                 .startTime(Instant.now())
                 .endTime(Instant.now().plusSeconds(60))
-                .status("completed")
+                .status(CareCallStatus.COMPLETED)
                 .responded((byte) 1)
                 .build();
         
@@ -278,7 +279,7 @@ class CareCallControllerTest {
                 .settingId(2)
                 .startTime(Instant.now())
                 .endTime(Instant.now().plusSeconds(60))
-                .status("completed")
+                .status(CareCallStatus.COMPLETED)
                 .responded((byte) 1)
                 .build();
 

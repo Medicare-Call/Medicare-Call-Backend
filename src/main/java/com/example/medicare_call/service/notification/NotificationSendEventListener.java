@@ -3,6 +3,7 @@ package com.example.medicare_call.service.notification;
 import com.example.medicare_call.domain.CareCallRecord;
 import com.example.medicare_call.domain.Notification;
 import com.example.medicare_call.dto.NotificationDto;
+import com.example.medicare_call.global.enums.CareCallStatus;
 import com.example.medicare_call.global.event.CareCallEvent;
 import com.example.medicare_call.util.CareCallUtil;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,7 @@ class NotificationSendEventListener {
     private NotificationDto parseToNotificationDto(CareCallRecord careCallRecord) {
         String callStatus = careCallRecord.getCallStatus();
         String body;
-        if(callStatus.equals("failed") || callStatus.equals("no-answer")){
+        if(CareCallStatus.FAILED.matches(callStatus) || CareCallStatus.NO_ANSWER.matches(callStatus)){
             body = String.format("📞 %s 어르신 케어콜 부재중 상태입니다. 확인해 주세요!", careCallRecord.getElder().getName());
         }else{ // completed
             int order = CareCallUtil.extractCareCallOrder(careCallRecord.getStartTime(), careCallRecord.getSetting());

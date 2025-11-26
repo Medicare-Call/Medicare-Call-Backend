@@ -1,9 +1,8 @@
 package com.example.medicare_call.dto.data_processor;
 
+import com.example.medicare_call.global.enums.CareCallStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -33,10 +32,9 @@ public class CareCallDataProcessRequest {
     @Schema(description = "통화 종료 시간", example = "2025-07-27T21:45:00Z")
     private Instant endTime;
 
-    @Schema(description = "통화 상태", example = "completed")
-    @NotBlank(message = "통화 상태는 필수입니다.")
-    @Pattern(regexp = "^(completed|failed|busy|no-answer)$", message = "통화 상태는 completed, failed, busy, no-answer 중 하나여야 합니다.")
-    private String status;
+    @Schema(description = "통화 상태", example = "completed", implementation = String.class)
+    @NotNull(message = "통화 상태는 필수입니다.")
+    private CareCallStatus status;
 
     @Schema(description = "응답 여부", example = "1")
     @NotNull(message = "응답 여부는 필수입니다.")

@@ -18,6 +18,7 @@ import com.example.medicare_call.repository.MemberRepository;
 import com.example.medicare_call.repository.MedicationScheduleRepository;
 import com.example.medicare_call.service.data_processor.CareCallDataProcessingService;
 import com.example.medicare_call.service.ai.AiHealthDataExtractorService;
+import com.example.medicare_call.global.enums.CareCallStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -316,7 +317,7 @@ public class HealthDataController {
                 .responded((byte) 1)
                 .startTime(LocalDateTime.now())
                 .endTime(LocalDateTime.now().plusMinutes(15))
-                .callStatus("completed")
+                .callStatus(CareCallStatus.COMPLETED.getValue())
                 .transcriptionText(transcriptionText)
                 .psychologicalDetails(null)
                 .healthDetails(null)

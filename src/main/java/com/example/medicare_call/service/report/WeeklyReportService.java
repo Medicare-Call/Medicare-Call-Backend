@@ -4,6 +4,7 @@ import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.domain.Subscription;
 import com.example.medicare_call.domain.WeeklyStatistics;
 import com.example.medicare_call.dto.report.WeeklyReportResponse;
+import com.example.medicare_call.global.enums.CareCallStatus;
 import com.example.medicare_call.global.enums.ElderStatus;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
@@ -170,7 +171,7 @@ public class WeeklyReportService {
         int missedCalls = (int) careCallRecordRepository
                 .findByElderIdAndDateBetween(elder.getId(), startDate.atStartOfDay(), endDate.atTime(LocalTime.MAX))
                 .stream()
-                .filter(record -> "no-answer".equals(record.getCallStatus()))
+                .filter(record -> CareCallStatus.NO_ANSWER.matches(record.getCallStatus()))
                 .count();
 
         WeeklyReportResponse.SummaryStats summaryStats = WeeklyReportResponse.SummaryStats.builder()

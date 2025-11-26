@@ -4,6 +4,7 @@ import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.data_processor.CareCallDataProcessRequest;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionRequest;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
+import com.example.medicare_call.global.enums.CareCallStatus;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.*;
@@ -58,7 +59,7 @@ public class CareCallDataProcessingService {
                 .responded(request.getResponded())
                 .startTime(request.getStartTime() != null ? LocalDateTime.ofInstant(request.getStartTime(), ZoneOffset.UTC) : null)
                 .endTime(request.getEndTime() != null ? LocalDateTime.ofInstant(request.getEndTime(), ZoneOffset.UTC) : null)
-                .callStatus(request.getStatus())
+                .callStatus(request.getStatus() != null ? request.getStatus().getValue() : null)
                 .transcriptionText(transcriptionText)
                 .build();
         
@@ -74,7 +75,7 @@ public class CareCallDataProcessingService {
             }
         }
 
-        if ("no-answer".equals(request.getStatus())){
+        if (CareCallStatus.NO_ANSWER.equals(request.getStatus())){
             LocalDate callDate = saved.getCalledAt().toLocalDate();
             LocalDate startDate = callDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
 

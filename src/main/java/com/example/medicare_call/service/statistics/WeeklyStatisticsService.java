@@ -4,6 +4,7 @@ import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.report.WeeklySummaryDto;
 import com.example.medicare_call.global.enums.BloodSugarMeasurementType;
 import com.example.medicare_call.global.enums.BloodSugarStatus;
+import com.example.medicare_call.global.enums.CareCallStatus;
 import com.example.medicare_call.repository.BloodSugarRecordRepository;
 import com.example.medicare_call.repository.CareCallRecordRepository;
 import com.example.medicare_call.repository.DailyStatisticsRepository;
@@ -378,9 +379,8 @@ public class WeeklyStatisticsService {
                 .count();
 
         // 미응답 건수 (callStatus가 no-answer인 건수)
-        // TODO: Twilio에서 실제 상태값이 어떻게 정의되는지를 확인하고, 이에 알맞도록 수정
         int missedCalls = (int) callRecords.stream()
-                .filter(record -> "no-answer".equals(record.getCallStatus()))
+                .filter(record -> CareCallStatus.NO_ANSWER.matches(record.getCallStatus()))
                 .count();
 
         return WeeklySummaryStats.builder()
