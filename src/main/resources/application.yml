@@ -4,6 +4,10 @@ spring:
       api-key: ${OPENAI_API_KEY}
   profiles:
     active: local # 기본 active profile 설정
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
 
 jwt:
   secret: ${JWT_SECRET}
@@ -73,6 +77,7 @@ openai:
     key: ${OPENAI_API_KEY}
     url: ${OPENAI_API_URL}
   model: ${OPENAI_API_MODEL}
+  stt: ${OPENAI_STT}
 
 naverpay:
   client:
@@ -169,6 +174,7 @@ openai:
     key: ${OPENAI_API_KEY}
     url: ${OPENAI_API_URL}
   model: ${OPENAI_API_MODEL}
+  stt: ${OPENAI_STT}
 
 naverpay:
   client:
