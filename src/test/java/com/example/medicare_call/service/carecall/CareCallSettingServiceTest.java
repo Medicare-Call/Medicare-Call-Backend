@@ -3,11 +3,14 @@ package com.example.medicare_call.service.carecall;
 import com.example.medicare_call.domain.CareCallSetting;
 import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.domain.Member;
+import com.example.medicare_call.domain.MemberElder;
 import com.example.medicare_call.dto.carecall.CareCallSettingRequest;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
+import com.example.medicare_call.global.enums.MemberElderAuthority;
 import com.example.medicare_call.repository.CareCallSettingRepository;
 import com.example.medicare_call.repository.ElderRepository;
+import com.example.medicare_call.repository.MemberElderRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +32,8 @@ public class CareCallSettingServiceTest {
     private CareCallSettingRepository careCallSettingRepository;
     @Mock
     private ElderRepository elderRepository;
+    @Mock
+    private MemberElderRepository memberElderRepository;
     @InjectMocks
     private CareCallSettingService careCallSettingService;
 
@@ -36,8 +41,16 @@ public class CareCallSettingServiceTest {
         return Member.builder().id(id).build();
     }
 
-    private Elder createElder(Integer id, Member guardian) {
-        return Elder.builder().id(id).guardian(guardian).build();
+    private Elder createElder(Integer id) {
+        return Elder.builder().id(id).build();
+    }
+
+    private MemberElder createRelation(Member member, Elder elder) {
+        return MemberElder.builder()
+                .guardian(member)
+                .elder(elder)
+                .authority(MemberElderAuthority.MANAGE)
+                .build();
     }
 
     @Test
@@ -47,10 +60,12 @@ public class CareCallSettingServiceTest {
         Integer memberId = 1;
         Integer elderId = 1;
         Member member = createMember(memberId);
-        Elder elder = createElder(elderId, member);
+        Elder elder = createElder(elderId);
         CareCallSettingRequest request = new CareCallSettingRequest(LocalTime.of(9, 0), null, null);
 
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(elder));
+        when(memberElderRepository.findByGuardian_IdAndElder_Id(memberId, elderId))
+                .thenReturn(Optional.of(createRelation(member, elder)));
         when(careCallSettingRepository.findByElder(elder)).thenReturn(Optional.empty());
 
         // when
@@ -67,7 +82,7 @@ public class CareCallSettingServiceTest {
         Integer memberId = 1;
         Integer elderId = 1;
         Member member = createMember(memberId);
-        Elder elder = createElder(elderId, member);
+        Elder elder = createElder(elderId);
         CareCallSettingRequest request = new CareCallSettingRequest(LocalTime.of(10, 0), LocalTime.of(15, 0), null);
         CareCallSetting existingSetting = CareCallSetting.builder()
                 .elder(elder)
@@ -75,6 +90,8 @@ public class CareCallSettingServiceTest {
                 .build();
 
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(elder));
+        when(memberElderRepository.findByGuardian_IdAndElder_Id(memberId, elderId))
+                .thenReturn(Optional.of(createRelation(member, elder)));
         when(careCallSettingRepository.findByElder(elder)).thenReturn(Optional.of(existingSetting));
 
         // when
@@ -87,5 +104,3 @@ public class CareCallSettingServiceTest {
         verify(careCallSettingRepository, never()).save(any(CareCallSetting.class));
     }
 }
-
-

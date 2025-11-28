@@ -1,11 +1,11 @@
 package com.example.medicare_call.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Builder;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -15,8 +15,8 @@ import com.example.medicare_call.global.enums.ElderRelation;
 import com.example.medicare_call.global.enums.ElderStatus;
 import com.example.medicare_call.global.enums.ResidenceType;
 import lombok.Setter;
-import org.hibernate.annotations.Where;
 import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 @Entity
 @Table(name = "Elder")
@@ -34,10 +34,9 @@ public class Elder {
     @OneToOne(mappedBy = "elder")
     private Subscription subscription;
 
-    @JsonBackReference
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "guardian_id", nullable = false)
-    private Member guardian;
+    @JsonIgnore
+    @OneToMany(mappedBy = "elder", cascade = CascadeType.ALL, orphanRemoval = true)
+    private final List<MemberElder> memberElders = new ArrayList<>();
 
     @Column(name = "name", nullable = false, length = 100)
     private String name;
@@ -84,9 +83,8 @@ public class Elder {
     private ElderHealthInfo elderHealthInfo;
 
     @Builder
-    public Elder(Integer id, Member guardian, String name, LocalDate birthDate, Byte gender, String phone, ElderRelation relationship, ResidenceType residenceType, ElderStatus status) {
+    public Elder(Integer id, String name, LocalDate birthDate, Byte gender, String phone, ElderRelation relationship, ResidenceType residenceType, ElderStatus status) {
         this.id = id;
-        this.guardian = guardian;
         this.name = name;
         this.birthDate = birthDate;
         this.gender = gender;
@@ -110,4 +108,12 @@ public class Elder {
         this.relationship = relationship;
         this.residenceType = residenceType;
     }
-} 
+
+    public void addMemberElder(MemberElder memberElder) {
+        this.memberElders.add(memberElder);
+    }
+
+    public void removeMemberElder(MemberElder memberElder) {
+        this.memberElders.remove(memberElder);
+    }
+}

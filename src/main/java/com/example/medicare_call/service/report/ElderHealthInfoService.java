@@ -4,6 +4,7 @@ import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.ElderHealthInfoCreateRequest;
 import com.example.medicare_call.dto.ElderHealthInfoCreateRequestWithElderId;
 import com.example.medicare_call.dto.ElderHealthInfoResponse;
+import com.example.medicare_call.global.enums.MemberElderAuthority;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
@@ -24,6 +25,7 @@ public class ElderHealthInfoService {
     private final DiseaseRepository diseaseRepository;
     private final MedicationScheduleRepository medicationScheduleRepository;
     private final MemberRepository memberRepository;
+    private final MemberElderRepository memberElderRepository;
 
     @Transactional
     public void upsertElderHealthInfo(Integer memberId, Integer elderId, ElderHealthInfoCreateRequest request) {
@@ -31,7 +33,9 @@ public class ElderHealthInfoService {
         Elder elder = elderRepository.findById(elderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ELDER_NOT_FOUND));
 
-        if (!elder.getGuardian().getId().equals(memberId)) {
+        MemberElder relation = memberElderRepository.findByGuardian_IdAndElder_Id(memberId, elderId)
+                .orElseThrow(() -> new CustomException(ErrorCode.HANDLE_ACCESS_DENIED));
+        if (relation.getAuthority() != MemberElderAuthority.MANAGE) {
             throw new CustomException(ErrorCode.HANDLE_ACCESS_DENIED);
         }
 
@@ -123,11 +127,12 @@ public class ElderHealthInfoService {
     public List<ElderHealthInfoResponse> getElderHealth(Integer memberId){
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
-        List<Elder> elders = elderRepository.findByGuardian(member);
+        List<MemberElder> relations = memberElderRepository.findByGuardian_Id(member.getId());
 
         List<ElderHealthInfoResponse> responses = new ArrayList<>();
 
-        for(Elder elder : elders){
+        for(MemberElder relation : relations){
+            Elder elder = relation.getElder();
 
             // 질병 정보 추출
             List<String> diseases = elder.getElderDiseases().stream()

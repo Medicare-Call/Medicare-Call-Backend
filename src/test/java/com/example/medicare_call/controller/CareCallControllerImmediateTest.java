@@ -1,12 +1,9 @@
 package com.example.medicare_call.controller;
 
-import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.domain.Member;
-import com.example.medicare_call.global.enums.ElderRelation;
-import com.example.medicare_call.global.enums.ResidenceType;
 import com.example.medicare_call.global.jwt.JwtProvider;
-import com.example.medicare_call.repository.ElderRepository;
 import com.example.medicare_call.repository.MemberRepository;
+import com.example.medicare_call.repository.ElderRepository;
 import com.example.medicare_call.service.carecall.CareCallRequestSenderService;
 import com.example.medicare_call.service.data_processor.CareCallMediaProcessingService;
 import com.example.medicare_call.service.data_processor.OpenAiSttService;
@@ -31,7 +28,6 @@ import com.example.medicare_call.dto.carecall.ImmediateCareCallRequest.CareCallO
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -81,8 +77,6 @@ class CareCallControllerImmediateTest {
     private ObjectMapper objectMapper;
 
     private Member testMember;
-    private Elder testElder1;
-    private Elder testElder2;
 
     @BeforeEach
     void setUp() {
@@ -95,30 +89,6 @@ class CareCallControllerImmediateTest {
                 .plan((byte) 1)
                 .build();
 
-        testElder1 = Elder.builder()
-                .id(1)
-                .guardian(testMember)
-                .name("김할머니")
-                .birthDate(LocalDate.of(1940, 1, 1))
-                .gender((byte) 0)
-                .phone("01087654321")
-                .relationship(ElderRelation.GRANDCHILD)
-                .residenceType(ResidenceType.ALONE)
-                .build();
-
-        testElder2 = Elder.builder()
-                .id(2)
-                .guardian(testMember)
-                .name("박할아버지")
-                .birthDate(LocalDate.of(1938, 5, 15))
-                .gender((byte) 1)
-                .phone("01098765432")
-                .relationship(ElderRelation.CHILD)
-                .residenceType(ResidenceType.ALONE)
-                .build();
-
-        // Member의 elders 리스트 설정
-        testMember.getElders().addAll(Arrays.asList(testElder1, testElder2));
     }
 
     @Test

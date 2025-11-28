@@ -2,12 +2,13 @@ package com.example.medicare_call.service.notification;
 
 import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.domain.Member;
+import com.example.medicare_call.domain.MemberElder;
 import com.example.medicare_call.domain.Notification;
 import com.example.medicare_call.dto.NotificationDto;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.ElderRepository;
-import com.example.medicare_call.repository.MemberRepository;
+import com.example.medicare_call.repository.MemberElderRepository;
 import com.example.medicare_call.repository.NotificationRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,7 +33,7 @@ class NotificationServiceTest {
     private ElderRepository elderRepository;
 
     @Mock
-    private MemberRepository memberRepository;
+    private MemberElderRepository memberElderRepository;
 
     @Mock
     private NotificationRepository notificationRepository;
@@ -39,7 +42,6 @@ class NotificationServiceTest {
     private NotificationService notificationService;
 
     private final Integer elderId = 42;
-    private final Integer memberId = 4;
 
     private NotificationDto mockNotificationDto(Integer elderId, String title, String body) {
         NotificationDto dto = mock(NotificationDto.class);
@@ -58,11 +60,11 @@ class NotificationServiceTest {
         Elder elder = mock(Elder.class);
 
         Member member = mock(Member.class);
-        when(elder.getGuardian()).thenReturn(member);
-        when(member.getId()).thenReturn(memberId);
+        MemberElder relation = mock(MemberElder.class);
+        when(relation.getGuardian()).thenReturn(member);
+        when(memberElderRepository.findByElder(elder)).thenReturn(List.of(relation));
 
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(elder));
-        when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
 
         when(notificationRepository.save(any(Notification.class))).thenAnswer(invocation -> {
             Notification arg = invocation.getArgument(0);
@@ -88,7 +90,7 @@ class NotificationServiceTest {
         assertThat(saved.getCreatedAt()).isNotNull();
 
         verify(elderRepository).findById(elderId);
-        verify(memberRepository).findById(memberId);
+        verify(memberElderRepository).findByElder(elder);
     }
 
     @Test
@@ -108,27 +110,23 @@ class NotificationServiceTest {
     }
 
     @Test
-    @DisplayName("실패: Member 미존재 시 CustomException 발생")
-    void save_fail_memberNotFound() {
+    @DisplayName("실패: 어르신과 연결된 보호자가 없는 경우")
+    void save_fail_relationNotFound() {
         // given
         NotificationDto dto = mock(NotificationDto.class);
         when(dto.elderId()).thenReturn(elderId);
 
         Elder elder = mock(Elder.class);
 
-        Member member = mock(Member.class);
-        when(elder.getGuardian()).thenReturn(member);
-        when(member.getId()).thenReturn(memberId);
-
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(elder));
-        when(memberRepository.findById(memberId)).thenReturn(Optional.empty());
+        when(memberElderRepository.findByElder(elder)).thenReturn(Collections.emptyList());
 
         // when
         CustomException ex = assertThrows(CustomException.class,
                 () -> notificationService.saveNotification(dto));
 
         // then
-        assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.MEMBER_NOT_FOUND);
+        assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.HANDLE_ACCESS_DENIED);
     }
 
 

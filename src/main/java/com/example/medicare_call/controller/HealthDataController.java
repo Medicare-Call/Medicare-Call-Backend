@@ -41,7 +41,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @Tag(name = "Health Data", description = "건강 데이터 추출 API")
 public class HealthDataController {
-    
+
     private final AiHealthDataExtractorService aiHealthDataExtractorService;
     private final CareCallDataProcessingService careCallDataProcessingService;
     private final ElderRepository elderRepository;
@@ -51,34 +51,34 @@ public class HealthDataController {
     private final MedicationScheduleRepository medicationScheduleRepository;
 
     @Operation(
-        summary = "건강 데이터 추출",
-        description = "통화 내용에서 건강 관련 데이터를 추출합니다. (테스트용 엔드포인트)"
+            summary = "건강 데이터 추출",
+            description = "통화 내용에서 건강 관련 데이터를 추출합니다. (테스트용 엔드포인트)"
     )
     @ApiResponses({
-        @ApiResponse(
-            responseCode = "200",
-            description = "건강 데이터 추출 성공",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = HealthDataExtractionResponse.class)
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "건강 데이터 추출 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = HealthDataExtractionResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "서버 내부 오류"
             )
-        ),
-        @ApiResponse(
-            responseCode = "500",
-            description = "서버 내부 오류"
-        )
     })
     @PostMapping("/extract")
     public ResponseEntity<HealthDataExtractionResponse> extractHealthData(
-        @RequestBody @Schema(
-            description = "건강 데이터 추출 요청",
-            example = """
+            @RequestBody @Schema(
+                    description = "건강 데이터 추출 요청",
+                    example = """
             {
               "transcriptionText": "오늘 아침에 밥을 먹었고, 혈당을 측정했어요. 120이 나왔어요.",
               "callDate": "2024-01-01"
             }
             """
-        ) HealthDataExtractionRequest request
+            ) HealthDataExtractionRequest request
     ) {
         log.info("건강 데이터 추출 요청: {}", request);
         HealthDataExtractionResponse response = aiHealthDataExtractorService.extractHealthData(request);
@@ -86,28 +86,28 @@ public class HealthDataController {
     }
 
     @Operation(
-        summary = "[개발자용] 건강 데이터 DB 저장 테스트",
-        description = "건강 데이터를 DB에 저장하는 기능을 테스트합니다. (테스트용 엔드포인트)"
+            summary = "[개발자용] 건강 데이터 DB 저장 테스트",
+            description = "건강 데이터를 DB에 저장하는 기능을 테스트합니다. (테스트용 엔드포인트)"
     )
     @ApiResponses({
-        @ApiResponse(
-            responseCode = "200",
-            description = "건강 데이터 DB 저장 성공",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = CareCallRecord.class)
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "건강 데이터 DB 저장 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = CareCallRecord.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "서버 내부 오류"
             )
-        ),
-        @ApiResponse(
-            responseCode = "500",
-            description = "서버 내부 오류"
-        )
     })
     @PostMapping("/save-to-database")
     public ResponseEntity<CareCallRecord> saveHealthDataToDatabase(
-        @RequestBody @Schema(
-            description = "건강 데이터 DB 저장 테스트 요청",
-            example = """
+            @RequestBody @Schema(
+                    description = "건강 데이터 DB 저장 테스트 요청",
+                    example = """
             {
               "elderId": 1,
               "settingId": 1,
@@ -115,54 +115,54 @@ public class HealthDataController {
               "callDate": "2024-01-01"
             }
             """
-        ) HealthDataTestRequest request
+            ) HealthDataTestRequest request
     ) {
         log.info("건강 데이터 DB 저장 테스트 요청: {}", request);
-        
+
         // 테스트용 CareCallRecord 조회 또는 생성
         CareCallRecord savedCallRecord = createOrGetTestCallRecord(
-                request.getElderId(), 
-                request.getSettingId(), 
+                request.getElderId(),
+                request.getSettingId(),
                 request.getTranscriptionText()
         );
-        
+
         // OpenAI를 통한 건강 데이터 추출
         HealthDataExtractionRequest extractionRequest = HealthDataExtractionRequest.builder()
                 .transcriptionText(request.getTranscriptionText())
                 .callDate(request.getCallDate())
                 .build();
-        
+
         HealthDataExtractionResponse healthData = aiHealthDataExtractorService.extractHealthData(extractionRequest);
-        
+
         // 건강 데이터를 DB에 저장
         careCallDataProcessingService.saveHealthDataToDatabase(savedCallRecord, healthData);
-        
+
         return ResponseEntity.ok(savedCallRecord);
     }
 
     @Operation(
-        summary = "[개발자용] 건강 데이터 DB 저장 테스트 (수면 데이터)",
-        description = "수면 데이터가 포함된 건강 데이터를 DB에 저장하는 기능을 테스트합니다. (테스트용 엔드포인트)"
+            summary = "[개발자용] 건강 데이터 DB 저장 테스트 (수면 데이터)",
+            description = "수면 데이터가 포함된 건강 데이터를 DB에 저장하는 기능을 테스트합니다. (테스트용 엔드포인트)"
     )
     @ApiResponses({
-        @ApiResponse(
-            responseCode = "200",
-            description = "건강 데이터 DB 저장 성공",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = CareCallRecord.class)
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "건강 데이터 DB 저장 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = CareCallRecord.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "서버 내부 오류"
             )
-        ),
-        @ApiResponse(
-            responseCode = "500",
-            description = "서버 내부 오류"
-        )
     })
     @PostMapping("/save-sleep-data")
     public ResponseEntity<CareCallRecord> saveSleepDataToDatabase(
-        @RequestBody @Schema(
-            description = "수면 데이터 DB 저장 테스트 요청",
-            example = """
+            @RequestBody @Schema(
+                    description = "수면 데이터 DB 저장 테스트 요청",
+                    example = """
             {
               "elderId": 1,
               "settingId": 1,
@@ -170,54 +170,54 @@ public class HealthDataController {
               "callDate": "2024-01-01"
             }
             """
-        ) HealthDataTestRequest request
+            ) HealthDataTestRequest request
     ) {
         log.info("수면 데이터 DB 저장 테스트 요청: {}", request);
-        
+
         // 테스트용 CareCallRecord 조회 또는 생성
         CareCallRecord savedCallRecord = createOrGetTestCallRecord(
-                request.getElderId(), 
-                request.getSettingId(), 
+                request.getElderId(),
+                request.getSettingId(),
                 request.getTranscriptionText()
         );
-        
+
         // OpenAI를 통한 건강 데이터 추출
         HealthDataExtractionRequest extractionRequest = HealthDataExtractionRequest.builder()
                 .transcriptionText(request.getTranscriptionText())
                 .callDate(request.getCallDate())
                 .build();
-        
+
         HealthDataExtractionResponse healthData = aiHealthDataExtractorService.extractHealthData(extractionRequest);
-        
+
         // 건강 데이터를 DB에 저장
         careCallDataProcessingService.saveHealthDataToDatabase(savedCallRecord, healthData);
-        
+
         return ResponseEntity.ok(savedCallRecord);
     }
 
     @Operation(
-        summary = "[개발자용] 건강 데이터 DB 저장 테스트 (복약 데이터)",
-        description = "복약 데이터가 포함된 건강 데이터를 DB에 저장하는 기능을 테스트합니다. (테스트용 엔드포인트)"
+            summary = "[개발자용] 건강 데이터 DB 저장 테스트 (복약 데이터)",
+            description = "복약 데이터가 포함된 건강 데이터를 DB에 저장하는 기능을 테스트합니다. (테스트용 엔드포인트)"
     )
     @ApiResponses({
-        @ApiResponse(
-            responseCode = "200",
-            description = "건강 데이터 DB 저장 성공",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = CareCallRecord.class)
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "건강 데이터 DB 저장 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = CareCallRecord.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "서버 내부 오류"
             )
-        ),
-        @ApiResponse(
-            responseCode = "500",
-            description = "서버 내부 오류"
-        )
     })
     @PostMapping("/save-medication-data")
     public ResponseEntity<CareCallRecord> saveMedicationDataToDatabase(
-        @RequestBody @Schema(
-            description = "복약 데이터 DB 저장 테스트 요청",
-            example = """
+            @RequestBody @Schema(
+                    description = "복약 데이터 DB 저장 테스트 요청",
+                    example = """
             {
               "elderId": 1,
               "settingId": 1,
@@ -225,28 +225,28 @@ public class HealthDataController {
               "callDate": "2024-01-01"
             }
             """
-        ) HealthDataTestRequest request
+            ) HealthDataTestRequest request
     ) {
         log.info("복약 데이터 DB 저장 테스트 요청: {}", request);
-        
+
         // 테스트용 CareCallRecord 조회 또는 생성
         CareCallRecord savedCallRecord = createOrGetTestCallRecord(
-                request.getElderId(), 
-                request.getSettingId(), 
+                request.getElderId(),
+                request.getSettingId(),
                 request.getTranscriptionText()
         );
-        
+
         // OpenAI를 통한 건강 데이터 추출
         HealthDataExtractionRequest extractionRequest = HealthDataExtractionRequest.builder()
                 .transcriptionText(request.getTranscriptionText())
                 .callDate(request.getCallDate())
                 .build();
-        
+
         HealthDataExtractionResponse healthData = aiHealthDataExtractorService.extractHealthData(extractionRequest);
-        
+
         // 건강 데이터를 DB에 저장
         careCallDataProcessingService.saveHealthDataToDatabase(savedCallRecord, healthData);
-        
+
         return ResponseEntity.ok(savedCallRecord);
     }
 
@@ -267,13 +267,13 @@ public class HealthDataController {
                             .build();
                     return memberRepository.save(newMember);
                 });
-        
+
         // Elder 조회 또는 생성
         Elder elder = elderRepository.findById(elderId)
                 .orElseGet(() -> {
                     Elder newElder = Elder.builder()
                             .id(elderId)
-                            .guardian(guardian)
+//                            .guardian(guardian) # 2025 11/24 Many To Many 마이그레이션을 통해 일단 주석 처리
                             .name("테스트 어르신")
                             .gender(Gender.MALE.getCode())
                             .relationship(ElderRelation.CHILD)
@@ -281,7 +281,7 @@ public class HealthDataController {
                             .build();
                     return elderRepository.save(newElder);
                 });
-        
+
         // CareCallSetting 조회 또는 생성
         CareCallSetting setting = careCallSettingRepository.findById(settingId)
                 .orElseGet(() -> {
@@ -293,7 +293,7 @@ public class HealthDataController {
                             .build();
                     return careCallSettingRepository.save(newSetting);
                 });
-        
+
         // 테스트용 MedicationSchedule 생성 또는 조회
         MedicationSchedule schedule = medicationScheduleRepository.findByElder(elder)
                 .stream()
@@ -307,7 +307,7 @@ public class HealthDataController {
                             .build();
                     return medicationScheduleRepository.save(newSchedule);
                 });
-        
+
         // CareCallRecord 생성 및 저장
         CareCallRecord callRecord = CareCallRecord.builder()
                 .elder(elder)
@@ -321,7 +321,7 @@ public class HealthDataController {
                 .psychologicalDetails(null)
                 .healthDetails(null)
                 .build();
-        
+
         return careCallRecordRepository.save(callRecord);
     }
 
@@ -329,16 +329,16 @@ public class HealthDataController {
     public static class HealthDataTestRequest {
         @Schema(description = "어르신 ID", example = "1")
         private Integer elderId;
-        
+
         @Schema(description = "통화 설정 ID", example = "1")
         private Integer settingId;
-        
+
         @Schema(
-            description = "통화 내용 텍스트", 
-            example = "오늘 아침에 밥을 먹었고, 혈당을 측정했어요. 120이 나왔어요. 기분도 좋아요."
+                description = "통화 내용 텍스트",
+                example = "오늘 아침에 밥을 먹었고, 혈당을 측정했어요. 120이 나왔어요. 기분도 좋아요."
         )
         private String transcriptionText;
-        
+
         @Schema(description = "통화 날짜", example = "2024-01-01")
         @NotNull(message = "통화 날짜는 필수입니다.")
         @ValidDateRange
@@ -347,14 +347,14 @@ public class HealthDataController {
         // Getters and Setters
         public Integer getElderId() { return elderId; }
         public void setElderId(Integer elderId) { this.elderId = elderId; }
-        
+
         public Integer getSettingId() { return settingId; }
         public void setSettingId(Integer settingId) { this.settingId = settingId; }
-        
+
         public String getTranscriptionText() { return transcriptionText; }
         public void setTranscriptionText(String transcriptionText) { this.transcriptionText = transcriptionText; }
-        
+
         public LocalDate getCallDate() { return callDate; }
         public void setCallDate(LocalDate callDate) { this.callDate = callDate; }
     }
-} 
+}

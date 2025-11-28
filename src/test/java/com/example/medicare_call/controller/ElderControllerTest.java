@@ -1,12 +1,14 @@
 package com.example.medicare_call.controller;
 
 import com.example.medicare_call.domain.Elder;
+import com.example.medicare_call.domain.MemberElder;
 import com.example.medicare_call.dto.ElderRegisterRequest;
 import com.example.medicare_call.dto.ElderRegisterResponse;
 import com.example.medicare_call.dto.BulkElderRegisterRequest;
 import com.example.medicare_call.global.enums.ElderRelation;
 import com.example.medicare_call.global.enums.ResidenceType;
 import com.example.medicare_call.global.enums.Gender;
+import com.example.medicare_call.global.enums.MemberElderAuthority;
 import com.example.medicare_call.global.jwt.JwtProvider;
 import com.example.medicare_call.service.ElderService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -118,23 +120,29 @@ class ElderControllerTest {
     @Test
     @DisplayName("어르신 등록 성공")
     void registerElder_success() throws Exception {
-        when(elderService.registerElder(any(Integer.class), any(ElderRegisterRequest.class))).thenReturn(
-            Elder.builder()
-                    .id(1)
-                    .name(testElderRequest1.getName())
-                    .birthDate(testElderRequest1.getBirthDate())
-                    .gender(convertGenderToByte(testElderRequest1.getGender()))
-                    .phone(testElderRequest1.getPhone())
-                    .relationship(testElderRequest1.getRelationship())
-                    .residenceType(testElderRequest1.getResidenceType())
-                    .guardian(testMember)
-                    .build()
-        );
+        Elder elder = Elder.builder()
+                .id(1)
+                .name(testElderRequest1.getName())
+                .birthDate(testElderRequest1.getBirthDate())
+                .gender(convertGenderToByte(testElderRequest1.getGender()))
+                .phone(testElderRequest1.getPhone())
+                .relationship(testElderRequest1.getRelationship())
+                .residenceType(testElderRequest1.getResidenceType())
+                .build();
+        MemberElder relation = MemberElder.builder()
+                .guardian(testMember)
+                .elder(elder)
+                .authority(MemberElderAuthority.MANAGE)
+                .build();
+        elder.addMemberElder(relation);
+        when(elderService.registerElder(any(Integer.class), any(ElderRegisterRequest.class))).thenReturn(relation);
 
         mockMvc.perform(post("/elders")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(testElderRequest1)))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.guardianId").value(testMember.getId()))
+                .andExpect(jsonPath("$.guardianName").value(testMember.getName()));
     }
 
     @Test

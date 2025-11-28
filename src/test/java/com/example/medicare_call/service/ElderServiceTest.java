@@ -1,18 +1,21 @@
 package com.example.medicare_call.service;
 
 import com.example.medicare_call.domain.Elder;
+import com.example.medicare_call.domain.Member;
+import com.example.medicare_call.domain.MemberElder;
 import com.example.medicare_call.dto.ElderRegisterRequest;
 import com.example.medicare_call.dto.ElderRegisterResponse;
+import com.example.medicare_call.dto.ElderUpdateRequest;
 import com.example.medicare_call.global.enums.ElderRelation;
 import com.example.medicare_call.global.enums.ElderStatus;
-import com.example.medicare_call.global.enums.ResidenceType;
 import com.example.medicare_call.global.enums.Gender;
-import com.example.medicare_call.repository.ElderRepository;
-import com.example.medicare_call.repository.MemberRepository;
-import com.example.medicare_call.domain.Member;
-import com.example.medicare_call.dto.ElderUpdateRequest;
+import com.example.medicare_call.global.enums.MemberElderAuthority;
+import com.example.medicare_call.global.enums.ResidenceType;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
+import com.example.medicare_call.repository.ElderRepository;
+import com.example.medicare_call.repository.MemberElderRepository;
+import com.example.medicare_call.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,6 +43,8 @@ class ElderServiceTest {
     private ElderRepository elderRepository;
     @Mock
     private MemberRepository memberRepository;
+    @Mock
+    private MemberElderRepository memberElderRepository;
     @InjectMocks
     private ElderService elderService;
 
@@ -79,7 +84,7 @@ class ElderServiceTest {
         return (byte) (gender == Gender.MALE ? 0 : 1);
     }
 
-    private Elder createElderFromRequest(Integer id, ElderRegisterRequest request, Member guardian) {
+    private Elder createElderFromRequest(Integer id, ElderRegisterRequest request) {
         return Elder.builder()
                 .id(id)
                 .name(request.getName())
@@ -88,7 +93,14 @@ class ElderServiceTest {
                 .phone(request.getPhone())
                 .relationship(request.getRelationship())
                 .residenceType(request.getResidenceType())
+                .build();
+    }
+
+    private MemberElder createMemberElder(Member guardian, Elder elder, MemberElderAuthority authority) {
+        return MemberElder.builder()
                 .guardian(guardian)
+                .elder(elder)
+                .authority(authority)
                 .build();
     }
 
@@ -101,9 +113,10 @@ class ElderServiceTest {
             .name(testElderRequest1.getName())
             .build();
         when(elderRepository.save(any(Elder.class))).thenReturn(saved);
+        when(memberElderRepository.save(any(MemberElder.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Elder result = elderService.registerElder(1, testElderRequest1);
-        assertThat(result.getName()).isEqualTo("홍길동");
+        MemberElder result = elderService.registerElder(1, testElderRequest1);
+        assertThat(result.getElder().getName()).isEqualTo("홍길동");
     }
 
     @Test
@@ -141,13 +154,13 @@ class ElderServiceTest {
     void updateElder_fail_accessDenied() {
         // given
         Integer memberId = 1;
-        Integer otherMemberId = 2;
         Integer elderId = 1;
         ElderUpdateRequest request = new ElderUpdateRequest("김수정", LocalDate.of(1945, 5, 5), Gender.FEMALE, "01098765432", ElderRelation.CHILD, ResidenceType.WITH_FAMILY);
 
-        Member guardian = Member.builder().id(otherMemberId).build();
-        Elder elder = Elder.builder().id(elderId).guardian(guardian).build();
+        Elder elder = Elder.builder().id(elderId).build();
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(elder));
+        when(memberElderRepository.findByGuardian_IdAndElder_Id(memberId, elderId))
+                .thenReturn(Optional.of(createMemberElder(testMember, elder, MemberElderAuthority.VIEW)));
 
         // when & then
         CustomException exception = assertThrows(CustomException.class, () -> {
@@ -176,12 +189,11 @@ class ElderServiceTest {
     void deleteElder_fail_accessDenied() {
         // given
         Integer memberId = 1;
-        Integer otherMemberId = 2;
         Integer elderId = 1;
 
-        Member guardian = Member.builder().id(otherMemberId).build();
-        Elder elder = Elder.builder().id(elderId).guardian(guardian).build();
+        Elder elder = Elder.builder().id(elderId).build();
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(elder));
+        when(memberElderRepository.findByGuardian_IdAndElder_Id(memberId, elderId)).thenReturn(Optional.empty());
 
         // when & then
         CustomException exception = assertThrows(CustomException.class, () -> {
@@ -197,13 +209,13 @@ class ElderServiceTest {
         Integer memberId = 1;
         Integer elderId = 1;
 
-        Member guardian = Member.builder().id(memberId).build();
         Elder elder = Elder.builder()
                 .id(elderId)
-                .guardian(guardian)
                 .status(ElderStatus.ACTIVATED)
                 .build();
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(elder));
+        when(memberElderRepository.findByGuardian_IdAndElder_Id(memberId, elderId))
+                .thenReturn(Optional.of(createMemberElder(testMember, elder, MemberElderAuthority.MANAGE)));
 
         // when
         elderService.deleteElder(memberId, elderId);
@@ -218,11 +230,12 @@ class ElderServiceTest {
         // given
         List<ElderRegisterRequest> requests = List.of(testElderRequest1, testElderRequest2);
 
-        Elder savedElder1 = createElderFromRequest(1, testElderRequest1, testMember);
-        Elder savedElder2 = createElderFromRequest(2, testElderRequest2, testMember);
+        Elder savedElder1 = createElderFromRequest(1, testElderRequest1);
+        Elder savedElder2 = createElderFromRequest(2, testElderRequest2);
 
         when(memberRepository.findById(1)).thenReturn(Optional.of(testMember));
         when(elderRepository.saveAll(any(List.class))).thenReturn(List.of(savedElder1, savedElder2));
+        when(memberElderRepository.save(any(MemberElder.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // when
         List<ElderRegisterResponse> responses = elderService.bulkRegisterElders(1, requests);

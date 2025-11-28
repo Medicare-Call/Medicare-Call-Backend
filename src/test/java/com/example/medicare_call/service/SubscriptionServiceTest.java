@@ -46,7 +46,7 @@ public class SubscriptionServiceTest {
         // given
         Long memberId = 1L;
         Member member = Member.builder().id(memberId.intValue()).name("테스트회원").build();
-        Elder elder = Elder.builder().id(1).name("김어르신").guardian(member).build();
+        Elder elder = Elder.builder().id(1).name("김어르신").build();
         Subscription subscription = Subscription.builder()
                 .id(1L)
                 .member(member)

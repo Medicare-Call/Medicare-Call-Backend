@@ -137,7 +137,6 @@ public class CareCallRequestSenderService {
                 .name("김옥자")
                 .phone("01011111111")
                 .gender((byte)0)
-                .guardian(testMember)
                 .relationship(ElderRelation.CHILD)
                 .residenceType(ResidenceType.ALONE)
                 .build();

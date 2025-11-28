@@ -46,22 +46,13 @@ class MealRecordServiceTest {
     @InjectMocks
     private MealRecordService mealRecordService;
 
-    private Member guardian;
     private Elder elder;
     private CareCallRecord callRecord;
 
     @BeforeEach
     void setUp() {
-        guardian = Member.builder()
-                .id(1)
-                .name("테스트 보호자")
-                .phone("010-1234-5678")
-                .gender(Gender.MALE.getCode())
-                .build();
-
         elder = Elder.builder()
                 .id(1)
-                .guardian(guardian)
                 .name("테스트 어르신")
                 .gender(Gender.MALE.getCode())
                 .build();

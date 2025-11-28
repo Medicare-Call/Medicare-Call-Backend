@@ -16,4 +16,4 @@ public class ElderRegisterResponse {
     private String residenceType;
     private Integer guardianId;
     private String guardianName;
-} 
+}
