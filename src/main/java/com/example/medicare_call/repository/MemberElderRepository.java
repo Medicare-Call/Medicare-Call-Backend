@@ -20,5 +20,9 @@ public interface MemberElderRepository extends JpaRepository<MemberElder, Long> 
     List<MemberElder> findByElder(Elder elder);
 
     @Query("select me.elder from MemberElder me where me.guardian.id = :guardianId and me.elder.status = :status")
-    List<Elder> findEldersByGuardianIdAndStatus(@Param("guardianId") Integer guardianId, @Param("status") ElderStatus status);
+    List<Elder> findElders(@Param("guardianId") Integer guardianId, @Param("status") ElderStatus status);
+    
+    default List<Elder> findEldersByGuardianId(Integer guardianId) {
+        return findElders(guardianId, ElderStatus.ACTIVE); 
+    }
 }
