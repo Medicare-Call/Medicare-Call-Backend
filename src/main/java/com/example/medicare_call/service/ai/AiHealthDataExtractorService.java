@@ -161,7 +161,7 @@ public class AiHealthDataExtractorService {
             """, 
             request.getCallDate(),
             request.getTranscriptionText(),
-            request.getMedicationNames() != null ? String.join(", ", request.getMedicationNames()) : "등록된 약 없음"
+            request.getMedicationNames() != null && !request.getMedicationNames().isEmpty() ? String.join(", ", request.getMedicationNames()) : "등록된 약 없음"
         );
     }
 
