@@ -7,6 +7,7 @@ import com.example.medicare_call.dto.ElderResponse;
 import com.example.medicare_call.dto.ElderUpdateRequest;
 import com.example.medicare_call.domain.MemberElder;
 import com.example.medicare_call.domain.Member;
+import com.example.medicare_call.global.enums.ElderStatus;
 import com.example.medicare_call.global.enums.MemberElderAuthority;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
@@ -56,8 +57,7 @@ public class ElderService {
         Member guardian = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
-        return memberElderRepository.findByGuardian_Id(guardian.getId()).stream()
-                .map(MemberElder::getElder)
+        return memberElderRepository.findEldersByGuardianId(guardian.getId()).stream()
                 .map(this::toElderResponse)
                 .toList();
 

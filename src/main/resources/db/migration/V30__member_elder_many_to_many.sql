@@ -16,7 +16,7 @@ INSERT INTO Member_Elder (guardian_id, elder_id, authority)
 SELECT guardian_id, id, 'MANAGE'
 FROM Elder
 WHERE guardian_id IS NOT NULL and status = 'ACTIVATED';
-ON DUPLICATE KEY UPDATE authority = VALUES(authority);
+ON DUPLICATE KEY UPDATE authority = NEW.authority;
 
 -- 3. Elder 테이블에서 guardian 컬럼 제거
 ALTER TABLE Elder
