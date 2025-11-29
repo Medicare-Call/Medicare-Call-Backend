@@ -33,4 +33,7 @@ public class HealthDataExtractionRequest {
     @NotNull(message = "통화 날짜는 필수입니다.")
     @ValidDateRange
     private LocalDate callDate;
+
+    @Schema(description = "등록된 복약 명칭 리스트")
+    private java.util.List<String> medicationNames;
 } 
