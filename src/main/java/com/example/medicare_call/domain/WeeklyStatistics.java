@@ -151,4 +151,8 @@ public class WeeklyStatistics {
         this.avgSleepMinutes = avgSleepMinutes;
         this.aiHealthSummary = aiHealthSummary;
     }
+
+    public void incrementMissedCalls() {
+        this.missedCalls = (this.missedCalls == null ? 0 : this.missedCalls) + 1;
+    }
 }

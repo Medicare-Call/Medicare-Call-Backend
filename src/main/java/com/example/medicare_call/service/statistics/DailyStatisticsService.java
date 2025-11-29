@@ -2,6 +2,7 @@ package com.example.medicare_call.service.statistics;
 
 import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.report.HomeSummaryDto;
+import com.example.medicare_call.global.enums.CareCallStatus;
 import com.example.medicare_call.global.enums.MealType;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.global.enums.MedicationTakenStatus;
@@ -271,7 +272,7 @@ public class DailyStatisticsService {
         List<CareCallRecord> todayCompletedCalls = careCallRecordRepository
                 .findByElderIdAndDateBetween(elder.getId(), callDay.atStartOfDay(), callDay.atTime(LocalTime.MAX))
                 .stream()
-                .filter(record -> "completed".equalsIgnoreCase(record.getCallStatus()))
+                .filter(record -> CareCallStatus.COMPLETED.matches(record.getCallStatus()))
                 .toList();
 
         if (todayCompletedCalls.isEmpty()) {

@@ -4,6 +4,7 @@ import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.data_processor.CareCallDataProcessRequest;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionRequest;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
+import com.example.medicare_call.global.enums.CareCallStatus;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.*;
@@ -48,6 +49,9 @@ class CareCallDataProcessingServiceTest {
     @Mock
     private AiHealthDataExtractorService aiHealthDataExtractorService;
 
+    @Mock
+    private WeeklyStatisticsRepository weeklyStatisticsRepository;
+
     @InjectMocks
     private CareCallDataProcessingService careCallDataProcessingService;
 
@@ -75,7 +79,7 @@ class CareCallDataProcessingServiceTest {
                 .settingId(2)
                 .startTime(Instant.parse("2025-01-27T10:00:00Z"))
                 .endTime(Instant.parse("2025-01-27T10:15:00Z"))
-                .status("completed")
+                .status(CareCallStatus.COMPLETED)
                 .transcription(transcriptionData)
                 .build();
 
@@ -136,7 +140,7 @@ class CareCallDataProcessingServiceTest {
         CareCallDataProcessRequest request = CareCallDataProcessRequest.builder()
                 .elderId(1)
                 .settingId(2)
-                .status("failed")
+                .status(CareCallStatus.FAILED)
                 .build();
 
         Elder elder = Elder.builder()
@@ -186,7 +190,7 @@ class CareCallDataProcessingServiceTest {
         CareCallDataProcessRequest request = CareCallDataProcessRequest.builder()
                 .elderId(1)
                 .settingId(2)
-                .status("busy")
+                .status(CareCallStatus.BUSY)
                 .transcription(transcriptionData)
                 .build();
 
@@ -233,7 +237,7 @@ class CareCallDataProcessingServiceTest {
         CareCallDataProcessRequest request = CareCallDataProcessRequest.builder()
                 .elderId(999)
                 .settingId(2)
-                .status("completed")
+                .status(CareCallStatus.COMPLETED)
                 .build();
 
         when(elderRepository.findById(999)).thenReturn(Optional.empty());
@@ -252,7 +256,7 @@ class CareCallDataProcessingServiceTest {
         CareCallDataProcessRequest request = CareCallDataProcessRequest.builder()
                 .elderId(1)
                 .settingId(999)
-                .status("completed")
+                .status(CareCallStatus.COMPLETED)
                 .build();
 
         Elder elder = Elder.builder()
@@ -270,13 +274,13 @@ class CareCallDataProcessingServiceTest {
     }
 
     @Test
-    @DisplayName("통화 데이터 저장 성공 - 시간 정보 없음")
-    void saveCallData_success_noTimeInfo() {
+    @DisplayName("통화 데이터 저장 성공 - no-answer 시 missedCalls 증가")
+    void saveCallData_success_noAnswer_incrementsMissedCalls() {
         // given
         CareCallDataProcessRequest request = CareCallDataProcessRequest.builder()
                 .elderId(1)
                 .settingId(2)
-                .status("no-answer")
+                .status(CareCallStatus.NO_ANSWER)
                 .build();
 
         Elder elder = Elder.builder()
@@ -291,14 +295,23 @@ class CareCallDataProcessingServiceTest {
                 .id(1)
                 .elder(elder)
                 .setting(setting)
+                .calledAt(LocalDateTime.now())
                 .callStatus("no-answer")
                 .psychologicalDetails(null)
                 .healthDetails(null)
                 .build();
 
+        WeeklyStatistics weeklyStats = WeeklyStatistics.builder()
+                .id(1L)
+                .elder(elder)
+                .missedCalls(0)
+                .build();
+
         when(elderRepository.findById(1)).thenReturn(Optional.of(elder));
         when(careCallSettingRepository.findById(2)).thenReturn(Optional.of(setting));
         when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(expectedRecord);
+        when(weeklyStatisticsRepository.findByElderAndStartDate(any(Elder.class), any(LocalDate.class)))
+                .thenReturn(Optional.of(weeklyStats));
 
         // when
         CareCallRecord result = careCallDataProcessingService.saveCallData(request);
@@ -314,6 +327,7 @@ class CareCallDataProcessingServiceTest {
         verify(careCallSettingRepository).findById(2);
         verify(careCallRecordRepository).save(any(CareCallRecord.class));
         verify(aiHealthDataExtractorService, never()).extractHealthData(any());
+        verify(weeklyStatisticsRepository).findByElderAndStartDate(any(Elder.class), any(LocalDate.class));
     }
 
     @Test
@@ -333,7 +347,7 @@ class CareCallDataProcessingServiceTest {
                 .elderId(1)
                 .settingId(2)
                 .startTime(Instant.parse("2025-01-27T10:00:00Z"))
-                .status("completed")
+                .status(CareCallStatus.COMPLETED)
                 .transcription(transcriptionData)
                 .build();
 
