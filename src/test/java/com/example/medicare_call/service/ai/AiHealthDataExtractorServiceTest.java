@@ -22,8 +22,12 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import com.example.medicare_call.dto.data_processor.ai.OpenAiRequest;
+import static org.mockito.Mockito.verify;
 
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.argThat;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -273,4 +277,44 @@ class AiHealthDataExtractorServiceTest {
     }
 
 
+}
+    @Test
+    @DisplayName("프롬프트에 복약 명칭 리스트가 포함되는지 검증한다")
+    void extractHealthData_includesMedicationNamesInPrompt() {
+        // given
+        List<String> medicationNames = List.of("혈압약", "당뇨약");
+        HealthDataExtractionRequest request = HealthDataExtractionRequest.builder()
+                .transcriptionText("테스트 통화 내용")
+                .callDate(LocalDate.of(2024, 1, 1))
+                .medicationNames(medicationNames)
+                .build();
+
+        OpenAiResponse openAiResponse = OpenAiResponse.builder()
+                .choices(List.of(
+                        OpenAiResponse.Choice.builder()
+                                .message(OpenAiResponse.Message.builder()
+                                        .content("{}")
+                                        .build())
+                                .build()
+                ))
+                .build();
+
+        when(restTemplate.postForObject(eq("https://api.openai.com/v1/chat/completions"), any(HttpEntity.class), eq(OpenAiResponse.class)))
+                .thenReturn(openAiResponse);
+
+        // when
+        aiHealthDataExtractorService.extractHealthData(request);
+
+        // then
+        verify(restTemplate).postForObject(
+                eq("https://api.openai.com/v1/chat/completions"),
+                argThat(entity -> {
+                    HttpEntity<OpenAiRequest> httpEntity = (HttpEntity<OpenAiRequest>) entity;
+                    OpenAiRequest openAiRequest = httpEntity.getBody();
+                    String prompt = openAiRequest.getMessages().get(1).getContent();
+                    return prompt.contains("혈압약, 당뇨약");
+                }),
+                eq(OpenAiResponse.class)
+        );
+    }
 }

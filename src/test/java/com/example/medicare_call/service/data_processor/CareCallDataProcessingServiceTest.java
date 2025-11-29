@@ -4,7 +4,6 @@ import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.data_processor.CareCallDataProcessRequest;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionRequest;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
-import com.example.medicare_call.global.enums.CareCallStatus;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.*;
@@ -51,6 +50,9 @@ class CareCallDataProcessingServiceTest {
 
     @Mock
     private WeeklyStatisticsRepository weeklyStatisticsRepository;
+
+    @Mock
+    private MedicationScheduleRepository medicationScheduleRepository;
 
     @InjectMocks
     private CareCallDataProcessingService careCallDataProcessingService;
@@ -109,7 +111,8 @@ class CareCallDataProcessingServiceTest {
         when(elderRepository.findById(1)).thenReturn(Optional.of(elder));
         when(careCallSettingRepository.findById(2)).thenReturn(Optional.of(setting));
         when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(expectedRecord);
-        
+        when(medicationScheduleRepository.findByElder(any(Elder.class))).thenReturn(java.util.Collections.emptyList());
+
         // Mock OpenAI health data service
         when(aiHealthDataExtractorService.extractHealthData(any(HealthDataExtractionRequest.class)))
                 .thenReturn(HealthDataExtractionResponse.builder().build());
@@ -280,7 +283,7 @@ class CareCallDataProcessingServiceTest {
         CareCallDataProcessRequest request = CareCallDataProcessRequest.builder()
                 .elderId(1)
                 .settingId(2)
-                .status(CareCallStatus.NO_ANSWER)
+                .status("no-answer")
                 .build();
 
         Elder elder = Elder.builder()

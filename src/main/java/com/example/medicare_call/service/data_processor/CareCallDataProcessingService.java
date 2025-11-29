@@ -29,6 +29,7 @@ public class CareCallDataProcessingService {
     private final CareCallRecordRepository careCallRecordRepository;
     private final ElderRepository elderRepository;
     private final CareCallSettingRepository careCallSettingRepository;
+    private final MedicationScheduleRepository medicationScheduleRepository;
     private final AiHealthDataExtractorService aiHealthDataExtractorService;
     private final BloodSugarService bloodSugarService;
     private final MedicationService medicationService;
@@ -97,6 +98,12 @@ public class CareCallDataProcessingService {
         HealthDataExtractionRequest request = HealthDataExtractionRequest.builder()
                 .transcriptionText(transcriptionText)
                 .callDate(callDate)
+                .medicationNames(
+                        medicationScheduleRepository.findByElder(callRecord.getElder()).stream()
+                                .map(MedicationSchedule::getName)
+                                .distinct()
+                                .collect(Collectors.toList())
+                )
                 .build();
         
         HealthDataExtractionResponse healthData = aiHealthDataExtractorService.extractHealthData(request);
