@@ -57,7 +57,7 @@ public class ElderService {
         Member guardian = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
-        return memberElderRepository.findEldersByGuardianIdAndStatus(guardian.getId(), ElderStatus.ACTIVATED).stream()
+        return memberElderRepository.findEldersByGuardianId(guardian.getId()).stream()
                 .map(this::toElderResponse)
                 .toList();
 

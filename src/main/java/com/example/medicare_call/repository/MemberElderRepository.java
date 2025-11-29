@@ -23,6 +23,6 @@ public interface MemberElderRepository extends JpaRepository<MemberElder, Long> 
     List<Elder> findElders(@Param("guardianId") Integer guardianId, @Param("status") ElderStatus status);
     
     default List<Elder> findEldersByGuardianId(Integer guardianId) {
-        return findElders(guardianId, ElderStatus.ACTIVE); 
+        return findElders(guardianId, ElderStatus.ACTIVATED);
     }
 }
