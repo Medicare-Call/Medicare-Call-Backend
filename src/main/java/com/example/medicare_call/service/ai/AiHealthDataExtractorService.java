@@ -2,48 +2,30 @@ package com.example.medicare_call.service.ai;
 
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionRequest;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
-import com.example.medicare_call.dto.data_processor.ai.OpenAiRequest;
-import com.example.medicare_call.dto.data_processor.ai.OpenAiResponse;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.ai.converter.BeanOutputConverter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-
-import java.util.List;
 
 @Slf4j
 @Service
 public class AiHealthDataExtractorService {
     
-    private static final int JSON_CODE_BLOCK_MARKER_LENGTH = 7; // "```json"
-    private static final int CODE_BLOCK_MARKER_LENGTH = 3; // "```"
-    
-    private final RestTemplate restTemplate;
-    private final ObjectMapper objectMapper;
-    
-    @Value("${openai.api.key}")
-    private String openaiApiKey;
-
-    @Value("${openai.api.url}")
-    private String openaiApiUrl;
+    private final OpenAiChatService openAiChatService;
+    private final BeanOutputConverter<HealthDataExtractionResponse> beanOutputConverter;
     
     @Value("${openai.model}")
     private String openaiModel;
 
     @Autowired
     public AiHealthDataExtractorService(
-            @Qualifier("openAiRestTemplate") RestTemplate restTemplate,
-            ObjectMapper objectMapper
+            OpenAiChatService openAiChatService
     ) {
-        this.restTemplate = restTemplate;
-        this.objectMapper = objectMapper;
+        this.openAiChatService = openAiChatService;
+        this.beanOutputConverter = new BeanOutputConverter<>(HealthDataExtractionResponse.class);
     }
 
 
@@ -52,39 +34,23 @@ public class AiHealthDataExtractorService {
             log.info("OpenAI API를 통한 건강 데이터 추출 시작");
             
             String prompt = buildPrompt(request);
-            
-            OpenAiRequest openAiRequest = OpenAiRequest.builder()
+            String systemMessage = "당신은 의료 통화 내용에서 건강 데이터를 추출하는 전문가입니다. 주어진 통화 내용에서 건강 관련 정보를 정확히 추출하여 JSON 형태로 응답해주세요.";
+
+            OpenAiChatOptions options = OpenAiChatOptions.builder()
                     .model(openaiModel)
-                    .messages(List.of(
-                            // 기본 역할, 정의
-                            OpenAiRequest.Message.builder()
-                                    .role("system")
-                                    .content("당신은 의료 통화 내용에서 건강 데이터를 추출하는 전문가입니다. 주어진 통화 내용에서 건강 관련 정보를 정확히 추출하여 JSON 형태로 응답해주세요.")
-                                    .build(),
-                            // 전달하는 질문 및 요청
-                            OpenAiRequest.Message.builder()
-                                    .role("user")
-                                    .content(prompt)
-                                    .build()
-                    ))
-                    // temperature: 일관된 그리고 정확한 답변을 주도록 제어하는 파라미터
-                    // 0.0 ~ 2.0 -> 클 수록 같은 입력에 대해서도 무작위한 답변, 작을 수록 일관된 답변을 반환
                     .temperature(0.1)
                     .build();
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(openaiApiKey);
-
-            HttpEntity<OpenAiRequest> entity = new HttpEntity<>(openAiRequest, headers);
+            ChatResponse response = openAiChatService.openAiChat(prompt, systemMessage, options);
             
-            OpenAiResponse response = restTemplate.postForObject(openaiApiUrl, entity, OpenAiResponse.class);
-            
-            if (response != null && !response.getChoices().isEmpty()) {
-                String content = response.getChoices().get(0).getMessage().getContent();
+            if (response != null && response.getResult() != null) {
+                String content = response.getResult().getOutput().getText();
                 log.info("OpenAI 응답: {}", content);
                 
-                return parseHealthDataResponse(content);
+                // 마크다운 코드 블록 제거 (BeanOutputConverter가 처리하지 못할 수 있음)
+                content = cleanContent(content);
+                
+                return beanOutputConverter.convert(content);
             } else {
                 log.error("OpenAI API 응답이 비어있습니다");
                 return createEmptyResponse();
@@ -94,6 +60,15 @@ public class AiHealthDataExtractorService {
             log.error("OpenAI API 호출 중 오류 발생", e);
             return createEmptyResponse();
         }
+    }
+
+    private String cleanContent(String content) {
+        if (content.contains("```json")) {
+            return content.substring(content.indexOf("```json") + 7, content.lastIndexOf("```")).trim();
+        } else if (content.contains("```")) {
+            return content.substring(content.indexOf("```") + 3, content.lastIndexOf("```")).trim();
+        }
+        return content.trim();
     }
 
     private String buildPrompt(HealthDataExtractionRequest request) {
@@ -184,24 +159,6 @@ public class AiHealthDataExtractorService {
             request.getCallDate(),
             request.getTranscriptionText()
         );
-    }
-
-    private HealthDataExtractionResponse parseHealthDataResponse(String content) {
-        try {
-            String jsonContent = content;
-            if (content.contains("```json")) {
-                jsonContent = content.substring(content.indexOf("```json") + JSON_CODE_BLOCK_MARKER_LENGTH, content.lastIndexOf("```"));
-            } else if (content.contains("```")) {
-                jsonContent = content.substring(content.indexOf("```") + CODE_BLOCK_MARKER_LENGTH, content.lastIndexOf("```"));
-            }
-            
-            jsonContent = jsonContent.trim();
-            return objectMapper.readValue(jsonContent, HealthDataExtractionResponse.class);
-            
-        } catch (JsonProcessingException e) {
-            log.error("JSON 파싱 오류", e);
-            return createEmptyResponse();
-        }
     }
 
     private HealthDataExtractionResponse createEmptyResponse() {
