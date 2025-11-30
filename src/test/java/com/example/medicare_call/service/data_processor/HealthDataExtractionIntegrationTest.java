@@ -2,27 +2,28 @@ package com.example.medicare_call.service.data_processor;
 
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionRequest;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
-import com.example.medicare_call.dto.data_processor.ai.OpenAiResponse;
 import com.example.medicare_call.service.ai.AiHealthDataExtractorService;
+import com.example.medicare_call.service.ai.OpenAiChatService;
 import com.example.medicare_call.service.notification.NotificationService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.messaging.FirebaseMessaging;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.model.Generation;
+import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpEntity;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,8 +35,8 @@ class HealthDataExtractionIntegrationTest {
     @Autowired
     private AiHealthDataExtractorService aiHealthDataExtractorService;
 
-    @MockBean(name = "openAiRestTemplate")
-    private RestTemplate restTemplate;
+    @MockBean
+    private OpenAiChatService openAiChatService;
 
     @MockBean
     private NotificationService notificationService;
@@ -47,8 +48,7 @@ class HealthDataExtractionIntegrationTest {
     private FirebaseMessaging firebaseMessaging;
 
 
-    @Autowired
-    private ObjectMapper objectMapper;
+
 
     @Test
     @DisplayName("통화 내용에서 식사 및 혈당 데이터를 성공적으로 추출한다")
@@ -89,8 +89,12 @@ class HealthDataExtractionIntegrationTest {
             """;
 
         // Mock OpenAI API response
-        when(restTemplate.postForObject(eq("https://api.openai.com/v1/chat/completions"), any(HttpEntity.class), eq(OpenAiResponse.class)))
-                .thenReturn(createMockOpenAiResponse(mockOpenAiResponse));
+        ChatResponse chatResponse = new ChatResponse(List.of(
+                new Generation(new AssistantMessage(mockOpenAiResponse))
+        ));
+
+        when(openAiChatService.openAiChat(any(String.class), any(String.class), any(OpenAiChatOptions.class)))
+                .thenReturn(chatResponse);
 
         // when
         HealthDataExtractionResponse result = aiHealthDataExtractorService.extractHealthData(request);
@@ -162,8 +166,12 @@ class HealthDataExtractionIntegrationTest {
             """;
 
         // Mock OpenAI API response
-        when(restTemplate.postForObject(eq("https://api.openai.com/v1/chat/completions"), any(HttpEntity.class), eq(OpenAiResponse.class)))
-                .thenReturn(createMockOpenAiResponse(mockOpenAiResponse));
+        ChatResponse chatResponse = new ChatResponse(List.of(
+                new Generation(new AssistantMessage(mockOpenAiResponse))
+        ));
+
+        when(openAiChatService.openAiChat(any(String.class), any(String.class), any(OpenAiChatOptions.class)))
+                .thenReturn(chatResponse);
 
         // when
         HealthDataExtractionResponse result = aiHealthDataExtractorService.extractHealthData(request);
@@ -215,8 +223,12 @@ class HealthDataExtractionIntegrationTest {
             """;
 
         // Mock OpenAI API response
-        when(restTemplate.postForObject(eq("https://api.openai.com/v1/chat/completions"), any(HttpEntity.class), eq(OpenAiResponse.class)))
-                .thenReturn(createMockOpenAiResponse(mockOpenAiResponse));
+        ChatResponse chatResponse = new ChatResponse(List.of(
+                new Generation(new AssistantMessage(mockOpenAiResponse))
+        ));
+
+        when(openAiChatService.openAiChat(any(String.class), any(String.class), any(OpenAiChatOptions.class)))
+                .thenReturn(chatResponse);
 
         // when
         HealthDataExtractionResponse result = aiHealthDataExtractorService.extractHealthData(request);
@@ -230,17 +242,5 @@ class HealthDataExtractionIntegrationTest {
         assertThat(result.getBloodSugarData()).isNull();
         assertThat(result.getMedicationData()).isNull();
         assertThat(result.getHealthSigns()).isNull();
-    }
-
-    private OpenAiResponse createMockOpenAiResponse(String content) {
-        return OpenAiResponse.builder()
-                .choices(List.of(
-                        OpenAiResponse.Choice.builder()
-                                .message(OpenAiResponse.Message.builder()
-                                        .content(content)
-                                        .build())
-                                .build()
-                ))
-                .build();
     }
 } 

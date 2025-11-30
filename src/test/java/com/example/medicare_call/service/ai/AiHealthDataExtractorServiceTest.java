@@ -2,9 +2,8 @@ package com.example.medicare_call.service.ai;
 
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionRequest;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
-import com.example.medicare_call.dto.data_processor.ai.OpenAiResponse;
 import com.example.medicare_call.service.ai.AiHealthDataExtractorService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.example.medicare_call.service.ai.OpenAiChatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,34 +11,32 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpEntity;
+import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.model.Generation;
+import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+
 import static org.mockito.Mockito.when;
+
 
 @ExtendWith(MockitoExtension.class)
 class AiHealthDataExtractorServiceTest {
 
     @Mock
-    private RestTemplate restTemplate;
-
-    @Mock
-    private ObjectMapper objectMapper;
+    private OpenAiChatService openAiChatService;
 
     @InjectMocks
     private AiHealthDataExtractorService aiHealthDataExtractorService;
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(aiHealthDataExtractorService, "openaiApiKey", "test-api-key");
-        ReflectionTestUtils.setField(aiHealthDataExtractorService, "openaiApiUrl", "https://api.openai.com/v1/chat/completions");
         ReflectionTestUtils.setField(aiHealthDataExtractorService, "openaiModel", "gpt-4");
     }
 
@@ -73,34 +70,15 @@ class AiHealthDataExtractorServiceTest {
             }
             """;
 
-        OpenAiResponse openAiResponse = OpenAiResponse.builder()
-                .choices(List.of(
-                        OpenAiResponse.Choice.builder()
-                                .message(OpenAiResponse.Message.builder()
-                                        .content(mockOpenAiResponse)
-                                        .build())
-                                .build()
-                ))
-                .build();
+        ChatResponse chatResponse = new ChatResponse(List.of(
+                new Generation(new AssistantMessage(mockOpenAiResponse))
+        ));
 
-        HealthDataExtractionResponse.BloodSugarData bloodSugar = HealthDataExtractionResponse.BloodSugarData.builder()
-                .measurementTime("아침").mealTime("식후").bloodSugarValue(120).status("NORMAL").build();
-        HealthDataExtractionResponse.MealData meal = HealthDataExtractionResponse.MealData.builder()
-                .mealType("아침").mealEatenStatus("섭취함").mealSummary("아침 식사를 하였음").build();
-        HealthDataExtractionResponse expectedResponse = HealthDataExtractionResponse.builder()
-                .date("2024-01-01")
-                .mealData(List.of(meal))
-                .bloodSugarData(List.of(bloodSugar))
-                .medicationData(List.of())
-                .psychologicalState(List.of("기분이 좋음"))
-                .healthSigns(List.of("혈당이 정상 범위"))
-                .build();
 
-        when(restTemplate.postForObject(eq("https://api.openai.com/v1/chat/completions"), any(HttpEntity.class), eq(OpenAiResponse.class)))
-                .thenReturn(openAiResponse);
-        // parseHealthDataResponse 메서드에서 trim()된 JSON 문자열을 사용하므로 Mock 설정을 수정
-        when(objectMapper.readValue(any(String.class), eq(HealthDataExtractionResponse.class)))
-                .thenReturn(expectedResponse);
+
+
+        when(openAiChatService.openAiChat(any(String.class), any(String.class), any(OpenAiChatOptions.class)))
+                .thenReturn(chatResponse);
 
         // when
         HealthDataExtractionResponse result = aiHealthDataExtractorService.extractHealthData(request);
@@ -143,35 +121,17 @@ class AiHealthDataExtractorServiceTest {
                  }
             """;
 
-        OpenAiResponse openAiResponse = OpenAiResponse.builder()
-                .choices(List.of(
-                        OpenAiResponse.Choice.builder()
-                                .message(OpenAiResponse.Message.builder()
-                                        .content(mockOpenAiResponse)
-                                        .build())
-                                .build()
-                ))
-                .build();
-
-        HealthDataExtractionResponse.BloodSugarData bloodSugar = HealthDataExtractionResponse.BloodSugarData.builder()
-                .measurementTime("아침").mealTime("식후").bloodSugarValue(120).status("NORMAL").build();
-        HealthDataExtractionResponse.MealData meal = HealthDataExtractionResponse.MealData.builder()
-                .mealType("아침").mealEatenStatus("섭취함").mealSummary("아침 식사를 하였음").build();
-
-        HealthDataExtractionResponse expectedResponse = HealthDataExtractionResponse.builder()
-                .date("2024-01-01")
-                .mealData(List.of(meal))
-                .bloodSugarData(List.of(bloodSugar))
-                .medicationData(List.of())
-                .psychologicalState(List.of("기분이 좋음"))
-                .healthSigns(List.of("혈당이 정상 범위"))
-                .build();
+        ChatResponse chatResponse = new ChatResponse(List.of(
+                new Generation(new AssistantMessage(mockOpenAiResponse))
+        ));
 
 
-        when(restTemplate.postForObject(eq("https://api.openai.com/v1/chat/completions"), any(HttpEntity.class), eq(OpenAiResponse.class)))
-                .thenReturn(openAiResponse);
-        when(objectMapper.readValue(any(String.class), eq(HealthDataExtractionResponse.class)))
-                .thenReturn(expectedResponse);
+
+
+
+
+        when(openAiChatService.openAiChat(any(String.class), any(String.class), any(OpenAiChatOptions.class)))
+                .thenReturn(chatResponse);
 
         // when
         HealthDataExtractionResponse result = aiHealthDataExtractorService.extractHealthData(request);
@@ -208,36 +168,16 @@ class AiHealthDataExtractorServiceTest {
                  }
             """;
 
-        OpenAiResponse openAiResponse = OpenAiResponse.builder()
-                .choices(List.of(
-                        OpenAiResponse.Choice.builder()
-                                .message(OpenAiResponse.Message.builder()
-                                        .content(mockOpenAiResponse)
-                                        .build())
-                                .build()
-                ))
-                .build();
+        ChatResponse chatResponse = new ChatResponse(List.of(
+                new Generation(new AssistantMessage(mockOpenAiResponse))
+        ));
 
-        HealthDataExtractionResponse.BloodSugarData bloodSugar1 = HealthDataExtractionResponse.BloodSugarData.builder()
-                .measurementTime("아침").mealTime("식전").bloodSugarValue(90).status("NORMAL").build();
-        HealthDataExtractionResponse.BloodSugarData bloodSugar2 = HealthDataExtractionResponse.BloodSugarData.builder()
-                .measurementTime("점심").mealTime("식후").bloodSugarValue(150).status("NORMAL").build();
 
-        HealthDataExtractionResponse.MedicationData medication1 = HealthDataExtractionResponse.MedicationData.builder()
-                .medicationType("혈압약").taken("복용함").takenTime("아침").build();
-        HealthDataExtractionResponse.MedicationData medication2 = HealthDataExtractionResponse.MedicationData.builder()
-                .medicationType("당뇨약").taken("복용함").takenTime("점심").build();
 
-        HealthDataExtractionResponse expectedResponse = HealthDataExtractionResponse.builder()
-                .date("2024-01-02")
-                .bloodSugarData(List.of(bloodSugar1, bloodSugar2))
-                .medicationData(List.of(medication1, medication2))
-                .build();
 
-        when(restTemplate.postForObject(eq("https://api.openai.com/v1/chat/completions"), any(HttpEntity.class), eq(OpenAiResponse.class)))
-                .thenReturn(openAiResponse);
-        when(objectMapper.readValue(any(String.class), eq(HealthDataExtractionResponse.class)))
-                .thenReturn(expectedResponse);
+
+        when(openAiChatService.openAiChat(any(String.class), any(String.class), any(OpenAiChatOptions.class)))
+                .thenReturn(chatResponse);
 
         // when
         HealthDataExtractionResponse result = aiHealthDataExtractorService.extractHealthData(request);
@@ -261,7 +201,7 @@ class AiHealthDataExtractorServiceTest {
                 .callDate(LocalDate.of(2024, 1, 1))
                 .build();
 
-        when(restTemplate.postForObject(eq("https://api.openai.com/v1/chat/completions"), any(HttpEntity.class), eq(OpenAiResponse.class)))
+        when(openAiChatService.openAiChat(any(String.class), any(String.class), any(OpenAiChatOptions.class)))
                 .thenReturn(null);
 
         // when
@@ -287,20 +227,14 @@ class AiHealthDataExtractorServiceTest {
                 .callDate(LocalDate.of(2024, 1, 1))
                 .build();
 
-        OpenAiResponse openAiResponse = OpenAiResponse.builder()
-                .choices(List.of(
-                        OpenAiResponse.Choice.builder()
-                                .message(OpenAiResponse.Message.builder()
-                                        .content("잘못된 JSON 형식")
-                                        .build())
-                                .build()
-                ))
-                .build();
+        ChatResponse chatResponse = new ChatResponse(List.of(
+                new Generation(new AssistantMessage("잘못된 JSON 형식"))
+        ));
 
-        when(restTemplate.postForObject(eq("https://api.openai.com/v1/chat/completions"), any(HttpEntity.class), eq(OpenAiResponse.class)))
-                .thenReturn(openAiResponse);
-        when(objectMapper.readValue(any(String.class), eq(HealthDataExtractionResponse.class)))
-                .thenThrow(new RuntimeException("JSON 파싱 오류"));
+        when(openAiChatService.openAiChat(any(String.class), any(String.class), any(OpenAiChatOptions.class)))
+                .thenReturn(chatResponse);
+        // The ObjectMapper is no longer mocked, so this test will now rely on the actual ObjectMapper behavior
+        // which will throw an exception for invalid JSON, leading to the expected empty response.
 
         // when
         HealthDataExtractionResponse result = aiHealthDataExtractorService.extractHealthData(request);
@@ -320,30 +254,14 @@ class AiHealthDataExtractorServiceTest {
                 .callDate(LocalDate.of(2024, 1, 1))
                 .build();
 
-        OpenAiResponse openAiResponse = OpenAiResponse.builder()
-                .choices(List.of(
-                        OpenAiResponse.Choice.builder()
-                                .message(OpenAiResponse.Message.builder()
-                                        .content("{}")
-                                        .build())
-                                .build()
-                ))
-                .build();
+        ChatResponse chatResponse = new ChatResponse(List.of(
+                new Generation(new AssistantMessage("{}"))
+        ));
 
-        HealthDataExtractionResponse expectedResponse = HealthDataExtractionResponse.builder()
-                .date(null)
-                .mealData(null)
-                .sleepData(null)
-                .psychologicalState(null)
-                .bloodSugarData(null)
-                .medicationData(null)
-                .healthSigns(null)
-                .build();
 
-        when(restTemplate.postForObject(eq("https://api.openai.com/v1/chat/completions"), any(HttpEntity.class), eq(OpenAiResponse.class)))
-                .thenReturn(openAiResponse);
-        when(objectMapper.readValue(any(String.class), eq(HealthDataExtractionResponse.class)))
-                .thenReturn(expectedResponse);
+
+        when(openAiChatService.openAiChat(any(String.class), any(String.class), any(OpenAiChatOptions.class)))
+                .thenReturn(chatResponse);
 
         // when
         HealthDataExtractionResponse result = aiHealthDataExtractorService.extractHealthData(request);
@@ -353,4 +271,6 @@ class AiHealthDataExtractorServiceTest {
         assertThat(result.getDate()).isNull();
         assertThat(result.getMealData()).isNull();
     }
-} 
+
+
+}
