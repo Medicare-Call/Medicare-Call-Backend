@@ -3,6 +3,7 @@ package com.example.medicare_call.service.data_processor;
 import com.example.medicare_call.domain.CareCallRecord;
 import com.example.medicare_call.dto.data_processor.CareCallDataProcessRequest;
 import com.example.medicare_call.dto.data_processor.OpenAiSttResponse;
+import com.example.medicare_call.global.enums.CareCallStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -50,7 +51,7 @@ public class CareCallMediaProcessingService {
         CareCallDataProcessRequest processRequest = CareCallDataProcessRequest.builder()
                 .elderId(request.getElderId())
                 .settingId(request.getSettingId())
-                .status("completed")
+                .status(CareCallStatus.COMPLETED)
                 .startTime(calledAtTime.atZone(ZoneOffset.UTC).toInstant())
                 .endTime(endedAtTime.atZone(ZoneOffset.UTC).toInstant())
                 .responded((byte) 1)
