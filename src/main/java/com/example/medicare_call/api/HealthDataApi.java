@@ -14,21 +14,21 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface HealthDataApi {
 
     @Operation(
-            summary = "건강 데이터 추출",
-            description = "통화 내용에서 건강 관련 데이터를 추출합니다. (테스트용 엔드포인트)"
+        summary = "건강 데이터 추출",
+        description = "통화 내용에서 건강 관련 데이터를 추출합니다. (테스트용 엔드포인트)"
     )
     @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "건강 데이터 추출 성공",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = HealthDataExtractionResponse.class)
-                    )
-            ),
-            @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+        @ApiResponse(
+            responseCode = "200",
+            description = "건강 데이터 추출 성공",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = HealthDataExtractionResponse.class)
+            )
+        ),
+        @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
     ResponseEntity<HealthDataExtractionResponse> extractHealthData(
-            @RequestBody HealthDataExtractionRequest request
+        @RequestBody HealthDataExtractionRequest request
     );
 }
