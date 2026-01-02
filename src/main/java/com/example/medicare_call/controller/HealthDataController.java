@@ -46,10 +46,10 @@ public class HealthDataController implements HealthDataApi, HealthDataTestApi {
     }
 
     @Override
-    @PostMapping("/save-to-database")
-    public ResponseEntity<CareCallRecord> saveHealthDataToDatabase(
+    @PostMapping("/extract/test")
+    public ResponseEntity<CareCallRecord> saveTestHealthData(
             @RequestBody @Schema(
-                    description = "건강 데이터 DB 저장 테스트 요청",
+                    description = "건강 데이터 추출 테스트",
                     example = """
             {
               "elderId": 1,
@@ -60,7 +60,7 @@ public class HealthDataController implements HealthDataApi, HealthDataTestApi {
             """
             ) HealthDataTestRequest request
     ) {
-        log.info("건강 데이터 DB 저장 테스트 요청: {}", request);
+        log.info("건강 데이터 추출 테스트: {}", request);
 
         // 테스트용 CareCallRecord 조회 또는 생성
         CareCallRecord savedCallRecord = testDataGenerator.createOrGetTestCallRecord(
@@ -82,81 +82,4 @@ public class HealthDataController implements HealthDataApi, HealthDataTestApi {
 
         return ResponseEntity.ok(savedCallRecord);
     }
-
-    @Override
-    @PostMapping("/save-sleep-data")
-    public ResponseEntity<CareCallRecord> saveSleepDataToDatabase(
-            @RequestBody @Schema(
-                    description = "수면 데이터 DB 저장 테스트 요청",
-                    example = """
-            {
-              "elderId": 1,
-              "settingId": 1,
-              "transcriptionText": "어제 밤 10시에 잠들어서 오늘 아침 6시에 일어났어요. 8시간 잘 잤어요.",
-              "callDate": "2024-01-01"
-            }
-            """
-            ) HealthDataTestRequest request
-    ) {
-        log.info("수면 데이터 DB 저장 테스트 요청: {}", request);
-
-        // 테스트용 CareCallRecord 조회 또는 생성
-        CareCallRecord savedCallRecord = testDataGenerator.createOrGetTestCallRecord(
-                request.getElderId(),
-                request.getSettingId(),
-                request.getTranscriptionText()
-        );
-
-        // OpenAI를 통한 건강 데이터 추출
-        HealthDataExtractionRequest extractionRequest = HealthDataExtractionRequest.builder()
-                .transcriptionText(request.getTranscriptionText())
-                .callDate(request.getCallDate())
-                .build();
-
-        HealthDataExtractionResponse healthData = aiHealthDataExtractorService.extractHealthData(extractionRequest);
-
-        // 건강 데이터를 DB에 저장
-        careCallDataProcessingService.saveHealthDataToDatabase(savedCallRecord, healthData);
-
-        return ResponseEntity.ok(savedCallRecord);
-    }
-
-    @Override
-    @PostMapping("/save-medication-data")
-    public ResponseEntity<CareCallRecord> saveMedicationDataToDatabase(
-            @RequestBody @Schema(
-                    description = "복약 데이터 DB 저장 테스트 요청",
-                    example = """
-            {
-              "elderId": 1,
-              "settingId": 1,
-              "transcriptionText": "혈압약을 아침에 복용했어요. 오늘은 머리가 좀 아파요.",
-              "callDate": "2024-01-01"
-            }
-            """
-            ) HealthDataTestRequest request
-    ) {
-        log.info("복약 데이터 DB 저장 테스트 요청: {}", request);
-
-        // 테스트용 CareCallRecord 조회 또는 생성
-        CareCallRecord savedCallRecord = testDataGenerator.createOrGetTestCallRecord(
-                request.getElderId(),
-                request.getSettingId(),
-                request.getTranscriptionText()
-        );
-
-        // OpenAI를 통한 건강 데이터 추출
-        HealthDataExtractionRequest extractionRequest = HealthDataExtractionRequest.builder()
-                .transcriptionText(request.getTranscriptionText())
-                .callDate(request.getCallDate())
-                .build();
-
-        HealthDataExtractionResponse healthData = aiHealthDataExtractorService.extractHealthData(extractionRequest);
-
-        // 건강 데이터를 DB에 저장
-        careCallDataProcessingService.saveHealthDataToDatabase(savedCallRecord, healthData);
-
-        return ResponseEntity.ok(savedCallRecord);
-    }
-
 }
