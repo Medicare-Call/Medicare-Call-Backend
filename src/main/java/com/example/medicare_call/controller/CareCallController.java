@@ -71,7 +71,7 @@ public class CareCallController {
 
     //TODO: 개발 완료 후 삭제
     @Operation(summary = "[테스트용] 프롬프트 테스트", description = "케어콜에 전송하는 프롬프트를 직접 작성하여 전화 품질을 테스트합니다.")
-    @PostMapping("/test-care-call")
+    @PostMapping("/care-call/test")
     public ResponseEntity<String> testCareCall(@Valid @RequestBody CareCallTestRequest req) {
         careCallRequestSenderService.sendTestCall(req);
         return ResponseEntity.ok(req.prompt());
@@ -89,7 +89,7 @@ public class CareCallController {
                     )
             )
     )
-    @PostMapping(value = "/call-data-for-betatest", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/call-data/beta", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CareCallRecord> uploadAndProcessCallData(
             @ModelAttribute @Valid CallDataUploadRequest request
     ) {

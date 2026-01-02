@@ -334,7 +334,7 @@ class CareCallControllerTest {
         doNothing().when(careCallRequestSenderService).sendTestCall(any(CareCallTestRequest.class));
 
         // when & then
-        mockMvc.perform(post("/test-care-call")
+        mockMvc.perform(post("/care-call/test")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -450,7 +450,7 @@ class CareCallControllerTest {
                 .thenReturn(savedRecord);
 
         // when & then
-        mockMvc.perform(multipart("/call-data-for-betatest")
+        mockMvc.perform(multipart("/call-data/beta")
                         .file(mockAudioFile)
                         .param("elderId", "1002")
                         .param("settingId", "4"))
@@ -465,7 +465,7 @@ class CareCallControllerTest {
                 .thenThrow(new CustomException(ErrorCode.INVALID_INPUT_VALUE, "오디오 파일이 없습니다."));
 
         // when & then
-        mockMvc.perform(multipart("/call-data-for-betatest")
+        mockMvc.perform(multipart("/call-data/beta")
                         .file(new MockMultipartFile("recordingFile", new byte[0]))
                         .param("elderId", "1002")
                         .param("settingId", "4"))
@@ -484,7 +484,7 @@ class CareCallControllerTest {
         );
 
         // when & then
-        mockMvc.perform(multipart("/call-data-for-betatest")
+        mockMvc.perform(multipart("/call-data/beta")
                         .file(mockAudioFile)
                         .param("settingId", "4"))
                 .andExpect(status().isBadRequest());
@@ -502,7 +502,7 @@ class CareCallControllerTest {
         );
 
         // when & then
-        mockMvc.perform(multipart("/call-data-for-betatest")
+        mockMvc.perform(multipart("/call-data/beta")
                         .file(mockAudioFile)
                         .param("elderId", "1002"))
                 .andExpect(status().isBadRequest());
@@ -523,7 +523,7 @@ class CareCallControllerTest {
                 .thenThrow(new CustomException(ErrorCode.ELDER_NOT_FOUND, "어르신을 찾을 수 없습니다."));
 
         // when & then
-        mockMvc.perform(multipart("/call-data-for-betatest")
+        mockMvc.perform(multipart("/call-data/beta")
                         .file(mockAudioFile)
                         .param("elderId", "999")
                         .param("settingId", "4"))
@@ -546,7 +546,7 @@ class CareCallControllerTest {
                 .thenThrow(new CustomException(ErrorCode.CARE_CALL_SETTING_NOT_FOUND, "통화 설정을 찾을 수 없습니다."));
 
         // when & then
-        mockMvc.perform(multipart("/call-data-for-betatest")
+        mockMvc.perform(multipart("/call-data/beta")
                         .file(mockAudioFile)
                         .param("elderId", "1002")
                         .param("settingId", "999"))
@@ -568,7 +568,7 @@ class CareCallControllerTest {
                 .thenThrow(new CustomException(ErrorCode.STT_PROCESSING_FAILED, "STT 처리 실패"));
 
         // when & then
-        mockMvc.perform(multipart("/call-data-for-betatest")
+        mockMvc.perform(multipart("/call-data/beta")
                         .file(mockAudioFile)
                         .param("elderId", "1002")
                         .param("settingId", "4"))
