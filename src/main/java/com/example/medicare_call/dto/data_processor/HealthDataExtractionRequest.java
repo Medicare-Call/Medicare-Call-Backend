@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Builder
@@ -35,5 +36,5 @@ public class HealthDataExtractionRequest {
     private LocalDate callDate;
 
     @Schema(description = "등록된 복약 명칭 리스트")
-    private java.util.List<String> medicationNames;
+    private List<String> medicationNames;
 } 
