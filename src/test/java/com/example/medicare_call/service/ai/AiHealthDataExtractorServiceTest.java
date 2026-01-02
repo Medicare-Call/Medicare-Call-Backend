@@ -276,8 +276,6 @@ class AiHealthDataExtractorServiceTest {
         assertThat(result.getMealData()).isNull();
     }
 
-
-}
     @Test
     @DisplayName("프롬프트에 복약 명칭 리스트가 포함되는지 검증한다")
     void extractHealthData_includesMedicationNamesInPrompt() {
@@ -289,32 +287,23 @@ class AiHealthDataExtractorServiceTest {
                 .medicationNames(medicationNames)
                 .build();
 
-        OpenAiResponse openAiResponse = OpenAiResponse.builder()
-                .choices(List.of(
-                        OpenAiResponse.Choice.builder()
-                                .message(OpenAiResponse.Message.builder()
-                                        .content("{}")
-                                        .build())
-                                .build()
-                ))
-                .build();
+        ChatResponse chatResponse = new ChatResponse(List.of(
+                new Generation(new AssistantMessage("{}"))
+        ));
 
-        when(restTemplate.postForObject(eq("https://api.openai.com/v1/chat/completions"), any(HttpEntity.class), eq(OpenAiResponse.class)))
-                .thenReturn(openAiResponse);
+        when(openAiChatService.openAiChat(any(String.class), any(String.class), any(OpenAiChatOptions.class)))
+                .thenReturn(chatResponse);
 
         // when
         aiHealthDataExtractorService.extractHealthData(request);
 
         // then
-        verify(restTemplate).postForObject(
-                eq("https://api.openai.com/v1/chat/completions"),
-                argThat(entity -> {
-                    HttpEntity<OpenAiRequest> httpEntity = (HttpEntity<OpenAiRequest>) entity;
-                    OpenAiRequest openAiRequest = httpEntity.getBody();
-                    String prompt = openAiRequest.getMessages().get(1).getContent();
-                    return prompt.contains("혈압약, 당뇨약");
-                }),
-                eq(OpenAiResponse.class)
+        verify(openAiChatService).openAiChat(
+                argThat(userMessage -> userMessage.contains(
+                        "[중요] 복약 데이터 추출 시, 약의 종류는 반드시 다음 리스트에 있는 명칭 중 하나를 사용하세요: [혈압약, 당뇨약]"
+                )),
+                any(String.class),
+                any(OpenAiChatOptions.class)
         );
     }
 }
