@@ -12,7 +12,7 @@ import com.example.medicare_call.global.event.CareCallEvent;
 import com.example.medicare_call.global.event.Events;
 import com.example.medicare_call.service.carecall.CareCallRequestSenderService;
 import com.example.medicare_call.service.carecall.CareCallSettingService;
-import com.example.medicare_call.service.data_processor.CareCallMediaProcessingService;
+import com.example.medicare_call.service.data_processor.CareCallUploadService;
 import com.example.medicare_call.service.data_processor.CareCallDataProcessingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -35,7 +35,7 @@ public class CareCallController {
     private final CareCallSettingService careCallSettingService;
     private final CareCallDataProcessingService careCallDataProcessingService;
     private final CareCallRequestSenderService careCallRequestSenderService;
-    private final CareCallMediaProcessingService callDataUploadService;
+    private final CareCallUploadService careCallUploadService;
 
 
     @Operation(summary = "어르신 전화 시간대 등록 및 수정", description = "3번의 케어콜 시간대를 저장 및 수정합니다.")
@@ -94,7 +94,7 @@ public class CareCallController {
             @ModelAttribute @Valid CallDataUploadRequest request
     ) {
         log.info("베타 테스트용 전화 데이터 업로드 요청 수신: elderId={}", request.getElderId());
-        CareCallRecord savedRecord = callDataUploadService.processUploadedCallData(request);
+        CareCallRecord savedRecord = careCallUploadService.processUploadedCallData(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedRecord);
     }
 }
