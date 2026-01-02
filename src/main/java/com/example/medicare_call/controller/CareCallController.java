@@ -1,22 +1,23 @@
 package com.example.medicare_call.controller;
 
+import com.example.medicare_call.api.CareCallApi;
+import com.example.medicare_call.api.CareCallBetaTestApi;
+import com.example.medicare_call.api.CareCallTestApi;
 import com.example.medicare_call.domain.CareCallRecord;
 import com.example.medicare_call.dto.carecall.CareCallSettingRequest;
 import com.example.medicare_call.dto.carecall.CareCallSettingResponse;
 import com.example.medicare_call.dto.carecall.CareCallTestRequest;
+import com.example.medicare_call.dto.carecall.ImmediateCareCallRequest;
 import com.example.medicare_call.dto.data_processor.CallDataUploadRequest;
 import com.example.medicare_call.dto.data_processor.CareCallDataProcessRequest;
-import com.example.medicare_call.dto.carecall.ImmediateCareCallRequest;
 import com.example.medicare_call.global.annotation.AuthUser;
 import com.example.medicare_call.global.event.CareCallEvent;
 import com.example.medicare_call.global.event.Events;
 import com.example.medicare_call.service.carecall.CareCallRequestSenderService;
 import com.example.medicare_call.service.carecall.CareCallSettingService;
-import com.example.medicare_call.service.data_processor.CareCallUploadService;
 import com.example.medicare_call.service.data_processor.CareCallDataProcessingService;
-import io.swagger.v3.oas.annotations.Operation;
+import com.example.medicare_call.service.data_processor.CareCallUploadService;
 import io.swagger.v3.oas.annotations.Parameter;
-import org.springframework.web.bind.annotation.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,10 +28,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
-@Tag(name = "CareCall", description = "케어콜 설정, 데이터 수신, 테스트 API")
 @RestController
 @RequiredArgsConstructor
-public class CareCallController {
+@Tag(name = "CareCall", description = "케어콜 설정, 데이터 수신, 테스트 API")
+public class CareCallController implements CareCallApi, CareCallBetaTestApi, CareCallTestApi {
 
     private final CareCallSettingService careCallSettingService;
     private final CareCallDataProcessingService careCallDataProcessingService;
@@ -38,21 +39,21 @@ public class CareCallController {
     private final CareCallUploadService careCallUploadService;
 
 
-    @Operation(summary = "어르신 전화 시간대 등록 및 수정", description = "3번의 케어콜 시간대를 저장 및 수정합니다.")
+    @Override
     @PostMapping("/elders/{elderId}/care-call-setting")
     public ResponseEntity<Void> upsertCareCallSetting(@Parameter(hidden = true) @AuthUser Long memberId, @PathVariable Integer elderId, @Valid @RequestBody CareCallSettingRequest request) {
         careCallSettingService.upsertCareCallSetting(memberId.intValue(), elderId, request);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @Operation(summary = "어르신 전화 시간대 조회", description = "등록된 케어콜 시간대를 조회합니다.")
+    @Override
     @GetMapping("/elders/{elderId}/care-call-setting")
     public ResponseEntity<CareCallSettingResponse> getCareCallSetting(@Parameter(hidden = true) @AuthUser Long memberId, @PathVariable Integer elderId) {
         CareCallSettingResponse response = careCallSettingService.getCareCallSetting(memberId.intValue(), elderId);
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "통화 데이터 수신", description = "외부 서버로부터 통화 데이터를 받아서 저장합니다.")
+    @Override
     @PostMapping("/call-data")
     public ResponseEntity<CareCallRecord> receiveCallData(@Valid @RequestBody CareCallDataProcessRequest request) {
         log.info("통화 데이터 수신: elderId={}, settingId={}", request.getElderId(), request.getSettingId());
@@ -61,16 +62,15 @@ public class CareCallController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    // TODO [DEMO] 데모데이 시연용 임시 코드 → 정식 버전 구현 시 제거 필요
-    @Operation(summary = "즉시 케어콜 발송", description = "memberId를 통해 해당 보호자의 첫 번째 어르신에게 즉시 케어콜을 발송합니다.")
+    @Override
     @PostMapping("/care-call/immediate")
     public ResponseEntity<String> sendImmediateCareCall(@Valid @RequestBody ImmediateCareCallRequest request) {
         String result = careCallRequestSenderService.sendImmediateCall(request.getElderId(), request.getCareCallOption());
         return ResponseEntity.ok(result);
     }
 
-    //TODO: 개발 완료 후 삭제
-    @Operation(summary = "[테스트용] 프롬프트 테스트", description = "케어콜에 전송하는 프롬프트를 직접 작성하여 전화 품질을 테스트합니다.")
+    //TODO: 커스텀 프롬프트 케어콜 테스트용, 개발 완료 후 삭제
+    @Override
     @PostMapping("/care-call/test")
     public ResponseEntity<String> testCareCall(@Valid @RequestBody CareCallTestRequest req) {
         careCallRequestSenderService.sendTestCall(req);
@@ -78,17 +78,7 @@ public class CareCallController {
     }
 
     //TODO: 베타테스트용 API. 삭제 필요
-    @Operation(
-            summary = "[베타테스트용] 전화 데이터 처리",
-            description = "전화 녹음본을 업로드 하면 STT 후 분석 데이터가 저장됩니다.",
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    required = true,
-                    content = @io.swagger.v3.oas.annotations.media.Content(
-                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
-                            schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = CallDataUploadRequest.class)
-                    )
-            )
-    )
+    @Override
     @PostMapping(value = "/call-data/beta", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CareCallRecord> uploadAndProcessCallData(
             @ModelAttribute @Valid CallDataUploadRequest request
