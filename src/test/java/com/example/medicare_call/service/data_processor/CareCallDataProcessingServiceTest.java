@@ -4,6 +4,7 @@ import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.data_processor.CareCallDataProcessRequest;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionRequest;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
+import com.example.medicare_call.global.enums.CareCallStatus;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.*;
@@ -283,7 +284,7 @@ class CareCallDataProcessingServiceTest {
         CareCallDataProcessRequest request = CareCallDataProcessRequest.builder()
                 .elderId(1)
                 .settingId(2)
-                .status("no-answer")
+                .status(CareCallStatus.NO_ANSWER)
                 .build();
 
         Elder elder = Elder.builder()
