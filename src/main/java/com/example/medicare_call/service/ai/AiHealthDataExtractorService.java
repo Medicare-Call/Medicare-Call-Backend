@@ -107,6 +107,9 @@ public class AiHealthDataExtractorService {
                - 건강 징후 상세 내용 (짧은 문장들로 요약)
                - 건강 상태 요약 (좋음/나쁨)
             
+            [중요] 복약 데이터 추출 시, 약의 종류는 반드시 다음 리스트에 있는 명칭 중 하나를 사용하세요: [%s]
+            리스트에 없는 약 이름이 언급된 경우, 가장 유사한 이름으로 매핑하거나, 매핑이 불가능하면 언급된 이름을 그대로 사용하세요.
+            
             [중요] 만약 혈당을 여러 번 측정했거나 여러 종류의 약을 복용했다면, 각각을 반드시 별개의 JSON 객체로 분리하여 배열에 담아주세요. 예를 들어, "아침 혈압약, 점심 당뇨약"은 2개의 복약 데이터 객체로 분리해야 합니다. 절대로 하나의 필드에 여러 정보를 합치지 마세요.
             
             응답은 반드시 다음 JSON 구조로 해주세요:
@@ -157,7 +160,8 @@ public class AiHealthDataExtractorService {
             }
             """, 
             request.getCallDate(),
-            request.getTranscriptionText()
+            request.getTranscriptionText(),
+            request.getMedicationNames() != null && !request.getMedicationNames().isEmpty() ? String.join(", ", request.getMedicationNames()) : "등록된 약 없음"
         );
     }
 

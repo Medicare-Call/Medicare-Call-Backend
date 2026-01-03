@@ -52,6 +52,9 @@ class CareCallDataProcessingServiceTest {
     @Mock
     private WeeklyStatisticsRepository weeklyStatisticsRepository;
 
+    @Mock
+    private MedicationScheduleRepository medicationScheduleRepository;
+
     @InjectMocks
     private CareCallDataProcessingService careCallDataProcessingService;
 
@@ -109,7 +112,8 @@ class CareCallDataProcessingServiceTest {
         when(elderRepository.findById(1)).thenReturn(Optional.of(elder));
         when(careCallSettingRepository.findById(2)).thenReturn(Optional.of(setting));
         when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(expectedRecord);
-        
+        when(medicationScheduleRepository.findByElder(any(Elder.class))).thenReturn(java.util.Collections.emptyList());
+
         // Mock OpenAI health data service
         when(aiHealthDataExtractorService.extractHealthData(any(HealthDataExtractionRequest.class)))
                 .thenReturn(HealthDataExtractionResponse.builder().build());

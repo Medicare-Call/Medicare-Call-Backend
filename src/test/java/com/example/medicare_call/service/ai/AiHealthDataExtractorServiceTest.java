@@ -22,8 +22,12 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import com.example.medicare_call.dto.data_processor.ai.OpenAiRequest;
+import static org.mockito.Mockito.verify;
 
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.argThat;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -272,5 +276,34 @@ class AiHealthDataExtractorServiceTest {
         assertThat(result.getMealData()).isNull();
     }
 
+    @Test
+    @DisplayName("프롬프트에 복약 명칭 리스트가 포함되는지 검증한다")
+    void extractHealthData_includesMedicationNamesInPrompt() {
+        // given
+        List<String> medicationNames = List.of("혈압약", "당뇨약");
+        HealthDataExtractionRequest request = HealthDataExtractionRequest.builder()
+                .transcriptionText("테스트 통화 내용")
+                .callDate(LocalDate.of(2024, 1, 1))
+                .medicationNames(medicationNames)
+                .build();
 
+        ChatResponse chatResponse = new ChatResponse(List.of(
+                new Generation(new AssistantMessage("{}"))
+        ));
+
+        when(openAiChatService.openAiChat(any(String.class), any(String.class), any(OpenAiChatOptions.class)))
+                .thenReturn(chatResponse);
+
+        // when
+        aiHealthDataExtractorService.extractHealthData(request);
+
+        // then
+        verify(openAiChatService).openAiChat(
+                argThat(userMessage -> userMessage.contains(
+                        "[중요] 복약 데이터 추출 시, 약의 종류는 반드시 다음 리스트에 있는 명칭 중 하나를 사용하세요: [혈압약, 당뇨약]"
+                )),
+                any(String.class),
+                any(OpenAiChatOptions.class)
+        );
+    }
 }
