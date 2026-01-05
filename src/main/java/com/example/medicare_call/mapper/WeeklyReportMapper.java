@@ -69,21 +69,12 @@ public class WeeklyReportMapper {
             int unreadCount) {
 
         WeeklyReportResponse.SummaryStats summaryStats = WeeklyReportResponse.SummaryStats.builder()
-                .mealRate(null)
-                .medicationRate(null)
-                .healthSignals(null)
                 .missedCalls(missedCalls)
                 .build();
 
         return WeeklyReportResponse.builder()
                 .elderName(elderName)
                 .summaryStats(summaryStats)
-                .mealStats(null)
-                .medicationStats(null)
-                .healthSummary(null)
-                .averageSleep(null)
-                .psychSummary(null)
-                .bloodSugar(null)
                 .subscriptionStartDate(subscriptionStartDate)
                 .unreadNotification(unreadCount)
                 .build();
