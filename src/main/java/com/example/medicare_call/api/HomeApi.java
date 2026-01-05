@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+@Tag(name = "Home", description = "홈 화면 데이터 조회 API")
 public interface HomeApi {
 
     @Operation(
@@ -39,8 +40,8 @@ public interface HomeApi {
     })
 
     ResponseEntity<HomeReportResponse> getHomeData(
-            @AuthUser Long memberId,
+            Long memberId,
             @Parameter(description = "조회할 어르신의 식별자", required = true, example = "1")
-            Integer elderId
+            @PathVariable("elderId") Integer elderId
     );
 }
