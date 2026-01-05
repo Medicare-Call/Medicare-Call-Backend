@@ -29,7 +29,8 @@ public class HomeController implements HomeApi {
     private final HomeReportService homeReportService;
 
     @Override
-    public ResponseEntity<HomeReportResponse> getHomeData(Long memberId, Integer elderId) {
+    @GetMapping("/{elderId}/home")
+    public ResponseEntity<HomeReportResponse> getHomeData(@Parameter(hidden = true)Long memberId, @PathVariable("elderId")Integer elderId) {
         log.info("홈 화면 데이터 조회 요청: elderId={}", elderId);
         HomeReportResponse response = homeReportService.getHomeReport(memberId.intValue(), elderId);
         return ResponseEntity.ok(response);
