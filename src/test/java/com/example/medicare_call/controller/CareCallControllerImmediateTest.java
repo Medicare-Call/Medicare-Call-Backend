@@ -5,7 +5,7 @@ import com.example.medicare_call.global.jwt.JwtProvider;
 import com.example.medicare_call.repository.MemberRepository;
 import com.example.medicare_call.repository.ElderRepository;
 import com.example.medicare_call.service.carecall.CareCallRequestSenderService;
-import com.example.medicare_call.service.data_processor.CareCallMediaProcessingService;
+import com.example.medicare_call.service.data_processor.CareCallUploadService;
 import com.example.medicare_call.service.data_processor.OpenAiSttService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -68,7 +68,7 @@ class CareCallControllerImmediateTest {
     private AuthenticationArgumentResolver authenticationArgumentResolver;
 
     @MockBean
-    private CareCallMediaProcessingService callDataUploadService;
+    private CareCallUploadService careCallUploadService;
 
     @MockBean
     private OpenAiSttService openAiSttService;

@@ -29,7 +29,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class CareCallMediaProcessingServiceTest {
+class CareCallUploadServiceTest {
 
     @Mock
     private OpenAiSttService openAiSttService;
@@ -38,7 +38,7 @@ class CareCallMediaProcessingServiceTest {
     private CareCallDataProcessingService careCallDataProcessingService;
 
     @InjectMocks
-    private CareCallMediaProcessingService callDataUploadService;
+    private CareCallUploadService careCallUploadService;
 
     private MultipartFile mockAudioFile;
     private CallDataUploadRequest uploadRequest;
@@ -114,7 +114,7 @@ class CareCallMediaProcessingServiceTest {
         when(careCallDataProcessingService.saveCallData(any())).thenReturn(expectedRecord);
 
         // when
-        CareCallRecord result = callDataUploadService.processUploadedCallData(uploadRequest);
+        CareCallRecord result = careCallUploadService.processUploadedCallData(uploadRequest);
 
         // then
         assertThat(result).isNotNull();
@@ -147,7 +147,7 @@ class CareCallMediaProcessingServiceTest {
                 .thenThrow(new CustomException(ErrorCode.INVALID_INPUT_VALUE, "오디오 파일이 없습니다."));
 
         // when & then
-        assertThatThrownBy(() -> callDataUploadService.processUploadedCallData(requestWithEmptyFile))
+        assertThatThrownBy(() -> careCallUploadService.processUploadedCallData(requestWithEmptyFile))
                 .isInstanceOf(CustomException.class);
 
         verify(openAiSttService).transcribe(requestWithEmptyFile.getRecordingFile());
@@ -161,7 +161,7 @@ class CareCallMediaProcessingServiceTest {
                 .thenThrow(new CustomException(ErrorCode.STT_PROCESSING_FAILED, "STT 처리 실패"));
 
         // when & then
-        assertThatThrownBy(() -> callDataUploadService.processUploadedCallData(uploadRequest))
+        assertThatThrownBy(() -> careCallUploadService.processUploadedCallData(uploadRequest))
                 .isInstanceOf(CustomException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.STT_PROCESSING_FAILED);
 
@@ -192,7 +192,7 @@ class CareCallMediaProcessingServiceTest {
         when(careCallDataProcessingService.saveCallData(any())).thenReturn(expectedRecord);
 
         // when
-        CareCallRecord result = callDataUploadService.processUploadedCallData(uploadRequest);
+        CareCallRecord result = careCallUploadService.processUploadedCallData(uploadRequest);
 
         // then
         assertThat(result).isNotNull();
@@ -216,7 +216,7 @@ class CareCallMediaProcessingServiceTest {
         when(careCallDataProcessingService.saveCallData(any())).thenReturn(expectedRecord);
 
         // when
-        CareCallRecord result = callDataUploadService.processUploadedCallData(uploadRequest);
+        CareCallRecord result = careCallUploadService.processUploadedCallData(uploadRequest);
 
         // then
         assertThat(result).isNotNull();
@@ -248,7 +248,7 @@ class CareCallMediaProcessingServiceTest {
         when(careCallDataProcessingService.saveCallData(any())).thenReturn(expectedRecord);
 
         // when
-        CareCallRecord result = callDataUploadService.processUploadedCallData(uploadRequest);
+        CareCallRecord result = careCallUploadService.processUploadedCallData(uploadRequest);
 
         // then
         assertThat(result).isNotNull();
@@ -266,7 +266,7 @@ class CareCallMediaProcessingServiceTest {
                 .thenThrow(new CustomException(ErrorCode.ELDER_NOT_FOUND, "어르신을 찾을 수 없습니다."));
 
         // when & then
-        assertThatThrownBy(() -> callDataUploadService.processUploadedCallData(uploadRequest))
+        assertThatThrownBy(() -> careCallUploadService.processUploadedCallData(uploadRequest))
                 .isInstanceOf(CustomException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ELDER_NOT_FOUND);
 
@@ -283,7 +283,7 @@ class CareCallMediaProcessingServiceTest {
                 .thenThrow(new CustomException(ErrorCode.CARE_CALL_SETTING_NOT_FOUND, "통화 설정을 찾을 수 없습니다."));
 
         // when & then
-        assertThatThrownBy(() -> callDataUploadService.processUploadedCallData(uploadRequest))
+        assertThatThrownBy(() -> careCallUploadService.processUploadedCallData(uploadRequest))
                 .isInstanceOf(CustomException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.CARE_CALL_SETTING_NOT_FOUND);
 
@@ -320,7 +320,7 @@ class CareCallMediaProcessingServiceTest {
         when(careCallDataProcessingService.saveCallData(any())).thenReturn(expectedRecord);
 
         // when
-        CareCallRecord result = callDataUploadService.processUploadedCallData(uploadRequest);
+        CareCallRecord result = careCallUploadService.processUploadedCallData(uploadRequest);
 
         // then
         assertThat(result).isNotNull();

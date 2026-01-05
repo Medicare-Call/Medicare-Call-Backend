@@ -16,7 +16,7 @@ import java.time.ZoneOffset;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class CareCallMediaProcessingService {
+public class CareCallUploadService {
     private final OpenAiSttService openAiSttService;
     private final CareCallDataProcessingService careCallDataProcessingService;
 

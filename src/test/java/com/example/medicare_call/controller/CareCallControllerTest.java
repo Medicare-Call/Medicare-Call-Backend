@@ -17,7 +17,7 @@ import com.example.medicare_call.global.jwt.JwtTokenAuthentication;
 import com.example.medicare_call.repository.MemberRepository;
 import com.example.medicare_call.service.carecall.CareCallRequestSenderService;
 import com.example.medicare_call.service.carecall.CareCallSettingService;
-import com.example.medicare_call.service.data_processor.CareCallMediaProcessingService;
+import com.example.medicare_call.service.data_processor.CareCallUploadService;
 import com.example.medicare_call.service.data_processor.CareCallDataProcessingService;
 import com.example.medicare_call.service.data_processor.OpenAiSttService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -73,7 +73,7 @@ class CareCallControllerTest {
     @MockBean
     ApplicationEventPublisher publisher;
     @MockBean
-    private CareCallMediaProcessingService callDataUploadService;
+    private CareCallUploadService careCallUploadService;
     @MockBean
     private OpenAiSttService openAiSttService;
 
@@ -334,7 +334,7 @@ class CareCallControllerTest {
         doNothing().when(careCallRequestSenderService).sendTestCall(any(CareCallTestRequest.class));
 
         // when & then
-        mockMvc.perform(post("/test-care-call")
+        mockMvc.perform(post("/care-call/test")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -446,11 +446,11 @@ class CareCallControllerTest {
                 .transcriptionText("안녕하세요, 오늘 컨디션은 어떠세요? 네, 오늘은 컨디션이 좋아요.")
                 .build();
 
-        when(callDataUploadService.processUploadedCallData(any(com.example.medicare_call.dto.data_processor.CallDataUploadRequest.class)))
+        when(careCallUploadService.processUploadedCallData(any(com.example.medicare_call.dto.data_processor.CallDataUploadRequest.class)))
                 .thenReturn(savedRecord);
 
         // when & then
-        mockMvc.perform(multipart("/call-data-for-betatest")
+        mockMvc.perform(multipart("/call-data/beta")
                         .file(mockAudioFile)
                         .param("elderId", "1002")
                         .param("settingId", "4"))
@@ -461,11 +461,11 @@ class CareCallControllerTest {
     @DisplayName("베타테스트 통화 데이터 업로드 실패 - 오디오 파일 없음")
     void uploadAndProcessCallData_fail_emptyFile() throws Exception {
         // given
-        when(callDataUploadService.processUploadedCallData(any(com.example.medicare_call.dto.data_processor.CallDataUploadRequest.class)))
+        when(careCallUploadService.processUploadedCallData(any(com.example.medicare_call.dto.data_processor.CallDataUploadRequest.class)))
                 .thenThrow(new CustomException(ErrorCode.INVALID_INPUT_VALUE, "오디오 파일이 없습니다."));
 
         // when & then
-        mockMvc.perform(multipart("/call-data-for-betatest")
+        mockMvc.perform(multipart("/call-data/beta")
                         .file(new MockMultipartFile("recordingFile", new byte[0]))
                         .param("elderId", "1002")
                         .param("settingId", "4"))
@@ -484,7 +484,7 @@ class CareCallControllerTest {
         );
 
         // when & then
-        mockMvc.perform(multipart("/call-data-for-betatest")
+        mockMvc.perform(multipart("/call-data/beta")
                         .file(mockAudioFile)
                         .param("settingId", "4"))
                 .andExpect(status().isBadRequest());
@@ -502,7 +502,7 @@ class CareCallControllerTest {
         );
 
         // when & then
-        mockMvc.perform(multipart("/call-data-for-betatest")
+        mockMvc.perform(multipart("/call-data/beta")
                         .file(mockAudioFile)
                         .param("elderId", "1002"))
                 .andExpect(status().isBadRequest());
@@ -519,11 +519,11 @@ class CareCallControllerTest {
                 "mock audio content".getBytes()
         );
 
-        when(callDataUploadService.processUploadedCallData(any(com.example.medicare_call.dto.data_processor.CallDataUploadRequest.class)))
+        when(careCallUploadService.processUploadedCallData(any(com.example.medicare_call.dto.data_processor.CallDataUploadRequest.class)))
                 .thenThrow(new CustomException(ErrorCode.ELDER_NOT_FOUND, "어르신을 찾을 수 없습니다."));
 
         // when & then
-        mockMvc.perform(multipart("/call-data-for-betatest")
+        mockMvc.perform(multipart("/call-data/beta")
                         .file(mockAudioFile)
                         .param("elderId", "999")
                         .param("settingId", "4"))
@@ -542,11 +542,11 @@ class CareCallControllerTest {
                 "mock audio content".getBytes()
         );
 
-        when(callDataUploadService.processUploadedCallData(any(com.example.medicare_call.dto.data_processor.CallDataUploadRequest.class)))
+        when(careCallUploadService.processUploadedCallData(any(com.example.medicare_call.dto.data_processor.CallDataUploadRequest.class)))
                 .thenThrow(new CustomException(ErrorCode.CARE_CALL_SETTING_NOT_FOUND, "통화 설정을 찾을 수 없습니다."));
 
         // when & then
-        mockMvc.perform(multipart("/call-data-for-betatest")
+        mockMvc.perform(multipart("/call-data/beta")
                         .file(mockAudioFile)
                         .param("elderId", "1002")
                         .param("settingId", "999"))
@@ -564,11 +564,11 @@ class CareCallControllerTest {
                 "mock audio content".getBytes()
         );
 
-        when(callDataUploadService.processUploadedCallData(any(com.example.medicare_call.dto.data_processor.CallDataUploadRequest.class)))
+        when(careCallUploadService.processUploadedCallData(any(com.example.medicare_call.dto.data_processor.CallDataUploadRequest.class)))
                 .thenThrow(new CustomException(ErrorCode.STT_PROCESSING_FAILED, "STT 처리 실패"));
 
         // when & then
-        mockMvc.perform(multipart("/call-data-for-betatest")
+        mockMvc.perform(multipart("/call-data/beta")
                         .file(mockAudioFile)
                         .param("elderId", "1002")
                         .param("settingId", "4"))
