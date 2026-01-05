@@ -15,7 +15,7 @@ import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.global.jwt.JwtProvider;
 import com.example.medicare_call.global.jwt.JwtTokenAuthentication;
 import com.example.medicare_call.repository.MemberRepository;
-import com.example.medicare_call.service.carecall.CareCallRequestSenderService;
+import com.example.medicare_call.service.carecall.CareCallTestService;
 import com.example.medicare_call.service.carecall.CareCallSettingService;
 import com.example.medicare_call.service.data_processor.CareCallUploadService;
 import com.example.medicare_call.service.data_processor.CareCallDataProcessingService;
@@ -65,7 +65,7 @@ class CareCallControllerTest {
     @MockBean
     private CareCallSettingService careCallSettingService;
     @MockBean
-    private CareCallRequestSenderService careCallRequestSenderService;
+    private CareCallTestService careCallTestService;
     @MockBean
     private JwtProvider jwtProvider;
     @MockBean
@@ -331,7 +331,7 @@ class CareCallControllerTest {
         // given
         CareCallTestRequest request = new CareCallTestRequest("01012345678", "테스트 프롬프트입니다.");
 
-        doNothing().when(careCallRequestSenderService).sendTestCall(any(CareCallTestRequest.class));
+        doNothing().when(careCallTestService).sendTestCall(any(CareCallTestRequest.class));
 
         // when & then
         mockMvc.perform(post("/care-call/test")

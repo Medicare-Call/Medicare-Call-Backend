@@ -15,6 +15,7 @@ import com.example.medicare_call.global.event.CareCallEvent;
 import com.example.medicare_call.global.event.Events;
 import com.example.medicare_call.service.carecall.CareCallRequestSenderService;
 import com.example.medicare_call.service.carecall.CareCallSettingService;
+import com.example.medicare_call.service.carecall.CareCallTestService;
 import com.example.medicare_call.service.data_processor.CareCallDataProcessingService;
 import com.example.medicare_call.service.data_processor.CareCallUploadService;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -35,7 +36,7 @@ public class CareCallController implements CareCallApi, CareCallBetaTestApi, Car
 
     private final CareCallSettingService careCallSettingService;
     private final CareCallDataProcessingService careCallDataProcessingService;
-    private final CareCallRequestSenderService careCallRequestSenderService;
+    private final CareCallTestService careCallTestService;
     private final CareCallUploadService careCallUploadService;
 
 
@@ -65,7 +66,7 @@ public class CareCallController implements CareCallApi, CareCallBetaTestApi, Car
     @Override
     @PostMapping("/care-call/immediate")
     public ResponseEntity<String> sendImmediateCareCall(@Valid @RequestBody ImmediateCareCallRequest request) {
-        String result = careCallRequestSenderService.sendImmediateCall(request.getElderId(), request.getCareCallOption());
+        String result = careCallTestService.sendImmediateCall(request.getElderId(), request.getCareCallOption());
         return ResponseEntity.ok(result);
     }
 
@@ -73,7 +74,7 @@ public class CareCallController implements CareCallApi, CareCallBetaTestApi, Car
     @Override
     @PostMapping("/care-call/test")
     public ResponseEntity<String> testCareCall(@Valid @RequestBody CareCallTestRequest req) {
-        careCallRequestSenderService.sendTestCall(req);
+        careCallTestService.sendTestCall(req);
         return ResponseEntity.ok(req.prompt());
     }
 
