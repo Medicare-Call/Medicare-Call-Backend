@@ -8,6 +8,7 @@ import com.example.medicare_call.dto.report.WeeklyReportResponse;
 import com.example.medicare_call.global.enums.ElderStatus;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
+import com.example.medicare_call.mapper.WeeklyReportMapper;
 import com.example.medicare_call.repository.CareCallRecordRepository;
 import com.example.medicare_call.repository.ElderRepository;
 import com.example.medicare_call.repository.SubscriptionRepository;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
@@ -54,6 +56,9 @@ class WeeklyReportServiceTest {
 
     @Mock
     private CareCallRecordRepository careCallRecordRepository;
+
+    @Spy
+    private WeeklyReportMapper weeklyReportMapper = new WeeklyReportMapper();
 
     @InjectMocks
     private WeeklyReportService weeklyReportService;
