@@ -1,5 +1,6 @@
 package com.example.medicare_call.controller;
 
+import com.example.medicare_call.api.HomeApi;
 import com.example.medicare_call.dto.report.HomeReportResponse;
 import com.example.medicare_call.global.annotation.AuthUser;
 import com.example.medicare_call.service.report.HomeReportService;
@@ -22,43 +23,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/elders")
 @RequiredArgsConstructor
-@Tag(name = "Home", description = "홈 화면 데이터 조회 API")
-public class HomeController {
+public class HomeController implements HomeApi {
 
     private final HomeReportService homeReportService;
 
-    @Operation(
-        summary = "홈 화면 데이터 조회",
-        description = "초기 화면 렌더링에 필요한 데이터를 제공하는 API입니다. 홈 화면 진입 시에 호출하면 됩니다."
-    )
-    @ApiResponses({
-        @ApiResponse(
-            responseCode = "200",
-            description = "홈 화면 데이터 조회 성공",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = HomeReportResponse.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "잘못된 요청"
-        ),
-        @ApiResponse(
-            responseCode = "404",
-            description = "어르신 정보를 찾을 수 없음"
-        )
-    })
+    @Override
     @GetMapping("/{elderId}/home")
-    public ResponseEntity<HomeReportResponse> getHomeData(
-        @Parameter(hidden = true) @AuthUser Long memberId,
-        @Parameter(description = "조회할 어르신의 식별자", required = true, example = "1")
-        @PathVariable("elderId") Integer elderId
-    ) {
+    public ResponseEntity<HomeReportResponse> getHomeData(@Parameter(hidden = true) @AuthUser Long memberId, @PathVariable("elderId")Integer elderId) {
         log.info("홈 화면 데이터 조회 요청: elderId={}", elderId);
-
         HomeReportResponse response = homeReportService.getHomeReport(memberId.intValue(), elderId);
-
         return ResponseEntity.ok(response);
     }
 } 
