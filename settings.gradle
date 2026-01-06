@@ -1,1 +1,8 @@
+pluginManagement {
+    repositories {
+        mavenCentral() // 추가
+        gradlePluginPortal()
+    }
+}
+
 rootProject.name = 'medicare-call'
