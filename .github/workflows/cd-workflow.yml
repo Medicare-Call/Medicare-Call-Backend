@@ -34,7 +34,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: 🐘 build with Gradle (without test)
-        run: ./gradlew clean build -x test --stacktrace
+        run: ./gradlew clean build -x test --stacktrace --info
 
       - name: 🐳 Docker build & push
         run: |
