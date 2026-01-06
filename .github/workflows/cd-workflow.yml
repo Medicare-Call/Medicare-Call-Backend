@@ -24,6 +24,7 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+          cache: 'gradle'
           server-id: github
           settings-path: ${{ github.workspace }}
 
