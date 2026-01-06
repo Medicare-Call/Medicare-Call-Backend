@@ -21,6 +21,7 @@ configurations {
 }
 
 repositories {
+	maven { url 'https://maven-central.storage-download.googleapis.com/repos/central/data/' }
 	mavenCentral()
 	maven { url 'https://repo.spring.io/milestone' }
 }
