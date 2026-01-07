@@ -18,7 +18,7 @@ import java.time.ZoneOffset;
 @RequiredArgsConstructor
 public class CareCallUploadService {
     private final OpenAiSttService openAiSttService;
-    private final CareCallDataProcessingService careCallDataProcessingService;
+    private final CareCallService careCallService;
 
     @Transactional
     public CareCallRecord processUploadedCallData(CallDataUploadRequest request) {
@@ -58,7 +58,7 @@ public class CareCallUploadService {
                 .transcription(transcriptionData)
                 .build();
 
-        CareCallRecord saved = careCallDataProcessingService.saveCallData(processRequest);
+        CareCallRecord saved = careCallService.saveCallData(processRequest);
         log.info("STT 데이터 처리 완료: recordId={}", saved.getId());
         return saved;
     }

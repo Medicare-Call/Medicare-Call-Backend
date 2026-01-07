@@ -4,7 +4,7 @@ import com.example.medicare_call.domain.CareCallRecord;
 import com.example.medicare_call.domain.Notification;
 import com.example.medicare_call.dto.NotificationDto;
 import com.example.medicare_call.global.enums.CareCallStatus;
-import com.example.medicare_call.global.event.CareCallEvent;
+import com.example.medicare_call.global.event.CareCallAnalysisCompletedEvent;
 import com.example.medicare_call.util.CareCallUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +27,7 @@ class NotificationSendEventListener {
      * 3. 파이어베이스에 관련된 데이터 전송 ( Notification 엔티티의 PK )을 함께 전송해야함
      * */
     @EventListener
-    public void listenCareCallEvent(CareCallEvent careCallEvent) {
+    public void listenCareCallAnalysisCompletedEvent(CareCallAnalysisCompletedEvent careCallEvent) {
         CareCallRecord careCallRecord = careCallEvent.careCallRecord();
         NotificationDto notificationDto = parseToNotificationDto(careCallRecord);
         Notification notification = notificationService.saveNotification(notificationDto);

@@ -5,7 +5,7 @@ import com.example.medicare_call.domain.CareCallSetting;
 import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.domain.Notification;
 import com.example.medicare_call.dto.NotificationDto;
-import com.example.medicare_call.global.event.CareCallEvent;
+import com.example.medicare_call.global.event.CareCallAnalysisCompletedEvent;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,7 +39,7 @@ class NotificationSendEventListenerTest {
 
     @Test
     @DisplayName("실패 케어콜: 부재중 상태로 알림 발송")
-    void listenCareCallEvent_callStatus_failed() {
+    void listenCareCallAnalysisCompletedEvent_callStatus_failed() {
         // given
         Elder elder = mock(Elder.class);
         when(elder.getName()).thenReturn("김철수");
@@ -55,14 +55,14 @@ class NotificationSendEventListenerTest {
                 .startTime(LocalDateTime.of(2025, 11, 5, 10, 0))
                 .build();
 
-        CareCallEvent event = new CareCallEvent(careCallRecord);
+        CareCallAnalysisCompletedEvent event = new CareCallAnalysisCompletedEvent(careCallRecord);
 
         Notification notification = mock(Notification.class);
         when(notificationService.saveNotification(any(NotificationDto.class)))
                 .thenReturn(notification);
 
         // when
-        notificationSendEventListener.listenCareCallEvent(event);
+        notificationSendEventListener.listenCareCallAnalysisCompletedEvent(event);
 
         // then
         ArgumentCaptor<NotificationDto> dtoCaptor = ArgumentCaptor.forClass(NotificationDto.class);
@@ -79,7 +79,7 @@ class NotificationSendEventListenerTest {
 
     @Test
     @DisplayName("미응답 케어콜: no-answer 상태로 알림 발송")
-    void listenCareCallEvent_callStatus_noAnswer() {
+    void listenCareCallAnalysisCompletedEvent_callStatus_noAnswer() {
         // given
         Elder elder = mock(Elder.class);
         when(elder.getName()).thenReturn("이영희");
@@ -95,14 +95,14 @@ class NotificationSendEventListenerTest {
                 .startTime(LocalDateTime.of(2025, 11, 5, 14, 30))
                 .build();
 
-        CareCallEvent event = new CareCallEvent(careCallRecord);
+        CareCallAnalysisCompletedEvent event = new CareCallAnalysisCompletedEvent(careCallRecord);
 
         Notification notification = mock(Notification.class);
         when(notificationService.saveNotification(any(NotificationDto.class)))
                 .thenReturn(notification);
 
         // when
-        notificationSendEventListener.listenCareCallEvent(event);
+        notificationSendEventListener.listenCareCallAnalysisCompletedEvent(event);
 
         // then
         ArgumentCaptor<NotificationDto> dtoCaptor = ArgumentCaptor.forClass(NotificationDto.class);
@@ -118,7 +118,7 @@ class NotificationSendEventListenerTest {
 
     @Test
     @DisplayName("완료 케어콜 1차: completed 상태로 알림 발송")
-    void listenCareCallEvent_callStatus_completed_firstCall() {
+    void listenCareCallAnalysisCompletedEvent_callStatus_completed_firstCall() {
         // given
         Elder elder = mock(Elder.class);
         when(elder.getName()).thenReturn("박민수");
@@ -137,14 +137,14 @@ class NotificationSendEventListenerTest {
                 .startTime(LocalDateTime.of(2025, 11, 5, 10, 0))
                 .build();
 
-        CareCallEvent event = new CareCallEvent(careCallRecord);
+        CareCallAnalysisCompletedEvent event = new CareCallAnalysisCompletedEvent(careCallRecord);
 
         Notification notification = mock(Notification.class);
         when(notificationService.saveNotification(any(NotificationDto.class)))
                 .thenReturn(notification);
 
         // when
-        notificationSendEventListener.listenCareCallEvent(event);
+        notificationSendEventListener.listenCareCallAnalysisCompletedEvent(event);
 
         // then
         ArgumentCaptor<NotificationDto> dtoCaptor = ArgumentCaptor.forClass(NotificationDto.class);
@@ -160,7 +160,7 @@ class NotificationSendEventListenerTest {
 
     @Test
     @DisplayName("완료 케어콜 2차: completed 상태로 알림 발송")
-    void listenCareCallEvent_callStatus_completed_secondCall() {
+    void listenCareCallAnalysisCompletedEvent_callStatus_completed_secondCall() {
         // given
         Elder elder = mock(Elder.class);
         when(elder.getName()).thenReturn("최지원");
@@ -179,14 +179,14 @@ class NotificationSendEventListenerTest {
                 .startTime(LocalDateTime.of(2025, 11, 5, 15, 0))
                 .build();
 
-        CareCallEvent event = new CareCallEvent(careCallRecord);
+        CareCallAnalysisCompletedEvent event = new CareCallAnalysisCompletedEvent(careCallRecord);
 
         Notification notification = mock(Notification.class);
         when(notificationService.saveNotification(any(NotificationDto.class)))
                 .thenReturn(notification);
 
         // when
-        notificationSendEventListener.listenCareCallEvent(event);
+        notificationSendEventListener.listenCareCallAnalysisCompletedEvent(event);
 
         // then
         ArgumentCaptor<NotificationDto> dtoCaptor = ArgumentCaptor.forClass(NotificationDto.class);
@@ -202,7 +202,7 @@ class NotificationSendEventListenerTest {
 
     @Test
     @DisplayName("완료 케어콜 3차 + 건강 징후: completed 상태로 알림 발송")
-    void listenCareCallEvent_callStatus_completed_thirdCall_withHealthDetails() {
+    void listenCareCallAnalysisCompletedEvent_callStatus_completed_thirdCall_withHealthDetails() {
         // given
         Elder elder = mock(Elder.class);
         when(elder.getName()).thenReturn("정수진");
@@ -222,14 +222,14 @@ class NotificationSendEventListenerTest {
                 .healthDetails("혈압이 높게 측정되었습니다.")
                 .build();
 
-        CareCallEvent event = new CareCallEvent(careCallRecord);
+        CareCallAnalysisCompletedEvent event = new CareCallAnalysisCompletedEvent(careCallRecord);
 
         Notification notification = mock(Notification.class);
         when(notificationService.saveNotification(any(NotificationDto.class)))
                 .thenReturn(notification);
 
         // when
-        notificationSendEventListener.listenCareCallEvent(event);
+        notificationSendEventListener.listenCareCallAnalysisCompletedEvent(event);
 
         // then
         ArgumentCaptor<NotificationDto> dtoCaptor = ArgumentCaptor.forClass(NotificationDto.class);
@@ -246,7 +246,7 @@ class NotificationSendEventListenerTest {
 
     @Test
     @DisplayName("완료 케어콜 3차 + 건강 징후 미존재: 건강 징후 메시지 미포함")
-    void listenCareCallEvent_callStatus_completed_thirdCall_withoutHealthDetails() {
+    void listenCareCallAnalysisCompletedEvent_callStatus_completed_thirdCall_withoutHealthDetails() {
         // given
         Elder elder = mock(Elder.class);
         when(elder.getName()).thenReturn("한민지");
@@ -266,14 +266,14 @@ class NotificationSendEventListenerTest {
                 .healthDetails(null)
                 .build();
 
-        CareCallEvent event = new CareCallEvent(careCallRecord);
+        CareCallAnalysisCompletedEvent event = new CareCallAnalysisCompletedEvent(careCallRecord);
 
         Notification notification = mock(Notification.class);
         when(notificationService.saveNotification(any(NotificationDto.class)))
                 .thenReturn(notification);
 
         // when
-        notificationSendEventListener.listenCareCallEvent(event);
+        notificationSendEventListener.listenCareCallAnalysisCompletedEvent(event);
 
         // then
         ArgumentCaptor<NotificationDto> dtoCaptor = ArgumentCaptor.forClass(NotificationDto.class);
@@ -290,7 +290,7 @@ class NotificationSendEventListenerTest {
 
     @Test
     @DisplayName("케어콜 이벤트 처리: NotificationService와 FirebaseService 호출 순서 검증")
-    void listenCareCallEvent_serviceCallOrder() {
+    void listenCareCallAnalysisCompletedEvent_serviceCallOrder() {
         // given
         Elder elder = mock(Elder.class);
         when(elder.getName()).thenReturn("테스트");
@@ -306,14 +306,14 @@ class NotificationSendEventListenerTest {
                 .startTime(LocalDateTime.of(2025, 11, 5, 10, 0))
                 .build();
 
-        CareCallEvent event = new CareCallEvent(careCallRecord);
+        CareCallAnalysisCompletedEvent event = new CareCallAnalysisCompletedEvent(careCallRecord);
 
         Notification notification = mock(Notification.class);
         when(notificationService.saveNotification(any(NotificationDto.class)))
                 .thenReturn(notification);
 
         // when
-        notificationSendEventListener.listenCareCallEvent(event);
+        notificationSendEventListener.listenCareCallAnalysisCompletedEvent(event);
 
         // then - 호출 순서 검증
         InOrder inOrder = inOrder(notificationService, firebaseService);
