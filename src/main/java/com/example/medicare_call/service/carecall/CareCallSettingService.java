@@ -16,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalTime;
+
 @Service
 @RequiredArgsConstructor
 public class CareCallSettingService {
@@ -74,5 +76,24 @@ public class CareCallSettingService {
         if (relation.getAuthority() != MemberElderAuthority.MANAGE) {
             throw new CustomException(ErrorCode.HANDLE_ACCESS_DENIED);
         }
+    }
+
+    @Transactional
+    public CareCallSetting getOrCreateImmediateSetting(Elder elder) {
+        LocalTime currentTime = LocalTime.now().withSecond(0).withNano(0);
+
+        return careCallSettingRepository.findByElder(elder)
+            .map(setting -> {
+                setting.update(currentTime, setting.getSecondCallTime(), setting.getThirdCallTime());
+                return setting;
+            })
+            .orElseGet(() -> {
+                CareCallSetting newSetting = CareCallSetting.builder()
+                    .elder(elder)
+                    .firstCallTime(currentTime)
+                    .recurrence(CallRecurrenceType.DAILY.getValue())
+                    .build();
+                return careCallSettingRepository.save(newSetting);
+            });
     }
 }

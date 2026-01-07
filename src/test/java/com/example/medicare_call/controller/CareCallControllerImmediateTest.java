@@ -4,7 +4,7 @@ import com.example.medicare_call.domain.Member;
 import com.example.medicare_call.global.jwt.JwtProvider;
 import com.example.medicare_call.repository.MemberRepository;
 import com.example.medicare_call.repository.ElderRepository;
-import com.example.medicare_call.service.carecall.CareCallRequestSenderService;
+import com.example.medicare_call.service.carecall.CareCallTestService;
 import com.example.medicare_call.service.data_processor.CareCallUploadService;
 import com.example.medicare_call.service.data_processor.OpenAiSttService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,10 +26,8 @@ import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.dto.carecall.ImmediateCareCallRequest;
 import com.example.medicare_call.dto.carecall.ImmediateCareCallRequest.CareCallOption;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -44,7 +42,7 @@ class CareCallControllerImmediateTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private CareCallRequestSenderService careCallRequestSenderService;
+    private CareCallTestService careCallTestService;
 
     @MockBean
     private CareCallSettingService careCallSettingService;
@@ -101,7 +99,7 @@ class CareCallControllerImmediateTest {
 
         String expectedResult = "김할머니 어르신께 즉시 케어콜 발송이 완료되었습니다.";
         
-        when(careCallRequestSenderService.sendImmediateCall(request.getElderId(), request.getCareCallOption()))
+        when(careCallTestService.sendImmediateCall(request.getElderId(), request.getCareCallOption()))
                 .thenReturn(expectedResult);
 
         // when & then
@@ -120,7 +118,7 @@ class CareCallControllerImmediateTest {
         request.setElderId(999L); // 존재하지 않는 ID
         request.setCareCallOption(CareCallOption.FIRST);
         
-        when(careCallRequestSenderService.sendImmediateCall(request.getElderId(), request.getCareCallOption()))
+        when(careCallTestService.sendImmediateCall(request.getElderId(), request.getCareCallOption()))
                 .thenThrow(new CustomException(ErrorCode.ELDER_NOT_FOUND));
 
         // when & then
