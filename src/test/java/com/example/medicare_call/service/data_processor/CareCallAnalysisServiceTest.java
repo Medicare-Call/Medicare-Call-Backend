@@ -25,7 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class HealthDataProcessingServiceTest {
+public class CareCallAnalysisServiceTest {
 
     @Mock
     private CareCallRecordRepository careCallRecordRepository;
@@ -37,7 +37,7 @@ public class HealthDataProcessingServiceTest {
     private AiSummaryService aiSummaryService;
 
     @InjectMocks
-    private HealthDataProcessingService healthDataProcessingService;
+    private CareCallAnalysisService careCallAnalysisService;
 
     private CareCallSetting callSetting;
     private CareCallRecord callRecord;
@@ -87,7 +87,7 @@ public class HealthDataProcessingServiceTest {
         when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(callRecord);
 
         // when
-        healthDataProcessingService.updateCareCallRecordWithHealthData(callRecord, healthData);
+        careCallAnalysisService.updateCareCallRecordWithHealthData(callRecord, healthData);
 
         // then
         verify(mealRecordRepository).save(any(MealRecord.class));
@@ -120,7 +120,7 @@ public class HealthDataProcessingServiceTest {
         when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(callRecord);
 
         // when
-        healthDataProcessingService.updateCareCallRecordWithHealthData(callRecord, healthData);
+        careCallAnalysisService.updateCareCallRecordWithHealthData(callRecord, healthData);
 
         // then
         verify(mealRecordRepository, times(2)).save(any(MealRecord.class));
@@ -140,7 +140,7 @@ public class HealthDataProcessingServiceTest {
         when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(callRecord);
 
         // when
-        healthDataProcessingService.updateCareCallRecordWithHealthData(callRecord, healthData);
+        careCallAnalysisService.updateCareCallRecordWithHealthData(callRecord, healthData);
 
         // then
         verify(careCallRecordRepository).save(argThat(record -> 
@@ -163,7 +163,7 @@ public class HealthDataProcessingServiceTest {
         when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(callRecord);
 
         // when
-        healthDataProcessingService.updateCareCallRecordWithHealthData(callRecord, healthData);
+        careCallAnalysisService.updateCareCallRecordWithHealthData(callRecord, healthData);
 
         // then
         verify(careCallRecordRepository).save(argThat(record -> 
@@ -190,7 +190,7 @@ public class HealthDataProcessingServiceTest {
         when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(callRecord);
 
         // when
-        healthDataProcessingService.updateCareCallRecordWithHealthData(callRecord, healthData);
+        careCallAnalysisService.updateCareCallRecordWithHealthData(callRecord, healthData);
 
         // then
         verify(careCallRecordRepository).save(argThat(record -> 
@@ -213,7 +213,7 @@ public class HealthDataProcessingServiceTest {
         when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(callRecord);
 
         // when
-        healthDataProcessingService.updateCareCallRecordWithHealthData(callRecord, healthData);
+        careCallAnalysisService.updateCareCallRecordWithHealthData(callRecord, healthData);
 
         // then
         verify(mealRecordRepository, never()).save(any(MealRecord.class));
@@ -235,7 +235,7 @@ public class HealthDataProcessingServiceTest {
         when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(callRecord);
 
         // when
-        healthDataProcessingService.updateCareCallRecordWithHealthData(callRecord, healthData);
+        careCallAnalysisService.updateCareCallRecordWithHealthData(callRecord, healthData);
 
         // then
         verify(aiSummaryService).getSymptomAnalysis(healthSigns);
@@ -265,7 +265,7 @@ public class HealthDataProcessingServiceTest {
         when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(callRecord);
 
         // when
-        healthDataProcessingService.updateCareCallRecordWithHealthData(callRecord, healthData);
+        careCallAnalysisService.updateCareCallRecordWithHealthData(callRecord, healthData);
 
         // then
         verify(mealRecordRepository).save(argThat(record ->
@@ -294,12 +294,12 @@ public class HealthDataProcessingServiceTest {
         when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(callRecord);
 
         // when
-        healthDataProcessingService.updateCareCallRecordWithHealthData(callRecord, healthData);
+        careCallAnalysisService.updateCareCallRecordWithHealthData(callRecord, healthData);
 
         // then
         verify(mealRecordRepository).save(argThat(record ->
             record.getEatenStatus() == null && // null로 저장
-            HealthDataProcessingService.MEAL_STATUS_UNKNOWN_MESSAGE.equals(record.getResponseSummary()) // 고정 메시지
+            CareCallAnalysisService.MEAL_STATUS_UNKNOWN_MESSAGE.equals(record.getResponseSummary()) // 고정 메시지
         ));
         verify(careCallRecordRepository).save(any(CareCallRecord.class));
     }

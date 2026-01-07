@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class HealthDataProcessingService {
+public class CareCallAnalysisService {
     public static final String MEAL_STATUS_UNKNOWN_MESSAGE = "해당 시간대 식사 여부를 명확히 확인하지 못했어요.";
 
     private final CareCallRecordRepository careCallRecordRepository;
@@ -52,7 +52,7 @@ public class HealthDataProcessingService {
 
     @Autowired
     @Lazy
-    private HealthDataProcessingService self;
+    private CareCallAnalysisService self;
 
     @Retryable(
             retryFor = Exception.class,

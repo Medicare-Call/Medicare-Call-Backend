@@ -27,7 +27,7 @@ class CareCallEventListenerTest {
     private CareCallEventListener careCallEventListener;
 
     @Mock
-    private HealthDataProcessingService healthDataProcessingService;
+    private CareCallAnalysisService careCallAnalysisService;
 
     @Mock
     private WeeklyStatisticsService weeklyStatisticsService;
@@ -52,7 +52,7 @@ class CareCallEventListenerTest {
 
             // then
             // 1. 서비스 호출 확인
-            verify(healthDataProcessingService).extractAndSaveHealthDataFromAi(record);
+            verify(careCallAnalysisService).extractAndSaveHealthDataFromAi(record);
 
             // 2. 통계 업데이트 (Completed는 부재중 통계 업데이트 안함)
             verify(weeklyStatisticsService, never()).updateMissedCallStatistics(any());
@@ -85,7 +85,7 @@ class CareCallEventListenerTest {
 
             // then
             // 서비스는 호출되지만 내부에서 리턴됨 (Listener 입장에서는 호출함)
-            verify(healthDataProcessingService).extractAndSaveHealthDataFromAi(record);
+            verify(careCallAnalysisService).extractAndSaveHealthDataFromAi(record);
 
             // 이벤트 발행 확인
             eventsMock.verify(() -> Events.raise(any(CareCallAnalysisCompletedEvent.class)));
@@ -112,7 +112,7 @@ class CareCallEventListenerTest {
 
             // then
             // 서비스 호출 확인
-            verify(healthDataProcessingService).extractAndSaveHealthDataFromAi(record);
+            verify(careCallAnalysisService).extractAndSaveHealthDataFromAi(record);
 
             // 부재중 카운트 증가 확인
             verify(weeklyStatisticsService).updateMissedCallStatistics(record);
@@ -138,7 +138,7 @@ class CareCallEventListenerTest {
 
         // 서비스가 예외를 던짐 (Retry 다 하고 실패한 상황 가정)
         doThrow(new RuntimeException("최종 실패"))
-                .when(healthDataProcessingService).extractAndSaveHealthDataFromAi(record);
+                .when(careCallAnalysisService).extractAndSaveHealthDataFromAi(record);
 
         // when
         try (MockedStatic<Events> eventsMock = mockStatic(Events.class)) {
