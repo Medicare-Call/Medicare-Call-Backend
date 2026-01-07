@@ -2,7 +2,6 @@ package com.example.medicare_call.service.data_processor;
 
 import com.example.medicare_call.domain.CareCallRecord;
 import com.example.medicare_call.domain.MedicationSchedule;
-import com.example.medicare_call.domain.WeeklyStatistics;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionRequest;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
 import com.example.medicare_call.global.enums.CareCallStatus;
@@ -10,8 +9,8 @@ import com.example.medicare_call.global.event.CareCallAnalysisCompletedEvent;
 import com.example.medicare_call.global.event.CareCallCompletedEvent;
 import com.example.medicare_call.global.event.Events;
 import com.example.medicare_call.repository.MedicationScheduleRepository;
-import com.example.medicare_call.repository.WeeklyStatisticsRepository;
 import com.example.medicare_call.service.ai.AiHealthDataExtractorService;
+import com.example.medicare_call.service.statistics.WeeklyStatisticsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -19,11 +18,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.TemporalAdjusters;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -33,7 +29,7 @@ public class CareCallEventListener {
 
     private final AiHealthDataExtractorService aiHealthDataExtractorService;
     private final HealthDataProcessingService healthDataProcessingService;
-    private final WeeklyStatisticsRepository weeklyStatisticsRepository;
+    private final WeeklyStatisticsService weeklyStatisticsService;
     private final MedicationScheduleRepository medicationScheduleRepository;
 
     @Async
@@ -55,7 +51,7 @@ public class CareCallEventListener {
         // 통계 업데이트
         if (CareCallStatus.NO_ANSWER.matches(record.getCallStatus())) {
             try {
-                updateMissedCallStatistics(record);
+                weeklyStatisticsService.updateMissedCallStatistics(record);
             } catch (Exception e) {
                 log.error("부재중 통계 업데이트 중 오류 발생: recordId={}", record.getId(), e);
             }
@@ -87,15 +83,5 @@ public class CareCallEventListener {
         healthDataProcessingService.processAndSaveHealthData(callRecord, healthData);
 
         log.info("추출된 건강 데이터 처리 완료: {}", healthData);
-    }
-
-    private void updateMissedCallStatistics(CareCallRecord saved) {
-        LocalDate callDate = saved.getCalledAt().toLocalDate();
-        LocalDate startDate = callDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-
-        Optional<WeeklyStatistics> weeklyStatsOpt = weeklyStatisticsRepository.findByElderAndStartDate(saved.getElder(), startDate);
-
-        weeklyStatsOpt.ifPresent(WeeklyStatistics::incrementMissedCalls);
-        log.info("부재중 통계 업데이트 완료: elderId={}", saved.getElder().getId());
     }
 }

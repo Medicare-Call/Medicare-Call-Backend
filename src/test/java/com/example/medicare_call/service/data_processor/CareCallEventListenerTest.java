@@ -3,7 +3,6 @@ package com.example.medicare_call.service.data_processor;
 import com.example.medicare_call.domain.CareCallRecord;
 import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.domain.MedicationSchedule;
-import com.example.medicare_call.domain.WeeklyStatistics;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionRequest;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
 import com.example.medicare_call.global.enums.CareCallStatus;
@@ -11,8 +10,8 @@ import com.example.medicare_call.global.event.CareCallAnalysisCompletedEvent;
 import com.example.medicare_call.global.event.CareCallCompletedEvent;
 import com.example.medicare_call.global.event.Events;
 import com.example.medicare_call.repository.MedicationScheduleRepository;
-import com.example.medicare_call.repository.WeeklyStatisticsRepository;
 import com.example.medicare_call.service.ai.AiHealthDataExtractorService;
+import com.example.medicare_call.service.statistics.WeeklyStatisticsService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,7 +44,7 @@ class CareCallEventListenerTest {
     private HealthDataProcessingService healthDataProcessingService;
 
     @Mock
-    private WeeklyStatisticsRepository weeklyStatisticsRepository;
+    private WeeklyStatisticsService weeklyStatisticsService;
 
     @Mock
     private MedicationScheduleRepository medicationScheduleRepository;
@@ -91,7 +90,7 @@ class CareCallEventListenerTest {
             verify(healthDataProcessingService).processAndSaveHealthData(record, healthDataResponse);
 
             // 3. 통계 업데이트 (Completed는 부재중 통계 업데이트 안함)
-            verify(weeklyStatisticsRepository, never()).findByElderAndStartDate(any(), any());
+            verify(weeklyStatisticsService, never()).updateMissedCallStatistics(any());
 
             // 4. 분석 완료 이벤트 발행 확인
             eventsMock.verify(() -> Events.raise(argThat(e ->
@@ -146,10 +145,6 @@ class CareCallEventListenerTest {
 
         CareCallCompletedEvent event = new CareCallCompletedEvent(record);
 
-        WeeklyStatistics statistics = mock(WeeklyStatistics.class);
-        when(weeklyStatisticsRepository.findByElderAndStartDate(any(), any()))
-                .thenReturn(Optional.of(statistics));
-
         // when
         try (MockedStatic<Events> eventsMock = mockStatic(Events.class)) {
             careCallEventListener.handleCareCallSaved(event);
@@ -159,7 +154,7 @@ class CareCallEventListenerTest {
             verify(aiHealthDataExtractorService, never()).extractHealthData(any());
 
             // 부재중 카운트 증가 확인
-            verify(statistics).incrementMissedCalls();
+            verify(weeklyStatisticsService).updateMissedCallStatistics(record);
 
             // 이벤트 발행 확인
             eventsMock.verify(() -> Events.raise(any(CareCallAnalysisCompletedEvent.class)));
