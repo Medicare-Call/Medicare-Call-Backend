@@ -54,7 +54,7 @@ class AuthServiceTest {
                 .phone(phone)
                 .name("홍길동")
                 .birthDate(LocalDate.of(1990, 1, 1))
-                .gender((byte) 1)
+                .gender(Gender.FEMALE)
                 .plan((byte) 0)
                 .termsAgreedAt(LocalDateTime.now())
                 .build();
@@ -103,7 +103,7 @@ class AuthServiceTest {
                 .phone(phone)
                 .name("김철수")
                 .birthDate(LocalDate.of(1980, 5, 15))
-                .gender((byte) 0)
+                .gender(Gender.MALE)
                 .plan((byte) 1)
                 .termsAgreedAt(LocalDateTime.now())
                 .build();

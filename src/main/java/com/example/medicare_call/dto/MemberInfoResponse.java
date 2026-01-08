@@ -52,7 +52,7 @@ public record MemberInfoResponse(
         return new MemberInfoResponse(
                 member.getName(),
                 member.getBirthDate(),
-                member.getGenderEnum(),
+                member.getGender(),
                 member.getPhone(),
                 new PushNotificationResponse(
                         member.getPushAll(),

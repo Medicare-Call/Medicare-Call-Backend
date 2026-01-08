@@ -2,6 +2,7 @@ package com.example.medicare_call.repository;
 
 import com.example.medicare_call.domain.Member;
 import com.example.medicare_call.domain.Notification;
+import com.example.medicare_call.global.enums.Gender;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,7 +32,7 @@ class NotificationRepositoryTest {
         testMember = Member.builder()
                 .name("테스트 사용자")
                 .phone("01012345678")
-                .gender((byte) 1)
+                .gender(Gender.FEMALE)
                 .termsAgreedAt(LocalDateTime.now())
                 .build();
 

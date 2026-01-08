@@ -1,6 +1,7 @@
 package com.example.medicare_call.controller;
 
 import com.example.medicare_call.domain.Member;
+import com.example.medicare_call.global.enums.Gender;
 import com.example.medicare_call.global.jwt.JwtProvider;
 import com.example.medicare_call.repository.MemberRepository;
 import com.example.medicare_call.repository.ElderRepository;
@@ -82,7 +83,7 @@ class CareCallControllerImmediateTest {
                 .id(1)
                 .name("김보호자")
                 .phone("01012345678")
-                .gender((byte) 1)
+                .gender(Gender.FEMALE)
                 .termsAgreedAt(LocalDateTime.now())
                 .plan((byte) 1)
                 .build();

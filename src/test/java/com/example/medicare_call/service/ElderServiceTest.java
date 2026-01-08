@@ -58,7 +58,7 @@ class ElderServiceTest {
                 .id(1)
                 .name("테스트보호자")
                 .phone("01000000000")
-                .gender((byte)1)
+                .gender(Gender.MALE)
                 .termsAgreedAt(LocalDateTime.now())
                 .plan((byte)1)
                 .build();

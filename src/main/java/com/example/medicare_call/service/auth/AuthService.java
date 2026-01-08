@@ -34,7 +34,7 @@ public class AuthService {
                 .phone(phone)
                 .name(req.getName())
                 .birthDate(req.getBirthDate())
-                .gender(req.getGender().getCode())
+                .gender(req.getGender())
                 .plan((byte) 0)
                 .termsAgreedAt(LocalDateTime.now())
                 .fcmToken(req.getFcmToken())

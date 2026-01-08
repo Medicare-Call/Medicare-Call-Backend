@@ -7,6 +7,7 @@ import com.example.medicare_call.domain.Subscription;
 import com.example.medicare_call.dto.payment.NaverPayReserveRequest;
 import com.example.medicare_call.dto.payment.NaverPayReserveResponse;
 import com.example.medicare_call.dto.payment.NaverPayApplyResponse;
+import com.example.medicare_call.global.enums.*;
 import com.example.medicare_call.repository.OrderRepository;
 import com.example.medicare_call.repository.MemberRepository;
 import com.example.medicare_call.repository.ElderRepository;
@@ -24,10 +25,6 @@ import org.springframework.http.*;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
 import com.example.medicare_call.dto.payment.PaymentApprovalResponse;
-import com.example.medicare_call.global.enums.PaymentMethod;
-import com.example.medicare_call.global.enums.OrderStatus;
-import com.example.medicare_call.global.enums.SubscriptionPlan;
-import com.example.medicare_call.global.enums.SubscriptionStatus;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
@@ -100,7 +97,7 @@ class NaverPayServiceTest {
                 .id(1)
                 .name("테스트 회원")
                 .phone("010-1234-5678")
-                .gender((byte) 1)
+                .gender(Gender.FEMALE)
                 .termsAgreedAt(LocalDateTime.now())
                 .plan((byte) 0)
                 .build();
@@ -530,7 +527,7 @@ class NaverPayServiceTest {
                 .id(1)
                 .name("테스트 회원")
                 .phone("010-1234-5678")
-                .gender((byte) 1)
+                .gender(Gender.FEMALE)
                 .termsAgreedAt(LocalDateTime.now())
                 .plan((byte) 0)
                 .build();
@@ -585,7 +582,7 @@ class NaverPayServiceTest {
                 .id(1)
                 .name("테스트 회원")
                 .phone("010-1234-5678")
-                .gender((byte) 1)
+                .gender(Gender.FEMALE)
                 .termsAgreedAt(LocalDateTime.now())
                 .plan((byte) 0)
                 .build();
