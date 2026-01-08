@@ -70,7 +70,7 @@ public class CareCallRecord {
     @Column(name = "ai_extracted_data_json", columnDefinition = "TEXT")
     private String aiExtractedDataJson; // AI 로부터 추출된 건강 데이터 전체 JSON
 
-    @Builder
+    @Builder(toBuilder = true)
     public CareCallRecord(Integer id, Elder elder, CareCallSetting setting, LocalDateTime calledAt, Byte responded, LocalDateTime sleepStart, LocalDateTime sleepEnd, Byte healthStatus, Byte psychStatus,
                           LocalDateTime startTime, LocalDateTime endTime, String callStatus, String transcriptionText, String psychologicalDetails, String healthDetails, String aiHealthAnalysisComment,
                           String aiExtractedDataJson) {
