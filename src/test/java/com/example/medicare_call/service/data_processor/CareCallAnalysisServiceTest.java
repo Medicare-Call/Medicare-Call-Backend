@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -106,7 +107,7 @@ public class CareCallAnalysisServiceTest {
                 .thenReturn(null);
 
         // when & then
-        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> {
+        assertThrows(RuntimeException.class, () -> {
             careCallAnalysisService.extractAndSaveHealthDataFromAi(callRecord);
         });
 
