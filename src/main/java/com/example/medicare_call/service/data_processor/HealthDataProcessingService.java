@@ -24,6 +24,17 @@ import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
 
+import com.example.medicare_call.dto.data_processor.HealthDataExtractionRequest;
+import com.example.medicare_call.repository.MedicationScheduleRepository;
+import com.example.medicare_call.domain.MedicationSchedule;
+import com.example.medicare_call.service.ai.AiHealthDataExtractorService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
+import java.time.LocalDate;
+import java.util.stream.Collectors;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -36,6 +47,45 @@ public class HealthDataProcessingService {
     private final StatisticsUpdateService statisticsUpdateService;
     private final BloodSugarService bloodSugarService;
     private final MedicationService medicationService;
+    private final AiHealthDataExtractorService aiHealthDataExtractorService;
+    private final MedicationScheduleRepository medicationScheduleRepository;
+
+    @Autowired
+    @Lazy
+    private HealthDataProcessingService self;
+
+    @Retryable(
+            retryFor = Exception.class,
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 1000)
+    )
+    public void extractAndSaveHealthDataFromAi(CareCallRecord callRecord) {
+        String transcriptionText = callRecord.getTranscriptionText();
+        if (transcriptionText == null || transcriptionText.trim().isEmpty()) {
+            return;
+        }
+
+        log.info("통화 내용에서 건강 데이터 추출 및 저장 시작 (Attempt): callId={}", callRecord.getId());
+
+        LocalDate callDate = callRecord.getStartTime() != null ?
+                callRecord.getStartTime().toLocalDate() :
+                LocalDateTime.now().toLocalDate();
+
+        HealthDataExtractionRequest request = HealthDataExtractionRequest.builder()
+                .transcriptionText(transcriptionText)
+                .callDate(callDate)
+                .medicationNames(
+                        medicationScheduleRepository.findByElder(callRecord.getElder()).stream()
+                                .map(MedicationSchedule::getName)
+                                .distinct()
+                                .collect(Collectors.toList())
+                )
+                .build();
+
+        HealthDataExtractionResponse healthData = aiHealthDataExtractorService.extractHealthData(request);
+        
+        self.processAndSaveHealthData(callRecord, healthData);
+    }
 
     @Transactional
     public void processAndSaveHealthData(CareCallRecord callRecord, HealthDataExtractionResponse healthData) {
