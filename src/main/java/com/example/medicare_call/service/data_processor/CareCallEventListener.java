@@ -19,7 +19,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @RequiredArgsConstructor
 public class CareCallEventListener {
 
-    private final HealthDataProcessingService healthDataProcessingService;
+    private final CareCallAnalysisService careCallAnalysisService;
     private final WeeklyStatisticsService weeklyStatisticsService;
 
     @Async
@@ -32,7 +32,7 @@ public class CareCallEventListener {
 
         // 케어콜 데이터 분석 및 저장
         try {
-            healthDataProcessingService.extractAndSaveHealthDataFromAi(callData);
+            careCallAnalysisService.extractAndSaveHealthDataFromAi(callData);
         } catch (Exception e) {
             log.error("건강 데이터 분석 최종 실패: recordId={}", callData.getId(), e);
             // TODO: 디스코드 API or Slack API 연동하여 알림 전송
