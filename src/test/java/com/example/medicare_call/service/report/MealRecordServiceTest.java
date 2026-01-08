@@ -20,9 +20,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
+import com.example.medicare_call.service.report.MealRecordService;
+import com.example.medicare_call.repository.MealRecordRepository;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,8 +35,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @DisplayName("MealRecordService getDailyMeals Test")
 @ExtendWith(MockitoExtension.class)
@@ -170,5 +176,67 @@ class MealRecordServiceTest {
         // when, then
         CustomException exception = assertThrows(CustomException.class, () -> mealRecordService.getDailyMeals(1, LocalDate.now()));
         assertEquals(ErrorCode.ELDER_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("식사 데이터 저장 - 정상 저장")
+    void saveMealData_Success() {
+        // given
+        HealthDataExtractionResponse.MealData mealData = HealthDataExtractionResponse.MealData.builder()
+                .mealType("아침")
+                .mealEatenStatus("섭취함")
+                .mealSummary("맛있게 드심")
+                .build();
+        List<HealthDataExtractionResponse.MealData> mealDataList = Collections.singletonList(mealData);
+
+        // when
+        mealRecordService.saveMealData(callRecord, mealDataList);
+
+        // then
+        verify(mealRecordRepository).save(argThat(record ->
+                record.getMealType() == MealType.BREAKFAST.getValue() &&
+                record.getEatenStatus() == 1 &&
+                record.getResponseSummary().equals("맛있게 드심")
+        ));
+    }
+
+    @Test
+    @DisplayName("식사 데이터 저장 - 알 수 없는 식사 타입은 저장 안 함")
+    void saveMealData_UnknownType_DoNothing() {
+        // given
+        HealthDataExtractionResponse.MealData mealData = HealthDataExtractionResponse.MealData.builder()
+                .mealType("야식") // Unknown type
+                .mealEatenStatus("섭취함")
+                .mealSummary("치킨")
+                .build();
+        List<HealthDataExtractionResponse.MealData> mealDataList = Collections.singletonList(mealData);
+
+        // when
+        mealRecordService.saveMealData(callRecord, mealDataList);
+
+        // then
+        verify(mealRecordRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("식사 데이터 저장 - 식사 여부 알 수 없음 처리")
+    void saveMealData_UnknownStatus_SaveAsNull() {
+        // given
+        HealthDataExtractionResponse.MealData mealData = HealthDataExtractionResponse.MealData.builder()
+                .mealType("점심")
+                .mealEatenStatus("모름") // Unknown status
+                .mealSummary("잘 모르겠음")
+                .build();
+        List<HealthDataExtractionResponse.MealData> mealDataList = Collections.singletonList(mealData);
+
+        // when
+        mealRecordService.saveMealData(callRecord, mealDataList);
+
+        // then
+        verify(mealRecordRepository).save(argThat(record ->
+                record.getMealType() == MealType.LUNCH.getValue() &&
+                record.getEatenStatus() == null &&
+                record.getResponseSummary().equals("해당 시간대 식사 여부를 명확히 확인하지 못했어요.")
+        ));
     }
 }

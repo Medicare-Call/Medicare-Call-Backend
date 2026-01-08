@@ -1,16 +1,13 @@
 package com.example.medicare_call.service.data_processor;
 
 import com.example.medicare_call.domain.CareCallRecord;
-import com.example.medicare_call.domain.MealRecord;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
-import com.example.medicare_call.global.enums.HealthStatus;
-import com.example.medicare_call.global.enums.MealEatenStatus;
-import com.example.medicare_call.global.enums.MealType;
-import com.example.medicare_call.global.enums.PsychologicalStatus;
 import com.example.medicare_call.repository.CareCallRecordRepository;
-import com.example.medicare_call.repository.MealRecordRepository;
-import com.example.medicare_call.service.ai.AiSummaryService;
+import com.example.medicare_call.service.report.MealRecordService;
 import com.example.medicare_call.service.statistics.StatisticsUpdateService;
+import com.example.medicare_call.global.enums.HealthStatus;
+import com.example.medicare_call.global.enums.PsychologicalStatus;
+import com.example.medicare_call.service.ai.AiSummaryService;
 import com.example.medicare_call.util.CareCallUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,11 +29,11 @@ public class CareCallAnalysisResultSaveService {
     public static final String MEAL_STATUS_UNKNOWN_MESSAGE = "해당 시간대 식사 여부를 명확히 확인하지 못했어요.";
 
     private final CareCallRecordRepository careCallRecordRepository;
-    private final MealRecordRepository mealRecordRepository;
     private final AiSummaryService aiSummaryService;
     private final StatisticsUpdateService statisticsUpdateService;
     private final BloodSugarService bloodSugarService;
     private final MedicationService medicationService;
+    private final MealRecordService mealRecordService;
 
 
     @Transactional
@@ -50,6 +47,11 @@ public class CareCallAnalysisResultSaveService {
             if (healthData.getMedicationData() != null && !healthData.getMedicationData().isEmpty()) {
                 medicationService.saveMedicationTakenRecord(callRecord, healthData.getMedicationData());
             }
+            // 식사 데이터 저장
+            if (healthData.getMealData() != null) {
+                mealRecordService.saveMealData(callRecord, healthData.getMealData());
+            }
+
             this.updateCareCallRecordWithHealthData(callRecord, healthData);
         }
 
@@ -59,11 +61,6 @@ public class CareCallAnalysisResultSaveService {
     @Transactional
     public void updateCareCallRecordWithHealthData(CareCallRecord callRecord, HealthDataExtractionResponse healthData) {
         CareCallRecord updatedRecord = callRecord;
-
-        // 식사 데이터 처리
-        if (healthData.getMealData() != null) {
-            saveMealData(updatedRecord, healthData.getMealData());
-        }
 
         // 수면 데이터 처리
         if (healthData.getSleepData() != null) {
@@ -106,45 +103,6 @@ public class CareCallAnalysisResultSaveService {
         }
     }
 
-    private void saveMealData(CareCallRecord callRecord, List<HealthDataExtractionResponse.MealData> mealDataList) {
-
-        for (HealthDataExtractionResponse.MealData mealData : mealDataList) {
-            // 식사 타입 결정
-            MealType mealType = MealType.fromDescription(mealData.getMealType());
-            if (mealType == null) {
-                log.warn("알 수 없는 식사 타입: {}", mealData.getMealType());
-                return;
-            }
-
-            // 식사 여부 결정
-            MealEatenStatus mealEatenStatus = MealEatenStatus.fromDescription(mealData.getMealEatenStatus());
-            Byte eatenStatusValue = null;
-            String responseSummary = mealData.getMealSummary();
-
-            if (mealEatenStatus == null) {
-                // eatenStatus는 null로 저장, responseSummary는 고정 메시지
-                responseSummary = MEAL_STATUS_UNKNOWN_MESSAGE;
-            } else {
-                eatenStatusValue = mealEatenStatus.getValue();
-            }
-
-            // 식사 데이터 저장
-            MealRecord mealRecord = MealRecord.builder()
-                    .careCallRecord(callRecord)
-                    .mealType(mealType.getValue())
-                    .eatenStatus(eatenStatusValue)
-                    .responseSummary(responseSummary)
-                    .recordedAt(LocalDateTime.now())
-                    .build();
-
-            mealRecordRepository.save(mealRecord);
-            log.info("식사 데이터 저장 완료: mealType={}, mealEatenStatus={}, summary={}",
-                    mealRecord.getMealType(),
-                    mealEatenStatus != null ? mealEatenStatus.getDescription() : "알 수 없음",
-                    responseSummary);
-        }
-    }
-
     private CareCallRecord updateSleepData(CareCallRecord callRecord, HealthDataExtractionResponse.SleepData sleepData) {
         LocalDateTime sleepStart = null;
         LocalDateTime sleepEnd = null;
@@ -183,22 +141,9 @@ public class CareCallAnalysisResultSaveService {
 
         // 수면 데이터가 있으면 CareCallRecord 업데이트
         if (sleepStart != null || sleepEnd != null) {
-            callRecord = CareCallRecord.builder()
-                    .id(callRecord.getId())
-                    .elder(callRecord.getElder())
-                    .setting(callRecord.getSetting())
-                    .calledAt(callRecord.getCalledAt())
-                    .responded(callRecord.getResponded())
+            callRecord = callRecord.toBuilder()
                     .sleepStart(sleepStart != null ? sleepStart : callRecord.getSleepStart())
                     .sleepEnd(sleepEnd != null ? sleepEnd : callRecord.getSleepEnd())
-                    .healthStatus(callRecord.getHealthStatus())
-                    .psychStatus(callRecord.getPsychStatus())
-                    .startTime(callRecord.getStartTime())
-                    .endTime(callRecord.getEndTime())
-                    .callStatus(callRecord.getCallStatus())
-                    .transcriptionText(callRecord.getTranscriptionText())
-                    .psychologicalDetails(callRecord.getPsychologicalDetails())
-                    .healthDetails(callRecord.getHealthDetails())
                     .build();
         }
 
@@ -221,22 +166,9 @@ public class CareCallAnalysisResultSaveService {
         String psychologicalDetails = String.join(", ", psychologicalState);
 
         if (psychStatus != null) {
-            callRecord = CareCallRecord.builder()
-                    .id(callRecord.getId())
-                    .elder(callRecord.getElder())
-                    .setting(callRecord.getSetting())
-                    .calledAt(callRecord.getCalledAt())
-                    .responded(callRecord.getResponded())
-                    .sleepStart(callRecord.getSleepStart())
-                    .sleepEnd(callRecord.getSleepEnd())
-                    .healthStatus(callRecord.getHealthStatus())
+            callRecord = callRecord.toBuilder()
                     .psychStatus(psychStatus)
-                    .startTime(callRecord.getStartTime())
-                    .endTime(callRecord.getEndTime())
-                    .callStatus(callRecord.getCallStatus())
-                    .transcriptionText(callRecord.getTranscriptionText())
                     .psychologicalDetails(psychologicalDetails)
-                    .healthDetails(callRecord.getHealthDetails())
                     .build();
         }
 
@@ -258,21 +190,8 @@ public class CareCallAnalysisResultSaveService {
         String healthDetails = String.join(", ", healthSigns);
 
         if (healthStatusValue != null) {
-            callRecord = CareCallRecord.builder()
-                    .id(callRecord.getId())
-                    .elder(callRecord.getElder())
-                    .setting(callRecord.getSetting())
-                    .calledAt(callRecord.getCalledAt())
-                    .responded(callRecord.getResponded())
-                    .sleepStart(callRecord.getSleepStart())
-                    .sleepEnd(callRecord.getSleepEnd())
+            callRecord = callRecord.toBuilder()
                     .healthStatus(healthStatusValue)
-                    .psychStatus(callRecord.getPsychStatus())
-                    .startTime(callRecord.getStartTime())
-                    .endTime(callRecord.getEndTime())
-                    .callStatus(callRecord.getCallStatus())
-                    .transcriptionText(callRecord.getTranscriptionText())
-                    .psychologicalDetails(callRecord.getPsychologicalDetails())
                     .healthDetails(healthDetails)
                     .build();
         }
@@ -290,22 +209,7 @@ public class CareCallAnalysisResultSaveService {
             aiComment = aiSummaryService.getSymptomAnalysis(symptomList);
         }
 
-        callRecord = CareCallRecord.builder()
-                .id(callRecord.getId())
-                .elder(callRecord.getElder())
-                .setting(callRecord.getSetting())
-                .calledAt(callRecord.getCalledAt())
-                .responded(callRecord.getResponded())
-                .sleepStart(callRecord.getSleepStart())
-                .sleepEnd(callRecord.getSleepEnd())
-                .healthStatus(callRecord.getHealthStatus())
-                .psychStatus(callRecord.getPsychStatus())
-                .startTime(callRecord.getStartTime())
-                .endTime(callRecord.getEndTime())
-                .callStatus(callRecord.getCallStatus())
-                .transcriptionText(callRecord.getTranscriptionText())
-                .psychologicalDetails(callRecord.getPsychologicalDetails())
-                .healthDetails(callRecord.getHealthDetails())
+        callRecord = callRecord.toBuilder()
                 .aiHealthAnalysisComment(aiComment)
                 .aiExtractedDataJson(aiExtractedDataJson)
                 .build();
