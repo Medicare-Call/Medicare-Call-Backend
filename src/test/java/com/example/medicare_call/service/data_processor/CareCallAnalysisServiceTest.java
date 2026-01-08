@@ -3,10 +3,10 @@ package com.example.medicare_call.service.data_processor;
 import com.example.medicare_call.domain.CareCallRecord;
 import com.example.medicare_call.domain.CareCallSetting;
 import com.example.medicare_call.domain.Elder;
-import com.example.medicare_call.dto.data_processor.HealthDataExtractionRequest;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
 import com.example.medicare_call.repository.MedicationScheduleRepository;
-import com.example.medicare_call.service.ai.AiHealthDataExtractorService;
+import com.example.medicare_call.service.ai.CareCallDataExtractionPrompt;
+import com.example.medicare_call.service.ai.OpenAiChatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,18 +14,24 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.model.Generation;
+import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class CareCallAnalysisServiceTest {
 
     @Mock
-    private AiHealthDataExtractorService aiHealthDataExtractorService;
+    private OpenAiChatService openAiChatService;
 
     @Mock
     private MedicationScheduleRepository medicationScheduleRepository;
@@ -49,6 +55,8 @@ public class CareCallAnalysisServiceTest {
                 .startTime(LocalDateTime.of(2023, 10, 10, 10, 0))
                 .transcriptionText("오늘 밥 잘 먹었고 약도 먹었어.")
                 .build();
+        
+        ReflectionTestUtils.setField(careCallAnalysisService, "openaiModel", "gpt-4o-mini");
     }
 
     @Test
@@ -57,18 +65,19 @@ public class CareCallAnalysisServiceTest {
         // given
         when(medicationScheduleRepository.findByElder(any())).thenReturn(Collections.emptyList());
         
-        HealthDataExtractionResponse mockResponse = HealthDataExtractionResponse.builder()
-                .healthStatus("좋음")
-                .build();
-        when(aiHealthDataExtractorService.extractHealthData(any(HealthDataExtractionRequest.class)))
-                .thenReturn(mockResponse);
+        String jsonResponse = "{ \"healthStatus\": \"좋음\" }";
+        Generation generation = new Generation(new AssistantMessage(jsonResponse));
+        ChatResponse mockChatResponse = new ChatResponse(List.of(generation));
+
+        when(openAiChatService.openAiChat(anyString(), eq(CareCallDataExtractionPrompt.SYSTEM_MESSAGE), any(OpenAiChatOptions.class)))
+                .thenReturn(mockChatResponse);
 
         // when
         careCallAnalysisService.extractAndSaveHealthDataFromAi(callRecord);
 
         // then
-        verify(aiHealthDataExtractorService).extractHealthData(any(HealthDataExtractionRequest.class));
-        verify(careCallAnalysisResultSaveService).processAndSaveHealthData(callRecord, mockResponse);
+        verify(openAiChatService).openAiChat(contains(callRecord.getTranscriptionText()), eq(CareCallDataExtractionPrompt.SYSTEM_MESSAGE), any(OpenAiChatOptions.class));
+        verify(careCallAnalysisResultSaveService).processAndSaveHealthData(eq(callRecord), any(HealthDataExtractionResponse.class));
     }
 
     @Test
@@ -84,20 +93,23 @@ public class CareCallAnalysisServiceTest {
         careCallAnalysisService.extractAndSaveHealthDataFromAi(emptyRecord);
 
         // then
-        verify(aiHealthDataExtractorService, never()).extractHealthData(any());
+        verify(openAiChatService, never()).openAiChat(anyString(), anyString(), any());
         verify(careCallAnalysisResultSaveService, never()).processAndSaveHealthData(any(), any());
     }
 
     @Test
-    @DisplayName("Controller용 위임 메서드 검증")
-    void processAndSaveHealthData_delegation() {
+    @DisplayName("OpenAI 응답이 null이거나 비어있을 때 예외 발생")
+    void extractAndSaveHealthDataFromAi_throwsExceptionOnEmptyResponse() {
         // given
-        HealthDataExtractionResponse mockResponse = HealthDataExtractionResponse.builder().build();
+        when(medicationScheduleRepository.findByElder(any())).thenReturn(Collections.emptyList());
+        when(openAiChatService.openAiChat(anyString(), anyString(), any(OpenAiChatOptions.class)))
+                .thenReturn(null);
 
-        // when
-        careCallAnalysisService.processAndSaveHealthData(callRecord, mockResponse);
+        // when & then
+        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> {
+            careCallAnalysisService.extractAndSaveHealthDataFromAi(callRecord);
+        });
 
-        // then
-        verify(careCallAnalysisResultSaveService).processAndSaveHealthData(callRecord, mockResponse);
+        verify(careCallAnalysisResultSaveService, never()).processAndSaveHealthData(any(), any());
     }
 }
