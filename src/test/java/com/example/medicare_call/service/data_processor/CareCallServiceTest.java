@@ -2,40 +2,37 @@ package com.example.medicare_call.service.data_processor;
 
 import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.data_processor.CareCallDataProcessRequest;
-import com.example.medicare_call.dto.data_processor.HealthDataExtractionRequest;
-import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
 import com.example.medicare_call.global.enums.CareCallStatus;
+import com.example.medicare_call.global.event.CareCallCompletedEvent;
+import com.example.medicare_call.global.event.Events;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.*;
-import com.example.medicare_call.service.ai.AiHealthDataExtractorService;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class CareCallDataProcessingServiceTest {
+class CareCallServiceTest {
 
     @Mock
     private CareCallRecordRepository careCallRecordRepository;
@@ -46,17 +43,20 @@ class CareCallDataProcessingServiceTest {
     @Mock
     private CareCallSettingRepository careCallSettingRepository;
 
-    @Mock
-    private AiHealthDataExtractorService aiHealthDataExtractorService;
-
-    @Mock
-    private WeeklyStatisticsRepository weeklyStatisticsRepository;
-
-    @Mock
-    private MedicationScheduleRepository medicationScheduleRepository;
-
     @InjectMocks
-    private CareCallDataProcessingService careCallDataProcessingService;
+    private CareCallService careCallService;
+    
+    private MockedStatic<Events> eventsMockedStatic;
+
+    @BeforeEach
+    void setUp() {
+        eventsMockedStatic = Mockito.mockStatic(Events.class);
+    }
+    
+    @AfterEach
+    void tearDown() {
+        eventsMockedStatic.close();
+    }
 
     @Test
     @DisplayName("통화 데이터 저장 성공 - 모든 필드 포함")
@@ -112,14 +112,9 @@ class CareCallDataProcessingServiceTest {
         when(elderRepository.findById(1)).thenReturn(Optional.of(elder));
         when(careCallSettingRepository.findById(2)).thenReturn(Optional.of(setting));
         when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(expectedRecord);
-        when(medicationScheduleRepository.findByElder(any(Elder.class))).thenReturn(java.util.Collections.emptyList());
-
-        // Mock OpenAI health data service
-        when(aiHealthDataExtractorService.extractHealthData(any(HealthDataExtractionRequest.class)))
-                .thenReturn(HealthDataExtractionResponse.builder().build());
 
         // when
-        CareCallRecord result = careCallDataProcessingService.saveCallData(request);
+        CareCallRecord result = careCallService.saveCallData(request);
 
         // then
         assertThat(result).isNotNull();
@@ -131,10 +126,9 @@ class CareCallDataProcessingServiceTest {
         verify(elderRepository).findById(1);
         verify(careCallSettingRepository).findById(2);
         verify(careCallRecordRepository).save(any(CareCallRecord.class));
-        verify(aiHealthDataExtractorService).extractHealthData(argThat(healthRequest ->
-            healthRequest.getTranscriptionText().equals("고객: 안녕하세요, 오늘 컨디션은 어떠세요?\n어르신: 네, 오늘은 컨디션이 좋아요.") &&
-            healthRequest.getCallDate().equals(LocalDate.of(2025, 1, 27))
-        ));
+        
+        // 이벤트 발생 검증
+        eventsMockedStatic.verify(() -> Events.raise(any(CareCallCompletedEvent.class)), times(1));
     }
 
     @Test
@@ -169,7 +163,7 @@ class CareCallDataProcessingServiceTest {
         when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(expectedRecord);
 
         // when
-        CareCallRecord result = careCallDataProcessingService.saveCallData(request);
+        CareCallRecord result = careCallService.saveCallData(request);
 
         // then
         assertThat(result).isNotNull();
@@ -181,7 +175,7 @@ class CareCallDataProcessingServiceTest {
         verify(elderRepository).findById(1);
         verify(careCallSettingRepository).findById(2);
         verify(careCallRecordRepository).save(any(CareCallRecord.class));
-        verify(aiHealthDataExtractorService, never()).extractHealthData(any());
+        eventsMockedStatic.verify(() -> Events.raise(any(CareCallCompletedEvent.class)), times(1));
     }
 
     @Test
@@ -220,7 +214,7 @@ class CareCallDataProcessingServiceTest {
         when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(expectedRecord);
 
         // when
-        CareCallRecord result = careCallDataProcessingService.saveCallData(request);
+        CareCallRecord result = careCallService.saveCallData(request);
 
         // then
         assertThat(result).isNotNull();
@@ -231,7 +225,7 @@ class CareCallDataProcessingServiceTest {
         verify(elderRepository).findById(1);
         verify(careCallSettingRepository).findById(2);
         verify(careCallRecordRepository).save(any(CareCallRecord.class));
-        verify(aiHealthDataExtractorService, never()).extractHealthData(any());
+        eventsMockedStatic.verify(() -> Events.raise(any(CareCallCompletedEvent.class)), times(1));
     }
 
     @Test
@@ -248,9 +242,11 @@ class CareCallDataProcessingServiceTest {
 
         // when & then
         CustomException exception = assertThrows(CustomException.class,
-                () -> careCallDataProcessingService.saveCallData(request)
+                () -> careCallService.saveCallData(request)
         );
         assertEquals(ErrorCode.ELDER_NOT_FOUND, exception.getErrorCode());
+        verify(careCallRecordRepository, never()).save(any());
+        eventsMockedStatic.verify(() -> Events.raise(any(CareCallCompletedEvent.class)), never());
     }
 
     @Test
@@ -272,127 +268,10 @@ class CareCallDataProcessingServiceTest {
 
         // when & then
         CustomException exception = assertThrows(CustomException.class, () -> {
-            careCallDataProcessingService.saveCallData(request);
+            careCallService.saveCallData(request);
         });
         assertEquals(ErrorCode.CARE_CALL_SETTING_NOT_FOUND, exception.getErrorCode());
-    }
-
-    @Test
-    @DisplayName("통화 데이터 저장 성공 - no-answer 시 missedCalls 증가")
-    void saveCallData_success_noAnswer_incrementsMissedCalls() {
-        // given
-        CareCallDataProcessRequest request = CareCallDataProcessRequest.builder()
-                .elderId(1)
-                .settingId(2)
-                .status(CareCallStatus.NO_ANSWER)
-                .build();
-
-        Elder elder = Elder.builder()
-                .id(1)
-                .build();
-        
-        CareCallSetting setting = CareCallSetting.builder()
-                .id(2)
-                .build();
-        
-        CareCallRecord expectedRecord = CareCallRecord.builder()
-                .id(1)
-                .elder(elder)
-                .setting(setting)
-                .calledAt(LocalDateTime.now())
-                .callStatus("no-answer")
-                .psychologicalDetails(null)
-                .healthDetails(null)
-                .build();
-
-        WeeklyStatistics weeklyStats = WeeklyStatistics.builder()
-                .id(1L)
-                .elder(elder)
-                .missedCalls(0)
-                .build();
-
-        when(elderRepository.findById(1)).thenReturn(Optional.of(elder));
-        when(careCallSettingRepository.findById(2)).thenReturn(Optional.of(setting));
-        when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(expectedRecord);
-        when(weeklyStatisticsRepository.findByElderAndStartDate(any(Elder.class), any(LocalDate.class)))
-                .thenReturn(Optional.of(weeklyStats));
-
-        // when
-        CareCallRecord result = careCallDataProcessingService.saveCallData(request);
-
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.getId()).isEqualTo(1);
-        assertThat(result.getCallStatus()).isEqualTo("no-answer");
-        assertThat(result.getStartTime()).isNull();
-        assertThat(result.getEndTime()).isNull();
-        
-        verify(elderRepository).findById(1);
-        verify(careCallSettingRepository).findById(2);
-        verify(careCallRecordRepository).save(any(CareCallRecord.class));
-        verify(aiHealthDataExtractorService, never()).extractHealthData(any());
-        verify(weeklyStatisticsRepository).findByElderAndStartDate(any(Elder.class), any(LocalDate.class));
-    }
-
-    @Test
-    @DisplayName("통화 데이터 저장 시 OpenAI 건강 데이터 추출 서비스가 호출된다")
-    void saveCallData_callsOpenAiHealthDataService() {
-        // given
-        CareCallDataProcessRequest.TranscriptionData.TranscriptionSegment segment = CareCallDataProcessRequest.TranscriptionData.TranscriptionSegment.builder()
-                .speaker("어르신")
-                .text("오늘 아침에 밥을 먹었고, 혈당을 측정했어요. 120이 나왔어요.")
-                .build();
-
-        CareCallDataProcessRequest.TranscriptionData transcriptionData = CareCallDataProcessRequest.TranscriptionData.builder()
-                .fullText(Arrays.asList(segment))
-                .build();
-
-        CareCallDataProcessRequest request = CareCallDataProcessRequest.builder()
-                .elderId(1)
-                .settingId(2)
-                .startTime(Instant.parse("2025-01-27T10:00:00Z"))
-                .status(CareCallStatus.COMPLETED)
-                .transcription(transcriptionData)
-                .build();
-
-        Elder elder = Elder.builder()
-                .id(1)
-                .build();
-
-        CareCallSetting setting = CareCallSetting.builder()
-                .id(2)
-                .firstCallTime(LocalTime.parse("06:00:00"))
-                .secondCallTime(LocalTime.parse("08:00:00"))
-                .thirdCallTime(LocalTime.parse("10:01:00"))
-                .build();
-
-        CareCallRecord expectedRecord = CareCallRecord.builder()
-                .id(1)
-                .elder(elder)
-                .setting(setting)
-                .startTime(LocalDateTime.parse("2025-01-27T10:00:00"))
-                .callStatus("completed")
-                .transcriptionText("어르신: 오늘 아침에 밥을 먹었고, 혈당을 측정했어요. 120이 나왔어요.")
-                .psychologicalDetails(null)
-                .healthDetails(null)
-                .build();
-
-        when(elderRepository.findById(1)).thenReturn(Optional.of(elder));
-        when(careCallSettingRepository.findById(2)).thenReturn(Optional.of(setting));
-        when(careCallRecordRepository.save(any(CareCallRecord.class))).thenReturn(expectedRecord);
-        
-        // Mock OpenAI health data service
-        when(aiHealthDataExtractorService.extractHealthData(any(HealthDataExtractionRequest.class)))
-                .thenReturn(HealthDataExtractionResponse.builder().build());
-
-        // when
-        CareCallRecord result = careCallDataProcessingService.saveCallData(request);
-
-        // then
-        assertThat(result).isNotNull();
-        verify(aiHealthDataExtractorService).extractHealthData(argThat(healthRequest ->
-            healthRequest.getTranscriptionText().equals("어르신: 오늘 아침에 밥을 먹었고, 혈당을 측정했어요. 120이 나왔어요.") &&
-            healthRequest.getCallDate().equals(LocalDate.of(2025, 1, 27))
-        ));
+        verify(careCallRecordRepository, never()).save(any());
+        eventsMockedStatic.verify(() -> Events.raise(any(CareCallCompletedEvent.class)), never());
     }
 } 

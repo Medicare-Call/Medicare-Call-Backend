@@ -34,6 +34,25 @@ public class HealthDataProcessingService {
     private final MealRecordRepository mealRecordRepository;
     private final AiSummaryService aiSummaryService;
     private final StatisticsUpdateService statisticsUpdateService;
+    private final BloodSugarService bloodSugarService;
+    private final MedicationService medicationService;
+
+    @Transactional
+    public void processAndSaveHealthData(CareCallRecord callRecord, HealthDataExtractionResponse healthData) {
+        log.info("건강 데이터 DB 저장 시작: callId={}", callRecord.getId());
+
+        if (healthData != null) {
+            if (healthData.getBloodSugarData() != null && !healthData.getBloodSugarData().isEmpty()) {
+                bloodSugarService.saveBloodSugarData(callRecord, healthData.getBloodSugarData());
+            }
+            if (healthData.getMedicationData() != null && !healthData.getMedicationData().isEmpty()) {
+                medicationService.saveMedicationTakenRecord(callRecord, healthData.getMedicationData());
+            }
+            this.updateCareCallRecordWithHealthData(callRecord, healthData);
+        }
+
+        log.info("건강 데이터 DB 저장 완료: callId={}", callRecord.getId());
+    }
 
     @Transactional
     public void updateCareCallRecordWithHealthData(CareCallRecord callRecord, HealthDataExtractionResponse healthData) {

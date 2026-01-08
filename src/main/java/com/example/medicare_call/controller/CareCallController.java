@@ -11,12 +11,9 @@ import com.example.medicare_call.dto.carecall.ImmediateCareCallRequest;
 import com.example.medicare_call.dto.data_processor.CallDataUploadRequest;
 import com.example.medicare_call.dto.data_processor.CareCallDataProcessRequest;
 import com.example.medicare_call.global.annotation.AuthUser;
-import com.example.medicare_call.global.event.CareCallEvent;
-import com.example.medicare_call.global.event.Events;
-import com.example.medicare_call.service.carecall.CareCallRequestSenderService;
 import com.example.medicare_call.service.carecall.CareCallSettingService;
 import com.example.medicare_call.service.carecall.CareCallTestService;
-import com.example.medicare_call.service.data_processor.CareCallDataProcessingService;
+import com.example.medicare_call.service.data_processor.CareCallService;
 import com.example.medicare_call.service.data_processor.CareCallUploadService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -35,7 +32,7 @@ import org.springframework.web.bind.annotation.*;
 public class CareCallController implements CareCallApi, CareCallBetaTestApi, CareCallTestApi {
 
     private final CareCallSettingService careCallSettingService;
-    private final CareCallDataProcessingService careCallDataProcessingService;
+    private final CareCallService careCallService;
     private final CareCallTestService careCallTestService;
     private final CareCallUploadService careCallUploadService;
 
@@ -58,8 +55,7 @@ public class CareCallController implements CareCallApi, CareCallBetaTestApi, Car
     @PostMapping("/call-data")
     public ResponseEntity<CareCallRecord> receiveCallData(@Valid @RequestBody CareCallDataProcessRequest request) {
         log.info("통화 데이터 수신: elderId={}, settingId={}", request.getElderId(), request.getSettingId());
-        CareCallRecord savedRecord = careCallDataProcessingService.saveCallData(request);
-        Events.raise(new CareCallEvent(savedRecord));
+        careCallService.saveCallData(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

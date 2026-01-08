@@ -35,7 +35,7 @@ class CareCallUploadServiceTest {
     private OpenAiSttService openAiSttService;
 
     @Mock
-    private CareCallDataProcessingService careCallDataProcessingService;
+    private CareCallService careCallService;
 
     @InjectMocks
     private CareCallUploadService careCallUploadService;
@@ -111,7 +111,7 @@ class CareCallUploadServiceTest {
     void processUploadedCallData_success() {
         // given
         when(openAiSttService.transcribe(mockAudioFile)).thenReturn(sttResponse);
-        when(careCallDataProcessingService.saveCallData(any())).thenReturn(expectedRecord);
+        when(careCallService.saveCallData(any())).thenReturn(expectedRecord);
 
         // when
         CareCallRecord result = careCallUploadService.processUploadedCallData(uploadRequest);
@@ -125,7 +125,7 @@ class CareCallUploadServiceTest {
         assertThat(result.getTranscriptionText()).contains("오늘 컨디션");
 
         verify(openAiSttService).transcribe(mockAudioFile);
-        verify(careCallDataProcessingService).saveCallData(argThat(request ->
+        verify(careCallService).saveCallData(argThat(request ->
                 request.getElderId() == 1002 &&
                 request.getSettingId() == 4 &&
                 request.getTranscription() != null &&
@@ -189,7 +189,7 @@ class CareCallUploadServiceTest {
         multiSegmentResponse.setSegments(multipleSegments);
 
         when(openAiSttService.transcribe(mockAudioFile)).thenReturn(multiSegmentResponse);
-        when(careCallDataProcessingService.saveCallData(any())).thenReturn(expectedRecord);
+        when(careCallService.saveCallData(any())).thenReturn(expectedRecord);
 
         // when
         CareCallRecord result = careCallUploadService.processUploadedCallData(uploadRequest);
@@ -197,7 +197,7 @@ class CareCallUploadServiceTest {
         // then
         assertThat(result).isNotNull();
         verify(openAiSttService).transcribe(mockAudioFile);
-        verify(careCallDataProcessingService).saveCallData(argThat(request ->
+        verify(careCallService).saveCallData(argThat(request ->
                 request.getTranscription().getFullText().size() == 5
         ));
     }
@@ -213,14 +213,14 @@ class CareCallUploadServiceTest {
         emptySegmentsResponse.setSegments(new ArrayList<>());
 
         when(openAiSttService.transcribe(mockAudioFile)).thenReturn(emptySegmentsResponse);
-        when(careCallDataProcessingService.saveCallData(any())).thenReturn(expectedRecord);
+        when(careCallService.saveCallData(any())).thenReturn(expectedRecord);
 
         // when
         CareCallRecord result = careCallUploadService.processUploadedCallData(uploadRequest);
 
         // then
         assertThat(result).isNotNull();
-        verify(careCallDataProcessingService).saveCallData(argThat(request ->
+        verify(careCallService).saveCallData(argThat(request ->
                 request.getTranscription().getFullText().isEmpty()
         ));
     }
@@ -245,14 +245,14 @@ class CareCallUploadServiceTest {
         specialResponse.setSegments(specialSegments);
 
         when(openAiSttService.transcribe(mockAudioFile)).thenReturn(specialResponse);
-        when(careCallDataProcessingService.saveCallData(any())).thenReturn(expectedRecord);
+        when(careCallService.saveCallData(any())).thenReturn(expectedRecord);
 
         // when
         CareCallRecord result = careCallUploadService.processUploadedCallData(uploadRequest);
 
         // then
         assertThat(result).isNotNull();
-        verify(careCallDataProcessingService).saveCallData(argThat(request ->
+        verify(careCallService).saveCallData(argThat(request ->
                 request.getTranscription().getFullText().get(0).getText().contains("mg/dL")
         ));
     }
@@ -262,7 +262,7 @@ class CareCallUploadServiceTest {
     void processUploadedCallData_fail_elderNotFound() {
         // given
         when(openAiSttService.transcribe(mockAudioFile)).thenReturn(sttResponse);
-        when(careCallDataProcessingService.saveCallData(any()))
+        when(careCallService.saveCallData(any()))
                 .thenThrow(new CustomException(ErrorCode.ELDER_NOT_FOUND, "어르신을 찾을 수 없습니다."));
 
         // when & then
@@ -271,7 +271,7 @@ class CareCallUploadServiceTest {
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ELDER_NOT_FOUND);
 
         verify(openAiSttService).transcribe(mockAudioFile);
-        verify(careCallDataProcessingService).saveCallData(any());
+        verify(careCallService).saveCallData(any());
     }
 
     @Test
@@ -279,7 +279,7 @@ class CareCallUploadServiceTest {
     void processUploadedCallData_fail_settingNotFound() {
         // given
         when(openAiSttService.transcribe(mockAudioFile)).thenReturn(sttResponse);
-        when(careCallDataProcessingService.saveCallData(any()))
+        when(careCallService.saveCallData(any()))
                 .thenThrow(new CustomException(ErrorCode.CARE_CALL_SETTING_NOT_FOUND, "통화 설정을 찾을 수 없습니다."));
 
         // when & then
@@ -288,7 +288,7 @@ class CareCallUploadServiceTest {
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.CARE_CALL_SETTING_NOT_FOUND);
 
         verify(openAiSttService).transcribe(mockAudioFile);
-        verify(careCallDataProcessingService).saveCallData(any());
+        verify(careCallService).saveCallData(any());
     }
 
     @Test
@@ -317,14 +317,14 @@ class CareCallUploadServiceTest {
         longResponse.setSegments(longSegments);
 
         when(openAiSttService.transcribe(mockAudioFile)).thenReturn(longResponse);
-        when(careCallDataProcessingService.saveCallData(any())).thenReturn(expectedRecord);
+        when(careCallService.saveCallData(any())).thenReturn(expectedRecord);
 
         // when
         CareCallRecord result = careCallUploadService.processUploadedCallData(uploadRequest);
 
         // then
         assertThat(result).isNotNull();
-        verify(careCallDataProcessingService).saveCallData(argThat(request ->
+        verify(careCallService).saveCallData(argThat(request ->
                 request.getTranscription().getFullText().size() == 20
         ));
     }

@@ -8,8 +8,6 @@ import com.example.medicare_call.dto.carecall.CareCallSettingResponse;
 import com.example.medicare_call.dto.carecall.CareCallTestRequest;
 import com.example.medicare_call.dto.data_processor.CareCallDataProcessRequest;
 import com.example.medicare_call.global.enums.CareCallStatus;
-import com.example.medicare_call.global.event.CareCallEvent;
-import com.example.medicare_call.global.event.Events;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.global.jwt.JwtProvider;
@@ -18,7 +16,7 @@ import com.example.medicare_call.repository.MemberRepository;
 import com.example.medicare_call.service.carecall.CareCallTestService;
 import com.example.medicare_call.service.carecall.CareCallSettingService;
 import com.example.medicare_call.service.data_processor.CareCallUploadService;
-import com.example.medicare_call.service.data_processor.CareCallDataProcessingService;
+import com.example.medicare_call.service.data_processor.CareCallService;
 import com.example.medicare_call.service.data_processor.OpenAiSttService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -61,7 +59,7 @@ class CareCallControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private CareCallDataProcessingService careCallDataProcessingService;
+    private CareCallService careCallService;
     @MockBean
     private CareCallSettingService careCallSettingService;
     @MockBean
@@ -119,17 +117,14 @@ class CareCallControllerTest {
                 .transcriptionText("고객: 안녕하세요, 오늘 컨디션은 어떠세요?\n어르신: 네, 오늘은 컨디션이 좋아요.")
                 .build();
 
-        when(careCallDataProcessingService.saveCallData(any(CareCallDataProcessRequest.class))).thenReturn(savedRecord);
+        when(careCallService.saveCallData(any(CareCallDataProcessRequest.class))).thenReturn(savedRecord);
 
         // when & then
-        try (var mocked = org.mockito.Mockito.mockStatic(Events.class)) {
-            mockMvc.perform(post("/call-data")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isCreated())
-                    .andExpect(content().string(""));
-            mocked.verify(() -> Events.raise(org.mockito.ArgumentMatchers.isA(CareCallEvent.class)));
-        }
+        mockMvc.perform(post("/call-data")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(content().string(""));
     }
     
     @Test
@@ -219,17 +214,14 @@ class CareCallControllerTest {
                 .callStatus("completed")
                 .build();
 
-        when(careCallDataProcessingService.saveCallData(any(CareCallDataProcessRequest.class))).thenReturn(savedRecord);
+        when(careCallService.saveCallData(any(CareCallDataProcessRequest.class))).thenReturn(savedRecord);
 
         // when & then
-        try (var mocked = org.mockito.Mockito.mockStatic(Events.class)) {
-            mockMvc.perform(post("/call-data")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isCreated())
-                    .andExpect(content().string(""));
-            mocked.verify(() -> Events.raise(org.mockito.ArgumentMatchers.isA(CareCallEvent.class)));
-        }
+        mockMvc.perform(post("/call-data")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(content().string(""));
     }
 
     @Test
@@ -245,7 +237,7 @@ class CareCallControllerTest {
                 .responded((byte) 1)
                 .build();
 
-        when(careCallDataProcessingService.saveCallData(any(CareCallDataProcessRequest.class)))
+        when(careCallService.saveCallData(any(CareCallDataProcessRequest.class)))
                 .thenThrow(new CustomException(ErrorCode.ELDER_NOT_FOUND));
 
         // when & then
@@ -269,7 +261,7 @@ class CareCallControllerTest {
                 .responded((byte) 1)
                 .build();
         
-        when(careCallDataProcessingService.saveCallData(any(CareCallDataProcessRequest.class)))
+        when(careCallService.saveCallData(any(CareCallDataProcessRequest.class)))
                 .thenThrow(new CustomException(ErrorCode.CARE_CALL_SETTING_NOT_FOUND));
 
         // when & then
@@ -292,7 +284,7 @@ class CareCallControllerTest {
                 .responded((byte) 1)
                 .build();
 
-        when(careCallDataProcessingService.saveCallData(any(CareCallDataProcessRequest.class)))
+        when(careCallService.saveCallData(any(CareCallDataProcessRequest.class)))
                 .thenThrow(new RuntimeException("데이터 처리 실패"));
 
         // when & then

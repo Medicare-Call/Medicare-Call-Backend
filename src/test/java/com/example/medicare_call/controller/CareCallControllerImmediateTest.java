@@ -18,7 +18,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import com.example.medicare_call.service.carecall.CareCallSettingService;
-import com.example.medicare_call.service.data_processor.CareCallDataProcessingService;
+import com.example.medicare_call.service.data_processor.CareCallService;
 import com.example.medicare_call.repository.CareCallSettingRepository;
 import com.example.medicare_call.global.annotation.AuthenticationArgumentResolver;
 import com.example.medicare_call.global.exception.CustomException;
@@ -48,7 +48,7 @@ class CareCallControllerImmediateTest {
     private CareCallSettingService careCallSettingService;
 
     @MockBean
-    private CareCallDataProcessingService careCallDataProcessingService;
+    private CareCallService careCallService;
 
     @MockBean
     private MemberRepository memberRepository;

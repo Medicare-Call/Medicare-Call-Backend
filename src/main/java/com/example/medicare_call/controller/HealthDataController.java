@@ -6,7 +6,7 @@ import com.example.medicare_call.domain.CareCallRecord;
 import com.example.medicare_call.dto.HealthDataTestRequest;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionRequest;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
-import com.example.medicare_call.service.data_processor.CareCallDataProcessingService;
+import com.example.medicare_call.service.data_processor.HealthDataProcessingService;
 import com.example.medicare_call.service.ai.AiHealthDataExtractorService;
 import com.example.medicare_call.util.TestDataGenerator;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 public class HealthDataController implements HealthDataApi, HealthDataTestApi {
 
     private final AiHealthDataExtractorService aiHealthDataExtractorService;
-    private final CareCallDataProcessingService careCallDataProcessingService;
+    private final HealthDataProcessingService healthDataProcessingService;
     private final TestDataGenerator testDataGenerator;
 
     @Override
@@ -78,7 +78,7 @@ public class HealthDataController implements HealthDataApi, HealthDataTestApi {
         HealthDataExtractionResponse healthData = aiHealthDataExtractorService.extractHealthData(extractionRequest);
 
         // 건강 데이터를 DB에 저장
-        careCallDataProcessingService.saveHealthDataToDatabase(savedCallRecord, healthData);
+        healthDataProcessingService.processAndSaveHealthData(savedCallRecord, healthData);
 
         return ResponseEntity.ok(savedCallRecord);
     }

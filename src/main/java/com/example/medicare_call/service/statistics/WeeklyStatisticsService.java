@@ -127,6 +127,19 @@ public class WeeklyStatisticsService {
         weeklyStatisticsRepository.save(weeklyStatistics);
     }
 
+    @Transactional
+    public void updateMissedCallStatistics(CareCallRecord record) {
+        LocalDate callDate = record.getCalledAt().toLocalDate();
+        LocalDate startDate = callDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+
+        Optional<WeeklyStatistics> weeklyStatsOpt = weeklyStatisticsRepository.findByElderAndStartDate(record.getElder(), startDate);
+
+        weeklyStatsOpt.ifPresent(stats -> {
+            stats.incrementMissedCalls();
+        });
+        log.info("부재중 통계 업데이트 완료 (Service): elderId={}", record.getElder().getId());
+    }
+
     private WeeklySummaryDto createWeeklySummaryDto(
             WeeklyMealStats mealStats,
             Map<String, WeeklyMedicationStats> medicationStatsMap,
