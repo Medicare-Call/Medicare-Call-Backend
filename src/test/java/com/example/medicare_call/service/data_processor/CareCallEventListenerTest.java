@@ -163,34 +163,89 @@ class CareCallEventListenerTest {
 
     // TODO: 재시도 패턴 적용 후에 이벤트 발행 처리 시점을 다시 수정해야 한다.
     @Test
-    @DisplayName("AI 분석 중 예외 발생: 로그 남기고 이벤트는 발행")
-    void handleCareCallSaved_exception_during_analysis() {
+    @DisplayName("AI 분석 재시도: 2번 실패 후 3번째 성공 -> 이벤트 발행")
+    void handleCareCallSaved_retry_success() {
         // given
         Elder elder = mock(Elder.class);
         CareCallRecord record = CareCallRecord.builder()
-                .id(4)
+                .id(5)
                 .elder(elder)
                 .callStatus(CareCallStatus.COMPLETED.getValue())
-                .transcriptionText("텍스트 있음")
+                .transcriptionText("재시도 테스트")
                 .startTime(LocalDateTime.now())
                 .calledAt(LocalDateTime.now())
                 .build();
         ReflectionTestUtils.setField(record, "elder", elder);
-
         CareCallCompletedEvent event = new CareCallCompletedEvent(record);
 
+        List<MedicationSchedule> medicationSchedules = Collections.emptyList();
+        when(medicationScheduleRepository.findByElder(elder)).thenReturn(medicationSchedules);
+        
+        HealthDataExtractionResponse healthDataResponse = new HealthDataExtractionResponse(
+                "summary", Collections.emptyList(), null, Collections.emptyList(),
+                "details", Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), "mood"
+        );
+
+        // 첫 2번은 예외, 3번째는 성공
         when(aiHealthDataExtractorService.extractHealthData(any()))
-                .thenThrow(new RuntimeException("AI 서비스 오류"));
+                .thenThrow(new RuntimeException("1차 실패"))
+                .thenThrow(new RuntimeException("2차 실패"))
+                .thenReturn(healthDataResponse);
 
         // when
         try (MockedStatic<Events> eventsMock = mockStatic(Events.class)) {
             careCallEventListener.handleCareCallSaved(event);
 
             // then
-            // 예외가 발생해도 로직이 중단되지 않고 다음 단계(이벤트 발행)로 진행되는지 확인
-            // TODO: 실제 코드에서는 catch 블록에서 로그만 찍고 넘어감 -> 개선 필요
+            // AI 분석 3회 호출 확인
+            verify(aiHealthDataExtractorService, times(3)).extractHealthData(any());
+            
+            // 건강 데이터 저장 1회 호출
+            verify(healthDataProcessingService, times(1)).processAndSaveHealthData(any(), any());
+            
+            // 이벤트 발행 확인
+            eventsMock.verify(() -> Events.raise(any(CareCallAnalysisCompletedEvent.class)), times(1));
+        }
+    }
+
+    @Test
+    @DisplayName("AI 분석 재시도: 3번 모두 실패 -> 이벤트 발행 안함")
+    void handleCareCallSaved_retry_failure() {
+        // given
+        Elder elder = mock(Elder.class);
+        CareCallRecord record = CareCallRecord.builder()
+                .id(6)
+                .elder(elder)
+                .callStatus(CareCallStatus.COMPLETED.getValue())
+                .transcriptionText("실패 테스트")
+                .startTime(LocalDateTime.now())
+                .calledAt(LocalDateTime.now())
+                .build();
+        ReflectionTestUtils.setField(record, "elder", elder);
+        CareCallCompletedEvent event = new CareCallCompletedEvent(record);
+
+        List<MedicationSchedule> medicationSchedules = Collections.emptyList();
+        when(medicationScheduleRepository.findByElder(elder)).thenReturn(medicationSchedules);
+
+        // 3번 모두 실패
+        when(aiHealthDataExtractorService.extractHealthData(any()))
+                .thenThrow(new RuntimeException("1차 실패"))
+                .thenThrow(new RuntimeException("2차 실패"))
+                .thenThrow(new RuntimeException("3차 실패"));
+
+        // when
+        try (MockedStatic<Events> eventsMock = mockStatic(Events.class)) {
+            careCallEventListener.handleCareCallSaved(event);
+
+            // then
+            // AI 분석 3회 호출 확인
+            verify(aiHealthDataExtractorService, times(3)).extractHealthData(any());
+            
+            // 건강 데이터 저장 호출 안됨
             verify(healthDataProcessingService, never()).processAndSaveHealthData(any(), any());
-            eventsMock.verify(() -> Events.raise(any(CareCallAnalysisCompletedEvent.class)));
+            
+            // 이벤트 발행 안함
+            eventsMock.verify(() -> Events.raise(any(CareCallAnalysisCompletedEvent.class)), never());
         }
     }
 }

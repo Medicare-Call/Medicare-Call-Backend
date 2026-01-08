@@ -38,13 +38,29 @@ public class CareCallEventListener {
         CareCallRecord record = event.careCallRecord();
         log.info("CareCallCompletedEvent 수신: recordId={}", record.getId());
 
+        boolean processingSuccess = true;
+
         // LLM API 통한 건강 데이터 추출
         String transcriptionText = record.getTranscriptionText();
         if (transcriptionText != null && !transcriptionText.trim().isEmpty()) {
-            try {
-                processHealthDataExtraction(record, transcriptionText);
-            } catch (Exception e) {
-                log.error("건강 데이터 추출 및 저장 중 오류 발생: recordId={}", record.getId(), e);
+            int maxRetries = 3;
+            int attempt = 0;
+
+            while (attempt < maxRetries) {
+                attempt++;
+                try {
+                    processHealthDataExtraction(record, transcriptionText);
+                    break;
+                } catch (Exception e) {
+                    if (attempt < maxRetries) {
+                        log.warn("건강 데이터 추출 실패 (시도 {}/{}): recordId={}, error={}", attempt, maxRetries, record.getId(), e.getMessage());
+                    } else {
+                        log.error("건강 데이터 추출 최종 실패 (시도 {}/{}): recordId={}", attempt, maxRetries, record.getId(), e);
+                        // TODO: 디스코드 API or Slack API 연동하여 알림 전송
+                        // 만약 LLM API에 일시적인 장애가 발생하면, 추출 실패한 건들에 대해 일괄 밀어넣기 처리를 어떻게 할지 고민이 필요하다
+                        processingSuccess = false;
+                    }
+                }
             }
         }
 
@@ -58,7 +74,9 @@ public class CareCallEventListener {
         }
 
         // 분석 완료 이벤트 발행
-        Events.raise(new CareCallAnalysisCompletedEvent(record));
+        if (processingSuccess) {
+            Events.raise(new CareCallAnalysisCompletedEvent(record));
+        }
     }
 
     private void processHealthDataExtraction(CareCallRecord callRecord, String transcriptionText) {
