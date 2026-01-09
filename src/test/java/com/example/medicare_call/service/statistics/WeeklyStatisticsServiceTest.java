@@ -4,6 +4,8 @@ import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.report.WeeklySummaryDto;
 import com.example.medicare_call.global.enums.BloodSugarMeasurementType;
 import com.example.medicare_call.global.enums.BloodSugarStatus;
+import com.example.medicare_call.global.enums.CareCallResponseStatus;
+import com.example.medicare_call.global.enums.PsychologicalStatus;
 import com.example.medicare_call.repository.BloodSugarRecordRepository;
 import com.example.medicare_call.repository.CareCallRecordRepository;
 import com.example.medicare_call.repository.DailyStatisticsRepository;
@@ -73,7 +75,7 @@ class WeeklyStatisticsServiceTest {
                 .id(1)
                 .elder(testElder)
                 .calledAt(testDate.atTime(10, 0))
-                .responded((byte) 1)
+                .responded(CareCallResponseStatus.RESPONDED)
                 .callStatus("completed")
                 .build();
     }
@@ -248,9 +250,9 @@ class WeeklyStatisticsServiceTest {
     @DisplayName("심리 상태 통계 계산 - 좋음/나쁨 횟수")
     void updateWeeklyStatistics_psychStats_countsCorrectly() {
         // given
-        CareCallRecord psych1 = createCareCallWithPsych("기분 좋음", (byte) 1);
-        CareCallRecord psych2 = createCareCallWithPsych("기분 좋음", (byte) 1);
-        CareCallRecord psych3 = createCareCallWithPsych("우울함", (byte) 0);
+        CareCallRecord psych1 = createCareCallWithPsych("기분 좋음", PsychologicalStatus.GOOD);
+        CareCallRecord psych2 = createCareCallWithPsych("기분 좋음", PsychologicalStatus.GOOD);
+        CareCallRecord psych3 = createCareCallWithPsych("우울함", PsychologicalStatus.BAD);
 
         setupMockRepositories();
         when(careCallRecordRepository.findByElderIdAndDateBetween(eq(testElder.getId()), any(), any()))
@@ -501,7 +503,7 @@ class WeeklyStatisticsServiceTest {
                 .build();
     }
 
-    private CareCallRecord createCareCallWithPsych(String psychDetails, Byte psychStatus) {
+    private CareCallRecord createCareCallWithPsych(String psychDetails, PsychologicalStatus psychStatus) {
         return CareCallRecord.builder()
                 .elder(testElder)
                 .calledAt(testDate.atTime(10, 0))

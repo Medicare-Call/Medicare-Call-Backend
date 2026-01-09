@@ -83,6 +83,7 @@ class CareCallServiceTest {
                 .startTime(Instant.parse("2025-01-27T10:00:00Z"))
                 .endTime(Instant.parse("2025-01-27T10:15:00Z"))
                 .status(CareCallStatus.COMPLETED)
+                .responded((byte) 1)
                 .transcription(transcriptionData)
                 .build();
 
@@ -139,6 +140,7 @@ class CareCallServiceTest {
                 .elderId(1)
                 .settingId(2)
                 .status(CareCallStatus.FAILED)
+                .responded((byte) 1)
                 .build();
 
         Elder elder = Elder.builder()
@@ -189,6 +191,7 @@ class CareCallServiceTest {
                 .elderId(1)
                 .settingId(2)
                 .status(CareCallStatus.BUSY)
+                .responded((byte) 1)
                 .transcription(transcriptionData)
                 .build();
 
@@ -236,6 +239,7 @@ class CareCallServiceTest {
                 .elderId(999)
                 .settingId(2)
                 .status(CareCallStatus.COMPLETED)
+                .responded((byte) 1)
                 .build();
 
         when(elderRepository.findById(999)).thenReturn(Optional.empty());
@@ -257,6 +261,7 @@ class CareCallServiceTest {
                 .elderId(1)
                 .settingId(999)
                 .status(CareCallStatus.COMPLETED)
+                .responded((byte) 1)
                 .build();
 
         Elder elder = Elder.builder()

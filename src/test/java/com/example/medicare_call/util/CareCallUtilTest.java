@@ -1,6 +1,7 @@
 package com.example.medicare_call.util;
 
 import com.example.medicare_call.domain.CareCallSetting;
+import com.example.medicare_call.global.enums.CallRecurrenceType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,7 +22,7 @@ class CareCallUtilTest {
                 .firstCallTime(LocalTime.of(8, 0))
                 .secondCallTime(LocalTime.of(13, 0))
                 .thirdCallTime(LocalTime.of(21, 0))
-                .recurrence((byte) 1)
+                .recurrence(CallRecurrenceType.WEEKLY)
                 .build();
     }
 

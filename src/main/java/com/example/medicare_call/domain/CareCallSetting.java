@@ -1,9 +1,10 @@
 package com.example.medicare_call.domain;
 
+import com.example.medicare_call.global.enums.CallRecurrenceType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Builder;
 
 import jakarta.persistence.*;
 import java.time.LocalTime;
@@ -33,11 +34,12 @@ public class CareCallSetting {
     @Column(name = "third_call_time", nullable = false)
     private LocalTime thirdCallTime;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "recurrence", nullable = false)
-    private Byte recurrence;
+    private CallRecurrenceType recurrence;
 
     @Builder
-    public CareCallSetting(Integer id, Elder elder, LocalTime firstCallTime, LocalTime secondCallTime, LocalTime thirdCallTime, Byte recurrence) {
+    public CareCallSetting(Integer id, Elder elder, LocalTime firstCallTime, LocalTime secondCallTime, LocalTime thirdCallTime, CallRecurrenceType recurrence) {
         this.id = id;
         this.elder = elder;
         this.firstCallTime = firstCallTime;
@@ -51,4 +53,4 @@ public class CareCallSetting {
         this.secondCallTime = secondCallTime;
         this.thirdCallTime = thirdCallTime;
     }
-} 
+}

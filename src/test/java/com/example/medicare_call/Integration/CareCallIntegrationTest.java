@@ -4,6 +4,7 @@ import com.example.medicare_call.domain.CareCallSetting;
 import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.domain.Member;
 import com.example.medicare_call.domain.MemberElder;
+import com.example.medicare_call.global.enums.CallRecurrenceType;
 import com.example.medicare_call.global.enums.ElderRelation;
 import com.example.medicare_call.global.enums.Gender;
 import com.example.medicare_call.global.enums.MemberElderAuthority;
@@ -84,7 +85,7 @@ class CareCallIntegrationTest {
                 CareCallSetting.builder()
                         .elder(elder)
                         .firstCallTime(now)
-                        .recurrence((byte) 0)
+                        .recurrence(CallRecurrenceType.DAILY)
                         .build()
         );
 

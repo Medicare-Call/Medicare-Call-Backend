@@ -2,6 +2,7 @@ package com.example.medicare_call.service.data_processor;
 
 import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.data_processor.CareCallDataProcessRequest;
+import com.example.medicare_call.global.enums.CareCallResponseStatus;
 import com.example.medicare_call.global.event.CareCallCompletedEvent;
 import com.example.medicare_call.global.event.Events;
 import com.example.medicare_call.global.exception.CustomException;
@@ -45,7 +46,7 @@ public class CareCallService {
                 .elder(elder)
                 .setting(setting)
                 .calledAt(request.getStartTime() != null ? LocalDateTime.ofInstant(request.getStartTime(), ZoneOffset.UTC) : LocalDateTime.now())
-                .responded(request.getResponded())
+                .responded(resolveResponseStatus(request.getResponded()))
                 .startTime(request.getStartTime() != null ? LocalDateTime.ofInstant(request.getStartTime(), ZoneOffset.UTC) : null)
                 .endTime(request.getEndTime() != null ? LocalDateTime.ofInstant(request.getEndTime(), ZoneOffset.UTC) : null)
                 .callStatus(request.getStatus() != null ? request.getStatus().getValue() : null)
@@ -60,4 +61,16 @@ public class CareCallService {
 
         return saved;
     }
-} 
+
+    private CareCallResponseStatus resolveResponseStatus(Byte responded) {
+        try {
+            CareCallResponseStatus status = CareCallResponseStatus.fromValue(responded);
+            if (status == null) {
+                throw new IllegalArgumentException("Responded value cannot be null");
+            }
+            return status;
+        } catch (IllegalArgumentException e) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
+        }
+    }
+}

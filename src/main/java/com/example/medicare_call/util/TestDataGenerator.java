@@ -1,6 +1,8 @@
 package com.example.medicare_call.util;
 
 import com.example.medicare_call.domain.*;
+import com.example.medicare_call.global.enums.CallRecurrenceType;
+import com.example.medicare_call.global.enums.CareCallResponseStatus;
 import com.example.medicare_call.global.enums.ElderRelation;
 import com.example.medicare_call.global.enums.Gender;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
@@ -60,7 +62,7 @@ public class TestDataGenerator {
                             .id(settingId)
                             .elder(elder)
                             .firstCallTime(LocalDateTime.now().toLocalTime())
-                            .recurrence((byte) 1)
+                            .recurrence(CallRecurrenceType.WEEKLY)
                             .build();
                     return careCallSettingRepository.save(newSetting);
                 });
@@ -84,7 +86,7 @@ public class TestDataGenerator {
                 .elder(elder)
                 .setting(setting)
                 .calledAt(LocalDateTime.now())
-                .responded((byte) 1)
+                .responded(CareCallResponseStatus.RESPONDED)
                 .startTime(LocalDateTime.now())
                 .endTime(LocalDateTime.now().plusMinutes(15))
                 .callStatus("completed")

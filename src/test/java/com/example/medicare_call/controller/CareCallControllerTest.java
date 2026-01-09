@@ -100,7 +100,7 @@ class CareCallControllerTest {
                 .startTime(Instant.parse("2025-01-27T10:00:00Z"))
                 .endTime(Instant.parse("2025-01-27T10:15:00Z"))
                 .status(CareCallStatus.COMPLETED)
-                .responded((byte)1)
+                .responded((byte) 1)
                 .transcription(transcriptionData)
                 .build();
 
@@ -134,7 +134,7 @@ class CareCallControllerTest {
         CareCallDataProcessRequest request = CareCallDataProcessRequest.builder()
                 .settingId(2)
                 .status(CareCallStatus.COMPLETED)
-                .responded((byte)1)
+                .responded((byte) 1)
                 .build();
 
         // when & then
@@ -201,7 +201,7 @@ class CareCallControllerTest {
                 .elderId(1)
                 .settingId(2)
                 .status(CareCallStatus.COMPLETED)
-                .responded((byte)1)
+                .responded((byte) 1)
                 .build();
 
         Elder elder = Elder.builder().id(1).build();
