@@ -18,7 +18,7 @@ public class AuthenticationArgumentResolver implements HandlerMethodArgumentReso
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         return parameter.hasParameterAnnotation(AuthUser.class) && //@AuthUser가 붙어있고
-                parameter.getParameterType().equals(Integer.class); //타입이 Long인 경우 resolcer 동작
+                parameter.getParameterType().equals(Integer.class); //타입이 Integer인 경우 resolver 동작
     }
 
     //실제고 값을 꺼내서 컨트롤러의 파라미터로 넘겨주는 로직

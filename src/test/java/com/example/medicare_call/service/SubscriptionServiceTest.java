@@ -45,7 +45,7 @@ public class SubscriptionServiceTest {
     void getSubscriptions_Success() {
         // given
         Integer memberId = 1;
-        Member member = Member.builder().id(memberId.intValue()).name("테스트회원").build();
+        Member member = Member.builder().id(memberId).name("테스트회원").build();
         Elder elder = Elder.builder().id(1).name("김어르신").build();
         Subscription subscription = Subscription.builder()
                 .id(1L)
@@ -76,7 +76,7 @@ public class SubscriptionServiceTest {
     void getSubscriptions_Fail_MemberNotFound() {
         // given
         Integer memberId = 999;
-        given(memberRepository.existsById(memberId.intValue())).willReturn(false);
+        given(memberRepository.existsById(memberId)).willReturn(false);
 
         // when & then
         CustomException exception = assertThrows(CustomException.class, () -> {
@@ -90,8 +90,8 @@ public class SubscriptionServiceTest {
     void getSubscriptions_Success_NoSubscriptions() {
         // given
         Integer memberId = 1;
-        given(memberRepository.existsById(memberId.intValue())).willReturn(true);
-        given(subscriptionRepository.findByMemberId(memberId.intValue())).willReturn(Collections.emptyList());
+        given(memberRepository.existsById(memberId)).willReturn(true);
+        given(subscriptionRepository.findByMemberId(memberId)).willReturn(Collections.emptyList());
 
         // when
         List<SubscriptionResponse> responses = subscriptionService.getSubscriptionsByMember(memberId);
