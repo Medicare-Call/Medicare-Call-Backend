@@ -1,78 +1,10 @@
 package com.example.medicare_call.service.ai;
 
-import com.example.medicare_call.dto.data_processor.HealthDataExtractionRequest;
-import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
-import org.springframework.ai.converter.BeanOutputConverter;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.ai.chat.model.ChatResponse;
-import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-@Slf4j
-@Service
-public class AiHealthDataExtractorService {
+public class CareCallDataExtractionPrompt {
     
-    private final OpenAiChatService openAiChatService;
-    private final BeanOutputConverter<HealthDataExtractionResponse> beanOutputConverter;
-    
-    @Value("${openai.model}")
-    private String openaiModel;
+    public static final String SYSTEM_MESSAGE = "당신은 의료 통화 내용에서 건강 데이터를 추출하는 전문가입니다. 주어진 통화 내용에서 건강 관련 정보를 정확히 추출하여 JSON 형태로 응답해주세요.";
 
-    @Autowired
-    public AiHealthDataExtractorService(
-            OpenAiChatService openAiChatService
-    ) {
-        this.openAiChatService = openAiChatService;
-        this.beanOutputConverter = new BeanOutputConverter<>(HealthDataExtractionResponse.class);
-    }
-
-
-    public HealthDataExtractionResponse extractHealthData(HealthDataExtractionRequest request) {
-        try {
-            log.info("OpenAI API를 통한 건강 데이터 추출 시작");
-            
-            String prompt = buildPrompt(request);
-            String systemMessage = "당신은 의료 통화 내용에서 건강 데이터를 추출하는 전문가입니다. 주어진 통화 내용에서 건강 관련 정보를 정확히 추출하여 JSON 형태로 응답해주세요.";
-
-            OpenAiChatOptions options = OpenAiChatOptions.builder()
-                    .model(openaiModel)
-                    .temperature(0.1)
-                    .build();
-
-            ChatResponse response = openAiChatService.openAiChat(prompt, systemMessage, options);
-            
-            if (response != null && response.getResult() != null) {
-                String content = response.getResult().getOutput().getText();
-                log.info("OpenAI 응답: {}", content);
-                
-                // 마크다운 코드 블록 제거 (BeanOutputConverter가 처리하지 못할 수 있음)
-                content = cleanContent(content);
-                
-                return beanOutputConverter.convert(content);
-            } else {
-                log.error("OpenAI API 응답이 비어있습니다");
-                return createEmptyResponse();
-            }
-            
-        } catch (Exception e) {
-            log.error("OpenAI API 호출 중 오류 발생", e);
-            return createEmptyResponse();
-        }
-    }
-
-    private String cleanContent(String content) {
-        if (content.contains("```json")) {
-            return content.substring(content.indexOf("```json") + 7, content.lastIndexOf("```")).trim();
-        } else if (content.contains("```")) {
-            return content.substring(content.indexOf("```") + 3, content.lastIndexOf("```")).trim();
-        }
-        return content.trim();
-    }
-
-    private String buildPrompt(HealthDataExtractionRequest request) {
-        return String.format("""
+    public static final String PROMPT_TEMPLATE = """
             다음 통화 내용에서 건강 데이터를 추출하여 JSON 형태로 응답해주세요.
             
             통화 날짜: %s
@@ -158,24 +90,5 @@ public class AiHealthDataExtractorService {
               "healthSigns": ["건강 징후 상세 내용 1", "건강 징후 상세 내용 2"],
               "healthStatus": "좋음/나쁨"
             }
-            """, 
-            request.getCallDate(),
-            request.getTranscriptionText(),
-            request.getMedicationNames() != null && !request.getMedicationNames().isEmpty() ? String.join(", ", request.getMedicationNames()) : "등록된 약 없음"
-        );
-    }
-
-    private HealthDataExtractionResponse createEmptyResponse() {
-        return HealthDataExtractionResponse.builder()
-                .date(null)
-                .mealData(null)
-                .sleepData(null)
-                .psychologicalState(null)
-                .psychologicalStatus(null)
-                .bloodSugarData(null)
-                .medicationData(null)
-                .healthSigns(null)
-                .healthStatus(null)
-                .build();
-    }
-} 
+            """;
+}
