@@ -1,9 +1,10 @@
 package com.example.medicare_call.service.ai.prompt;
 
-import com.example.medicare_call.dto.report.WeeklySummaryDto;
-import com.example.medicare_call.service.statistics.WeeklyStatisticsService;
+import com.example.medicare_call.service.statistics.WeeklyStatsAggregate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,53 +19,56 @@ class WeeklySummaryPromptBuilderTest {
         String systemMessage = weeklySummaryPromptBuilder.buildSystemMessage();
 
         // Then
-        assertThat(systemMessage).isEqualTo("당신은 어르신 주간 건강 보고서 전문가입니다. 어르신의 주간 데이터를 분석하여 보호자에게 필요한 핵심 정보를 80자 이상 100자 미만으로 요약 보고해야 합니다.");
+        assertThat(systemMessage).isEqualTo("당신은 주간 건강 데이터를 분석하여 보호자를 위한 주간 건강 보고서를 작성하는 전문가입니다. " +
+                "제공된 데이터를 기반으로 어르신의 건강 상태를 객관적으로 요약하고, " +
+                "보호자가 주의 깊게 살펴봐야 할 가장 중요한 사항 1~2가지를 중심으로 조언을 제공해주세요.");
     }
 
     @Test
     @DisplayName("buildPrompt 메서드는 PromptTemplate을 사용하여 올바른 프롬프트를 생성해야 한다")
     void buildPrompt_shouldCreateCorrectPromptUsingPromptTemplate() {
         // Given
-        WeeklyStatisticsService.WeeklyBloodSugarType beforeMeal =
-                WeeklyStatisticsService.WeeklyBloodSugarType.builder()
+        WeeklyStatsAggregate.BloodSugarStats beforeMeal =
+                WeeklyStatsAggregate.BloodSugarStats.builder()
                         .normal(2)
                         .high(0)
                         .low(0)
                         .build();
 
-        WeeklyStatisticsService.WeeklyBloodSugarType afterMeal =
-                WeeklyStatisticsService.WeeklyBloodSugarType.builder()
+        WeeklyStatsAggregate.BloodSugarStats afterMeal =
+                WeeklyStatsAggregate.BloodSugarStats.builder()
                         .normal(3)
                         .high(1)
                         .low(0)
                         .build();
 
-        WeeklyStatisticsService.WeeklyBloodSugar bloodSugar =
-                WeeklyStatisticsService.WeeklyBloodSugar.builder()
-                        .beforeMeal(beforeMeal)
-                        .afterMeal(afterMeal)
-                        .build();
-
-        WeeklySummaryDto dto = WeeklySummaryDto.builder()
-                .mealCount(18)
-                .mealRate(85)
-                .averageSleepHours(7.5)
+        WeeklyStatsAggregate aggregate = WeeklyStatsAggregate.builder()
+                .startDate(LocalDate.of(2026, 1, 5))
+                .endDate(LocalDate.of(2026, 1, 11))
+                .breakfastCount(6)
+                .lunchCount(6)
+                .dinnerCount(6)
+                .mealGoalCount(21)
                 .medicationTakenCount(10)
-                .medicationMissedCount(2)
-                .positivePsychologicalCount(5)
-                .negativePsychologicalCount(1)
+                .medicationGoalCount(12)
+                .medicationScheduledCount(14)
+                .avgSleepMinutes(450)
+                .psychGoodCount(5)
+                .psychNormalCount(0)
+                .psychBadCount(1)
                 .healthSignals(0)
                 .missedCalls(0)
-                .bloodSugar(bloodSugar)
+                .beforeMealBloodSugar(beforeMeal)
+                .afterMealBloodSugar(afterMeal)
                 .build();
 
         // When
-        String prompt = weeklySummaryPromptBuilder.buildPrompt(dto);
+        String prompt = weeklySummaryPromptBuilder.buildPrompt(aggregate);
 
         // Then
         assertThat(prompt).isNotNull();
         assertThat(prompt).contains("주간 총 식사 횟수: 18회 (총 21끼 기준)");
-        assertThat(prompt).contains("식사율: 85% (목표: 100%)");
+        assertThat(prompt).contains("식사율: 86% (목표: 100%)");
         assertThat(prompt).contains("평균 수면 시간: 7.5시간 (권장: 7-8시간)");
         assertThat(prompt).contains("약 복용 횟수: 10회");
         assertThat(prompt).contains("놓친 약 횟수: 2회");
@@ -80,27 +84,28 @@ class WeeklySummaryPromptBuilderTest {
     @DisplayName("buildPrompt 메서드는 bloodSugar의 모든 필드가 null일 때도 올바른 프롬프트를 생성해야 한다")
     void buildPrompt_shouldHandleNullBloodSugarFieldsCorrectly() {
         // Given
-        WeeklyStatisticsService.WeeklyBloodSugar bloodSugar =
-                WeeklyStatisticsService.WeeklyBloodSugar.builder()
-                        .beforeMeal(null)
-                        .afterMeal(null)
-                        .build();
-
-        WeeklySummaryDto dto = WeeklySummaryDto.builder()
-                .mealCount(0)
-                .mealRate(0)
-                .averageSleepHours(0.0)
+        WeeklyStatsAggregate aggregate = WeeklyStatsAggregate.builder()
+                .startDate(LocalDate.of(2026, 1, 5))
+                .endDate(LocalDate.of(2026, 1, 11))
+                .breakfastCount(0)
+                .lunchCount(0)
+                .dinnerCount(0)
+                .mealGoalCount(21)
                 .medicationTakenCount(0)
-                .medicationMissedCount(0)
-                .positivePsychologicalCount(0)
-                .negativePsychologicalCount(0)
+                .medicationGoalCount(0)
+                .medicationScheduledCount(0)
+                .avgSleepMinutes(0)
+                .psychGoodCount(0)
+                .psychNormalCount(0)
+                .psychBadCount(0)
                 .healthSignals(0)
                 .missedCalls(0)
-                .bloodSugar(bloodSugar)
+                .beforeMealBloodSugar(null)
+                .afterMealBloodSugar(null)
                 .build();
 
         // When
-        String prompt = weeklySummaryPromptBuilder.buildPrompt(dto);
+        String prompt = weeklySummaryPromptBuilder.buildPrompt(aggregate);
 
         // Then
         assertThat(prompt).isNotNull();
@@ -118,63 +123,72 @@ class WeeklySummaryPromptBuilderTest {
     }
 
     @Test
-    @DisplayName("buildPrompt 메서드는 WeeklySummaryDto의 bloodSugar 필드가 null일 때도 NPE 없이 올바른 프롬프트를 생성해야 한다")
-    void buildPrompt_shouldHandleNullBloodSugarFieldWithoutNPE() {
+    @DisplayName("buildPrompt 메서드는 avgSleepMinutes 필드가 null일 때도 NPE 없이 올바른 프롬프트를 생성해야 한다")
+    void buildPrompt_shouldHandleNullSleepMinutesFieldWithoutNPE() {
         // Given
-        WeeklySummaryDto dto = WeeklySummaryDto.builder()
-                .mealCount(0)
-                .mealRate(0)
-                .averageSleepHours(0.0)
+        WeeklyStatsAggregate aggregate = WeeklyStatsAggregate.builder()
+                .startDate(LocalDate.of(2026, 1, 5))
+                .endDate(LocalDate.of(2026, 1, 11))
+                .breakfastCount(0)
+                .lunchCount(0)
+                .dinnerCount(0)
+                .mealGoalCount(21)
                 .medicationTakenCount(0)
-                .medicationMissedCount(0)
-                .positivePsychologicalCount(0)
-                .negativePsychologicalCount(0)
+                .medicationGoalCount(0)
+                .medicationScheduledCount(0)
+                .avgSleepMinutes(null) // null로 설정
+                .psychGoodCount(0)
+                .psychNormalCount(0)
+                .psychBadCount(0)
                 .healthSignals(0)
                 .missedCalls(0)
-                .bloodSugar(null) // bloodSugar 필드를 null로 설정
+                .beforeMealBloodSugar(null)
+                .afterMealBloodSugar(null)
                 .build();
 
         // When
-        String prompt = weeklySummaryPromptBuilder.buildPrompt(dto);
+        String prompt = weeklySummaryPromptBuilder.buildPrompt(aggregate);
 
         // Then
         assertThat(prompt).isNotNull();
+        assertThat(prompt).contains("평균 수면 시간: 기록 없음 (권장: 7-8시간)");
         assertThat(prompt).contains("식전: 측정 기록 없음");
         assertThat(prompt).contains("식후: 측정 기록 없음");
     }
 
     @Test
-    @DisplayName("buildPrompt 메서드는 WeeklySummaryDto의 bloodSugar 에서 식전만 null인 경우 올바르게 처리해야 한다")
+    @DisplayName("buildPrompt 메서드는 식전 혈당만 null인 경우 올바르게 처리해야 한다")
     void buildPrompt_shouldHandleNullBeforeMealCorrectly() {
         // Given
-        WeeklyStatisticsService.WeeklyBloodSugarType afterMeal =
-                WeeklyStatisticsService.WeeklyBloodSugarType.builder()
+        WeeklyStatsAggregate.BloodSugarStats afterMeal =
+                WeeklyStatsAggregate.BloodSugarStats.builder()
                         .normal(3)
                         .high(1)
                         .low(0)
                         .build();
 
-        WeeklyStatisticsService.WeeklyBloodSugar bloodSugar =
-                WeeklyStatisticsService.WeeklyBloodSugar.builder()
-                        .beforeMeal(null)
-                        .afterMeal(afterMeal)
-                        .build();
-
-        WeeklySummaryDto dto = WeeklySummaryDto.builder()
-                .mealCount(15)
-                .mealRate(71)
-                .averageSleepHours(7.0)
+        WeeklyStatsAggregate aggregate = WeeklyStatsAggregate.builder()
+                .startDate(LocalDate.of(2026, 1, 5))
+                .endDate(LocalDate.of(2026, 1, 11))
+                .breakfastCount(5)
+                .lunchCount(5)
+                .dinnerCount(5)
+                .mealGoalCount(21)
                 .medicationTakenCount(8)
-                .medicationMissedCount(1)
-                .positivePsychologicalCount(4)
-                .negativePsychologicalCount(0)
+                .medicationGoalCount(9)
+                .medicationScheduledCount(12)
+                .avgSleepMinutes(420) // 7.0시간
+                .psychGoodCount(4)
+                .psychNormalCount(0)
+                .psychBadCount(0)
                 .healthSignals(0)
                 .missedCalls(0)
-                .bloodSugar(bloodSugar)
+                .beforeMealBloodSugar(null)
+                .afterMealBloodSugar(afterMeal)
                 .build();
 
         // When
-        String prompt = weeklySummaryPromptBuilder.buildPrompt(dto);
+        String prompt = weeklySummaryPromptBuilder.buildPrompt(aggregate);
 
         // Then
         assertThat(prompt).isNotNull();
@@ -183,37 +197,38 @@ class WeeklySummaryPromptBuilderTest {
     }
 
     @Test
-    @DisplayName("buildPrompt 메서드는 WeeklySummaryDto의 bloodSugar 에서 식후만 null인 경우에도 올바르게 처리해야 한다")
+    @DisplayName("buildPrompt 메서드는 식후 혈당만 null인 경우에도 올바르게 처리해야 한다")
     void buildPrompt_shouldHandleNullAfterMealCorrectly() {
         // Given
-        WeeklyStatisticsService.WeeklyBloodSugarType beforeMeal =
-                WeeklyStatisticsService.WeeklyBloodSugarType.builder()
+        WeeklyStatsAggregate.BloodSugarStats beforeMeal =
+                WeeklyStatsAggregate.BloodSugarStats.builder()
                         .normal(2)
                         .high(1)
                         .low(0)
                         .build();
 
-        WeeklyStatisticsService.WeeklyBloodSugar bloodSugar =
-                WeeklyStatisticsService.WeeklyBloodSugar.builder()
-                        .beforeMeal(beforeMeal)
-                        .afterMeal(null)
-                        .build();
-
-        WeeklySummaryDto dto = WeeklySummaryDto.builder()
-                .mealCount(15)
-                .mealRate(71)
-                .averageSleepHours(7.0)
+        WeeklyStatsAggregate aggregate = WeeklyStatsAggregate.builder()
+                .startDate(LocalDate.of(2026, 1, 5))
+                .endDate(LocalDate.of(2026, 1, 11))
+                .breakfastCount(5)
+                .lunchCount(5)
+                .dinnerCount(5)
+                .mealGoalCount(21)
                 .medicationTakenCount(8)
-                .medicationMissedCount(1)
-                .positivePsychologicalCount(4)
-                .negativePsychologicalCount(0)
+                .medicationGoalCount(9)
+                .medicationScheduledCount(12)
+                .avgSleepMinutes(420) // 7.0시간
+                .psychGoodCount(4)
+                .psychNormalCount(0)
+                .psychBadCount(0)
                 .healthSignals(0)
                 .missedCalls(0)
-                .bloodSugar(bloodSugar)
+                .beforeMealBloodSugar(beforeMeal)
+                .afterMealBloodSugar(null)
                 .build();
 
         // When
-        String prompt = weeklySummaryPromptBuilder.buildPrompt(dto);
+        String prompt = weeklySummaryPromptBuilder.buildPrompt(aggregate);
 
         // Then
         assertThat(prompt).isNotNull();
