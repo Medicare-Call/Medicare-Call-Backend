@@ -20,12 +20,12 @@ public class SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
     private final MemberRepository memberRepository;
 
-    public List<SubscriptionResponse> getSubscriptionsByMember(Long memberId) {
-        if (!memberRepository.existsById(memberId.intValue())) {
+    public List<SubscriptionResponse> getSubscriptionsByMember(Integer memberId) {
+        if (!memberRepository.existsById(memberId)) {
             throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
         }
 
-        return subscriptionRepository.findByMemberId(memberId.intValue()).stream()
+        return subscriptionRepository.findByMemberId(memberId).stream()
                 .map(SubscriptionResponse::from)
                 .collect(Collectors.toList());
     }

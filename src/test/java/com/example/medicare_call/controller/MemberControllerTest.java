@@ -60,7 +60,7 @@ class MemberControllerTest {
         @Override
         public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                                       NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
-            return 1L; // 테스트용 고정 memberId
+            return 1; // 테스트용 고정 memberId
         }
     }
 

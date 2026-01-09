@@ -123,7 +123,7 @@ public class NaverPayController {
                 )
             )
             @Valid @RequestBody NaverPayReserveRequest request,
-            @Parameter(hidden = true) @AuthUser Long memberId) {
+            @Parameter(hidden = true) @AuthUser Integer memberId) {
         
         log.info("결제 요청 생성 API 호출 - productName: {}, totalPayAmount: {}", 
             request.getProductName(), request.getTotalPayAmount());

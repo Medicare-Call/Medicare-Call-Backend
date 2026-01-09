@@ -67,7 +67,7 @@ class TokenControllerTest {
         // given
         String accessToken = "valid-access-token";
         String authorization = "Bearer " + accessToken;
-        Long memberId = 1L;
+        Integer memberId = 1;
 
         when(jwtProvider.getMemberId(accessToken)).thenReturn(memberId);
 

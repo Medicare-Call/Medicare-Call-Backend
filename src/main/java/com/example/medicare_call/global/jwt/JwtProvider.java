@@ -90,8 +90,8 @@ public class JwtProvider {
                 .getBody();
     }
 
-    public Long getMemberId(String token) {
-        return Long.parseLong(getClaims(token).get("id").toString());
+    public Integer getMemberId(String token) {
+        return Integer.parseInt(getClaims(token).get("id").toString());
     }
 
     public String getPhone(String token) {

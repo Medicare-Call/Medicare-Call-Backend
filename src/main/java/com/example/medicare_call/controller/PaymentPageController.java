@@ -27,7 +27,7 @@ public class PaymentPageController {
         description = "네이버페이 JavaScript SDK를 사용한 결제 페이지를 반환합니다."
     )
     public String paymentPage(
-            @Parameter(hidden = true) @AuthUser Long memberId,
+            @Parameter(hidden = true) @AuthUser Integer memberId,
             @Parameter(description = "주문 코드", required = true)
             @PathVariable String orderCode,
             Model model) {

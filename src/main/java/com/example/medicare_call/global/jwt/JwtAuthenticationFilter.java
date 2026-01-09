@@ -48,7 +48,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             // Access Token인지 확인
             if (jwtProvider.isAccessToken(token)) {
-                Long memberId = jwtProvider.getMemberId(token);
+                Integer memberId = jwtProvider.getMemberId(token);
                 log.info("Extracted memberId from Access Token: {}", memberId);
                 return new JwtTokenAuthentication(memberId);
             } else {

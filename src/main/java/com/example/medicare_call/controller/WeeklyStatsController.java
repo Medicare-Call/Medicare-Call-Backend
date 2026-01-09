@@ -22,13 +22,13 @@ public class WeeklyStatsController implements WeeklyStatsApi {
     @Override
     @GetMapping("/{elderId}/weekly-stats")
     public ResponseEntity<WeeklyReportResponse> getWeeklyStats(
-        @AuthUser Long memberId,
+        @AuthUser Integer memberId,
         @PathVariable("elderId") Integer elderId,
         @RequestParam("startDate") LocalDate startDate
     ) {
         log.info("주간 통계 데이터 조회 요청: elderId={}, startDate={}", elderId, startDate);
 
-        WeeklyReportResponse response = weeklyReportService.getWeeklyReport(memberId.intValue(), elderId, startDate);
+        WeeklyReportResponse response = weeklyReportService.getWeeklyReport(memberId, elderId, startDate);
 
         return ResponseEntity.ok(response);
     }

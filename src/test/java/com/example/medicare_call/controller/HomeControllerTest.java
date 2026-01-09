@@ -108,7 +108,7 @@ class HomeControllerTest {
                 .bloodSugar(bloodSugar)
                 .build();
 
-        when(homeReportService.getHomeReport(anyInt(), eq(elderId)))
+        when(homeReportService.getHomeReport(nullable(Integer.class), eq(elderId)))
                 .thenReturn(expectedResponse);
 
         // when & then
@@ -175,7 +175,7 @@ class HomeControllerTest {
                 .bloodSugar(null)
                 .build();
 
-        when(homeReportService.getHomeReport(anyInt(), eq(elderId)))
+        when(homeReportService.getHomeReport(nullable(Integer.class), eq(elderId)))
                 .thenReturn(expectedResponse);
 
         // when & then

@@ -30,7 +30,7 @@ public class SubscriptionController {
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = SubscriptionResponse.class)))
     @GetMapping
-    public ResponseEntity<List<SubscriptionResponse>> getSubscriptions(@Parameter(hidden = true) @AuthUser Long memberId) {
+    public ResponseEntity<List<SubscriptionResponse>> getSubscriptions(@Parameter(hidden = true) @AuthUser Integer memberId) {
         List<SubscriptionResponse> subscriptions = subscriptionService.getSubscriptionsByMember(memberId);
         return ResponseEntity.ok(subscriptions);
     }

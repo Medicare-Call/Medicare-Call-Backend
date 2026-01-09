@@ -113,7 +113,7 @@ class WeeklyStatsControllerTest {
                 .bloodSugar(bloodSugar)
                 .build();
 
-        when(weeklyReportService.getWeeklyReport(anyInt(), eq(elderId), eq(startDate)))
+        when(weeklyReportService.getWeeklyReport(nullable(Integer.class), eq(elderId), eq(startDate)))
                 .thenReturn(expectedResponse);
 
         // when & then

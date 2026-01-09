@@ -37,10 +37,10 @@ public class TokenController {
         String token = authorization.replace("Bearer ", "");
         
         // 토큰에서 사용자 ID 추출
-        Long memberId = jwtProvider.getMemberId(token);
+        Integer memberId = jwtProvider.getMemberId(token);
         
         // Refresh Token 삭제
-        refreshTokenService.deleteRefreshToken(memberId.intValue());
+        refreshTokenService.deleteRefreshToken(memberId);
         
         log.info("로그아웃 완료 - Member ID: {}", memberId);
         

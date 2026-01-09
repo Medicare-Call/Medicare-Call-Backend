@@ -1,12 +1,11 @@
 package com.example.medicare_call.dto;
 
 import com.example.medicare_call.domain.Notice;
+import com.example.medicare_call.util.TimeUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.format.DateTimeFormatter;
 
 @Getter
 @Builder
@@ -26,7 +25,7 @@ public class NoticeResponse {
                 .title(notice.getTitle())
                 .author(notice.getAuthor())
                 .contents(notice.getContents())
-                .publishedAt(notice.getPublishedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                .publishedAt(TimeUtil.parseToDateString(notice.getPublishedAt()))
                 .build();
     }
 } 

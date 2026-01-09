@@ -40,7 +40,7 @@ public interface HomeApi {
     })
 
     ResponseEntity<HomeReportResponse> getHomeData(
-            Long memberId,
+            Integer memberId,
             @Parameter(description = "조회할 어르신의 식별자", required = true, example = "1")
             @PathVariable("elderId") Integer elderId
     );

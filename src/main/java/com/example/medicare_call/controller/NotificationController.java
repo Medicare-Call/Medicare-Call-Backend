@@ -70,11 +70,11 @@ public class NotificationController {
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
     public ResponseEntity<Void> sendHardcodedCareCall(
-            @Parameter(hidden = true) @AuthUser Long memberId
+            @Parameter(hidden = true) @AuthUser Integer memberId
     ) {
         log.info("테스트 알람 전송 완료");
         Notification notification = Notification.builder()
-                .member(memberRepository.findById(memberId.intValue()).orElseThrow())
+                .member(memberRepository.findById(memberId).orElseThrow())
                 .createdAt(LocalDateTime.now())
                 .title("테스트 알림 타이틀")
                 .body("테스트 알림 바디")
@@ -87,12 +87,12 @@ public class NotificationController {
     @Operation(summary = "알림 목록 조회", description = "특정 회원의 알림을 최신순으로 페이지네이션하여 제공합니다. 페이지당 40개의 알람 (페이지 0 ~ totalPages-1 까지 가능)")
     @GetMapping
     public ResponseEntity<NotificationPageResponse> getNotifications(
-            @Parameter(hidden = true) @AuthUser Long memberId,
+            @Parameter(hidden = true) @AuthUser Integer memberId,
             @RequestParam(name = "page", defaultValue = "0") int page
     ) {
         int safePage = Math.max(page, 0);
         NotificationPageResponse response = notificationService.getNotifications(
-                memberId.intValue(),
+                memberId,
                 safePage,
                 NOTIFICATION_PAGE_SIZE
         );
@@ -115,9 +115,9 @@ public class NotificationController {
     })
     @PostMapping("/validation-token")
     public ResponseEntity<Void> validationToken(
-        @Parameter(hidden = true) @AuthUser Long memberId
+        @Parameter(hidden = true) @AuthUser Integer memberId
     ){
-        String fcmToken = memberService.getFcmToken(memberId.intValue());
+        String fcmToken = memberService.getFcmToken(memberId);
         if (fcmToken == null ) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         try {
             firebaseService.validationToken(fcmToken);
