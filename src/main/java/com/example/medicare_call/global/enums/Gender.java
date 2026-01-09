@@ -1,7 +1,5 @@
 package com.example.medicare_call.global.enums;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-
 /**
  * 성별을 나타내는 Enum
  * (MALE: 남성, FEMALE: 여성)

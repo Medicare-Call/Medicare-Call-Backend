@@ -39,8 +39,9 @@ public class Member {
     @Column(name = "birth_date")
     private LocalDate birthDate;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "gender", nullable = false)
-    private Byte gender;
+    private Gender gender;
 
     @Column(name = "terms_agreed_at", nullable = false)
     private LocalDateTime termsAgreedAt;
@@ -68,12 +69,8 @@ public class Member {
     @Column(name = "fcm_token", unique = true, nullable = true)
     private String fcmToken;
 
-    public Gender getGenderEnum() {
-        return Gender.fromCode(gender); // byte값 → Enum 변환
-    }
-
     @Builder
-    public Member(Integer id, String name, String phone, LocalDate birthDate, Byte gender, LocalDateTime termsAgreedAt, Byte plan, String fcmToken) {
+    public Member(Integer id, String name, String phone, LocalDate birthDate, Gender gender, LocalDateTime termsAgreedAt, Byte plan, String fcmToken) {
         this.id = id;
         this.name = name;
         this.phone = phone;
@@ -84,7 +81,7 @@ public class Member {
         this.fcmToken = fcmToken;
     }
 
-    public void updateInfo(String name, LocalDate birthDate, Byte gender, String phone,
+    public void updateInfo(String name, LocalDate birthDate, Gender gender, String phone,
                            NotificationStatus pushAll, NotificationStatus pushCarecallCompleted,
                            NotificationStatus pushHealthAlert, NotificationStatus pushCarecallMissed) {
         this.name = name;

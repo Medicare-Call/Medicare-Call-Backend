@@ -5,6 +5,7 @@ import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.domain.Member;
 import com.example.medicare_call.domain.MemberElder;
 import com.example.medicare_call.global.enums.ElderRelation;
+import com.example.medicare_call.global.enums.Gender;
 import com.example.medicare_call.global.enums.MemberElderAuthority;
 import com.example.medicare_call.global.enums.ResidenceType;
 import com.example.medicare_call.repository.CareCallSettingRepository;
@@ -53,7 +54,7 @@ class CareCallIntegrationTest {
                 Member.builder()
                         .name("보호자")
                         .phone("01099998888")
-                        .gender((byte) 1)
+                        .gender(Gender.FEMALE)
                         .termsAgreedAt(LocalDateTime.now())
                         .build()
         );

@@ -32,7 +32,7 @@ public class TestDataGenerator {
                             .id(1)
                             .name("테스트 보호자")
                             .phone("010-1234-5678")
-                            .gender(Gender.MALE.getCode())
+                            .gender(Gender.MALE)
                             .termsAgreedAt(LocalDateTime.now())
                             .plan((byte) 1)
                             .build();
