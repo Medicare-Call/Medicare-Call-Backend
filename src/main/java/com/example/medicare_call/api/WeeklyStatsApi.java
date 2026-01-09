@@ -40,7 +40,7 @@ public interface WeeklyStatsApi {
             )
     })
     ResponseEntity<WeeklyReportResponse> getWeeklyStats(
-            @Parameter(hidden = true) Long memberId,
+            @Parameter(hidden = true) Integer memberId,
             @Parameter(description = "어르신 식별자", required = true, example = "1")
             @PathVariable("elderId") Integer elderId,
             @Parameter(description = "주간 통계를 조회할 시작 날짜 (yyyy-MM-dd)", required = true, example = "2025-07-15")

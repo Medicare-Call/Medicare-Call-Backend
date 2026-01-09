@@ -37,25 +37,25 @@ public class MemberController {
 
     @GetMapping("/member")
     @Operation(summary = "내 정보 조회", description = "현재 로그인한 사용자의 정보를 조회합니다")
-    public ResponseEntity<MemberInfoResponse> getMemberInfo(@Parameter(hidden = true) @AuthUser Long memberId){
-        MemberInfoResponse memberInfoResponse = memberService.getMemberInfo(memberId.intValue());
+    public ResponseEntity<MemberInfoResponse> getMemberInfo(@Parameter(hidden = true) @AuthUser Integer memberId){
+        MemberInfoResponse memberInfoResponse = memberService.getMemberInfo(memberId);
         return ResponseEntity.ok(memberInfoResponse);
     }
 
     @PostMapping("/member")
     @Operation(summary = "내 정보 수정", description = "현재 로그인한 사용자의 정보를 수정합니다")
-    public ResponseEntity<MemberInfoResponse> updateMemberInfo(@Parameter(hidden = true) @AuthUser Long memberId,
+    public ResponseEntity<MemberInfoResponse> updateMemberInfo(@Parameter(hidden = true) @AuthUser Integer memberId,
                                                                @Valid @RequestBody MemberInfoUpdateRequest request){
-        MemberInfoResponse response = memberService.updateMemberInfo(memberId.intValue(), request);
+        MemberInfoResponse response = memberService.updateMemberInfo(memberId, request);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/member/fcm-token")
     @Operation(summary = "FCM 토큰 갱신", description = "사용자의 FCM 토큰을 갱신합니다")
     public ResponseEntity<Void> updateFcmToken(
-            @Parameter(hidden = true) @AuthUser Long memberId,
+            @Parameter(hidden = true) @AuthUser Integer memberId,
             @RequestBody @Valid FcmTokenRequest request) {
-        memberService.updateFcmToken(memberId.intValue(), request.getFcmToken());
+        memberService.updateFcmToken(memberId, request.getFcmToken());
         return ResponseEntity.ok().build();
     }
 

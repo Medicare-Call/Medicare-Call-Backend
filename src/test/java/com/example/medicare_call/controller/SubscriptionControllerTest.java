@@ -16,6 +16,7 @@ import com.example.medicare_call.global.annotation.AuthUser;
 import java.time.LocalDate;
 import java.util.Collections;
 
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -49,7 +50,7 @@ class SubscriptionControllerTest {
                                    org.springframework.web.method.support.ModelAndViewContainer mavContainer,
                                    org.springframework.web.context.request.NativeWebRequest webRequest,
                                    org.springframework.web.bind.support.WebDataBinderFactory binderFactory) {
-            return 1L;
+            return 1;
         }
     }
 
@@ -65,7 +66,7 @@ class SubscriptionControllerTest {
                 .nextBillingDate(LocalDate.of(2025, 7, 10))
                 .startDate(LocalDate.of(2025, 5, 10))
                 .build();
-        given(subscriptionService.getSubscriptionsByMember(anyLong())).willReturn(Collections.singletonList(response));
+        given(subscriptionService.getSubscriptionsByMember(anyInt())).willReturn(Collections.singletonList(response));
 
         // when & then
         mockMvc.perform(get("/elders/subscriptions"))
@@ -82,7 +83,7 @@ class SubscriptionControllerTest {
     @DisplayName("GET /elders/subscriptions - 회원의 구독 정보 조회 성공 (구독 정보 없음)")
     void getSubscriptions_Success_Empty() throws Exception {
         // given
-        given(subscriptionService.getSubscriptionsByMember(anyLong())).willReturn(Collections.emptyList());
+        given(subscriptionService.getSubscriptionsByMember(anyInt())).willReturn(Collections.emptyList());
 
         // when & then
         mockMvc.perform(get("/elders/subscriptions"))

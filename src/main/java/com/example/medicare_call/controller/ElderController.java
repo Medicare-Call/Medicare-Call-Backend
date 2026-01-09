@@ -32,9 +32,9 @@ public class ElderController {
     @Operation(summary = "어르신 등록", description = "이름, 생년월일, 성별, 휴대폰, 관계, 거주방식 정보를 입력받아 어르신을 등록합니다.")
     @PostMapping
     public ResponseEntity<ElderRegisterResponse> registerElder(
-            @Parameter(hidden = true) @AuthUser Long memberId,
+            @Parameter(hidden = true) @AuthUser Integer memberId,
             @Valid @RequestBody ElderRegisterRequest request) {
-        MemberElder memberElder = elderService.registerElder(memberId.intValue(), request);
+        MemberElder memberElder = elderService.registerElder(memberId, request);
         Elder elder = memberElder.getElder();
         Member guardian = memberElder.getGuardian();
         ElderRegisterResponse response = ElderRegisterResponse.builder()
@@ -56,9 +56,9 @@ public class ElderController {
             description = "로그인한 유저가 등록한 모든 어르신의 개인정보를 조회합니다."
     )
     @GetMapping
-    public ResponseEntity<List<ElderResponse>> getElder(@Parameter(hidden = true) @AuthUser Long memberId){
+    public ResponseEntity<List<ElderResponse>> getElder(@Parameter(hidden = true) @AuthUser Integer memberId){
         log.info("어르신 설정 정보 조회 요청: memberId={}", memberId);
-        List<ElderResponse> body = elderService.getElder(memberId.intValue());
+        List<ElderResponse> body = elderService.getElder(memberId);
         return ResponseEntity.ok(body);
     }
 
@@ -68,14 +68,14 @@ public class ElderController {
     )
     @PostMapping("/{elderId}")
     public ResponseEntity<ElderResponse> updateElder(
-            @Parameter(hidden = true) @AuthUser Long memberId,
+            @Parameter(hidden = true) @AuthUser Integer memberId,
             @PathVariable Integer elderId,
             @Valid @RequestBody ElderUpdateRequest req
     ){
         log.info("어르신 설정 정보 수정 요청: memberId={}, elderId={}, name={}, birthDate={}, gender={}, phone={}, relationship={}, residenceType={}",
                 memberId, elderId, req.name(), req.birthDate(), req.gender(), req.phone(), req.relationship(), req.residenceType());
 
-        ElderResponse res = elderService.updateElder(memberId.intValue(), elderId, req);
+        ElderResponse res = elderService.updateElder(memberId, elderId, req);
         return ResponseEntity.ok(res);
     }
 
@@ -85,11 +85,11 @@ public class ElderController {
     )
     @DeleteMapping("/{elderId}")
     public ResponseEntity<Void> deleteElder(
-            @Parameter(hidden = true) @AuthUser Long memberId,
+            @Parameter(hidden = true) @AuthUser Integer memberId,
             @PathVariable Integer elderId
     ){
         log.info("어르신 설정 정보 삭제 요청: memberId={}, elderId={}", memberId, elderId);
-        elderService.deleteElder(memberId.intValue(), elderId);
+        elderService.deleteElder(memberId, elderId);
         return ResponseEntity.noContent().build();
     }
 
@@ -99,11 +99,11 @@ public class ElderController {
     )
     @PostMapping("/bulk")
     public ResponseEntity<List<ElderRegisterResponse>> bulkRegisterElders(
-            @Parameter(hidden = true) @AuthUser Long memberId,
+            @Parameter(hidden = true) @AuthUser Integer memberId,
             @Valid @RequestBody BulkElderRegisterRequest requestList
     ){
         log.info("어르신 정보 일괄 등록 요청: memberId={}, 요청 건수={}", memberId, requestList.getElders().size());
-        List<ElderRegisterResponse> responses = elderService.bulkRegisterElders(memberId.intValue(), requestList.getElders());
+        List<ElderRegisterResponse> responses = elderService.bulkRegisterElders(memberId, requestList.getElders());
         return ResponseEntity.ok(responses);
     }
 }

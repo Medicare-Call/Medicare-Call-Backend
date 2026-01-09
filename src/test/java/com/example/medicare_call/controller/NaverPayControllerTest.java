@@ -72,7 +72,7 @@ class NaverPayControllerTest {
                                    org.springframework.web.method.support.ModelAndViewContainer mavContainer,
                                    org.springframework.web.context.request.NativeWebRequest webRequest, 
                                    org.springframework.web.bind.support.WebDataBinderFactory binderFactory) {
-            return 1L; // 테스트용 고정 memberId
+            return 1; // 테스트용 고정 memberId
         }
     }
 
@@ -95,7 +95,7 @@ class NaverPayControllerTest {
                         .build())
                 .build();
 
-        when(naverPayService.createPaymentReserve(any(NaverPayReserveRequest.class), any(Long.class)))
+        when(naverPayService.createPaymentReserve(any(NaverPayReserveRequest.class), any(Integer.class)))
                 .thenReturn(response);
 
         // when & then

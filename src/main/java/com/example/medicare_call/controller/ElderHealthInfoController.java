@@ -28,18 +28,18 @@ public class ElderHealthInfoController {
     @Operation(summary = "어르신 건강정보 등록 및 수정", description = "질환, 복약주기, 특이사항을 등록 및 수정합니다.")
     @PostMapping("/{elderId}/health-info")
     public ResponseEntity<Void> upsertElderHealthInfo(
-            @Parameter(hidden = true) @AuthUser Long memberId,
+            @Parameter(hidden = true) @AuthUser Integer memberId,
             @PathVariable Integer elderId,
             @Valid @RequestBody ElderHealthInfoCreateRequest request
     ) {
-        elderHealthInfoService.upsertElderHealthInfo(memberId.intValue(), elderId, request);
+        elderHealthInfoService.upsertElderHealthInfo(memberId, elderId, request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @Operation(summary = "어르신 건강정보 조회", description = "elderId와 이름을 포함한 건강 정보를 조회합니다.")
     @GetMapping("/health-info")
-    public ResponseEntity<List<ElderHealthInfoResponse>> getElderHealthInfo(@Parameter(hidden = true) @AuthUser Long memberId) {
-        return ResponseEntity.ok(elderHealthInfoService.getElderHealth(memberId.intValue()));
+    public ResponseEntity<List<ElderHealthInfoResponse>> getElderHealthInfo(@Parameter(hidden = true) @AuthUser Integer memberId) {
+        return ResponseEntity.ok(elderHealthInfoService.getElderHealth(memberId));
     }
 
     @Operation(
@@ -48,11 +48,11 @@ public class ElderHealthInfoController {
     )
     @PostMapping("/health-info/bulk")
     public ResponseEntity<Void> bulkUpsertElderHealthInfo(
-            @Parameter(hidden = true) @AuthUser Long memberId,
+            @Parameter(hidden = true) @AuthUser Integer memberId,
             @Valid @RequestBody BulkElderHealthInfoCreateRequest requestList
     ){
         log.info("어르신 건강정보 일괄 등록 요청: memberId={}, 요청 건수={}", memberId, requestList.getHealthInfos().size());
-        elderHealthInfoService.bulkUpsertElderHealthInfo(memberId.intValue(), requestList.getHealthInfos());
+        elderHealthInfoService.bulkUpsertElderHealthInfo(memberId, requestList.getHealthInfos());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

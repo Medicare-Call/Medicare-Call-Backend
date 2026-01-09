@@ -18,7 +18,7 @@ public class AuthenticationArgumentResolver implements HandlerMethodArgumentReso
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         return parameter.hasParameterAnnotation(AuthUser.class) && //@AuthUser가 붙어있고
-                parameter.getParameterType().equals(Long.class); //타입이 Long인 경우 resolcer 동작
+                parameter.getParameterType().equals(Integer.class); //타입이 Long인 경우 resolcer 동작
     }
 
     //실제고 값을 꺼내서 컨트롤러의 파라미터로 넘겨주는 로직
@@ -38,7 +38,7 @@ public class AuthenticationArgumentResolver implements HandlerMethodArgumentReso
         }
     }
 
-    private Long getUsIdxFromAuthentication(Authentication authentication) {
+    private Integer getUsIdxFromAuthentication(Authentication authentication) {
         if (!(authentication instanceof JwtTokenAuthentication)) {
             throw new IllegalArgumentException("Authentication 설정이 잘못되었습니다."); //사용자 인증 객체가 JwtTokenAuthentication 타입인지 확인
         }

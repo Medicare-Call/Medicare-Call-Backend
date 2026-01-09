@@ -39,15 +39,15 @@ public class CareCallController implements CareCallApi, CareCallBetaTestApi, Car
 
     @Override
     @PostMapping("/elders/{elderId}/care-call-setting")
-    public ResponseEntity<Void> upsertCareCallSetting(@Parameter(hidden = true) @AuthUser Long memberId, @PathVariable Integer elderId, @Valid @RequestBody CareCallSettingRequest request) {
-        careCallSettingService.upsertCareCallSetting(memberId.intValue(), elderId, request);
+    public ResponseEntity<Void> upsertCareCallSetting(@Parameter(hidden = true) @AuthUser Integer memberId, @PathVariable Integer elderId, @Valid @RequestBody CareCallSettingRequest request) {
+        careCallSettingService.upsertCareCallSetting(memberId, elderId, request);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @Override
     @GetMapping("/elders/{elderId}/care-call-setting")
-    public ResponseEntity<CareCallSettingResponse> getCareCallSetting(@Parameter(hidden = true) @AuthUser Long memberId, @PathVariable Integer elderId) {
-        CareCallSettingResponse response = careCallSettingService.getCareCallSetting(memberId.intValue(), elderId);
+    public ResponseEntity<CareCallSettingResponse> getCareCallSetting(@Parameter(hidden = true) @AuthUser Integer memberId, @PathVariable Integer elderId) {
+        CareCallSettingResponse response = careCallSettingService.getCareCallSetting(memberId, elderId);
         return ResponseEntity.ok(response);
     }
 

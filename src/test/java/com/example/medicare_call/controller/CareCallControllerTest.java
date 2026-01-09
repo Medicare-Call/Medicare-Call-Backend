@@ -305,7 +305,7 @@ class CareCallControllerTest {
         );
         
         // JWT 인증 설정
-        JwtTokenAuthentication auth = new JwtTokenAuthentication(1L);
+        JwtTokenAuthentication auth = new JwtTokenAuthentication(1);
         SecurityContextHolder.getContext().setAuthentication(auth);
 
         doNothing().when(careCallSettingService).upsertCareCallSetting(any(Integer.class), any(Integer.class), any(CareCallSettingRequest.class));
@@ -344,7 +344,7 @@ class CareCallControllerTest {
         );
 
         // JWT 인증 설정
-        JwtTokenAuthentication auth = new JwtTokenAuthentication(1L);
+        JwtTokenAuthentication auth = new JwtTokenAuthentication(1);
         SecurityContextHolder.getContext().setAuthentication(auth);
 
         when(careCallSettingService.getCareCallSetting(any(Integer.class), any(Integer.class))).thenReturn(response);
@@ -363,7 +363,7 @@ class CareCallControllerTest {
     void getCareCallSetting_fail_elderNotFound() throws Exception {
         // given
         // JWT 인증 설정
-        JwtTokenAuthentication auth = new JwtTokenAuthentication(1L);
+        JwtTokenAuthentication auth = new JwtTokenAuthentication(1);
         SecurityContextHolder.getContext().setAuthentication(auth);
 
         when(careCallSettingService.getCareCallSetting(any(Integer.class), any(Integer.class)))
@@ -381,7 +381,7 @@ class CareCallControllerTest {
     void getCareCallSetting_fail_settingNotFound() throws Exception {
         // given
         // JWT 인증 설정
-        JwtTokenAuthentication auth = new JwtTokenAuthentication(1L);
+        JwtTokenAuthentication auth = new JwtTokenAuthentication(1);
         SecurityContextHolder.getContext().setAuthentication(auth);
 
         when(careCallSettingService.getCareCallSetting(any(Integer.class), any(Integer.class)))
@@ -398,7 +398,7 @@ class CareCallControllerTest {
     void getCareCallSetting_fail_accessDenied() throws Exception {
         // given
         // JWT 인증 설정
-        JwtTokenAuthentication auth = new JwtTokenAuthentication(1L);
+        JwtTokenAuthentication auth = new JwtTokenAuthentication(1);
         SecurityContextHolder.getContext().setAuthentication(auth);
 
         when(careCallSettingService.getCareCallSetting(any(Integer.class), any(Integer.class)))

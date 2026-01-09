@@ -44,7 +44,7 @@ public class SubscriptionServiceTest {
     @DisplayName("구독 정보 조회 성공")
     void getSubscriptions_Success() {
         // given
-        Long memberId = 1L;
+        Integer memberId = 1;
         Member member = Member.builder().id(memberId.intValue()).name("테스트회원").build();
         Elder elder = Elder.builder().id(1).name("김어르신").build();
         Subscription subscription = Subscription.builder()
@@ -58,8 +58,8 @@ public class SubscriptionServiceTest {
                 .nextBillingDate(LocalDate.now().plusMonths(1))
                 .build();
 
-        given(memberRepository.existsById(memberId.intValue())).willReturn(true);
-        given(subscriptionRepository.findByMemberId(memberId.intValue())).willReturn(Collections.singletonList(subscription));
+        given(memberRepository.existsById(memberId)).willReturn(true);
+        given(subscriptionRepository.findByMemberId(memberId)).willReturn(Collections.singletonList(subscription));
 
         // when
         List<SubscriptionResponse> responses = subscriptionService.getSubscriptionsByMember(memberId);
@@ -75,7 +75,7 @@ public class SubscriptionServiceTest {
     @DisplayName("구독 정보 조회 실패 - 회원 없음")
     void getSubscriptions_Fail_MemberNotFound() {
         // given
-        Long memberId = 999L;
+        Integer memberId = 999;
         given(memberRepository.existsById(memberId.intValue())).willReturn(false);
 
         // when & then
@@ -89,7 +89,7 @@ public class SubscriptionServiceTest {
     @DisplayName("구독 정보 조회 성공 - 구독 정보 없음")
     void getSubscriptions_Success_NoSubscriptions() {
         // given
-        Long memberId = 1L;
+        Integer memberId = 1;
         given(memberRepository.existsById(memberId.intValue())).willReturn(true);
         given(subscriptionRepository.findByMemberId(memberId.intValue())).willReturn(Collections.emptyList());
 

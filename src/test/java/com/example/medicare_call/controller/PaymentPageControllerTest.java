@@ -40,13 +40,13 @@ class PaymentPageControllerTest {
             @Override
             public boolean supportsParameter(MethodParameter parameter) {
                 return parameter.hasParameterAnnotation(AuthUser.class) &&
-                        parameter.getParameterType().equals(Long.class);
+                        parameter.getParameterType().equals(Integer.class);
             }
 
             @Override
             public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                                         NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
-                return 1L; // 테스트용 ID
+                return 1; // 테스트용 ID
             }
         };
 
@@ -61,7 +61,7 @@ class PaymentPageControllerTest {
     void payment_page_success() throws Exception {
         // given
         String orderCode = "ORDER-TEST-001";
-        Long memberId = 1L;
+        Integer memberId = 1;
 
         // when & then
         mockMvc.perform(get("/payments/page/" + orderCode)

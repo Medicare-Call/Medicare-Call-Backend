@@ -33,11 +33,11 @@ public class PaymentPageService {
      * @param orderCode 주문 코드
      * @param model Thymeleaf 모델
      */
-    public void preparePaymentPage(Long memberId, String orderCode, Model model) {
+    public void preparePaymentPage(Integer memberId, String orderCode, Model model) {
         Order order = orderRepository.findByCode(orderCode)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
-        if (!order.getMember().getId().equals(memberId.intValue())) {
+        if (!order.getMember().getId().equals(memberId)) {
             throw new CustomException(ErrorCode.HANDLE_ACCESS_DENIED);
         }
 

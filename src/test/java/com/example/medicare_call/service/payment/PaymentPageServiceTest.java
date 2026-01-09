@@ -57,7 +57,7 @@ class PaymentPageServiceTest {
         when(orderRepository.findByCode("ORDER-TEST-001")).thenReturn(Optional.of(testOrder));
 
         // when
-        paymentPageService.preparePaymentPage(1L, "ORDER-TEST-001", model);
+        paymentPageService.preparePaymentPage(1, "ORDER-TEST-001", model);
 
         // then
         verify(orderRepository).findByCode("ORDER-TEST-001");
@@ -71,7 +71,7 @@ class PaymentPageServiceTest {
     void preparePaymentPage_fail_invalid_member() {
         // given
         when(orderRepository.findByCode("ORDER-TEST-001")).thenReturn(Optional.of(testOrder));
-        Long wrongMemberId = 2L;
+        Integer wrongMemberId = 2;
 
         // when & then
         CustomException exception = assertThrows(CustomException.class, () -> {
@@ -91,7 +91,7 @@ class PaymentPageServiceTest {
 
         // when & then
         CustomException exception = assertThrows(CustomException.class, () -> {
-            paymentPageService.preparePaymentPage(1L, "NON-EXISTENT-ORDER", model);
+            paymentPageService.preparePaymentPage(1, "NON-EXISTENT-ORDER", model);
         });
 
         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.ORDER_NOT_FOUND);

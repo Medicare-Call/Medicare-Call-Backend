@@ -71,7 +71,7 @@ class EldersInfoControllerTest {
                                       org.springframework.web.method.support.ModelAndViewContainer mavContainer,
                                       org.springframework.web.context.request.NativeWebRequest webRequest,
                                       org.springframework.web.bind.support.WebDataBinderFactory binderFactory) {
-            return 1L; // 테스트용 고정 memberId
+            return 1; // 테스트용 고정 memberId
         }
     }
 
@@ -95,7 +95,7 @@ class EldersInfoControllerTest {
     @DisplayName("어르신 개인정보 조회 성공")
     void getElderSettingInfo_success() throws Exception {
         // given
-        Long memberId = 1L;
+        Integer memberId = 1;
         List<ElderResponse> responseList = Arrays.asList(
                 new ElderResponse(
                         1,
@@ -127,7 +127,7 @@ class EldersInfoControllerTest {
     @DisplayName("어르신 개인정보 조회 실패 - 회원이 존재하지 않음")
     void getElderSettingInfo_fail_memberNotFound() throws Exception {
         // given
-        Long memberId = 1L;
+        Integer memberId = 1;
         when(elderSettingService.getElder(memberId.intValue()))
                 .thenThrow(new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
@@ -142,7 +142,7 @@ class EldersInfoControllerTest {
     @DisplayName("어르신 개인정보 수정 성공")
     void updateElderSettingInfo_success() throws Exception {
         // given
-        Long memberId = 1L;
+        Integer memberId = 1;
         Integer elderId = 1;
         ElderUpdateRequest request = new ElderUpdateRequest(
                 "김철수",
@@ -183,7 +183,7 @@ class EldersInfoControllerTest {
     @DisplayName("어르신 개인정보 수정 실패 - 어르신이 존재하지 않음")
     void updateElderSettingInfo_fail_elderNotFound() throws Exception {
         // given
-        Long memberId = 1L;
+        Integer memberId = 1;
         Integer elderId = 999;
         ElderUpdateRequest request = new ElderUpdateRequest(
                 "김철수",
@@ -235,25 +235,25 @@ class EldersInfoControllerTest {
     @DisplayName("어르신 개인정보 삭제 성공")
     void deleteElderSettingInfo_success() throws Exception {
         // given
-        Long memberId = 1L;
+        Integer memberId = 1;
         Integer elderId = 1;
-        doNothing().when(elderSettingService).deleteElder(memberId.intValue(), elderId);
+        doNothing().when(elderSettingService).deleteElder(memberId, elderId);
 
         // when & then
         mockMvc.perform(delete("/elders/{elderId}", elderId))
                 .andExpect(status().isNoContent());
 
-        verify(elderSettingService, times(1)).deleteElder(memberId.intValue(), elderId);
+        verify(elderSettingService, times(1)).deleteElder(memberId, elderId);
     }
 
     @Test
     @DisplayName("어르신 개인정보 삭제 실패 - 어르신이 존재하지 않음")
     void deleteElderSettingInfo_fail_elderNotFound() throws Exception {
         // given
-        Long memberId = 1L;
+        Integer memberId = 1;
         Integer elderId = 999;
         doThrow(new CustomException(ErrorCode.ELDER_NOT_FOUND))
-                .when(elderSettingService).deleteElder(memberId.intValue(), elderId);
+                .when(elderSettingService).deleteElder(memberId, elderId);
 
         // when & then
         mockMvc.perform(delete("/elders/{elderId}", elderId))
@@ -265,10 +265,10 @@ class EldersInfoControllerTest {
     @DisplayName("어르신 개인정보 삭제 실패 - 권한 없음")
     void deleteElderSettingInfo_fail_accessDenied() throws Exception {
         // given
-        Long memberId = 1L;
+        Integer memberId = 1;
         Integer elderId = 2; // 다른 보호자의 어르신
         doThrow(new CustomException(ErrorCode.HANDLE_ACCESS_DENIED))
-                .when(elderSettingService).deleteElder(memberId.intValue(), elderId);
+                .when(elderSettingService).deleteElder(memberId, elderId);
 
         // when & then
         mockMvc.perform(delete("/elders/{elderId}", elderId))

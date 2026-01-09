@@ -71,7 +71,7 @@ public class NaverPayService {
      * @return 결제 예약 응답
      */
     @Transactional
-    public NaverPayReserveResponse createPaymentReserve(NaverPayReserveRequest request, Long memberId) {
+    public NaverPayReserveResponse createPaymentReserve(NaverPayReserveRequest request, Integer memberId) {
         log.info("네이버페이 결제 예약 생성 시작 - memberId: {}", memberId);
 
         // 주문 내역 검증
@@ -89,7 +89,7 @@ public class NaverPayService {
         } while (orderRepository.existsByCode(orderCode));
         
         // 회원 정보 조회
-        Member member = memberRepository.findById(memberId.intValue())
+        Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
         
         // 어르신 정보 검증

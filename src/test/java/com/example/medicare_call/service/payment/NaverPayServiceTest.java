@@ -128,7 +128,7 @@ class NaverPayServiceTest {
         when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
 
         // when
-        NaverPayReserveResponse result = naverPayService.createPaymentReserve(request, 1L);
+        NaverPayReserveResponse result = naverPayService.createPaymentReserve(request, 1);
 
         // then
         assertThat(result).isNotNull();
@@ -154,7 +154,7 @@ class NaverPayServiceTest {
                 .thenReturn(true);
 
         // when & then
-        assertThatThrownBy(() -> naverPayService.createPaymentReserve(request, 1L))
+        assertThatThrownBy(() -> naverPayService.createPaymentReserve(request, 1))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("주문 번호 생성에 3회 실패했습니다.");
     }
@@ -173,7 +173,7 @@ class NaverPayServiceTest {
                 .build();
 
         // when & then
-        assertThatThrownBy(() -> naverPayService.createPaymentReserve(request, 1L))
+        assertThatThrownBy(() -> naverPayService.createPaymentReserve(request, 1))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("상품명은 필수입니다.");
     }
@@ -192,7 +192,7 @@ class NaverPayServiceTest {
                 .build();
 
         // when & then
-        assertThatThrownBy(() -> naverPayService.createPaymentReserve(request, 1L))
+        assertThatThrownBy(() -> naverPayService.createPaymentReserve(request, 1))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("총 결제 금액은 10원 이상이어야 합니다.");
     }
@@ -434,7 +434,7 @@ class NaverPayServiceTest {
     @DisplayName("결제 예약 실패 - 회원 없음")
     void createPaymentReserve_fail_memberNotFound() {
         // given
-        Long memberId = 99L;
+        Integer memberId = 99;
         NaverPayReserveRequest request = new NaverPayReserveRequest("Test", 1, 1000, 909, 91, List.of(99L));
         when(memberRepository.findById(anyInt())).thenReturn(Optional.empty());
 
@@ -449,7 +449,7 @@ class NaverPayServiceTest {
     @DisplayName("결제 예약 실패 - 어르신 없음")
     void createPaymentReserve_fail_elderNotFound() {
         // given
-        Long memberId = 1L;
+        Integer memberId = 1;
         NaverPayReserveRequest request = new NaverPayReserveRequest("Test", 1, 1000, 909, 91, List.of(99L));
         when(memberRepository.findById(anyInt())).thenReturn(Optional.of(new Member()));
         when(elderRepository.existsById(99)).thenReturn(false);
