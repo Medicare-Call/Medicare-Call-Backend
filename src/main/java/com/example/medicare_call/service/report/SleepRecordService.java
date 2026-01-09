@@ -1,19 +1,18 @@
 package com.example.medicare_call.service.report;
 
 import com.example.medicare_call.domain.CareCallRecord;
-import com.example.medicare_call.dto.report.DailyMentalAnalysisResponse;
 import com.example.medicare_call.dto.report.DailySleepResponse;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.CareCallRecordRepository;
 import com.example.medicare_call.repository.ElderRepository;
+import com.example.medicare_call.util.TimeUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -49,11 +48,11 @@ public class SleepRecordService {
                 .build();
         
         if (sleepStart != null) {
-            sleepTime = sleepStart.format(DateTimeFormatter.ofPattern("HH:mm"));
+            sleepTime = TimeUtil.parseToTimeString(sleepStart);
         }
         
         if (sleepEnd != null) {
-            wakeTime = sleepEnd.format(DateTimeFormatter.ofPattern("HH:mm"));
+            wakeTime = TimeUtil.parseToTimeString(sleepEnd);
         }
         
         // 총 수면 시간 계산
