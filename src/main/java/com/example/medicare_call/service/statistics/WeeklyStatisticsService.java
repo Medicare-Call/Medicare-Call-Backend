@@ -5,6 +5,7 @@ import com.example.medicare_call.dto.report.WeeklySummaryDto;
 import com.example.medicare_call.global.enums.BloodSugarMeasurementType;
 import com.example.medicare_call.global.enums.BloodSugarStatus;
 import com.example.medicare_call.global.enums.CareCallStatus;
+import com.example.medicare_call.global.enums.PsychologicalStatus;
 import com.example.medicare_call.repository.BloodSugarRecordRepository;
 import com.example.medicare_call.repository.CareCallRecordRepository;
 import com.example.medicare_call.repository.DailyStatisticsRepository;
@@ -297,14 +298,14 @@ public class WeeklyStatisticsService {
         int good = 0, normal = 0, bad = 0;
 
         for (CareCallRecord record : mentalRecords) {
-            if (record.getPsychStatus() != null) {
-                // psychStatus는 Byte 타입: 1=좋음, 0=나쁨
-                // TODO: refactor into Enum
-                if (record.getPsychStatus() == 1) {
-                    good++;
-                } else if (record.getPsychStatus() == 0) {
-                    bad++;
-                }
+            PsychologicalStatus status = record.getPsychStatus();
+            if (status == null) {
+                continue;
+            }
+            if (status == PsychologicalStatus.GOOD) {
+                good++;
+            } else if (status == PsychologicalStatus.BAD) {
+                bad++;
             }
         }
 

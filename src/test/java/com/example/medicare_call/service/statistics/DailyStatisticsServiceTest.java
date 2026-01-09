@@ -1,10 +1,13 @@
 package com.example.medicare_call.service.statistics;
 
 import com.example.medicare_call.domain.*;
+import com.example.medicare_call.global.enums.CareCallResponseStatus;
 import com.example.medicare_call.global.enums.MealEatenStatus;
 import com.example.medicare_call.global.enums.MealType;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.global.enums.MedicationTakenStatus;
+import com.example.medicare_call.global.enums.HealthStatus;
+import com.example.medicare_call.global.enums.PsychologicalStatus;
 import com.example.medicare_call.repository.*;
 import com.example.medicare_call.service.ai.AiSummaryService;
 import org.junit.jupiter.api.BeforeEach;
@@ -78,7 +81,7 @@ class DailyStatisticsServiceTest {
                 .id(1)
                 .elder(testElder)
                 .calledAt(testDateTime)
-                .responded((byte) 1)
+                .responded(CareCallResponseStatus.RESPONDED)
                 .callStatus("completed")
                 .build();
     }
@@ -393,7 +396,7 @@ class DailyStatisticsServiceTest {
     void updateDailyStatistics_healthStatus_usesPreviousNonNull() {
         // given
         CareCallRecord oldNull = createCareCallRecord(1, null, null, testDate.atTime(9, 0));
-        CareCallRecord middleGood = createCareCallRecord(2, (byte) 1, null, testDate.atTime(12, 0));
+        CareCallRecord middleGood = createCareCallRecord(2, HealthStatus.GOOD, null, testDate.atTime(12, 0));
         CareCallRecord latestNull = createCareCallRecord(3, null, null, testDate.atTime(18, 0));
 
         when(dailyStatisticsRepository.findByElderAndDate(testElder, testDate))
@@ -427,8 +430,8 @@ class DailyStatisticsServiceTest {
     @DisplayName("건강 상태 - 최신 값이 null이 아니면 최신 값 사용")
     void updateDailyStatistics_healthStatus_usesLatestNonNull() {
         // given
-        CareCallRecord olderBad = createCareCallRecord(1, (byte) 0, null, testDate.atTime(9, 0));
-        CareCallRecord latestGood = createCareCallRecord(2, (byte) 1, null, testDate.atTime(18, 0));
+        CareCallRecord olderBad = createCareCallRecord(1, HealthStatus.BAD, null, testDate.atTime(9, 0));
+        CareCallRecord latestGood = createCareCallRecord(2, HealthStatus.GOOD, null, testDate.atTime(18, 0));
 
         when(dailyStatisticsRepository.findByElderAndDate(testElder, testDate))
                 .thenReturn(Optional.empty());
@@ -499,7 +502,7 @@ class DailyStatisticsServiceTest {
     void updateDailyStatistics_mentalStatus_usesPreviousNonNull() {
         // given
         CareCallRecord oldNull = createCareCallRecord(1, null, null, testDate.atTime(9, 0));
-        CareCallRecord middleBad = createCareCallRecord(2, null, (byte) 0, testDate.atTime(12, 0));
+        CareCallRecord middleBad = createCareCallRecord(2, null, PsychologicalStatus.BAD, testDate.atTime(12, 0));
         CareCallRecord latestNull = createCareCallRecord(3, null, null, testDate.atTime(18, 0));
 
         when(dailyStatisticsRepository.findByElderAndDate(testElder, testDate))
@@ -533,8 +536,8 @@ class DailyStatisticsServiceTest {
     @DisplayName("심리 상태 - 최신 값이 null이 아니면 최신 값 사용")
     void updateDailyStatistics_mentalStatus_usesLatestNonNull() {
         // given
-        CareCallRecord olderGood = createCareCallRecord(1, null, (byte) 1, testDate.atTime(9, 0));
-        CareCallRecord latestBad = createCareCallRecord(2, null, (byte) 0, testDate.atTime(18, 0));
+        CareCallRecord olderGood = createCareCallRecord(1, null, PsychologicalStatus.GOOD, testDate.atTime(9, 0));
+        CareCallRecord latestBad = createCareCallRecord(2, null, PsychologicalStatus.BAD, testDate.atTime(18, 0));
 
         when(dailyStatisticsRepository.findByElderAndDate(testElder, testDate))
                 .thenReturn(Optional.empty());
@@ -736,12 +739,12 @@ class DailyStatisticsServiceTest {
                 .build();
     }
 
-    private CareCallRecord createCareCallRecord(Integer id, Byte healthStatus, Byte psychStatus, LocalDateTime calledAt) {
+    private CareCallRecord createCareCallRecord(Integer id, HealthStatus healthStatus, PsychologicalStatus psychStatus, LocalDateTime calledAt) {
         return CareCallRecord.builder()
                 .id(id)
                 .elder(testElder)
                 .calledAt(calledAt)
-                .responded((byte) 1)
+                .responded(CareCallResponseStatus.RESPONDED)
                 .healthStatus(healthStatus)
                 .psychStatus(psychStatus)
                 .build();
@@ -757,7 +760,7 @@ class DailyStatisticsServiceTest {
                 .id(1)
                 .elder(testElder)
                 .calledAt(eveningTime)
-                .responded((byte) 1)
+                .responded(CareCallResponseStatus.RESPONDED)
                 .callStatus("completed")
                 .build();
 

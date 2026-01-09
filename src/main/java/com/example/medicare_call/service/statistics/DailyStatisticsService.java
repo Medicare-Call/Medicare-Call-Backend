@@ -7,6 +7,8 @@ import com.example.medicare_call.global.enums.MealEatenStatus;
 import com.example.medicare_call.global.enums.MealType;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.global.enums.MedicationTakenStatus;
+import com.example.medicare_call.global.enums.HealthStatus;
+import com.example.medicare_call.global.enums.PsychologicalStatus;
 import com.example.medicare_call.repository.*;
 import com.example.medicare_call.service.ai.AiSummaryService;
 import lombok.Builder;
@@ -386,9 +388,9 @@ public class DailyStatisticsService {
 
         // 오늘 데이터 중 null이 아닌 최신 건강 상태 반환
         for (int i = healthRecords.size() - 1; i >= 0; i--) {
-            Byte healthStatus = healthRecords.get(i).getHealthStatus();
+            HealthStatus healthStatus = healthRecords.get(i).getHealthStatus();
             if (healthStatus != null) {
-                return healthStatus == 1 ? "좋음" : "나쁨";
+                return healthStatus.getDescription();
             }
         }
 
@@ -404,9 +406,9 @@ public class DailyStatisticsService {
 
         // 오늘 데이터 중 null이 아닌 최신 심리 상태 반환
         for (int i = mentalRecords.size() - 1; i >= 0; i--) {
-            Byte psychStatus = mentalRecords.get(i).getPsychStatus();
+            PsychologicalStatus psychStatus = mentalRecords.get(i).getPsychStatus();
             if (psychStatus != null) {
-                return psychStatus == 1 ? "좋음" : "나쁨";
+                return psychStatus.getDescription();
             }
         }
 
