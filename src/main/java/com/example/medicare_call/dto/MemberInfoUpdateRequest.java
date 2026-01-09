@@ -51,7 +51,7 @@ public record MemberInfoUpdateRequest(
                 member.updateInfo(
                         this.name,
                         this.birthDate,
-                        this.gender, // Gender enum을 byte로 변환
+                        this.gender,
                         this.phone,
                         this.pushNotification.all,
                         this.pushNotification.carecallCompleted,
