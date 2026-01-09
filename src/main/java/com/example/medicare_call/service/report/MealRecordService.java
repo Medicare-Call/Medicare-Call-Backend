@@ -43,21 +43,17 @@ public class MealRecordService {
         String dinner = null;
 
         for (MealRecord record : mealRecords) {
-            MealType mealType = MealType.fromValue(record.getMealType());
-            if (mealType != null) {
-                String mealContent = record.getResponseSummary();
+            MealType mealType = record.getMealType();
+            if (mealType == null) {
+                continue;
+            }
 
-                switch (mealType) {
-                    case BREAKFAST:
-                        breakfast = mealContent;
-                        break;
-                    case LUNCH:
-                        lunch = mealContent;
-                        break;
-                    case DINNER:
-                        dinner = mealContent;
-                        break;
-                }
+            String mealContent = record.getResponseSummary();
+
+            switch (mealType) {
+                case BREAKFAST -> breakfast = mealContent;
+                case LUNCH -> lunch = mealContent;
+                case DINNER -> dinner = mealContent;
             }
         }
 
@@ -88,20 +84,20 @@ public class MealRecordService {
 
             // 식사 여부 결정
             MealEatenStatus mealEatenStatus = MealEatenStatus.fromDescription(mealData.getMealEatenStatus());
-            Byte eatenStatusValue = null;
+            MealEatenStatus eatenStatusValue = null;
             String responseSummary = mealData.getMealSummary();
 
             if (mealEatenStatus == null) {
                 // eatenStatus는 null로 저장, responseSummary는 고정 메시지
                 responseSummary = "해당 시간대 식사 여부를 명확히 확인하지 못했어요.";
             } else {
-                eatenStatusValue = mealEatenStatus.getValue();
+                eatenStatusValue = mealEatenStatus;
             }
 
             // 식사 데이터 저장
             MealRecord mealRecord = MealRecord.builder()
                     .careCallRecord(callRecord)
-                    .mealType(mealType.getValue())
+                    .mealType(mealType)
                     .eatenStatus(eatenStatusValue)
                     .responseSummary(responseSummary)
                     .recordedAt(LocalDateTime.now())
@@ -110,7 +106,7 @@ public class MealRecordService {
             mealRecordRepository.save(mealRecord);
             log.info("식사 데이터 저장 완료: mealType={}, mealEatenStatus={}, summary={}",
                     mealRecord.getMealType(),
-                    mealEatenStatus != null ? mealEatenStatus.getDescription() : "알 수 없음",
+                    mealRecord.getEatenStatus() != null ? mealRecord.getEatenStatus().getDescription() : "알 수 없음",
                     responseSummary);
         }
     }

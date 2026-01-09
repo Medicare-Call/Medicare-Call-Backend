@@ -3,6 +3,7 @@ package com.example.medicare_call.service.statistics;
 import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.report.HomeSummaryDto;
 import com.example.medicare_call.global.enums.CareCallStatus;
+import com.example.medicare_call.global.enums.MealEatenStatus;
 import com.example.medicare_call.global.enums.MealType;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.global.enums.MedicationTakenStatus;
@@ -146,23 +147,22 @@ public class DailyStatisticsService {
         Boolean lunch = null;
         Boolean dinner = null;
 
-        if(!todayMeals.isEmpty()) {
+        if (!todayMeals.isEmpty()) {
             for (MealRecord meal : todayMeals) {
-
                 if (meal == null) continue;
-                MealType mealType = MealType.fromValue(meal.getMealType());
-                if (mealType != null) {
-                    switch (mealType) {
-                        case BREAKFAST:
-                            breakfast = meal.getEatenStatus() != null ? meal.getEatenStatus() == (byte) 1 : null;
-                            break;
-                        case LUNCH:
-                            lunch = meal.getEatenStatus() != null ? meal.getEatenStatus() == (byte) 1 : null;
-                            break;
-                        case DINNER:
-                            dinner = meal.getEatenStatus() != null ? meal.getEatenStatus() == (byte) 1 : null;
-                            break;
-                    }
+
+                MealType mealType = meal.getMealType();
+                if (mealType == null) continue;
+
+                Boolean eaten = null;
+                if (meal.getEatenStatus() != null) {
+                    eaten = meal.getEatenStatus() == MealEatenStatus.EATEN;
+                }
+
+                switch (mealType) {
+                    case BREAKFAST -> breakfast = eaten;
+                    case LUNCH -> lunch = eaten;
+                    case DINNER -> dinner = eaten;
                 }
             }
         }

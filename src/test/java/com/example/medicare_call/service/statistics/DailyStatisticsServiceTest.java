@@ -1,6 +1,7 @@
 package com.example.medicare_call.service.statistics;
 
 import com.example.medicare_call.domain.*;
+import com.example.medicare_call.global.enums.MealEatenStatus;
 import com.example.medicare_call.global.enums.MealType;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.global.enums.MedicationTakenStatus;
@@ -86,7 +87,7 @@ class DailyStatisticsServiceTest {
     @DisplayName("통계 업데이트 성공 - 새로운 통계 생성")
     void updateDailyStatistics_success_createNew() {
         // given
-        MealRecord breakfastMeal = createMealRecord(1, MealType.BREAKFAST.getValue(), (byte) 1);
+        MealRecord breakfastMeal = createMealRecord(1, MealType.BREAKFAST, MealEatenStatus.EATEN);
 
         when(dailyStatisticsRepository.findByElderAndDate(testElder, testDate))
                 .thenReturn(Optional.empty());
@@ -117,7 +118,7 @@ class DailyStatisticsServiceTest {
     @DisplayName("통계 업데이트 성공 - 기존 통계 업데이트")
     void updateDailyStatistics_success_updateExisting() {
         // given
-        MealRecord breakfastMeal = createMealRecord(1, MealType.BREAKFAST.getValue(), (byte) 1);
+        MealRecord breakfastMeal = createMealRecord(1, MealType.BREAKFAST, MealEatenStatus.EATEN);
         DailyStatistics existingStats = DailyStatistics.builder()
                 .id(1L)
                 .elder(testElder)
@@ -157,7 +158,7 @@ class DailyStatisticsServiceTest {
     @DisplayName("식사 데이터 집계 - 아침 식사만 기록")
     void updateDailyStatistics_mealData_onlyBreakfast() {
         // given
-        MealRecord breakfastMeal = createMealRecord(1, MealType.BREAKFAST.getValue(), (byte) 1);
+        MealRecord breakfastMeal = createMealRecord(1, MealType.BREAKFAST, MealEatenStatus.EATEN);
 
         when(dailyStatisticsRepository.findByElderAndDate(testElder, testDate))
                 .thenReturn(Optional.empty());
@@ -192,8 +193,8 @@ class DailyStatisticsServiceTest {
     @DisplayName("식사 데이터 집계 - 아침/점심 식사 기록")
     void updateDailyStatistics_mealData_breakfastAndLunch() {
         // given
-        MealRecord breakfastMeal = createMealRecord(1, MealType.BREAKFAST.getValue(), (byte) 1);
-        MealRecord lunchMeal = createMealRecord(2, MealType.LUNCH.getValue(), (byte) 0);
+        MealRecord breakfastMeal = createMealRecord(1, MealType.BREAKFAST, MealEatenStatus.EATEN);
+        MealRecord lunchMeal = createMealRecord(2, MealType.LUNCH, MealEatenStatus.NOT_EATEN);
 
         when(dailyStatisticsRepository.findByElderAndDate(testElder, testDate))
                 .thenReturn(Optional.empty());
@@ -464,7 +465,7 @@ class DailyStatisticsServiceTest {
         CareCallRecord r2 = createCareCallRecord(2, null, null, testDate.atTime(18, 0));
 
         // early return을 피하기 위해 최소한의 식사 데이터 추가
-        MealRecord breakfastMeal = createMealRecord(1, MealType.BREAKFAST.getValue(), (byte) 1);
+        MealRecord breakfastMeal = createMealRecord(1, MealType.BREAKFAST, MealEatenStatus.EATEN);
 
         when(dailyStatisticsRepository.findByElderAndDate(testElder, testDate))
                 .thenReturn(Optional.empty());
@@ -570,7 +571,7 @@ class DailyStatisticsServiceTest {
         CareCallRecord r2 = createCareCallRecord(2, null, null, testDate.atTime(18, 0));
 
         // early return을 피하기 위해 최소한의 식사 데이터 추가
-        MealRecord breakfastMeal = createMealRecord(1, MealType.BREAKFAST.getValue(), (byte) 1);
+        MealRecord breakfastMeal = createMealRecord(1, MealType.BREAKFAST, MealEatenStatus.EATEN);
 
         when(dailyStatisticsRepository.findByElderAndDate(testElder, testDate))
                 .thenReturn(Optional.empty());
@@ -685,7 +686,7 @@ class DailyStatisticsServiceTest {
     @DisplayName("AI 요약 생성 - AiSummaryService 호출 확인")
     void updateDailyStatistics_aiSummary_callsAiService() {
         // given
-        MealRecord breakfastMeal = createMealRecord(1, MealType.BREAKFAST.getValue(), (byte) 1);
+        MealRecord breakfastMeal = createMealRecord(1, MealType.BREAKFAST, MealEatenStatus.EATEN);
 
         when(dailyStatisticsRepository.findByElderAndDate(testElder, testDate))
                 .thenReturn(Optional.empty());
@@ -716,7 +717,7 @@ class DailyStatisticsServiceTest {
     }
 
     // Helper methods
-    private MealRecord createMealRecord(Integer id, Byte mealType, Byte eatenStatus) {
+    private MealRecord createMealRecord(Integer id, MealType mealType, MealEatenStatus eatenStatus) {
         return MealRecord.builder()
                 .id(id)
                 .careCallRecord(testCareCallRecord)
