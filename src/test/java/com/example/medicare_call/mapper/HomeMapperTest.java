@@ -569,4 +569,85 @@ class HomeMapperTest {
         assertThat(response.getMedicationStatus().getMedicationList().get(0).getType()).isEqualTo("약A");
         assertThat(response.getMedicationStatus().getMedicationList().get(0).getTaken()).isNull();
     }
+
+    @Test
+    @DisplayName("goal과 scheduled가 다를 때 goal을 올바르게 매핑한다")
+    void testMapToHomeReportResponse_GoalVsScheduled() {
+        // given
+        Elder elder = Elder.builder().name("김옥자").build();
+
+        DailyStatistics.DoseStatus doseStatus = DailyStatistics.DoseStatus.builder()
+                .time(MedicationScheduleTime.MORNING)
+                .taken(true)
+                .build();
+
+        DailyStatistics.MedicationInfo medicationInfo = DailyStatistics.MedicationInfo.builder()
+                .type("당뇨약")
+                .scheduled(3)  // 전체 스케줄: 3회
+                .goal(2)       // 목표: 2회 (케어콜 기준)
+                .taken(1)
+                .doseStatusList(List.of(doseStatus))
+                .build();
+
+        DailyStatistics stats = DailyStatistics.builder()
+                .medicationTotalTaken(1)
+                .medicationTotalGoal(2)
+                .medicationList(List.of(medicationInfo))
+                .breakfastTaken(null)
+                .lunchTaken(null)
+                .dinnerTaken(null)
+                .avgSleepMinutes(null)
+                .avgBloodSugar(null)
+                .healthStatus(null)
+                .mentalStatus(null)
+                .aiSummary(null)
+                .build();
+
+        // when
+        HomeReportResponse response = homeMapper.mapToHomeReportResponse(
+                elder, Optional.of(stats), List.of(), 0, LocalTime.now()
+        );
+
+        // then
+        assertThat(response.getMedicationStatus().getMedicationList()).hasSize(1);
+        HomeReportResponse.MedicationInfo mappedInfo = response.getMedicationStatus().getMedicationList().get(0);
+        assertThat(mappedInfo.getGoal()).isEqualTo(2);  // scheduled(3)이 아닌 goal(2) 확인
+    }
+
+    @Test
+    @DisplayName("DoseStatusList가 null일 때 NPE 없이 빈 리스트를 반환한다")
+    void testMapToHomeReportResponse_NullDoseStatusList() {
+        // given
+        Elder elder = Elder.builder().name("김옥자").build();
+
+        DailyStatistics.MedicationInfo medicationInfo = DailyStatistics.MedicationInfo.builder()
+                .type("당뇨약")
+                .scheduled(3)
+                .goal(2)
+                .taken(1)
+                .doseStatusList(null)  // null 케이스
+                .build();
+
+        DailyStatistics stats = DailyStatistics.builder()
+                .medicationTotalTaken(1)
+                .medicationTotalGoal(2)
+                .medicationList(List.of(medicationInfo))
+                .breakfastTaken(null)
+                .lunchTaken(null)
+                .dinnerTaken(null)
+                .avgSleepMinutes(null)
+                .avgBloodSugar(null)
+                .healthStatus(null)
+                .mentalStatus(null)
+                .aiSummary(null)
+                .build();
+
+        // when & then (NPE 없이 실행되어야 함)
+        HomeReportResponse response = homeMapper.mapToHomeReportResponse(
+                elder, Optional.of(stats), List.of(), 0, LocalTime.now()
+        );
+
+        assertThat(response.getMedicationStatus().getMedicationList()).hasSize(1);
+        assertThat(response.getMedicationStatus().getMedicationList().get(0).getDoseStatusList()).isEmpty();
+    }
 }
