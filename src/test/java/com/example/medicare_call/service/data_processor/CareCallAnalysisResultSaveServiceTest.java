@@ -103,9 +103,9 @@ class CareCallAnalysisResultSaveServiceTest {
         verify(mealRecordService).saveMealData(eq(callRecord), anyList());
         
         // 4. 레코드 업데이트 확인 (수면, 심리)
-        verify(careCallRecordRepository).save(argThat(record -> 
+        verify(careCallRecordRepository).save(argThat(record ->
             record.getSleepStart() != null &&
-            record.getPsychStatus() == PsychologicalStatus.GOOD.getValue()
+            record.getPsychStatus() == PsychologicalStatus.GOOD
         ));
         
         // 5. 통계 업데이트 확인
@@ -171,7 +171,7 @@ class CareCallAnalysisResultSaveServiceTest {
 
         // then
         verify(careCallRecordRepository).save(argThat(record ->
-                record.getHealthStatus() == HealthStatus.BAD.getValue() &&
+                record.getHealthStatus() == HealthStatus.BAD &&
                 record.getHealthDetails().contains("기침")
         ));
     }

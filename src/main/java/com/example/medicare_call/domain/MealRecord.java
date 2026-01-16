@@ -1,8 +1,10 @@
 package com.example.medicare_call.domain;
 
+import com.example.medicare_call.global.enums.MealEatenStatus;
+import com.example.medicare_call.global.enums.MealType;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Builder;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -21,11 +23,13 @@ public class MealRecord {
     @JoinColumn(name = "carecall_record_id", nullable = false)
     private CareCallRecord careCallRecord;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "meal_type")
-    private Byte mealType;
+    private MealType mealType;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "eaten_status")
-    private Byte eatenStatus; // 0: 식사 안함  1: 식사함
+    private MealEatenStatus eatenStatus; // 0: 식사 안함  1: 식사함
 
     @Column(name = "response_summary", length = 500)
     private String responseSummary;
@@ -34,7 +38,7 @@ public class MealRecord {
     private LocalDateTime recordedAt;
 
     @Builder
-    public MealRecord(Integer id, CareCallRecord careCallRecord, Byte mealType, Byte eatenStatus, String responseSummary, LocalDateTime recordedAt) {
+    public MealRecord(Integer id, CareCallRecord careCallRecord, MealType mealType, MealEatenStatus eatenStatus, String responseSummary, LocalDateTime recordedAt) {
         this.id = id;
         this.careCallRecord = careCallRecord;
         this.mealType = mealType;

@@ -154,12 +154,11 @@ public class CareCallAnalysisResultSaveService {
     }
 
     private CareCallRecord updatePsychologicalStatus(CareCallRecord callRecord, List<String> psychologicalState, String psychologicalStatus) {
-        // OpenAiHealthDataService 에서 고정값을 내려줘서 리터럴을 사용하여 비교함
-        Byte psychStatus = null;
+        PsychologicalStatus psychStatus = null;
         if ("좋음".equals(psychologicalStatus)) {
-            psychStatus = PsychologicalStatus.GOOD.getValue();
+            psychStatus = PsychologicalStatus.GOOD;
         } else if ("나쁨".equals(psychologicalStatus)) {
-            psychStatus = PsychologicalStatus.BAD.getValue();
+            psychStatus = PsychologicalStatus.BAD;
         }
 
         // 상세 내용을 문자열로 저장
@@ -178,12 +177,11 @@ public class CareCallAnalysisResultSaveService {
     }
 
     private CareCallRecord updateHealthStatus(CareCallRecord callRecord, List<String> healthSigns, String healthStatus) {
-        // OpenAiHealthDataService 에서 고정값을 내려줘서 리터럴을 사용하여 비교함
-        Byte healthStatusValue = null;
+        HealthStatus healthStatusValue = null;
         if ("좋음".equals(healthStatus)) {
-            healthStatusValue = HealthStatus.GOOD.getValue();
+            healthStatusValue = HealthStatus.GOOD;
         } else if ("나쁨".equals(healthStatus)) {
-            healthStatusValue = HealthStatus.BAD.getValue();
+            healthStatusValue = HealthStatus.BAD;
         }
 
         // 상세 내용을 문자열로 저장
