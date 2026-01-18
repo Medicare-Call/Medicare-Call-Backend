@@ -22,18 +22,18 @@ public class HomeMapper {
      */
     public HomeReportResponse mapToHomeReportResponse(
             Elder elder,
-            Optional<DailyStatistics> statisticsOpt,
+            Optional<DailyStatistics> statistics,
             List<MedicationSchedule> schedules,
             int unreadCount,
             LocalTime now) {
 
         // 1. 오늘 날짜 데이터가 없을 경우 (빈 응답 생성)
-        if (statisticsOpt.isEmpty()) {
+        if (statistics.isEmpty()) {
             return mapToEmptyHomeReport(elder, schedules, unreadCount, now);
         }
 
         // 2. 데이터가 있을 경우 (정상 매핑)
-        DailyStatistics stats = statisticsOpt.get();
+        DailyStatistics stats = statistics.get();
 
         return HomeReportResponse.builder()
                 .elderName(elder.getName())
