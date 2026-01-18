@@ -1,9 +1,14 @@
 package com.example.medicare_call.controller;
 
+import com.example.medicare_call.domain.DailyStatistics;
+import com.example.medicare_call.domain.Elder;
+import com.example.medicare_call.domain.MedicationSchedule;
 import com.example.medicare_call.dto.report.HomeReportResponse;
 import com.example.medicare_call.global.annotation.AuthenticationArgumentResolver;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.global.jwt.JwtProvider;
+import com.example.medicare_call.mapper.HomeMapper;
+import com.example.medicare_call.service.notification.NotificationService;
 import com.example.medicare_call.service.report.HomeReportService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -18,6 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
@@ -37,10 +43,16 @@ class HomeControllerTest {
     private HomeReportService homeReportService;
 
     @MockBean
+    private HomeMapper homeMapper;
+
+    @MockBean
     private JwtProvider jwtProvider;
 
     @MockBean
     private AuthenticationArgumentResolver authenticationArgumentResolver;
+
+    @MockBean
+    private NotificationService notificationService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -51,41 +63,86 @@ class HomeControllerTest {
         // given
         Integer elderId = 1;
 
-        HomeReportResponse.MealStatus mealStatus = HomeReportResponse.MealStatus.builder()
-                .breakfast(true)
-                .lunch(true)
-                .dinner(false)
+        // Elder 객체 생성
+        Elder elder = Elder.builder()
+                .id(elderId)
+                .name("김옥자")
                 .build();
 
-        // doseStatusList 생성
-        HomeReportResponse.DoseStatus morningDose = HomeReportResponse.DoseStatus.builder().time(MedicationScheduleTime.MORNING).taken(true).build();
-        HomeReportResponse.DoseStatus lunchDose = HomeReportResponse.DoseStatus.builder().time(MedicationScheduleTime.LUNCH).taken(null).build();
-        HomeReportResponse.DoseStatus dinnerDose = HomeReportResponse.DoseStatus.builder().time(MedicationScheduleTime.DINNER).taken(true).build();
-        List<HomeReportResponse.DoseStatus> doseStatusList1 = Arrays.asList(morningDose, lunchDose, dinnerDose);
+        // DailyStatistics 객체 생성
+        DailyStatistics.DoseStatus morningDose = DailyStatistics.DoseStatus.builder().time(MedicationScheduleTime.MORNING).taken(true).build();
+        DailyStatistics.DoseStatus lunchDose = DailyStatistics.DoseStatus.builder().time(MedicationScheduleTime.LUNCH).taken(null).build();
+        DailyStatistics.DoseStatus dinnerDose = DailyStatistics.DoseStatus.builder().time(MedicationScheduleTime.DINNER).taken(true).build();
+        List<DailyStatistics.DoseStatus> doseStatusList1 = Arrays.asList(morningDose, lunchDose, dinnerDose);
 
-        HomeReportResponse.MedicationInfo medicationInfo1 = HomeReportResponse.MedicationInfo.builder()
+        DailyStatistics.MedicationInfo medicationInfo1 = DailyStatistics.MedicationInfo.builder()
                 .type("당뇨약")
                 .taken(2)
                 .goal(3)
                 .doseStatusList(doseStatusList1)
                 .build();
 
-        HomeReportResponse.DoseStatus morningDose2 = HomeReportResponse.DoseStatus.builder().time(MedicationScheduleTime.MORNING).taken(true).build();
-        HomeReportResponse.DoseStatus lunchDose2 = HomeReportResponse.DoseStatus.builder().time(MedicationScheduleTime.LUNCH).taken(null).build();
-        HomeReportResponse.DoseStatus dinnerDose2 = HomeReportResponse.DoseStatus.builder().time(MedicationScheduleTime.DINNER).taken(null).build();
-        List<HomeReportResponse.DoseStatus> doseStatusList2 = Arrays.asList(morningDose2, lunchDose2, dinnerDose2);
+        DailyStatistics.DoseStatus morningDose2 = DailyStatistics.DoseStatus.builder().time(MedicationScheduleTime.MORNING).taken(true).build();
+        DailyStatistics.DoseStatus lunchDose2 = DailyStatistics.DoseStatus.builder().time(MedicationScheduleTime.LUNCH).taken(null).build();
+        DailyStatistics.DoseStatus dinnerDose2 = DailyStatistics.DoseStatus.builder().time(MedicationScheduleTime.DINNER).taken(null).build();
+        List<DailyStatistics.DoseStatus> doseStatusList2 = Arrays.asList(morningDose2, lunchDose2, dinnerDose2);
 
-        HomeReportResponse.MedicationInfo medicationInfo2 = HomeReportResponse.MedicationInfo.builder()
+        DailyStatistics.MedicationInfo medicationInfo2 = DailyStatistics.MedicationInfo.builder()
                 .type("혈압약")
                 .taken(1)
                 .goal(3)
                 .doseStatusList(doseStatusList2)
                 .build();
 
-        HomeReportResponse.MedicationStatus medicationStatus = HomeReportResponse.MedicationStatus.builder()
-                .totalTaken(3) // 2 (당뇨약) + 1 (혈압약)
-                .totalGoal(6)  // 3 (당뇨약) + 3 (혈압약)
+        DailyStatistics statistics = DailyStatistics.builder()
+                .breakfastTaken(true)
+                .lunchTaken(true)
+                .dinnerTaken(false)
+                .medicationTotalTaken(3)
+                .medicationTotalGoal(6)
                 .medicationList(Arrays.asList(medicationInfo1, medicationInfo2))
+                .avgSleepMinutes(450)  // 7시간 30분 = 450분
+                .avgBloodSugar(120)
+                .healthStatus("좋음")
+                .mentalStatus("좋음")
+                .aiSummary("TODO: AI 요약 기능 구현 필요")
+                .build();
+
+        // 예상 응답 생성
+        HomeReportResponse.MealStatus mealStatus = HomeReportResponse.MealStatus.builder()
+                .breakfast(true)
+                .lunch(true)
+                .dinner(false)
+                .build();
+
+        HomeReportResponse.DoseStatus respMorningDose = HomeReportResponse.DoseStatus.builder().time(MedicationScheduleTime.MORNING).taken(true).build();
+        HomeReportResponse.DoseStatus respLunchDose = HomeReportResponse.DoseStatus.builder().time(MedicationScheduleTime.LUNCH).taken(null).build();
+        HomeReportResponse.DoseStatus respDinnerDose = HomeReportResponse.DoseStatus.builder().time(MedicationScheduleTime.DINNER).taken(true).build();
+        List<HomeReportResponse.DoseStatus> respDoseStatusList1 = Arrays.asList(respMorningDose, respLunchDose, respDinnerDose);
+
+        HomeReportResponse.MedicationInfo respMedicationInfo1 = HomeReportResponse.MedicationInfo.builder()
+                .type("당뇨약")
+                .taken(2)
+                .goal(3)
+                .doseStatusList(respDoseStatusList1)
+                .build();
+
+        HomeReportResponse.DoseStatus respMorningDose2 = HomeReportResponse.DoseStatus.builder().time(MedicationScheduleTime.MORNING).taken(true).build();
+        HomeReportResponse.DoseStatus respLunchDose2 = HomeReportResponse.DoseStatus.builder().time(MedicationScheduleTime.LUNCH).taken(null).build();
+        HomeReportResponse.DoseStatus respDinnerDose2 = HomeReportResponse.DoseStatus.builder().time(MedicationScheduleTime.DINNER).taken(null).build();
+        List<HomeReportResponse.DoseStatus> respDoseStatusList2 = Arrays.asList(respMorningDose2, respLunchDose2, respDinnerDose2);
+
+        HomeReportResponse.MedicationInfo respMedicationInfo2 = HomeReportResponse.MedicationInfo.builder()
+                .type("혈압약")
+                .taken(1)
+                .goal(3)
+                .doseStatusList(respDoseStatusList2)
+                .build();
+
+        HomeReportResponse.MedicationStatus medicationStatus = HomeReportResponse.MedicationStatus.builder()
+                .totalTaken(3)
+                .totalGoal(6)
+                .medicationList(Arrays.asList(respMedicationInfo1, respMedicationInfo2))
                 .build();
 
         HomeReportResponse.Sleep sleep = HomeReportResponse.Sleep.builder()
@@ -108,7 +165,14 @@ class HomeControllerTest {
                 .bloodSugar(bloodSugar)
                 .build();
 
-        when(homeReportService.getHomeReport(nullable(Integer.class), eq(elderId)))
+        // Service mocking
+        when(homeReportService.getElder(elderId)).thenReturn(elder);
+        when(homeReportService.getTodayStatistics(any(Elder.class), any())).thenReturn(Optional.of(statistics));
+        when(homeReportService.getMedicationSchedules(any(Elder.class))).thenReturn(Collections.emptyList());
+        when(notificationService.getUnreadCount(nullable(Integer.class))).thenReturn(0);
+
+        // Mapper mocking
+        when(homeMapper.mapToHomeReportResponse(any(Elder.class), any(), any(), anyInt(), any()))
                 .thenReturn(expectedResponse);
 
         // when & then
@@ -152,6 +216,28 @@ class HomeControllerTest {
         // given
         Integer elderId = 1;
 
+        // Elder 객체 생성
+        Elder elder = Elder.builder()
+                .id(elderId)
+                .name("김옥자")
+                .build();
+
+        // DailyStatistics 객체 생성 (건강 상태 나쁨)
+        DailyStatistics statistics = DailyStatistics.builder()
+                .breakfastTaken(false)
+                .lunchTaken(false)
+                .dinnerTaken(false)
+                .medicationTotalTaken(0)
+                .medicationTotalGoal(3)
+                .medicationList(Collections.emptyList())
+                .avgSleepMinutes(null)
+                .avgBloodSugar(null)
+                .healthStatus("나쁨")
+                .mentalStatus("나쁨")
+                .aiSummary("건강 상태가 좋지 않습니다.")
+                .build();
+
+        // 예상 응답 생성
         HomeReportResponse.MealStatus mealStatus = HomeReportResponse.MealStatus.builder()
                 .breakfast(false)
                 .lunch(false)
@@ -175,7 +261,14 @@ class HomeControllerTest {
                 .bloodSugar(null)
                 .build();
 
-        when(homeReportService.getHomeReport(nullable(Integer.class), eq(elderId)))
+        // Service mocking
+        when(homeReportService.getElder(elderId)).thenReturn(elder);
+        when(homeReportService.getTodayStatistics(any(Elder.class), any())).thenReturn(Optional.of(statistics));
+        when(homeReportService.getMedicationSchedules(any(Elder.class))).thenReturn(Collections.emptyList());
+        when(notificationService.getUnreadCount(nullable(Integer.class))).thenReturn(0);
+
+        // Mapper mocking
+        when(homeMapper.mapToHomeReportResponse(any(Elder.class), any(), any(), anyInt(), any()))
                 .thenReturn(expectedResponse);
 
         // when & then
