@@ -1,6 +1,6 @@
 package com.example.medicare_call.service.ai.prompt;
 
-import com.example.medicare_call.service.statistics.WeeklyStatsAggregate;
+import com.example.medicare_call.dto.statistics.WeeklyStatsAggregate;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.stereotype.Component;
 

@@ -3,7 +3,7 @@ package com.example.medicare_call.service.ai;
 import com.example.medicare_call.dto.data_processor.ai.OpenAiRequest;
 import com.example.medicare_call.dto.data_processor.ai.OpenAiResponse;
 import com.example.medicare_call.dto.report.HomeSummaryDto;
-import com.example.medicare_call.service.statistics.WeeklyStatsAggregate;
+import com.example.medicare_call.dto.statistics.WeeklyStatsAggregate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

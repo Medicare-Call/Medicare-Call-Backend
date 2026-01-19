@@ -1,6 +1,7 @@
 package com.example.medicare_call.service.statistics;
 
 import com.example.medicare_call.domain.*;
+import com.example.medicare_call.dto.statistics.WeeklyStatsAggregate;
 import com.example.medicare_call.repository.BloodSugarRecordRepository;
 import com.example.medicare_call.repository.CareCallRecordRepository;
 import com.example.medicare_call.repository.DailyStatisticsRepository;

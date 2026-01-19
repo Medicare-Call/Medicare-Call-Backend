@@ -1,4 +1,4 @@
-package com.example.medicare_call.service.statistics;
+package com.example.medicare_call.dto.statistics;
 
 import lombok.Builder;
 

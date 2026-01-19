@@ -4,6 +4,7 @@ import com.example.medicare_call.domain.BloodSugarRecord;
 import com.example.medicare_call.domain.CareCallRecord;
 import com.example.medicare_call.domain.DailyStatistics;
 import com.example.medicare_call.domain.Elder;
+import com.example.medicare_call.dto.statistics.WeeklyStatsAggregate;
 import com.example.medicare_call.global.enums.BloodSugarMeasurementType;
 import com.example.medicare_call.global.enums.BloodSugarStatus;
 import com.example.medicare_call.global.enums.CareCallStatus;
