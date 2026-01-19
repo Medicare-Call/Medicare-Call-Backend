@@ -21,6 +21,16 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class WeeklyStatsAggregator {
 
+    /**
+     * 지정된 기간의 케어콜 기록, 혈당 기록, 일간 통계를 기반으로 주간 통계를 집계한다.
+     *
+     * @param startDate 집계 대상 기간 시작일
+     * @param endDate 집계 대상 기간 종료일
+     * @param dailyStatsList 일긴 통계 목록
+     * @param bloodSugarRecords 혈당 측정 기록 목록
+     * @param callRecords 케어콜 기록 목록
+     * @return 주간 통계 집계 결과
+     */
     public WeeklyStatsAggregate aggregate(
             LocalDate startDate,
             LocalDate endDate,
