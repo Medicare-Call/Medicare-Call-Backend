@@ -6,6 +6,7 @@ import com.example.medicare_call.domain.DailyStatistics;
 import com.example.medicare_call.global.enums.BloodSugarMeasurementType;
 import com.example.medicare_call.global.enums.BloodSugarStatus;
 import com.example.medicare_call.global.enums.CareCallStatus;
+import com.example.medicare_call.global.enums.PsychologicalStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -158,10 +159,10 @@ public class WeeklyStatsAggregator {
         int goodCount = 0, normalCount = 0, badCount = 0;
 
         for (CareCallRecord record : mentalRecords) {
-            Byte psychStatus = record.getPsychStatus();
+            PsychologicalStatus psychStatus = record.getPsychStatus();
             if (psychStatus == null) continue;
-            if (psychStatus == 1) goodCount++;
-            else if (psychStatus == 0) badCount++;
+            if (psychStatus == PsychologicalStatus.GOOD) goodCount++;
+            else if (psychStatus == PsychologicalStatus.BAD) badCount++;
         }
 
         return new PsychStats(goodCount, normalCount, badCount);

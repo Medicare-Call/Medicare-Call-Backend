@@ -7,6 +7,7 @@ import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.global.enums.BloodSugarMeasurementType;
 import com.example.medicare_call.global.enums.BloodSugarStatus;
 import com.example.medicare_call.global.enums.CareCallStatus;
+import com.example.medicare_call.global.enums.PsychologicalStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -59,8 +60,8 @@ class WeeklyStatsAggregatorTest {
         List<CareCallRecord> callRecords = List.of(
                 callRecordWithSleep(startDate, LocalTime.of(22, 0), LocalTime.of(6, 0)),  // 8시간
                 callRecordWithSleep(startDate.plusDays(1), LocalTime.of(23, 0), LocalTime.of(7, 30)),  // 8.5시간
-                callRecordWithPsych(startDate, (byte) 1, "좋음"),
-                callRecordWithPsych(startDate.plusDays(1), (byte) 0, "나쁨"),
+                callRecordWithPsych(startDate, PsychologicalStatus.GOOD, "좋음"),
+                callRecordWithPsych(startDate.plusDays(1), PsychologicalStatus.BAD, "나쁨"),
                 callRecordWithHealth(startDate, "두통"),
                 callRecordWithStatus(startDate.plusDays(2), CareCallStatus.NO_ANSWER)
         );
@@ -183,10 +184,10 @@ class WeeklyStatsAggregatorTest {
     void aggregate_psychStats_handlesNullStatus() {
         // Given
         List<CareCallRecord> callRecords = List.of(
-                callRecordWithPsych(startDate, (byte) 1, "괜찮음"),
+                callRecordWithPsych(startDate, PsychologicalStatus.GOOD, "괜찮음"),
                 callRecordWithPsych(startDate.plusDays(1), null, "무응답"),
-                callRecordWithPsych(startDate.plusDays(2), (byte) 0, "우울함"),
-                callRecordWithPsych(startDate.plusDays(3), (byte) 1, "괜찮음")
+                callRecordWithPsych(startDate.plusDays(2), PsychologicalStatus.BAD, "우울함"),
+                callRecordWithPsych(startDate.plusDays(3), PsychologicalStatus.GOOD, "괜찮음")
         );
 
         // When
@@ -312,7 +313,7 @@ class WeeklyStatsAggregatorTest {
                 .build();
     }
 
-    private CareCallRecord callRecordWithPsych(LocalDate date, Byte psychStatus, String details) {
+    private CareCallRecord callRecordWithPsych(LocalDate date, PsychologicalStatus psychStatus, String details) {
         return CareCallRecord.builder()
                 .elder(testElder)
                 .calledAt(date.atTime(9, 0))
