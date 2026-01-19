@@ -1,9 +1,13 @@
 package com.example.medicare_call.service.statistics;
 
 import com.example.medicare_call.domain.*;
+import com.example.medicare_call.global.enums.CareCallResponseStatus;
+import com.example.medicare_call.global.enums.MealEatenStatus;
 import com.example.medicare_call.global.enums.MealType;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.global.enums.MedicationTakenStatus;
+import com.example.medicare_call.global.enums.HealthStatus;
+import com.example.medicare_call.global.enums.PsychologicalStatus;
 import com.example.medicare_call.repository.*;
 import com.example.medicare_call.service.ai.AiSummaryService;
 import org.junit.jupiter.api.BeforeEach;
@@ -77,7 +81,7 @@ class DailyStatisticsServiceTest {
                 .id(1)
                 .elder(testElder)
                 .calledAt(testDateTime)
-                .responded((byte) 1)
+                .responded(CareCallResponseStatus.RESPONDED)
                 .callStatus("completed")
                 .build();
     }
@@ -86,7 +90,7 @@ class DailyStatisticsServiceTest {
     @DisplayName("통계 업데이트 성공 - 새로운 통계 생성")
     void updateDailyStatistics_success_createNew() {
         // given
-        MealRecord breakfastMeal = createMealRecord(1, MealType.BREAKFAST.getValue(), (byte) 1);
+        MealRecord breakfastMeal = createMealRecord(1, MealType.BREAKFAST, MealEatenStatus.EATEN);
 
         when(dailyStatisticsRepository.findByElderAndDate(testElder, testDate))
                 .thenReturn(Optional.empty());
@@ -117,7 +121,7 @@ class DailyStatisticsServiceTest {
     @DisplayName("통계 업데이트 성공 - 기존 통계 업데이트")
     void updateDailyStatistics_success_updateExisting() {
         // given
-        MealRecord breakfastMeal = createMealRecord(1, MealType.BREAKFAST.getValue(), (byte) 1);
+        MealRecord breakfastMeal = createMealRecord(1, MealType.BREAKFAST, MealEatenStatus.EATEN);
         DailyStatistics existingStats = DailyStatistics.builder()
                 .id(1L)
                 .elder(testElder)
@@ -157,7 +161,7 @@ class DailyStatisticsServiceTest {
     @DisplayName("식사 데이터 집계 - 아침 식사만 기록")
     void updateDailyStatistics_mealData_onlyBreakfast() {
         // given
-        MealRecord breakfastMeal = createMealRecord(1, MealType.BREAKFAST.getValue(), (byte) 1);
+        MealRecord breakfastMeal = createMealRecord(1, MealType.BREAKFAST, MealEatenStatus.EATEN);
 
         when(dailyStatisticsRepository.findByElderAndDate(testElder, testDate))
                 .thenReturn(Optional.empty());
@@ -192,8 +196,8 @@ class DailyStatisticsServiceTest {
     @DisplayName("식사 데이터 집계 - 아침/점심 식사 기록")
     void updateDailyStatistics_mealData_breakfastAndLunch() {
         // given
-        MealRecord breakfastMeal = createMealRecord(1, MealType.BREAKFAST.getValue(), (byte) 1);
-        MealRecord lunchMeal = createMealRecord(2, MealType.LUNCH.getValue(), (byte) 0);
+        MealRecord breakfastMeal = createMealRecord(1, MealType.BREAKFAST, MealEatenStatus.EATEN);
+        MealRecord lunchMeal = createMealRecord(2, MealType.LUNCH, MealEatenStatus.NOT_EATEN);
 
         when(dailyStatisticsRepository.findByElderAndDate(testElder, testDate))
                 .thenReturn(Optional.empty());
@@ -392,7 +396,7 @@ class DailyStatisticsServiceTest {
     void updateDailyStatistics_healthStatus_usesPreviousNonNull() {
         // given
         CareCallRecord oldNull = createCareCallRecord(1, null, null, testDate.atTime(9, 0));
-        CareCallRecord middleGood = createCareCallRecord(2, (byte) 1, null, testDate.atTime(12, 0));
+        CareCallRecord middleGood = createCareCallRecord(2, HealthStatus.GOOD, null, testDate.atTime(12, 0));
         CareCallRecord latestNull = createCareCallRecord(3, null, null, testDate.atTime(18, 0));
 
         when(dailyStatisticsRepository.findByElderAndDate(testElder, testDate))
@@ -426,8 +430,8 @@ class DailyStatisticsServiceTest {
     @DisplayName("건강 상태 - 최신 값이 null이 아니면 최신 값 사용")
     void updateDailyStatistics_healthStatus_usesLatestNonNull() {
         // given
-        CareCallRecord olderBad = createCareCallRecord(1, (byte) 0, null, testDate.atTime(9, 0));
-        CareCallRecord latestGood = createCareCallRecord(2, (byte) 1, null, testDate.atTime(18, 0));
+        CareCallRecord olderBad = createCareCallRecord(1, HealthStatus.BAD, null, testDate.atTime(9, 0));
+        CareCallRecord latestGood = createCareCallRecord(2, HealthStatus.GOOD, null, testDate.atTime(18, 0));
 
         when(dailyStatisticsRepository.findByElderAndDate(testElder, testDate))
                 .thenReturn(Optional.empty());
@@ -464,7 +468,7 @@ class DailyStatisticsServiceTest {
         CareCallRecord r2 = createCareCallRecord(2, null, null, testDate.atTime(18, 0));
 
         // early return을 피하기 위해 최소한의 식사 데이터 추가
-        MealRecord breakfastMeal = createMealRecord(1, MealType.BREAKFAST.getValue(), (byte) 1);
+        MealRecord breakfastMeal = createMealRecord(1, MealType.BREAKFAST, MealEatenStatus.EATEN);
 
         when(dailyStatisticsRepository.findByElderAndDate(testElder, testDate))
                 .thenReturn(Optional.empty());
@@ -498,7 +502,7 @@ class DailyStatisticsServiceTest {
     void updateDailyStatistics_mentalStatus_usesPreviousNonNull() {
         // given
         CareCallRecord oldNull = createCareCallRecord(1, null, null, testDate.atTime(9, 0));
-        CareCallRecord middleBad = createCareCallRecord(2, null, (byte) 0, testDate.atTime(12, 0));
+        CareCallRecord middleBad = createCareCallRecord(2, null, PsychologicalStatus.BAD, testDate.atTime(12, 0));
         CareCallRecord latestNull = createCareCallRecord(3, null, null, testDate.atTime(18, 0));
 
         when(dailyStatisticsRepository.findByElderAndDate(testElder, testDate))
@@ -532,8 +536,8 @@ class DailyStatisticsServiceTest {
     @DisplayName("심리 상태 - 최신 값이 null이 아니면 최신 값 사용")
     void updateDailyStatistics_mentalStatus_usesLatestNonNull() {
         // given
-        CareCallRecord olderGood = createCareCallRecord(1, null, (byte) 1, testDate.atTime(9, 0));
-        CareCallRecord latestBad = createCareCallRecord(2, null, (byte) 0, testDate.atTime(18, 0));
+        CareCallRecord olderGood = createCareCallRecord(1, null, PsychologicalStatus.GOOD, testDate.atTime(9, 0));
+        CareCallRecord latestBad = createCareCallRecord(2, null, PsychologicalStatus.BAD, testDate.atTime(18, 0));
 
         when(dailyStatisticsRepository.findByElderAndDate(testElder, testDate))
                 .thenReturn(Optional.empty());
@@ -570,7 +574,7 @@ class DailyStatisticsServiceTest {
         CareCallRecord r2 = createCareCallRecord(2, null, null, testDate.atTime(18, 0));
 
         // early return을 피하기 위해 최소한의 식사 데이터 추가
-        MealRecord breakfastMeal = createMealRecord(1, MealType.BREAKFAST.getValue(), (byte) 1);
+        MealRecord breakfastMeal = createMealRecord(1, MealType.BREAKFAST, MealEatenStatus.EATEN);
 
         when(dailyStatisticsRepository.findByElderAndDate(testElder, testDate))
                 .thenReturn(Optional.empty());
@@ -685,7 +689,7 @@ class DailyStatisticsServiceTest {
     @DisplayName("AI 요약 생성 - AiSummaryService 호출 확인")
     void updateDailyStatistics_aiSummary_callsAiService() {
         // given
-        MealRecord breakfastMeal = createMealRecord(1, MealType.BREAKFAST.getValue(), (byte) 1);
+        MealRecord breakfastMeal = createMealRecord(1, MealType.BREAKFAST, MealEatenStatus.EATEN);
 
         when(dailyStatisticsRepository.findByElderAndDate(testElder, testDate))
                 .thenReturn(Optional.empty());
@@ -716,7 +720,7 @@ class DailyStatisticsServiceTest {
     }
 
     // Helper methods
-    private MealRecord createMealRecord(Integer id, Byte mealType, Byte eatenStatus) {
+    private MealRecord createMealRecord(Integer id, MealType mealType, MealEatenStatus eatenStatus) {
         return MealRecord.builder()
                 .id(id)
                 .careCallRecord(testCareCallRecord)
@@ -735,12 +739,12 @@ class DailyStatisticsServiceTest {
                 .build();
     }
 
-    private CareCallRecord createCareCallRecord(Integer id, Byte healthStatus, Byte psychStatus, LocalDateTime calledAt) {
+    private CareCallRecord createCareCallRecord(Integer id, HealthStatus healthStatus, PsychologicalStatus psychStatus, LocalDateTime calledAt) {
         return CareCallRecord.builder()
                 .id(id)
                 .elder(testElder)
                 .calledAt(calledAt)
-                .responded((byte) 1)
+                .responded(CareCallResponseStatus.RESPONDED)
                 .healthStatus(healthStatus)
                 .psychStatus(psychStatus)
                 .build();
@@ -756,7 +760,7 @@ class DailyStatisticsServiceTest {
                 .id(1)
                 .elder(testElder)
                 .calledAt(eveningTime)
-                .responded((byte) 1)
+                .responded(CareCallResponseStatus.RESPONDED)
                 .callStatus("completed")
                 .build();
 

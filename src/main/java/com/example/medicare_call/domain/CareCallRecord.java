@@ -1,5 +1,8 @@
 package com.example.medicare_call.domain;
 
+import com.example.medicare_call.global.enums.CareCallResponseStatus;
+import com.example.medicare_call.global.enums.HealthStatus;
+import com.example.medicare_call.global.enums.PsychologicalStatus;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -31,8 +34,9 @@ public class CareCallRecord {
     @Column(name = "called_at", nullable = false)
     private LocalDateTime calledAt;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "responded", nullable = false)
-    private Byte responded;
+    private CareCallResponseStatus responded;
 
     @Column(name = "sleep_start")
     private LocalDateTime sleepStart; // 수면 시작 시간
@@ -40,11 +44,13 @@ public class CareCallRecord {
     @Column(name = "sleep_end")
     private LocalDateTime sleepEnd; // 수면 종료 시간
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "health_status")
-    private Byte healthStatus; // 1: 좋음, 0: 나쁨
+    private HealthStatus healthStatus; // 1: 좋음, 0: 나쁨
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "psych_status")
-    private Byte psychStatus; // 1: 좋음, 0: 나쁨
+    private PsychologicalStatus psychStatus; // 1: 좋음, 0: 나쁨
 
     @Column(name = "start_time")
     private LocalDateTime startTime; // 통화 시작 시간
@@ -71,7 +77,7 @@ public class CareCallRecord {
     private String aiExtractedDataJson; // AI 로부터 추출된 건강 데이터 전체 JSON
 
     @Builder(toBuilder = true)
-    public CareCallRecord(Integer id, Elder elder, CareCallSetting setting, LocalDateTime calledAt, Byte responded, LocalDateTime sleepStart, LocalDateTime sleepEnd, Byte healthStatus, Byte psychStatus,
+    public CareCallRecord(Integer id, Elder elder, CareCallSetting setting, LocalDateTime calledAt, CareCallResponseStatus responded, LocalDateTime sleepStart, LocalDateTime sleepEnd, HealthStatus healthStatus, PsychologicalStatus psychStatus,
                           LocalDateTime startTime, LocalDateTime endTime, String callStatus, String transcriptionText, String psychologicalDetails, String healthDetails, String aiHealthAnalysisComment,
                           String aiExtractedDataJson) {
         this.id = id;

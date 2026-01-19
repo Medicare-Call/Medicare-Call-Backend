@@ -7,6 +7,7 @@ import com.example.medicare_call.domain.Member;
 import com.example.medicare_call.dto.report.DailyMealResponse;
 import com.example.medicare_call.dto.report.DailyMentalAnalysisResponse;
 import com.example.medicare_call.global.enums.Gender;
+import com.example.medicare_call.global.enums.MealEatenStatus;
 import com.example.medicare_call.global.enums.MealType;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
@@ -160,8 +161,8 @@ class MealRecordServiceTest {
         return MealRecord.builder()
                 .id(1)
                 .careCallRecord(callRecord)
-                .mealType(mealType.getValue())
-                .eatenStatus((byte) 1)
+                .mealType(mealType)
+                .eatenStatus(MealEatenStatus.EATEN)
                 .responseSummary(responseSummary)
                 .recordedAt(LocalDateTime.now())
                 .build();
@@ -194,8 +195,8 @@ class MealRecordServiceTest {
 
         // then
         verify(mealRecordRepository).save(argThat(record ->
-                record.getMealType() == MealType.BREAKFAST.getValue() &&
-                record.getEatenStatus() == 1 &&
+                record.getMealType() == MealType.BREAKFAST &&
+                record.getEatenStatus() == MealEatenStatus.EATEN &&
                 record.getResponseSummary().equals("맛있게 드심")
         ));
     }
@@ -234,7 +235,7 @@ class MealRecordServiceTest {
 
         // then
         verify(mealRecordRepository).save(argThat(record ->
-                record.getMealType() == MealType.LUNCH.getValue() &&
+                record.getMealType() == MealType.LUNCH &&
                 record.getEatenStatus() == null &&
                 record.getResponseSummary().equals("해당 시간대 식사 여부를 명확히 확인하지 못했어요.")
         ));

@@ -3,9 +3,12 @@ package com.example.medicare_call.service.statistics;
 import com.example.medicare_call.domain.*;
 import com.example.medicare_call.dto.report.HomeSummaryDto;
 import com.example.medicare_call.global.enums.CareCallStatus;
+import com.example.medicare_call.global.enums.MealEatenStatus;
 import com.example.medicare_call.global.enums.MealType;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.global.enums.MedicationTakenStatus;
+import com.example.medicare_call.global.enums.HealthStatus;
+import com.example.medicare_call.global.enums.PsychologicalStatus;
 import com.example.medicare_call.repository.*;
 import com.example.medicare_call.service.ai.AiSummaryService;
 import lombok.Builder;
@@ -146,23 +149,22 @@ public class DailyStatisticsService {
         Boolean lunch = null;
         Boolean dinner = null;
 
-        if(!todayMeals.isEmpty()) {
+        if (!todayMeals.isEmpty()) {
             for (MealRecord meal : todayMeals) {
-
                 if (meal == null) continue;
-                MealType mealType = MealType.fromValue(meal.getMealType());
-                if (mealType != null) {
-                    switch (mealType) {
-                        case BREAKFAST:
-                            breakfast = meal.getEatenStatus() != null ? meal.getEatenStatus() == (byte) 1 : null;
-                            break;
-                        case LUNCH:
-                            lunch = meal.getEatenStatus() != null ? meal.getEatenStatus() == (byte) 1 : null;
-                            break;
-                        case DINNER:
-                            dinner = meal.getEatenStatus() != null ? meal.getEatenStatus() == (byte) 1 : null;
-                            break;
-                    }
+
+                MealType mealType = meal.getMealType();
+                if (mealType == null) continue;
+
+                Boolean eaten = null;
+                if (meal.getEatenStatus() != null) {
+                    eaten = meal.getEatenStatus() == MealEatenStatus.EATEN;
+                }
+
+                switch (mealType) {
+                    case BREAKFAST -> breakfast = eaten;
+                    case LUNCH -> lunch = eaten;
+                    case DINNER -> dinner = eaten;
                 }
             }
         }
@@ -386,9 +388,9 @@ public class DailyStatisticsService {
 
         // 오늘 데이터 중 null이 아닌 최신 건강 상태 반환
         for (int i = healthRecords.size() - 1; i >= 0; i--) {
-            Byte healthStatus = healthRecords.get(i).getHealthStatus();
+            HealthStatus healthStatus = healthRecords.get(i).getHealthStatus();
             if (healthStatus != null) {
-                return healthStatus == 1 ? "좋음" : "나쁨";
+                return healthStatus.getDescription();
             }
         }
 
@@ -404,9 +406,9 @@ public class DailyStatisticsService {
 
         // 오늘 데이터 중 null이 아닌 최신 심리 상태 반환
         for (int i = mentalRecords.size() - 1; i >= 0; i--) {
-            Byte psychStatus = mentalRecords.get(i).getPsychStatus();
+            PsychologicalStatus psychStatus = mentalRecords.get(i).getPsychStatus();
             if (psychStatus != null) {
-                return psychStatus == 1 ? "좋음" : "나쁨";
+                return psychStatus.getDescription();
             }
         }
 

@@ -5,6 +5,7 @@ import com.example.medicare_call.domain.CareCallRecord;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
 import com.example.medicare_call.global.enums.BloodSugarMeasurementType;
 import com.example.medicare_call.global.enums.BloodSugarStatus;
+import com.example.medicare_call.global.enums.CareCallResponseStatus;
 import com.example.medicare_call.repository.BloodSugarRecordRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -43,7 +44,7 @@ class BloodSugarServiceTest {
                 .elder(null)
                 .setting(null)
                 .calledAt(LocalDateTime.now())
-                .responded((byte) 1)
+                .responded(CareCallResponseStatus.RESPONDED)
                 .startTime(LocalDateTime.now())
                 .endTime(LocalDateTime.now().plusMinutes(15))
                 .callStatus("completed")
@@ -175,4 +176,4 @@ class BloodSugarServiceTest {
         // 혈당 값이 null이면 저장하지 않음
         verify(bloodSugarRecordRepository, org.mockito.Mockito.never()).save(any(BloodSugarRecord.class));
     }
-} 
+}
