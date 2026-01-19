@@ -2,7 +2,6 @@ package com.example.medicare_call.service.data_processor;
 
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionRequest;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
-import com.example.medicare_call.service.ai.AiHealthDataExtractorService;
 import com.example.medicare_call.service.ai.OpenAiChatService;
 import com.example.medicare_call.service.notification.NotificationService;
 
@@ -33,7 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 class HealthDataExtractionIntegrationTest {
 
     @Autowired
-    private AiHealthDataExtractorService aiHealthDataExtractorService;
+    private CareCallAnalysisService careCallAnalysisService;
 
     @MockBean
     private OpenAiChatService openAiChatService;
@@ -97,7 +96,11 @@ class HealthDataExtractionIntegrationTest {
                 .thenReturn(chatResponse);
 
         // when
-        HealthDataExtractionResponse result = aiHealthDataExtractorService.extractHealthData(request);
+        HealthDataExtractionResponse result = careCallAnalysisService.extractHealthData(
+                request.getCallDate(),
+                request.getTranscriptionText(),
+                List.of()
+        );
 
         // then
         assertThat(result).isNotNull();
@@ -174,7 +177,11 @@ class HealthDataExtractionIntegrationTest {
                 .thenReturn(chatResponse);
 
         // when
-        HealthDataExtractionResponse result = aiHealthDataExtractorService.extractHealthData(request);
+        HealthDataExtractionResponse result = careCallAnalysisService.extractHealthData(
+                request.getCallDate(),
+                request.getTranscriptionText(),
+                List.of()
+        );
 
         // then
         assertThat(result).isNotNull();
@@ -231,7 +238,11 @@ class HealthDataExtractionIntegrationTest {
                 .thenReturn(chatResponse);
 
         // when
-        HealthDataExtractionResponse result = aiHealthDataExtractorService.extractHealthData(request);
+        HealthDataExtractionResponse result = careCallAnalysisService.extractHealthData(
+                request.getCallDate(),
+                request.getTranscriptionText(),
+                List.of()
+        );
 
         // then
         assertThat(result).isNotNull();
