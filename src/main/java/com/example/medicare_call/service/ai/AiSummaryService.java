@@ -3,8 +3,7 @@ package com.example.medicare_call.service.ai;
 import com.example.medicare_call.dto.data_processor.ai.OpenAiRequest;
 import com.example.medicare_call.dto.data_processor.ai.OpenAiResponse;
 import com.example.medicare_call.dto.report.HomeSummaryDto;
-import com.example.medicare_call.dto.report.WeeklySummaryDto;
-import com.example.medicare_call.service.statistics.WeeklyStatisticsService;
+import com.example.medicare_call.dto.statistics.WeeklyStatsAggregate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -65,11 +64,11 @@ public class AiSummaryService {
         }
     }
 
-    public String getWeeklyStatsSummary(WeeklySummaryDto weeklySummaryDto) {
+    public String getWeeklyStatsSummary(WeeklyStatsAggregate aggregate) {
         try {
             log.info("OpenAI API를 통한 주간 건강 데이터 요약 시작");
 
-            String prompt = buildWeeklyPrompt(weeklySummaryDto);
+            String prompt = buildWeeklyPrompt(aggregate);
 
             OpenAiRequest openAiRequest = OpenAiRequest.builder()
                     .model(openaiModel)
@@ -166,15 +165,15 @@ public class AiSummaryService {
         );
     }
 
-    private String buildWeeklyPrompt(WeeklySummaryDto weeklySummaryDto) {
+    private String buildWeeklyPrompt(WeeklyStatsAggregate aggregate) {
         return String.format("""
             다음은 어르신의 한 주간 건강 데이터입니다. 이 데이터를 바탕으로 보호자를 위한 주간 건강 보고서를 작성해주세요.
             결과는 반드시 공백 포함 80자 이상 100자 미만으로, 존댓말로 작성해주세요.
 
             [주요 건강 데이터]
-            - 주간 총 식사 횟수: %d회 (총 21끼 기준)
+            - 주간 총 식사 횟수: %d회 (총 %d끼 기준)
             - 식사율: %d%% (목표: 100%%)
-            - 평균 수면 시간: %.1f시간 (권장: 7-8시간)
+            - 평균 수면 시간: %s (권장: 7-8시간)
             - 약 복용 횟수: %d회
             - 놓친 약 횟수: %d회
             - 긍정적 심리 상태: %d회
@@ -194,28 +193,36 @@ public class AiSummaryService {
             - 부정적 심리 상태가 긍정적 상태보다 많거나 비슷하면 어르신의 정신 건강에 대한 보호자의 관심을 유도해주세요.
             - 데이터를 종합하여 보호자가 가장 주의해야 할 점 1~2가지를 중심으로 보고서를 작성해주세요.
             """,
-                weeklySummaryDto.getMealCount(),
-                weeklySummaryDto.getMealRate(),
-                weeklySummaryDto.getAverageSleepHours(),
-                weeklySummaryDto.getMedicationTakenCount(),
-                weeklySummaryDto.getMedicationMissedCount(),
-                weeklySummaryDto.getPositivePsychologicalCount(),
-                weeklySummaryDto.getNegativePsychologicalCount(),
-                weeklySummaryDto.getHealthSignals(),
-                weeklySummaryDto.getMissedCalls(),
-                formatBloodSugarStats(weeklySummaryDto.getBloodSugar() != null ? weeklySummaryDto.getBloodSugar().beforeMeal() : null),
-                formatBloodSugarStats(weeklySummaryDto.getBloodSugar() != null ? weeklySummaryDto.getBloodSugar().afterMeal() : null)
+                aggregate.totalMealCount(),
+                aggregate.mealGoalCount(),
+                aggregate.mealRatePercent(),
+                formatAverageSleepMinutes(aggregate.avgSleepMinutes()),
+                aggregate.medicationTakenCount(),
+                aggregate.medicationMissedCount(),
+                aggregate.psychGoodCount(),
+                aggregate.psychBadCount(),
+                aggregate.healthSignals(),
+                aggregate.missedCalls(),
+                formatBloodSugarStats(aggregate.beforeMealBloodSugar()),
+                formatBloodSugarStats(aggregate.afterMealBloodSugar())
         );
     }
 
-    private String formatBloodSugarStats(WeeklyStatisticsService.WeeklyBloodSugarType bloodSugarType) {
-        if (bloodSugarType == null) {
+    private String formatAverageSleepMinutes(Integer minutes) {
+        if (minutes == null) {
+            return "기록 없음";
+        }
+        return String.format("%.1f시간", minutes / 60.0);
+    }
+
+    private String formatBloodSugarStats(WeeklyStatsAggregate.BloodSugarStats bloodSugar) {
+        if (bloodSugar == null) {
             return "측정 기록 없음";
         }
         return String.format("정상 %d회, 고혈당 %d회, 저혈당 %d회",
-                bloodSugarType.normal(),
-                bloodSugarType.high(),
-                bloodSugarType.low());
+                bloodSugar.normal(),
+                bloodSugar.high(),
+                bloodSugar.low());
     }
 
     public String getSymptomAnalysis(List<String> symptomList) {

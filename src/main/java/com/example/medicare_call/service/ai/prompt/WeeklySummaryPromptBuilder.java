@@ -1,21 +1,20 @@
 package com.example.medicare_call.service.ai.prompt;
 
-import com.example.medicare_call.dto.report.WeeklySummaryDto;
-import com.example.medicare_call.service.statistics.WeeklyStatisticsService;
+import com.example.medicare_call.dto.statistics.WeeklyStatsAggregate;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
-public class WeeklySummaryPromptBuilder implements PromptBuilder<WeeklySummaryDto> {
+public class WeeklySummaryPromptBuilder implements PromptBuilder<WeeklyStatsAggregate> {
 
     private final String WEEKLY_SUMMARY_PROMPT_TEMPLATE = """
             다음은 어르신의 한 주간 건강 데이터입니다. 이 데이터를 바탕으로 보호자를 위한 주간 건강 보고서를 작성해주세요.
             결과는 반드시 공백 포함 80자 이상 100자 미만으로, 존댓말로 작성해주세요.
 
             [주요 건강 데이터]
-            - 주간 총 식사 횟수: {mealCount}회 (총 21끼 기준)
+            - 주간 총 식사 횟수: {totalMealCount}회 (총 {mealGoalCount}끼 기준)
             - 식사율: {mealRate}% (목표: 100%)
-            - 평균 수면 시간: {averageSleepHours}시간 (권장: 7-8시간)
+            - 평균 수면 시간: {averageSleepHours} (권장: 7-8시간)
             - 약 복용 횟수: {medicationTakenCount}회
             - 놓친 약 횟수: {medicationMissedCount}회
             - 긍정적 심리 상태: {positivePsychologicalCount}회
@@ -38,36 +37,45 @@ public class WeeklySummaryPromptBuilder implements PromptBuilder<WeeklySummaryDt
 
     @Override
     public String buildSystemMessage() {
-        return "당신은 어르신 주간 건강 보고서 전문가입니다. 어르신의 주간 데이터를 분석하여 보호자에게 필요한 핵심 정보를 80자 이상 100자 미만으로 요약 보고해야 합니다.";
+        return "당신은 주간 건강 데이터를 분석하여 보호자를 위한 주간 건강 보고서를 작성하는 전문가입니다. " +
+                "제공된 데이터를 기반으로 어르신의 건강 상태를 객관적으로 요약하고, " +
+                "보호자가 주의 깊게 살펴봐야 할 가장 중요한 사항 1~2가지를 중심으로 조언을 제공해주세요.";
     }
 
     @Override
-    public String buildPrompt(WeeklySummaryDto weeklySummaryDto) {
+    public String buildPrompt(WeeklyStatsAggregate aggregate) {
         PromptTemplate promptTemplate = new PromptTemplate(WEEKLY_SUMMARY_PROMPT_TEMPLATE);
 
-        promptTemplate.add("mealCount", weeklySummaryDto.getMealCount());
-        promptTemplate.add("mealRate", weeklySummaryDto.getMealRate());
-        promptTemplate.add("averageSleepHours", String.format("%.1f", weeklySummaryDto.getAverageSleepHours()));
-        promptTemplate.add("medicationTakenCount", weeklySummaryDto.getMedicationTakenCount());
-        promptTemplate.add("medicationMissedCount", weeklySummaryDto.getMedicationMissedCount());
-        promptTemplate.add("positivePsychologicalCount", weeklySummaryDto.getPositivePsychologicalCount());
-        promptTemplate.add("negativePsychologicalCount", weeklySummaryDto.getNegativePsychologicalCount());
-        promptTemplate.add("healthSignals", weeklySummaryDto.getHealthSignals());
-        promptTemplate.add("missedCalls", weeklySummaryDto.getMissedCalls());
-        var bloodSugar = weeklySummaryDto.getBloodSugar();
-        promptTemplate.add("bloodSugarBeforeMeal", formatBloodSugarStats(bloodSugar != null ? bloodSugar.beforeMeal() : null));
-        promptTemplate.add("bloodSugarAfterMeal", formatBloodSugarStats(bloodSugar != null ? bloodSugar.afterMeal() : null));
+        promptTemplate.add("totalMealCount", aggregate.totalMealCount());
+        promptTemplate.add("mealGoalCount", aggregate.mealGoalCount());
+        promptTemplate.add("mealRate", aggregate.mealRatePercent());
+        promptTemplate.add("averageSleepHours", formatAverageSleepMinutes(aggregate.avgSleepMinutes()));
+        promptTemplate.add("medicationTakenCount", aggregate.medicationTakenCount());
+        promptTemplate.add("medicationMissedCount", aggregate.medicationMissedCount());
+        promptTemplate.add("positivePsychologicalCount", aggregate.psychGoodCount());
+        promptTemplate.add("negativePsychologicalCount", aggregate.psychBadCount());
+        promptTemplate.add("healthSignals", aggregate.healthSignals());
+        promptTemplate.add("missedCalls", aggregate.missedCalls());
+        promptTemplate.add("bloodSugarBeforeMeal", formatBloodSugarStats(aggregate.beforeMealBloodSugar()));
+        promptTemplate.add("bloodSugarAfterMeal", formatBloodSugarStats(aggregate.afterMealBloodSugar()));
 
         return promptTemplate.create().getContents();
     }
 
-    private String formatBloodSugarStats(WeeklyStatisticsService.WeeklyBloodSugarType bloodSugarType) {
-        if (bloodSugarType == null) {
+    private String formatAverageSleepMinutes(Integer minutes) {
+        if (minutes == null) {
+            return "기록 없음";
+        }
+        return String.format("%.1f시간", minutes / 60.0);
+    }
+
+    private String formatBloodSugarStats(WeeklyStatsAggregate.BloodSugarStats bloodSugar) {
+        if (bloodSugar == null) {
             return "측정 기록 없음";
         }
         return String.format("정상 %d회, 고혈당 %d회, 저혈당 %d회",
-                bloodSugarType.normal(),
-                bloodSugarType.high(),
-                bloodSugarType.low());
+                bloodSugar.normal(),
+                bloodSugar.high(),
+                bloodSugar.low());
     }
 }

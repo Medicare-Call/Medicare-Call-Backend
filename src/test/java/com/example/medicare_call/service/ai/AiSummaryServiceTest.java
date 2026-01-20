@@ -2,8 +2,7 @@ package com.example.medicare_call.service.ai;
 
 import com.example.medicare_call.dto.data_processor.ai.OpenAiResponse;
 import com.example.medicare_call.dto.report.HomeSummaryDto;
-import com.example.medicare_call.dto.report.WeeklySummaryDto;
-import com.example.medicare_call.service.statistics.WeeklyStatisticsService;
+import com.example.medicare_call.dto.statistics.WeeklyStatsAggregate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -15,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -70,21 +70,28 @@ class AiSummaryServiceTest {
     @DisplayName("주간 건강 데이터 요약 성공")
     void getWeeklyStatsSummary_success() {
         // given
-        WeeklyStatisticsService.WeeklyBloodSugarType beforeMeal = WeeklyStatisticsService.WeeklyBloodSugarType.builder().normal(5).high(1).low(0).build();
-        WeeklyStatisticsService.WeeklyBloodSugarType afterMeal = WeeklyStatisticsService.WeeklyBloodSugarType.builder().normal(4).high(2).low(0).build();
-        WeeklyStatisticsService.WeeklyBloodSugar bloodSugar = WeeklyStatisticsService.WeeklyBloodSugar.builder().beforeMeal(beforeMeal).afterMeal(afterMeal).build();
+        WeeklyStatsAggregate.BloodSugarStats beforeMeal = new WeeklyStatsAggregate.BloodSugarStats(5, 1, 0);
+        WeeklyStatsAggregate.BloodSugarStats afterMeal = new WeeklyStatsAggregate.BloodSugarStats(4, 2, 0);
 
-        WeeklySummaryDto weeklySummaryDto = WeeklySummaryDto.builder()
-                .mealCount(15)
-                .mealRate(71)
-                .averageSleepHours(7.5)
-                .bloodSugar(bloodSugar)
+        WeeklyStatsAggregate weeklyStatsAggregate = WeeklyStatsAggregate.builder()
+                .startDate(LocalDate.of(2026, 1, 5))
+                .endDate(LocalDate.of(2026, 1, 11))
+                .breakfastCount(5)
+                .lunchCount(5)
+                .dinnerCount(5)
+                .mealGoalCount(21)
+                .medicationByType(Collections.emptyMap())
                 .medicationTakenCount(10)
-                .medicationMissedCount(2)
-                .positivePsychologicalCount(5)
-                .negativePsychologicalCount(1)
+                .medicationGoalCount(12)
+                .medicationScheduledCount(14)
+                .avgSleepMinutes(450)
+                .psychGoodCount(5)
+                .psychNormalCount(0)
+                .psychBadCount(1)
                 .healthSignals(3)
                 .missedCalls(1)
+                .beforeMealBloodSugar(beforeMeal)
+                .afterMealBloodSugar(afterMeal)
                 .build();
 
         String expectedSummary = "이번 주 어르신은 건강 이상 신호가 3회, 케어콜 미응답이 1회 있었습니다. 어르신께 무슨 일이 없는지 확인이 필요해 보입니다. 약도 2회 누락되어 꾸준한 복용 지도가 필요합니다.";
@@ -103,7 +110,7 @@ class AiSummaryServiceTest {
                 .thenReturn(openAiResponse);
 
         // when
-        String actualSummary = aiSummaryService.getWeeklyStatsSummary(weeklySummaryDto);
+        String actualSummary = aiSummaryService.getWeeklyStatsSummary(weeklyStatsAggregate);
 
         // then
         assertEquals(expectedSummary, actualSummary);
