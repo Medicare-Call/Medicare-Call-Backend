@@ -33,6 +33,13 @@ public class WeeklyStatisticsService {
     private final WeeklyStatsAggregator weeklyStatsAggregator;
     private final AiSummaryService aiSummaryService;
 
+    /**
+     * 케어콜 기록을 기준으로 주간 데이터를 집계하여 WeeklyStatsAggregate를 생성하고,
+     * 해당 집계 결과를 기반으로 AI 주간 요약을 생성한 뒤
+     * WeeklyStatistics 엔티티를 Upsert 처리한다.
+     *
+     * @param record 주간 통계 집계 기준이 되는 케어콜 기록
+     */
     @Transactional
     public void upsertWeeklyStatistics(CareCallRecord record) {
         Elder elder = record.getElder();
@@ -93,6 +100,12 @@ public class WeeklyStatisticsService {
         weeklyStatisticsRepository.save(ws);
     }
 
+    /**
+     * 응답하지 않은 케어콜 발생 시 해당 주차의 미응답 통계 값을 증가시킨다.
+     * 해당 기간의 WeeklyStatistics 엔티티가 존재하지 않는 경우에는 별도 처리 수행 X
+     *
+     * @param record 미응답 케어콜 기록
+     */
     @Transactional
     public void updateMissedCallStatistics(CareCallRecord record) {
         Elder elder = record.getElder();
