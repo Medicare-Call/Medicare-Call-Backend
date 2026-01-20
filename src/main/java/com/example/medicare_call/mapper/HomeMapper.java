@@ -22,18 +22,18 @@ public class HomeMapper {
      */
     public HomeReportResponse mapToHomeReportResponse(
             Elder elder,
-            Optional<DailyStatistics> statisticsOpt,
+            Optional<DailyStatistics> statistics,
             List<MedicationSchedule> schedules,
             int unreadCount,
             LocalTime now) {
 
         // 1. 오늘 날짜 데이터가 없을 경우 (빈 응답 생성)
-        if (statisticsOpt.isEmpty()) {
+        if (statistics.isEmpty()) {
             return mapToEmptyHomeReport(elder, schedules, unreadCount, now);
         }
 
         // 2. 데이터가 있을 경우 (정상 매핑)
-        DailyStatistics stats = statisticsOpt.get();
+        DailyStatistics stats = statistics.get();
 
         return HomeReportResponse.builder()
                 .elderName(elder.getName())
@@ -114,19 +114,16 @@ public class HomeMapper {
                     List<DailyStatistics.DoseStatus> dummyDoseStatuses = entry.getValue().stream()
                             .map(s -> DailyStatistics.DoseStatus.builder()
                                     .time(s.getScheduleTime())
-                                    .taken(null)
                                     .build())
                             .toList();
 
                     return HomeReportResponse.MedicationInfo.builder()
                             .type(entry.getKey())
-                            .taken(null)
                             .goal(entry.getValue().size())
                             .nextTime(calculateNextTime(dummyDoseStatuses, now))
                             .doseStatusList(entry.getValue().stream()
                                     .map(s -> HomeReportResponse.DoseStatus.builder()
                                             .time(s.getScheduleTime())
-                                            .taken(null)
                                             .build())
                                     .toList())
                             .build();
@@ -136,21 +133,13 @@ public class HomeMapper {
         return HomeReportResponse.builder()
                 .elderName(elder.getName())
                 .mealStatus(HomeReportResponse.MealStatus.builder()
-                        .breakfast(null)
-                        .lunch(null)
-                        .dinner(null)
                         .build())
                 .medicationStatus(HomeReportResponse.MedicationStatus.builder()
-                        .totalTaken(null)
-                        .totalGoal(null)
                         .medicationList(medicationList)
                         .build())
                 .sleep(HomeReportResponse.Sleep.builder()
-                        .meanHours(null)
-                        .meanMinutes(null)
                         .build())
                 .bloodSugar(HomeReportResponse.BloodSugar.builder()
-                        .meanValue(null)
                         .build())
                 .unreadNotification(unreadCount)
                 .build();
