@@ -8,6 +8,7 @@ import com.example.medicare_call.global.annotation.AuthenticationArgumentResolve
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.global.jwt.JwtProvider;
 import com.example.medicare_call.mapper.HomeMapper;
+import com.example.medicare_call.service.ElderService;
 import com.example.medicare_call.service.notification.NotificationService;
 import com.example.medicare_call.service.report.HomeReportService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,6 +42,9 @@ class HomeControllerTest {
 
     @MockBean
     private HomeReportService homeReportService;
+
+    @MockBean
+    private ElderService elderService;
 
     @MockBean
     private HomeMapper homeMapper;
@@ -166,7 +170,7 @@ class HomeControllerTest {
                 .build();
 
         // Service mocking
-        when(homeReportService.getElder(elderId)).thenReturn(elder);
+        when(elderService.getElder(elderId)).thenReturn(elder);
         when(homeReportService.getTodayStatistics(any(Elder.class), any())).thenReturn(Optional.of(statistics));
         when(homeReportService.getMedicationSchedules(any(Elder.class))).thenReturn(Collections.emptyList());
         when(notificationService.getUnreadCount(nullable(Integer.class))).thenReturn(0);
@@ -262,7 +266,7 @@ class HomeControllerTest {
                 .build();
 
         // Service mocking
-        when(homeReportService.getElder(elderId)).thenReturn(elder);
+        when(elderService.getElder(elderId)).thenReturn(elder);
         when(homeReportService.getTodayStatistics(any(Elder.class), any())).thenReturn(Optional.of(statistics));
         when(homeReportService.getMedicationSchedules(any(Elder.class))).thenReturn(Collections.emptyList());
         when(notificationService.getUnreadCount(nullable(Integer.class))).thenReturn(0);

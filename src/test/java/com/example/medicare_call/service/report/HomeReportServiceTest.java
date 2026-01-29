@@ -8,12 +8,14 @@ import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.DailyStatisticsRepository;
 import com.example.medicare_call.repository.ElderRepository;
 import com.example.medicare_call.repository.MedicationScheduleRepository;
+import com.example.medicare_call.service.ElderService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -41,6 +43,9 @@ class HomeReportServiceTest {
     @InjectMocks
     private HomeReportService homeReportService;
 
+    @InjectMocks
+    private ElderService elderService;
+
     @Test
     @DisplayName("어르신 엔티티 조회 성공")
     void getElder_성공() {
@@ -50,7 +55,7 @@ class HomeReportServiceTest {
         when(elderRepository.findById(elderId)).thenReturn(Optional.of(elder));
 
         // when
-        Elder result = homeReportService.getElder(elderId);
+        Elder result = elderService.getElder(elderId);
 
         // then
         assertThat(result.getName()).isEqualTo("김옥자");
@@ -64,7 +69,7 @@ class HomeReportServiceTest {
         when(elderRepository.findById(anyInt())).thenReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> homeReportService.getElder(999))
+        assertThatThrownBy(() -> elderService.getElder(999))
                 .isInstanceOf(CustomException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ELDER_NOT_FOUND);
     }

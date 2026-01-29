@@ -53,7 +53,12 @@ public class ElderService {
         return relation;
     }
 
-    public List<ElderResponse> getElder(Integer memberId){
+    public Elder getElder(Integer elderId) {
+        return elderRepository.findById(elderId)
+                .orElseThrow(() -> new CustomException(ErrorCode.ELDER_NOT_FOUND));
+    }
+
+    public List<ElderResponse> getElders(Integer memberId){
         Member guardian = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 

@@ -7,15 +7,10 @@ import com.example.medicare_call.domain.MedicationSchedule;
 import com.example.medicare_call.dto.report.HomeReportResponse;
 import com.example.medicare_call.global.annotation.AuthUser;
 import com.example.medicare_call.mapper.HomeMapper;
+import com.example.medicare_call.service.ElderService;
 import com.example.medicare_call.service.notification.NotificationService;
 import com.example.medicare_call.service.report.HomeReportService;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +32,7 @@ public class HomeController implements HomeApi {
 
     private final HomeMapper homeMapper;
     private final HomeReportService homeReportService;
+    private final ElderService elderService;
     private final NotificationService notificationService;
 
     @Override
@@ -44,7 +40,7 @@ public class HomeController implements HomeApi {
     public ResponseEntity<HomeReportResponse> getHomeData(@Parameter(hidden = true) @AuthUser Integer memberId, @PathVariable("elderId")Integer elderId) {
         log.info("홈 화면 데이터 조회 요청: elderId={}", elderId);
 
-        Elder elder = homeReportService.getElder(elderId);
+        Elder elder = elderService.getElder(elderId);
         Optional<DailyStatistics> statistics = homeReportService.getTodayStatistics(elder, LocalDate.now());
         List<MedicationSchedule> schedules = homeReportService.getMedicationSchedules(elder);
         int unreadCount = notificationService.getUnreadCount(memberId);

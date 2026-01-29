@@ -58,7 +58,7 @@ public class ElderController {
     @GetMapping
     public ResponseEntity<List<ElderResponse>> getElder(@Parameter(hidden = true) @AuthUser Integer memberId){
         log.info("어르신 설정 정보 조회 요청: memberId={}", memberId);
-        List<ElderResponse> body = elderService.getElder(memberId);
+        List<ElderResponse> body = elderService.getElders(memberId);
         return ResponseEntity.ok(body);
     }
 

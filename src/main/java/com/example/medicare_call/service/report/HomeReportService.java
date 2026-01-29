@@ -29,22 +29,16 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class HomeReportService {
 
-    private final ElderRepository elderRepository;
     private final DailyStatisticsRepository dailyStatisticsRepository;
     private final MedicationScheduleRepository medicationScheduleRepository;
 
-    // 1. 어르신 엔티티 조회
-    public Elder getElder(Integer elderId) {
-        return elderRepository.findById(elderId)
-                .orElseThrow(() -> new CustomException(ErrorCode.ELDER_NOT_FOUND));
-    }
 
-    // 2. 오늘의 통계 데이터 조회 (Optional 반환)
+    // 1. 오늘의 통계 데이터 조회 (Optional 반환)
     public Optional<DailyStatistics> getTodayStatistics(Elder elder, LocalDate date) {
         return dailyStatisticsRepository.findByElderAndDate(elder, date);
     }
 
-    // 3. 복약 스케줄 조회
+    // 2. 복약 스케줄 조회
     public List<MedicationSchedule> getMedicationSchedules(Elder elder) {
         return medicationScheduleRepository.findByElder(elder);
     }
