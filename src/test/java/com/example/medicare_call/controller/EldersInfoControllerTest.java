@@ -108,7 +108,7 @@ class EldersInfoControllerTest {
                 )
         );
 
-        when(elderSettingService.getElder(memberId.intValue())).thenReturn(responseList);
+        when(elderSettingService.getElders(memberId.intValue())).thenReturn(responseList);
 
         // when & then
         mockMvc.perform(get("/elders")
@@ -128,7 +128,7 @@ class EldersInfoControllerTest {
     void getElderSettingInfo_fail_memberNotFound() throws Exception {
         // given
         Integer memberId = 1;
-        when(elderSettingService.getElder(memberId.intValue()))
+        when(elderSettingService.getElders(memberId.intValue()))
                 .thenThrow(new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
         // when & then
