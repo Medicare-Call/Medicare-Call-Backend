@@ -28,6 +28,13 @@ public class CareCallTestService {
     private final CareCallClient careCallClient;
 
     // TODO: KUIT 데모데이 시연용 일시적 기능으로 불완전합니다. 제거 혹은 개선이 필요합니다.
+    /**
+     * 특정 어르신에게 즉시 케어콜을 발송
+     *
+     * @param elderId 대상 어르신 ID
+     * @param careCallOption 케어콜 옵션 (회차 정보 등)
+     * @return 발송 완료 메시지
+     */
     @Transactional
     public String sendImmediateCall(Long elderId, CareCallOption careCallOption) {
         Elder elder = elderRepository.findById(elderId.intValue())
@@ -45,6 +52,12 @@ public class CareCallTestService {
         }
     }
 
+    /**
+     * 테스트용 케어콜을 발신
+     * 가상의 어르신 데이터(더미)를 사용하여 실제 발신 로직만 테스트하고 DB 저장은 수행하지 않는다
+     * 
+     * @param req 테스트할 프롬프트와 전화번호 정보
+     */
     public void sendTestCall(CareCallTestRequest req) {
         // 테스트용이라 하드코딩된 더미 데이터 사용, DB 저장 안함
         Elder testElder = Elder.builder()
@@ -61,6 +74,12 @@ public class CareCallTestService {
         careCallClient.requestCall(100, testElder.getId(), req.phoneNumber(), testPrompt);
     }
 
+    /**
+     * CareCallOption enum을 CallType enum으로 변환
+     * 
+     * @param option 변환할 CareCallOption
+     * @return 변환된 CallType
+     */
     private CallType convertOptionToCallType(CareCallOption option) {
         switch (option) {
             case FIRST: return CallType.FIRST;

@@ -25,6 +25,12 @@ public class CareCallService {
     private final ElderRepository elderRepository;
     private final CareCallSettingRepository careCallSettingRepository;
 
+    /**
+     * 케어콜 통화 데이터를 저장하고 CareCallCompletedEvent 이벤트를 발행
+     * 
+     * @param request 케어콜 데이터 처리 요청 정보를 담은 DTO
+     * @return 저장된 케어콜 기록 엔티티
+     */
     @Transactional
     public CareCallRecord saveCallData(CareCallDataProcessRequest request) {
         log.info("통화 데이터 저장 시작: elderId={}, settingId={}", request.getElderId(), request.getSettingId());

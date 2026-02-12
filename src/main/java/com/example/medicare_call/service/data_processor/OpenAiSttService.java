@@ -37,6 +37,12 @@ public class OpenAiSttService {
     @Value("${openai.stt}")
     private String openaiAudioUrl;
 
+    /**
+     * OpenAI Whisper API를 사용하여 오디오 파일을 텍스트로 변환한다
+     * 
+     * @param audioFile 변환할 오디오 파일
+     * @return STT 변환 결과 (텍스트 및 세그먼트 정보)
+     */
     public OpenAiSttResponse transcribe(MultipartFile audioFile) {
         if (audioFile == null || audioFile.isEmpty()) {
             throw new CustomException(ErrorCode.INVALID_INPUT_VALUE, "오디오 파일이 없습니다.");
@@ -78,6 +84,14 @@ public class OpenAiSttService {
         }
     }
 
+    /**
+     * OpenAI STT API 호출을 위한 Multipart 요청 엔티티를 생성
+     * 
+     * @param audioFile 오디오 파일
+     * @param headers HTTP 헤더
+     * @return MultiValueMap을 포함하는 HttpEntity
+     * @throws IOException 파일 처리 중 오류 발생 시
+     */
     private static @NotNull HttpEntity<MultiValueMap<String, Object>> getMultiValueMapHttpEntity(MultipartFile audioFile, HttpHeaders headers) throws IOException {
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
 

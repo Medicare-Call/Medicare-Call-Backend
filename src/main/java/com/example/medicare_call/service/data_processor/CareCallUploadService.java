@@ -20,6 +20,13 @@ public class CareCallUploadService {
     private final OpenAiSttService openAiSttService;
     private final CareCallService careCallService;
 
+    /**
+     * 업로드된 통화 녹음 데이터를 처리
+     * STT 변환을 수행하고 처리가 완료된 통화 기록을 저장한다
+     * 
+     * @param request 통화 데이터 업로드 요청 정보를 담은 DTO
+     * @return 저장된 케어콜 기록 엔티티
+     */
     @Transactional
     public CareCallRecord processUploadedCallData(CallDataUploadRequest request) {
         MultipartFile recordingFile = request.getRecordingFile();
