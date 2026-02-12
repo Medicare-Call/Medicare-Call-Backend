@@ -2,7 +2,7 @@ package com.example.medicare_call.controller;
 
 import com.example.medicare_call.api.MedicationApi;
 import com.example.medicare_call.dto.report.DailyMedicationResponse;
-import com.example.medicare_call.service.data_processor.MedicationService;
+import com.example.medicare_call.service.health_data.MedicationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
