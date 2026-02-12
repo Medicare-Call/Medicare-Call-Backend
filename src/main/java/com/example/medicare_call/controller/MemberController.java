@@ -59,6 +59,13 @@ public class MemberController {
         return ResponseEntity.ok().build();
     }
 
+    @DeleteMapping("/member")
+    @Operation(summary = "회원 탈퇴", description = "현재 로그인한 사용자의 정보를 삭제하고 탈퇴 처리합니다")
+    public ResponseEntity<Void> withdraw(@Parameter(hidden = true) @AuthUser Integer memberId) {
+        memberService.withdraw(memberId);
+        return ResponseEntity.noContent().build();
+    }
+
     @Getter
     @NoArgsConstructor
     static class FcmTokenRequest {
