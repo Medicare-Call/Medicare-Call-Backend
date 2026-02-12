@@ -7,6 +7,7 @@ import com.example.medicare_call.dto.auth.SmsVerificationResponse;
 import com.example.medicare_call.dto.auth.TokenResponse;
 import com.example.medicare_call.global.enums.Gender;
 import com.example.medicare_call.global.enums.MemberStatus;
+import com.example.medicare_call.global.enums.SubscriptionPlan;
 import com.example.medicare_call.global.jwt.JwtProvider;
 import com.example.medicare_call.repository.MemberRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -55,7 +56,7 @@ class AuthServiceTest {
                 .name("홍길동")
                 .birthDate(LocalDate.of(1990, 1, 1))
                 .gender(Gender.FEMALE)
-                .plan((byte) 0)
+                .plan(SubscriptionPlan.STANDARD)
                 .termsAgreedAt(LocalDateTime.now())
                 .build();
 
@@ -104,7 +105,7 @@ class AuthServiceTest {
                 .name("김철수")
                 .birthDate(LocalDate.of(1980, 5, 15))
                 .gender(Gender.MALE)
-                .plan((byte) 1)
+                .plan(SubscriptionPlan.STANDARD)
                 .termsAgreedAt(LocalDateTime.now())
                 .build();
 

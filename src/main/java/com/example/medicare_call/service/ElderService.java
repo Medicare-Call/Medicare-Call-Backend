@@ -36,7 +36,7 @@ public class ElderService {
         Elder elder = Elder.builder()
             .name(request.getName())
             .birthDate(request.getBirthDate())
-            .gender((byte) (request.getGender() == Gender.MALE ? 0 : 1))
+            .gender(request.getGender())
             .phone(request.getPhone())
             .relationship(request.getRelationship())
             .residenceType(request.getResidenceType())
@@ -81,7 +81,7 @@ public class ElderService {
         updateElder.applySettings(
                 req.name(),
                 req.birthDate(),
-                req.gender().getCode(),
+                req.gender(),
                 req.phone(),
                 req.relationship(),
                 req.residenceType()
@@ -112,7 +112,7 @@ public class ElderService {
                 .map(request -> Elder.builder()
                         .name(request.getName())
                         .birthDate(request.getBirthDate())
-                        .gender((byte) (request.getGender() == Gender.MALE ? 0 : 1))
+                        .gender(request.getGender())
                         .phone(request.getPhone())
                         .relationship(request.getRelationship())
                         .residenceType(request.getResidenceType())
@@ -141,7 +141,7 @@ public class ElderService {
                 elder.getId(),
                 elder.getName(),
                 elder.getBirthDate(),
-                Gender.fromCode(elder.getGender()),
+                elder.getGender(),
                 elder.getPhone(),
                 elder.getRelationship(),
                 elder.getResidenceType()
@@ -154,7 +154,7 @@ public class ElderService {
                 .name(elder.getName())
                 .birthDate(elder.getBirthDate())
                 .phone(elder.getPhone())
-                .gender(elder.getGender() == 0 ? "MALE" : "FEMALE")
+                .gender(elder.getGender().toString())
                 .relationship(elder.getRelationship() != null ? elder.getRelationship().name() : null)
                 .residenceType(elder.getResidenceType() != null ? elder.getResidenceType().name() : null)
                 .guardianId(guardian != null ? guardian.getId() : null)

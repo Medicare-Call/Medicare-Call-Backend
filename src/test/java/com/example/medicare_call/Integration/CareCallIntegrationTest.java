@@ -65,7 +65,7 @@ class CareCallIntegrationTest {
                         .id(1)
                         .name("테스터")
                         .birthDate(LocalDate.of(1940, 1, 1))
-                        .gender((byte) 1)
+                        .gender(Gender.MALE)
                         .phone("+821088000000")
                         .relationship(ElderRelation.CHILD)
                         .residenceType(ResidenceType.ALONE)

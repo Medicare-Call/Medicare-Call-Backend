@@ -99,7 +99,7 @@ class NaverPayServiceTest {
                 .phone("010-1234-5678")
                 .gender(Gender.FEMALE)
                 .termsAgreedAt(LocalDateTime.now())
-                .plan((byte) 0)
+                .plan(SubscriptionPlan.STANDARD)
                 .build();
         when(memberRepository.findById(1)).thenReturn(Optional.of(member));
 
@@ -529,7 +529,7 @@ class NaverPayServiceTest {
                 .phone("010-1234-5678")
                 .gender(Gender.FEMALE)
                 .termsAgreedAt(LocalDateTime.now())
-                .plan((byte) 0)
+                .plan(SubscriptionPlan.STANDARD)
                 .build();
 
         return Order.builder()
@@ -584,7 +584,7 @@ class NaverPayServiceTest {
                 .phone("010-1234-5678")
                 .gender(Gender.FEMALE)
                 .termsAgreedAt(LocalDateTime.now())
-                .plan((byte) 0)
+                .plan(SubscriptionPlan.STANDARD)
                 .build();
 
         return Order.builder()

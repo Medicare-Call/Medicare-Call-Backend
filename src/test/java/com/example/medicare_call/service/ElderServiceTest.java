@@ -6,11 +6,7 @@ import com.example.medicare_call.domain.MemberElder;
 import com.example.medicare_call.dto.ElderRegisterRequest;
 import com.example.medicare_call.dto.ElderRegisterResponse;
 import com.example.medicare_call.dto.ElderUpdateRequest;
-import com.example.medicare_call.global.enums.ElderRelation;
-import com.example.medicare_call.global.enums.ElderStatus;
-import com.example.medicare_call.global.enums.Gender;
-import com.example.medicare_call.global.enums.MemberElderAuthority;
-import com.example.medicare_call.global.enums.ResidenceType;
+import com.example.medicare_call.global.enums.*;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.ElderRepository;
@@ -60,7 +56,7 @@ class ElderServiceTest {
                 .phone("01000000000")
                 .gender(Gender.MALE)
                 .termsAgreedAt(LocalDateTime.now())
-                .plan((byte)1)
+                .plan(SubscriptionPlan.PREMIUM)
                 .build();
 
         testElderRequest1 = new ElderRegisterRequest();
@@ -89,7 +85,7 @@ class ElderServiceTest {
                 .id(id)
                 .name(request.getName())
                 .birthDate(request.getBirthDate())
-                .gender(convertGenderToByte(request.getGender()))
+                .gender(request.getGender())
                 .phone(request.getPhone())
                 .relationship(request.getRelationship())
                 .residenceType(request.getResidenceType())
