@@ -1,12 +1,7 @@
 package com.example.medicare_call.util;
 
 import com.example.medicare_call.domain.*;
-import com.example.medicare_call.global.enums.CallRecurrenceType;
-import com.example.medicare_call.global.enums.CareCallResponseStatus;
-import com.example.medicare_call.global.enums.ElderRelation;
-import com.example.medicare_call.global.enums.Gender;
-import com.example.medicare_call.global.enums.MedicationScheduleTime;
-import com.example.medicare_call.global.enums.ResidenceType;
+import com.example.medicare_call.global.enums.*;
 import com.example.medicare_call.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -36,7 +31,7 @@ public class TestDataGenerator {
                             .phone("010-1234-5678")
                             .gender(Gender.MALE)
                             .termsAgreedAt(LocalDateTime.now())
-                            .plan((byte) 1)
+                            .plan(SubscriptionPlan.PREMIUM)
                             .build();
                     return memberRepository.save(newMember);
                 });
@@ -48,7 +43,7 @@ public class TestDataGenerator {
                             .id(elderId)
 //                            .guardian(guardian) # 2025 11/24 Many To Many 마이그레이션을 통해 일단 주석 처리
                             .name("테스트 어르신")
-                            .gender(Gender.MALE.getCode())
+                            .gender(Gender.MALE)
                             .relationship(ElderRelation.CHILD)
                             .residenceType(ResidenceType.ALONE)
                             .build();

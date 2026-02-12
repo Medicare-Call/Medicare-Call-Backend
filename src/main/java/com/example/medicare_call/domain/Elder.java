@@ -1,5 +1,6 @@
 package com.example.medicare_call.domain;
 
+import com.example.medicare_call.global.enums.Gender;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Builder;
@@ -44,8 +45,9 @@ public class Elder {
     @Column(name = "birth_date")
     private LocalDate birthDate;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "gender", nullable = false)
-    private Byte gender;
+    private Gender gender;
 
     @Column(name = "phone", length = 20)
     private String phone;
@@ -83,7 +85,7 @@ public class Elder {
     private ElderHealthInfo elderHealthInfo;
 
     @Builder
-    public Elder(Integer id, String name, LocalDate birthDate, Byte gender, String phone, ElderRelation relationship, ResidenceType residenceType, ElderStatus status) {
+    public Elder(Integer id, String name, LocalDate birthDate, Gender gender, String phone, ElderRelation relationship, ResidenceType residenceType, ElderStatus status) {
         this.id = id;
         this.name = name;
         this.birthDate = birthDate;
@@ -97,7 +99,7 @@ public class Elder {
     // setting update를 post로 구현
     public void applySettings(String name,
                               LocalDate birthDate,
-                              Byte gender,
+                              Gender gender,
                               String phone,
                               ElderRelation relationship,
                               ResidenceType residenceType) {

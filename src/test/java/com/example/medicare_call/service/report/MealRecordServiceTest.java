@@ -61,7 +61,7 @@ class MealRecordServiceTest {
         elder = Elder.builder()
                 .id(1)
                 .name("테스트 어르신")
-                .gender(Gender.MALE.getCode())
+                .gender(Gender.MALE)
                 .build();
 
         callRecord = CareCallRecord.builder()

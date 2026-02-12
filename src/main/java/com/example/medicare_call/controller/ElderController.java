@@ -42,7 +42,7 @@ public class ElderController {
                 .name(elder.getName())
                 .birthDate(elder.getBirthDate())
                 .phone(elder.getPhone())
-                .gender(elder.getGender() == 0 ? "MALE" : "FEMALE")
+                .gender(elder.getGender().name())
                 .relationship(elder.getRelationship() != null ? elder.getRelationship().name() : null)
                 .residenceType(elder.getResidenceType() != null ? elder.getResidenceType().name() : null)
                 .guardianId(guardian != null ? guardian.getId() : null)
