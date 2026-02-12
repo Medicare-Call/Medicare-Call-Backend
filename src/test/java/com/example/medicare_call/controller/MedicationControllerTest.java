@@ -6,7 +6,7 @@ import com.example.medicare_call.dto.report.DailyMentalAnalysisResponse;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
-import com.example.medicare_call.service.data_processor.MedicationService;
+import com.example.medicare_call.service.health_data.MedicationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

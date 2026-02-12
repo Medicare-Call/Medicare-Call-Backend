@@ -6,8 +6,8 @@ import com.example.medicare_call.domain.CareCallRecord;
 import com.example.medicare_call.dto.HealthDataTestRequest;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionRequest;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
-import com.example.medicare_call.service.data_processor.CareCallAnalysisResultSaveService;
-import com.example.medicare_call.service.data_processor.CareCallAnalysisService;
+import com.example.medicare_call.service.carecall.analysis.CareCallAnalysisResultSaveService;
+import com.example.medicare_call.service.carecall.analysis.CareCallAnalysisService;
 
 import com.example.medicare_call.util.TestDataGenerator;
 import io.swagger.v3.oas.annotations.media.Schema;
