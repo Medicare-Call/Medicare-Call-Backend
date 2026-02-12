@@ -36,10 +36,22 @@ public class CareCallAnalysisResultSaveService {
     private final MealRecordService mealRecordService;
 
 
+    /**
+     * 추출된 건강 데이터를 처리하고 각각의 서비스(혈당, 복약, 식사)를 통해 저장
+     * 
+     * @param callRecord 케어콜 기록 엔티티
+     * @param healthData AI로부터 추출된 건강 데이터
+     */
     @Transactional
     public void processAndSaveHealthData(CareCallRecord callRecord, HealthDataExtractionResponse healthData) {
         log.info("건강 데이터 DB 저장 시작: callId={}", callRecord.getId());
 
+        /*
+            TODO: null, empty check를 service에 위임하자
+            bloodSugarService.saveIfPresent(callRecord, healthData.getBloodSugarData());
+            medicationService.saveIfPresent(callRecord, healthData.getMedicationData());
+            mealRecordService.saveIfPresent(callRecord, healthData.getMealData());
+        * */
         if (healthData != null) {
             if (healthData.getBloodSugarData() != null && !healthData.getBloodSugarData().isEmpty()) {
                 bloodSugarService.saveBloodSugarData(callRecord, healthData.getBloodSugarData());
@@ -58,6 +70,12 @@ public class CareCallAnalysisResultSaveService {
         log.info("건강 데이터 DB 저장 완료: callId={}", callRecord.getId());
     }
 
+    /**
+     * CareCallRecord 엔티티에서 추출한 건강 데이터(수면, 심리, 건강 상태 등)를 업데이트
+     * 
+     * @param callRecord 업데이트할 케어콜 엔티티
+     * @param healthData AI로부터 추출된 건강 데이터
+     */
     @Transactional
     public void updateCareCallRecordWithHealthData(CareCallRecord callRecord, HealthDataExtractionResponse healthData) {
         CareCallRecord updatedRecord = callRecord;
@@ -103,6 +121,13 @@ public class CareCallAnalysisResultSaveService {
         }
     }
 
+    /**
+     * 수면 데이터를 파싱하여 CareCallRecord에 수면 시작/종료 시간을 업데이트
+     * 
+     * @param callRecord 업데이트할 케어콜 기록
+     * @param sleepData 수면 데이터 (시작/종료 시간)
+     * @return 업데이트된 CareCallRecord 객체
+     */
     private CareCallRecord updateSleepData(CareCallRecord callRecord, HealthDataExtractionResponse.SleepData sleepData) {
         LocalDateTime sleepStart = null;
         LocalDateTime sleepEnd = null;
@@ -153,6 +178,14 @@ public class CareCallAnalysisResultSaveService {
         return callRecord;
     }
 
+    /**
+     * 심리 상태 데이터를 기반으로 CareCallRecord에 심리 상태 코드 및 상세 내용을 업데이트
+     * 
+     * @param callRecord 업데이트할 케어콜 기록
+     * @param psychologicalState 심리 상태 상세 내용 리스트
+     * @param psychologicalStatus 심리 상태 요약 ("좋음" 또는 "나쁨")
+     * @return 업데이트된 CareCallRecord 객체
+     */
     private CareCallRecord updatePsychologicalStatus(CareCallRecord callRecord, List<String> psychologicalState, String psychologicalStatus) {
         PsychologicalStatus psychStatus = null;
         if ("좋음".equals(psychologicalStatus)) {
@@ -176,6 +209,14 @@ public class CareCallAnalysisResultSaveService {
         return callRecord;
     }
 
+    /**
+     * 건강 징후 데이터를 기반으로 CareCallRecord에 건강 상태 코드 및 상세 내용을 업데이트
+     * 
+     * @param callRecord 업데이트할 케어콜 기록
+     * @param healthSigns 건강 징후 상세 내용 리스트
+     * @param healthStatus 건강 상태 요약 ("좋음" 또는 "나쁨")
+     * @return 업데이트된 CareCallRecord 객체
+     */
     private CareCallRecord updateHealthStatus(CareCallRecord callRecord, List<String> healthSigns, String healthStatus) {
         HealthStatus healthStatusValue = null;
         if ("좋음".equals(healthStatus)) {
@@ -199,6 +240,13 @@ public class CareCallAnalysisResultSaveService {
         return callRecord;
     }
 
+    /**
+     * 건강 징후 목록을 분석하여 한 줄 요약 코멘트를 생성하고 CareCallRecord에 저장
+     * 
+     * @param callRecord 업데이트할 케어콜 기록
+     * @param aiExtractedDataJson AI 추출 데이터 JSON 문자열 (저장용)
+     * @return 업데이트된 CareCallRecord 객체
+     */
     private CareCallRecord updateAiHealthAnalysisComment(CareCallRecord callRecord, String aiExtractedDataJson) {
         String healthDetails = callRecord.getHealthDetails();
         String aiComment = null;

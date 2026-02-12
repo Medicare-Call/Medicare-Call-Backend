@@ -25,6 +25,13 @@ public class CareCallSettingService {
     private final ElderRepository elderRepository;
     private final MemberElderRepository memberElderRepository;
 
+    /**
+     * 회원의 어르신 케어콜 설정을 생성하거나 수정
+     * 
+     * @param memberId 요청 회원 ID
+     * @param elderId 대상 어르신 ID
+     * @param request 케어콜 설정 요청 정보 (시간 등)
+     */
     @Transactional
     public void upsertCareCallSetting(Integer memberId, Integer elderId, CareCallSettingRequest request){
         Elder elder = elderRepository.findById(elderId)
@@ -52,6 +59,13 @@ public class CareCallSettingService {
                 );
     }
 
+    /**
+     * 케어콜 설정을 조회
+     * 
+     * @param memberId 조회할 회원 ID
+     * @param elderId 대상 어르신 ID
+     * @return 케어콜 설정 정보
+     */
     @Transactional(readOnly = true)
     public CareCallSettingResponse getCareCallSetting(Integer memberId, Integer elderId) {
         Elder elder = elderRepository.findById(elderId)
@@ -70,6 +84,13 @@ public class CareCallSettingService {
         );
     }
 
+    /**
+     * 회원이 해당 어르신에 대해 관리 권한을 가지고 있는지 검증
+     * 
+     * @param memberId 회원 ID
+     * @param elderId 어르신 ID
+     * @throws CustomException 관리 권한이 없는 경우 예외 발생
+     */
     private void validateManageAuthority(Integer memberId, Integer elderId) {
         MemberElder relation = memberElderRepository.findByGuardian_IdAndElder_Id(memberId, elderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.HANDLE_ACCESS_DENIED));
@@ -78,6 +99,13 @@ public class CareCallSettingService {
         }
     }
 
+    /**
+     * 즉시 케어콜을 위한 케어콜 설정을 생성하거나 조회
+     * 1차 케어콜 시간을 현재 시간으로 설정하여 반환
+     * 
+     * @param elder 대상 어르신 엔티티
+     * @return 케어콜 설정 엔티티
+     */
     @Transactional
     public CareCallSetting getOrCreateImmediateSetting(Elder elder) {
         LocalTime currentTime = LocalTime.now().withSecond(0).withNano(0);

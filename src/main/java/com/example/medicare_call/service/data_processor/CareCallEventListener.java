@@ -22,6 +22,12 @@ public class CareCallEventListener {
     private final CareCallAnalysisService careCallAnalysisService;
     private final WeeklyStatisticsService weeklyStatisticsService;
 
+    /**
+     * 케어콜 저장 완료 이벤트를 처리
+     * AI 분석을 수행하고 통계를 업데이트
+     * 
+     * @param event 케어콜 완료 이벤트
+     */
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleCareCallSaved(CareCallCompletedEvent event) {
@@ -49,6 +55,11 @@ public class CareCallEventListener {
         }
     }
 
+    /**
+     * 케어콜 결과에 따라 통계 정보를 업데이트
+     * 
+     * @param record 케어콜 기록
+     */
     private void updateStatistics(CareCallRecord record) {
         if (CareCallStatus.NO_ANSWER.matches(record.getCallStatus())) {
             try {

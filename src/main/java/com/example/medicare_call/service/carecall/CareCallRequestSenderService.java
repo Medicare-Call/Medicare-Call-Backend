@@ -32,6 +32,14 @@ public class CareCallRequestSenderService {
     private final CallPromptGeneratorFactory callPromptGeneratorFactory;
     private final CareCallClient careCallClient;
 
+    /**
+     * 특정 어르신에게 케어콜을 발송
+     * 어르신의 질병, 건강 정보, 복약 일정을 조회하여 적절한 프롬프트를 생성하고 CareCallClient에 전달한다
+     * 
+     * @param settingId 케어콜 설정 ID
+     * @param elderId 대상 어르신 ID
+     * @param callType 케어콜 회차 (1차, 2차, 3차)
+     */
     public void sendCall(Integer settingId, Integer elderId, CallType callType) {
         Elder elder = elderRepository.findById(elderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ELDER_NOT_FOUND, "케어콜 발송 대상 어르신을 찾을 수 없습니다. ID: " + elderId));

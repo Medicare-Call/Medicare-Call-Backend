@@ -34,6 +34,11 @@ public class CareCallAnalysisService {
     @Value("${openai.model}")
     private String openaiModel;
 
+    /**
+     * 통화 내용에서 AI를 통해 건강 데이터를 추출하고 저장
+     *
+     * @param callRecord 분석할 케어콜 기록 엔티티
+     */
     @Retryable(
             retryFor = Exception.class,
             maxAttempts = 3,
@@ -61,6 +66,14 @@ public class CareCallAnalysisService {
         careCallAnalysisResultSaveService.processAndSaveHealthData(callRecord, healthData);
     }
 
+    /**
+     * OpenAI API를 호출하여 통화 텍스트에서 건강 데이터를 구조화된 형태로 추출한다
+     * 
+     * @param callDate 통화 날짜
+     * @param transcriptionText 통화 기록 텍스트
+     * @param medicationNames 복용 중인 약물 목록
+     * @return 추출된 건강 데이터 응답 DTO
+     */
     public HealthDataExtractionResponse extractHealthData(LocalDate callDate, String transcriptionText, List<String> medicationNames) {
         log.info("OpenAI API를 통한 건강 데이터 추출 시작");
 
