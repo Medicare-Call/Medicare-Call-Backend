@@ -2,7 +2,7 @@ package com.example.medicare_call.scheduler;
 
 import com.example.medicare_call.domain.CareCallSetting;
 import com.example.medicare_call.repository.CareCallSettingRepository;
-import com.example.medicare_call.service.carecall.CareCallSchedulerService;
+import com.example.medicare_call.service.carecall.outbound.CareCallSchedulerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
