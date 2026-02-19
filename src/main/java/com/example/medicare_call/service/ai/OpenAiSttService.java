@@ -1,4 +1,4 @@
-package com.example.medicare_call.service.carecall.inbound;
+package com.example.medicare_call.service.ai;
 
 import com.example.medicare_call.dto.data_processor.OpenAiSttResponse;
 import com.example.medicare_call.global.exception.CustomException;

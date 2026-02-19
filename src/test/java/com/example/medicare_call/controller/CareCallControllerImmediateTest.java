@@ -7,7 +7,7 @@ import com.example.medicare_call.repository.MemberRepository;
 import com.example.medicare_call.repository.ElderRepository;
 import com.example.medicare_call.service.carecall.outbound.CareCallTestService;
 import com.example.medicare_call.service.carecall.inbound.CareCallUploadService;
-import com.example.medicare_call.service.carecall.inbound.OpenAiSttService;
+import com.example.medicare_call.service.ai.OpenAiSttService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

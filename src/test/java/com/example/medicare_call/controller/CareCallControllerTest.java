@@ -17,7 +17,7 @@ import com.example.medicare_call.service.carecall.outbound.CareCallTestService;
 import com.example.medicare_call.service.carecall.setting.CareCallSettingService;
 import com.example.medicare_call.service.carecall.inbound.CareCallUploadService;
 import com.example.medicare_call.service.carecall.inbound.CareCallService;
-import com.example.medicare_call.service.carecall.inbound.OpenAiSttService;
+import com.example.medicare_call.service.ai.OpenAiSttService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
