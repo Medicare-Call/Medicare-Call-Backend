@@ -8,7 +8,7 @@ import com.example.medicare_call.global.enums.HealthStatus;
 import com.example.medicare_call.global.enums.PsychologicalStatus;
 import com.example.medicare_call.repository.CareCallRecordRepository;
 import com.example.medicare_call.service.ai.AiSummaryService;
-import com.example.medicare_call.service.report.MealRecordService;
+import com.example.medicare_call.service.health_data.MealRecordService;
 import com.example.medicare_call.service.statistics.StatisticsUpdateService;
 import com.example.medicare_call.service.health_data.BloodSugarService;
 import com.example.medicare_call.service.health_data.MedicationService;
