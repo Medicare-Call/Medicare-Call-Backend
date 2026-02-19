@@ -1,7 +1,7 @@
 package com.example.medicare_call.controller;
 
 import com.example.medicare_call.dto.report.DailyMealResponse;
-import com.example.medicare_call.service.report.MealRecordService;
+import com.example.medicare_call.service.health_data.MealRecordService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;

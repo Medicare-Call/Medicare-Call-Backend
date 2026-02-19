@@ -1,4 +1,4 @@
-package com.example.medicare_call.service.report;
+package com.example.medicare_call.service.health_data;
 
 import com.example.medicare_call.domain.CareCallRecord;
 import com.example.medicare_call.domain.Elder;
@@ -22,7 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
-import com.example.medicare_call.service.report.MealRecordService;
+import com.example.medicare_call.service.health_data.MealRecordService;
 import com.example.medicare_call.repository.MealRecordRepository;
 
 import java.time.LocalDate;
