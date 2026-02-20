@@ -328,4 +328,22 @@ class CareCallUploadServiceTest {
                 request.getTranscription().getFullText().size() == 20
         ));
     }
+
+    @Test
+    @DisplayName("파일 업로드 - 테스트 발송(settingId < 0)이면 저장 없이 null 반환")
+    void processUploadedCallData_skip_whenTestSettingId() {
+        // given
+        uploadRequest.setSettingId(-1); // TEST_SETTING_ID
+
+        when(openAiSttService.transcribe(mockAudioFile)).thenReturn(sttResponse);
+        when(careCallService.saveCallData(any())).thenReturn(null); // 테스트 발송은 null 반환
+
+        // when
+        CareCallRecord result = careCallUploadService.processUploadedCallData(uploadRequest);
+
+        // then: NPE 없이 null 반환
+        assertThat(result).isNull();
+        verify(openAiSttService).transcribe(mockAudioFile);
+        verify(careCallService).saveCallData(any());
+    }
 }

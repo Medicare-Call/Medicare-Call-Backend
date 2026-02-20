@@ -279,4 +279,46 @@ class CareCallServiceTest {
         verify(careCallRecordRepository, never()).save(any());
         eventsMockedStatic.verify(() -> Events.raise(any(CareCallCompletedEvent.class)), never());
     }
-} 
+
+    @Test
+    @DisplayName("통화 데이터 저장 건너뜀 - 테스트 발송 (TEST_SETTING_ID = -1)")
+    void saveCallData_skip_whenTestSettingId() {
+        // given
+        CareCallDataProcessRequest request = CareCallDataProcessRequest.builder()
+                .elderId(1)
+                .settingId(-1) // CareCallTestService.TEST_SETTING_ID
+                .status(CareCallStatus.COMPLETED)
+                .responded((byte) 1)
+                .build();
+
+        // when
+        CareCallRecord result = careCallService.saveCallData(request);
+
+        // then: 저장 없이 null 반환
+        assertThat(result).isNull();
+        verify(elderRepository, never()).findById(any());
+        verify(careCallSettingRepository, never()).findById(any());
+        verify(careCallRecordRepository, never()).save(any());
+        eventsMockedStatic.verify(() -> Events.raise(any(CareCallCompletedEvent.class)), never());
+    }
+
+    @Test
+    @DisplayName("통화 데이터 저장 건너뜀 - 음수 settingId는 모두 스킵")
+    void saveCallData_skip_whenAnyNegativeSettingId() {
+        // given
+        CareCallDataProcessRequest request = CareCallDataProcessRequest.builder()
+                .elderId(1)
+                .settingId(-99)
+                .status(CareCallStatus.COMPLETED)
+                .responded((byte) 1)
+                .build();
+
+        // when
+        CareCallRecord result = careCallService.saveCallData(request);
+
+        // then
+        assertThat(result).isNull();
+        verify(careCallRecordRepository, never()).save(any());
+        eventsMockedStatic.verify(() -> Events.raise(any(CareCallCompletedEvent.class)), never());
+    }
+}

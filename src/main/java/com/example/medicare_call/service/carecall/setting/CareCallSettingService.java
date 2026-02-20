@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalTime;
 
 @Service
 @RequiredArgsConstructor
@@ -97,31 +96,5 @@ public class CareCallSettingService {
         if (relation.getAuthority() != MemberElderAuthority.MANAGE) {
             throw new CustomException(ErrorCode.HANDLE_ACCESS_DENIED);
         }
-    }
-
-    /**
-     * 즉시 케어콜을 위한 케어콜 설정을 생성하거나 조회
-     * 1차 케어콜 시간을 현재 시간으로 설정하여 반환
-     * 
-     * @param elder 대상 어르신 엔티티
-     * @return 케어콜 설정 엔티티
-     */
-    @Transactional
-    public CareCallSetting getOrCreateImmediateSetting(Elder elder) {
-        LocalTime currentTime = LocalTime.now().withSecond(0).withNano(0);
-
-        return careCallSettingRepository.findByElder(elder)
-            .map(setting -> {
-                setting.update(currentTime, setting.getSecondCallTime(), setting.getThirdCallTime());
-                return setting;
-            })
-            .orElseGet(() -> {
-                CareCallSetting newSetting = CareCallSetting.builder()
-                    .elder(elder)
-                    .firstCallTime(currentTime)
-                    .recurrence(CallRecurrenceType.DAILY)
-                    .build();
-                return careCallSettingRepository.save(newSetting);
-            });
     }
 }
