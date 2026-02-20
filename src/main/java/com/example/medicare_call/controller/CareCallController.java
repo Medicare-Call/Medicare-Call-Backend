@@ -53,7 +53,8 @@ public class CareCallController implements CareCallApi, CareCallBetaTestApi, Car
 
     /**
      * 전화 서버로부터 통화 완료 raw 데이터를 수신하여 저장
-     * 테스트 전화(/care-call/immediate && settingId < 0)인 경우에는 저장을 건너뛴다
+     * /care-call/test는 CareCallTestService.TEST_SETTING_ID(-1)를 사용하므로 저장을 건너뛴다.
+     * /care-call/immediate는 실제 DB의 settingId를 사용하므로 정상적으로 저장된다.
      */
     @Override
     @PostMapping("/call-data")
