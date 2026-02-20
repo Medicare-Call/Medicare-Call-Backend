@@ -26,14 +26,22 @@ public class CareCallService {
     private final CareCallSettingRepository careCallSettingRepository;
 
     /**
-     * 케어콜 통화 데이터를 저장하고 CareCallCompletedEvent 이벤트를 발행
-     * 
-     * @param request 케어콜 데이터 처리 요청 정보를 담은 DTO
-     * @return 저장된 케어콜 기록 엔티티
+     * 전화 서버로부터 수신된 통화 raw 데이터를 저장하고 CareCallCompletedEvent를 발행
+     *
+     * settingId가 음수(< 0)인 경우 개발자용 테스트 발송(/care-call/test)의 결과이므로
+     * DB 저장 및 이벤트 발행을 건너뛴다
+     *
+     * @param request 전화 서버가 전송한 통화 완료 데이터
+     * @return 저장된 케어콜 기록 엔티티. 테스트 발송인 경우 null 반환
      */
     @Transactional
     public CareCallRecord saveCallData(CareCallDataProcessRequest request) {
         log.info("통화 데이터 저장 시작: elderId={}, settingId={}", request.getElderId(), request.getSettingId());
+
+        if (request.getSettingId() != null && request.getSettingId() < 0) {
+            log.info("테스트 발송 결과 수신 (settingId={}), 저장을 건너뜁니다.", request.getSettingId());
+            return null;
+        }
 
         Elder elder = elderRepository.findById(request.getElderId())
                 .orElseThrow(() -> new CustomException(ErrorCode.ELDER_NOT_FOUND));

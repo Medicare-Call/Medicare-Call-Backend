@@ -7,9 +7,9 @@ import com.example.medicare_call.dto.carecall.ImmediateCareCallRequest.CareCallO
 import com.example.medicare_call.global.enums.CallType;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
+import com.example.medicare_call.repository.CareCallSettingRepository;
 import com.example.medicare_call.repository.ElderRepository;
 import com.example.medicare_call.service.carecall.outbound.client.CareCallClient;
-import com.example.medicare_call.service.carecall.setting.CareCallSettingService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,7 +32,7 @@ class CareCallTestServiceTest {
     @Mock
     private ElderRepository elderRepository;
     @Mock
-    private CareCallSettingService careCallSettingService;
+    private CareCallSettingRepository careCallSettingRepository;
     @Mock
     private CareCallRequestSenderService careCallRequestSenderService;
     @Mock
@@ -51,7 +51,7 @@ class CareCallTestServiceTest {
         CareCallSetting setting = CareCallSetting.builder().id(10).build();
 
         when(elderRepository.findById(1)).thenReturn(Optional.of(elder));
-        when(careCallSettingService.getOrCreateImmediateSetting(elder)).thenReturn(setting);
+        when(careCallSettingRepository.findByElder(elder)).thenReturn(Optional.of(setting));
         
         // when
         String result = careCallTestService.sendImmediateCall(elderId, option);
@@ -84,6 +84,6 @@ class CareCallTestServiceTest {
         careCallTestService.sendTestCall(request);
 
         // then
-        verify(careCallClient).requestCall(eq(100), eq(100), eq(request.phoneNumber()), eq("테스트"));
+        verify(careCallClient).requestCall(eq(CareCallTestService.TEST_SETTING_ID), eq(100), eq(request.phoneNumber()), eq("테스트"));
     }
 }

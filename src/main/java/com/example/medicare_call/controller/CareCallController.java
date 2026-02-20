@@ -51,6 +51,10 @@ public class CareCallController implements CareCallApi, CareCallBetaTestApi, Car
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * 전화 서버로부터 통화 완료 raw 데이터를 수신하여 저장
+     * 테스트 전화(/care-call/immediate && settingId < 0)인 경우에는 저장을 건너뛴다
+     */
     @Override
     @PostMapping("/call-data")
     public ResponseEntity<CareCallRecord> receiveCallData(@Valid @RequestBody CareCallDataProcessRequest request) {
@@ -59,6 +63,10 @@ public class CareCallController implements CareCallApi, CareCallBetaTestApi, Car
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    /**
+     * 특정 어르신에게 cron을 통하지 않고, 즉시 케어콜을 발송 (베타테스트용)
+     * 실제 DB에 등록된 Elder와 CareCallSetting을 사용하며, 통화 결과가 정상적으로 DB에 저장
+     */
     @Override
     @PostMapping("/care-call/immediate")
     public ResponseEntity<String> sendImmediateCareCall(@Valid @RequestBody ImmediateCareCallRequest request) {
@@ -66,7 +74,11 @@ public class CareCallController implements CareCallApi, CareCallBetaTestApi, Car
         return ResponseEntity.ok(result);
     }
 
-    //TODO: 커스텀 프롬프트 케어콜 테스트용, 개발 완료 후 삭제
+    /**
+     * 개발자용 케어콜 발신 테스트 API (프로덕션 미사용)
+     * staging 환경에서 프롬프트와 전화번호로 발신 로직만 확인하기 위한 용도
+     * 더미 Elder, CareCallSetting을 사용하며, 통화 결과(settingId = -1)는 DB에 저장되지 않는다
+     */
     @Override
     @PostMapping("/care-call/test")
     public ResponseEntity<String> testCareCall(@Valid @RequestBody CareCallTestRequest req) {
