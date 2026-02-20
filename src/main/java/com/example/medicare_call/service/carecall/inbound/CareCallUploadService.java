@@ -66,6 +66,10 @@ public class CareCallUploadService {
                 .build();
 
         CareCallRecord saved = careCallService.saveCallData(processRequest);
+        if (saved == null) {
+            log.info("테스트 발송 - 저장 건너뜀 (settingId={})", processRequest.getSettingId());
+            return null;
+        }
         log.info("STT 데이터 처리 완료: recordId={}", saved.getId());
         return saved;
     }
