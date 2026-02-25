@@ -12,7 +12,6 @@ ALTER TABLE `Elder` DROP COLUMN `gender`;
 ALTER TABLE `Elder` CHANGE COLUMN `gender_new` `gender` ENUM('MALE','FEMALE') NOT NULL;
 
 -- 2. Member 테이블 plan 마이그레이션
--- 기존 Byte 값 매핑: 1 -> STANDARD, 2 -> PREMIUM (기획에 맞게 수정 필요)
 ALTER TABLE `Member` ADD COLUMN `plan_new` ENUM('STANDARD','PREMIUM') NULL;
 
 UPDATE `Member`

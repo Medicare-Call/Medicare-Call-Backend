@@ -76,9 +76,6 @@ class ElderServiceTest {
         testElderRequest2.setResidenceType(ResidenceType.WITH_FAMILY);
     }
 
-    private byte convertGenderToByte(Gender gender) {
-        return (byte) (gender == Gender.MALE ? 0 : 1);
-    }
 
     private Elder createElderFromRequest(Integer id, ElderRegisterRequest request) {
         return Elder.builder()
@@ -239,9 +236,9 @@ class ElderServiceTest {
         // then
         assertThat(responses).hasSize(2);
         assertThat(responses.get(0).getName()).isEqualTo("홍길동");
-        assertThat(responses.get(0).getGender()).isEqualTo("MALE");
+        assertThat(responses.get(0).getGender()).isEqualTo(Gender.MALE);
         assertThat(responses.get(1).getName()).isEqualTo("김영희");
-        assertThat(responses.get(1).getGender()).isEqualTo("FEMALE");
+        assertThat(responses.get(1).getGender()).isEqualTo(Gender.FEMALE);
         verify(memberRepository, times(1)).findById(1);
         verify(elderRepository, times(1)).saveAll(any(List.class));
     }
