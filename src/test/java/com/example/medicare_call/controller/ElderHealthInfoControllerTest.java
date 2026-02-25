@@ -6,7 +6,7 @@ import com.example.medicare_call.dto.BulkElderHealthInfoCreateRequest;
 import com.example.medicare_call.global.enums.ElderHealthNoteType;
 import com.example.medicare_call.global.enums.MedicationScheduleTime;
 import com.example.medicare_call.global.jwt.JwtProvider;
-import com.example.medicare_call.service.carecall.CareCallSettingService;
+import com.example.medicare_call.service.carecall.setting.CareCallSettingService;
 import com.example.medicare_call.service.report.ElderHealthInfoService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;

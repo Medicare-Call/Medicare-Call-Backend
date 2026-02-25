@@ -46,4 +46,13 @@ public class MemberService {
         memberRepository.save(member);
     }
 
+    @Transactional
+    public void withdraw(Integer memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        // Member를 삭제하면 cascade 설정에 의해 Member_Elder 및 Subscription도 함께 삭제됩니다.
+        memberRepository.delete(member);
+    }
+
 }

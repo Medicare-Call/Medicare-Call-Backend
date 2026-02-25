@@ -28,11 +28,15 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 import static org.hamcrest.Matchers.hasItems;
+import com.example.medicare_call.global.exception.CustomException;
+import com.example.medicare_call.global.exception.ErrorCode;
+
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(MemberController.class)
@@ -106,6 +110,40 @@ class MemberControllerTest {
                 .andExpect(jsonPath("$.phone").value("010-1234-5678"))
                 .andExpect(jsonPath("$.pushNotification.all").value("ON"))
                 .andExpect(jsonPath("$.pushNotification.carecallCompleted").value("OFF"));
+    }
+
+    @Test
+    @DisplayName("회원 탈퇴 성공")
+    void withdraw_Success() throws Exception {
+        // given
+        doNothing().when(memberService).withdraw(anyInt());
+
+        // when
+        ResultActions actions = mockMvc.perform(delete("/member")
+                .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        // then
+        actions.andExpect(status().isNoContent());
+        verify(memberService, times(1)).withdraw(1);
+    }
+
+    @Test
+    @DisplayName("회원 탈퇴 실패 - 존재하지 않는 회원")
+    void withdraw_Fail_MemberNotFound() throws Exception {
+        // given
+        doThrow(new CustomException(ErrorCode.MEMBER_NOT_FOUND))
+                .when(memberService).withdraw(anyInt());
+
+        // when
+        ResultActions actions = mockMvc.perform(delete("/member")
+                .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        // then
+        actions.andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("M001"))
+                .andExpect(jsonPath("$.message").value("존재하지 않는 회원입니다."));
     }
 
 }
