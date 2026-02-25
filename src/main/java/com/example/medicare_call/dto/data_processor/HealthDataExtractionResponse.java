@@ -1,5 +1,6 @@
 package com.example.medicare_call.dto.data_processor;
 
+import com.example.medicare_call.global.enums.BloodSugarMeasurementType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -107,8 +108,8 @@ public class HealthDataExtractionResponse {
             example = "식후",
             allowableValues = {"식전", "식후"}
         )
-        private String mealTime;
-        
+        private BloodSugarMeasurementType measurementType;
+
         @Schema(description = "혈당 값 (mg/dL)", example = "120")
         private Integer bloodSugarValue;
         

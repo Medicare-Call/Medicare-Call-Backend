@@ -53,7 +53,7 @@ class BloodSugarServiceTest {
 
         testBloodSugarData = HealthDataExtractionResponse.BloodSugarData.builder()
                 .measurementTime("아침")
-                .mealTime("식후")
+                .measurementType(BloodSugarMeasurementType.AFTER_MEAL)
                 .bloodSugarValue(120)
                 .status("NORMAL")
                 .build();
@@ -78,7 +78,7 @@ class BloodSugarServiceTest {
         assertThat(savedRecord.getBlood_sugar_value()).isEqualTo(BigDecimal.valueOf(120));
         assertThat(savedRecord.getMeasurementType()).isEqualTo(BloodSugarMeasurementType.AFTER_MEAL);
         assertThat(savedRecord.getStatus()).isEqualTo(BloodSugarStatus.NORMAL);
-        assertThat(savedRecord.getResponseSummary()).contains("측정시각: 아침, 식전/식후: 식후");
+        assertThat(savedRecord.getResponseSummary()).contains("측정시각: 아침, 식전/식후: AFTER_MEAL");
     }
 
     @Test
@@ -87,7 +87,7 @@ class BloodSugarServiceTest {
         // given
         testBloodSugarData = HealthDataExtractionResponse.BloodSugarData.builder()
                 .measurementTime("저녁")
-                .mealTime("식후")
+                .measurementType(BloodSugarMeasurementType.AFTER_MEAL)
                 .bloodSugarValue(200)
                 .status("HIGH")
                 .build();
@@ -113,7 +113,7 @@ class BloodSugarServiceTest {
         // given
         testBloodSugarData = HealthDataExtractionResponse.BloodSugarData.builder()
                 .measurementTime("아침")
-                .mealTime("식전")
+                .measurementType(BloodSugarMeasurementType.BEFORE_MEAL)
                 .bloodSugarValue(70)
                 .status("LOW")
                 .build();
@@ -139,7 +139,7 @@ class BloodSugarServiceTest {
         // given
         testBloodSugarData = HealthDataExtractionResponse.BloodSugarData.builder()
                 .measurementTime("아침")
-                .mealTime("식후")
+                .measurementType(BloodSugarMeasurementType.AFTER_MEAL)
                 .bloodSugarValue(120)
                 .status(null)
                 .build();
@@ -164,7 +164,7 @@ class BloodSugarServiceTest {
         // given
         testBloodSugarData = HealthDataExtractionResponse.BloodSugarData.builder()
                 .measurementTime("아침")
-                .mealTime("식후")
+                .measurementType(BloodSugarMeasurementType.AFTER_MEAL)
                 .bloodSugarValue(null)
                 .status("NORMAL")
                 .build();
