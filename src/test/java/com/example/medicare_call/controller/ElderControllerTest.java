@@ -5,10 +5,7 @@ import com.example.medicare_call.domain.MemberElder;
 import com.example.medicare_call.dto.ElderRegisterRequest;
 import com.example.medicare_call.dto.ElderRegisterResponse;
 import com.example.medicare_call.dto.BulkElderRegisterRequest;
-import com.example.medicare_call.global.enums.ElderRelation;
-import com.example.medicare_call.global.enums.ResidenceType;
-import com.example.medicare_call.global.enums.Gender;
-import com.example.medicare_call.global.enums.MemberElderAuthority;
+import com.example.medicare_call.global.enums.*;
 import com.example.medicare_call.global.jwt.JwtProvider;
 import com.example.medicare_call.service.ElderService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -91,7 +88,7 @@ class ElderControllerTest {
                 .phone("01000000000")
                 .gender(Gender.FEMALE)
                 .termsAgreedAt(LocalDateTime.now())
-                .plan((byte)1)
+                .plan(SubscriptionPlan.PREMIUM)
                 .build();
 
         testElderRequest1 = new ElderRegisterRequest();
@@ -124,7 +121,7 @@ class ElderControllerTest {
                 .id(1)
                 .name(testElderRequest1.getName())
                 .birthDate(testElderRequest1.getBirthDate())
-                .gender(convertGenderToByte(testElderRequest1.getGender()))
+                .gender(testElderRequest1.getGender())
                 .phone(testElderRequest1.getPhone())
                 .relationship(testElderRequest1.getRelationship())
                 .residenceType(testElderRequest1.getResidenceType())
@@ -176,7 +173,7 @@ class ElderControllerTest {
                         .name(testElderRequest1.getName())
                         .birthDate(testElderRequest1.getBirthDate())
                         .phone(testElderRequest1.getPhone())
-                        .gender("MALE")
+                        .gender(Gender.MALE)
                         .relationship(testElderRequest1.getRelationship().name())
                         .residenceType(testElderRequest1.getResidenceType().name())
                         .guardianId(testMember.getId())
@@ -187,7 +184,7 @@ class ElderControllerTest {
                         .name(testElderRequest2.getName())
                         .birthDate(testElderRequest2.getBirthDate())
                         .phone(testElderRequest2.getPhone())
-                        .gender("FEMALE")
+                        .gender(Gender.FEMALE)
                         .relationship(testElderRequest2.getRelationship().name())
                         .residenceType(testElderRequest2.getResidenceType().name())
                         .guardianId(testMember.getId())

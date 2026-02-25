@@ -6,11 +6,7 @@ import com.example.medicare_call.domain.MemberElder;
 import com.example.medicare_call.dto.ElderRegisterRequest;
 import com.example.medicare_call.dto.ElderRegisterResponse;
 import com.example.medicare_call.dto.ElderUpdateRequest;
-import com.example.medicare_call.global.enums.ElderRelation;
-import com.example.medicare_call.global.enums.ElderStatus;
-import com.example.medicare_call.global.enums.Gender;
-import com.example.medicare_call.global.enums.MemberElderAuthority;
-import com.example.medicare_call.global.enums.ResidenceType;
+import com.example.medicare_call.global.enums.*;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.ElderRepository;
@@ -60,7 +56,7 @@ class ElderServiceTest {
                 .phone("01000000000")
                 .gender(Gender.MALE)
                 .termsAgreedAt(LocalDateTime.now())
-                .plan((byte)1)
+                .plan(SubscriptionPlan.PREMIUM)
                 .build();
 
         testElderRequest1 = new ElderRegisterRequest();
@@ -80,16 +76,13 @@ class ElderServiceTest {
         testElderRequest2.setResidenceType(ResidenceType.WITH_FAMILY);
     }
 
-    private byte convertGenderToByte(Gender gender) {
-        return (byte) (gender == Gender.MALE ? 0 : 1);
-    }
 
     private Elder createElderFromRequest(Integer id, ElderRegisterRequest request) {
         return Elder.builder()
                 .id(id)
                 .name(request.getName())
                 .birthDate(request.getBirthDate())
-                .gender(convertGenderToByte(request.getGender()))
+                .gender(request.getGender())
                 .phone(request.getPhone())
                 .relationship(request.getRelationship())
                 .residenceType(request.getResidenceType())
@@ -243,9 +236,9 @@ class ElderServiceTest {
         // then
         assertThat(responses).hasSize(2);
         assertThat(responses.get(0).getName()).isEqualTo("홍길동");
-        assertThat(responses.get(0).getGender()).isEqualTo("MALE");
+        assertThat(responses.get(0).getGender()).isEqualTo(Gender.MALE);
         assertThat(responses.get(1).getName()).isEqualTo("김영희");
-        assertThat(responses.get(1).getGender()).isEqualTo("FEMALE");
+        assertThat(responses.get(1).getGender()).isEqualTo(Gender.FEMALE);
         verify(memberRepository, times(1)).findById(1);
         verify(elderRepository, times(1)).saveAll(any(List.class));
     }

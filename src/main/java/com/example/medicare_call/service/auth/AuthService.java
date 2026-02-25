@@ -5,6 +5,7 @@ import com.example.medicare_call.domain.RefreshToken;
 import com.example.medicare_call.dto.auth.MemberRegisterRequest;
 import com.example.medicare_call.dto.auth.SmsVerificationResponse;
 import com.example.medicare_call.dto.auth.TokenResponse;
+import com.example.medicare_call.global.enums.SubscriptionPlan;
 import com.example.medicare_call.global.jwt.JwtProvider;
 import com.example.medicare_call.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +36,7 @@ public class AuthService {
                 .name(req.getName())
                 .birthDate(req.getBirthDate())
                 .gender(req.getGender())
-                .plan((byte) 0)
+                .plan(SubscriptionPlan.PREMIUM)
                 .termsAgreedAt(LocalDateTime.now())
                 .fcmToken(req.getFcmToken())
                 .build();

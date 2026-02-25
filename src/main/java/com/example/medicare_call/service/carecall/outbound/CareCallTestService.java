@@ -7,6 +7,7 @@ import com.example.medicare_call.dto.carecall.CareCallTestRequest;
 import com.example.medicare_call.dto.carecall.ImmediateCareCallRequest.CareCallOption;
 import com.example.medicare_call.global.enums.CallType;
 import com.example.medicare_call.global.enums.ElderRelation;
+import com.example.medicare_call.global.enums.Gender;
 import com.example.medicare_call.global.enums.ResidenceType;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
@@ -64,7 +65,7 @@ public class CareCallTestService {
                 .id(100)
                 .name("김옥자") // 테스트 이름
                 .phone("01011111111")
-                .gender((byte)0)
+                .gender(Gender.MALE)
                 .relationship(ElderRelation.CHILD)
                 .residenceType(ResidenceType.ALONE)
                 .build();
