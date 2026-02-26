@@ -32,7 +32,8 @@ public class HomeSummaryPromptBuilder implements PromptBuilder<HomeSummaryDto> {
 
     @Override
     public String buildSystemMessage() {
-        return "당신은 어르신 건강 요약 보고서 전문가입니다. 어르신 데이터를 분석하여 보호자에게 필요한 핵심 정보를 45자 이내로 요약 보고해야 합니다.";
+        return "당신은 홈 화면의 건강 데이터를 분석하여 보호자를 위한 간결한 요약 보고서를 작성하는 전문가입니다. " +
+                "가장 중요하거나 시급한 건강 이슈 1~2가지를 중심으로, 공백 포함 45자 이내의 짧은 문장을 생성해주세요.";
     }
 
     @Override
