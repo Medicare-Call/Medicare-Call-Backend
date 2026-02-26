@@ -69,14 +69,25 @@ public class CareCallDataExtractionPromptBuilder implements PromptBuilder<CareCa
               "bloodSugarData": [
                 {
                   "measurementTime": "측정 시각1",
-                  "mealTime": "식전/식후1",
+                  "mealTime": "식전/식후",
                   "bloodSugarValue": 숫자값1,
+                  "status": "LOW/NORMAL/HIGH"
+                },
+                {
+                  "measurementTime": "측정 시각2",
+                  "mealTime": "식전/식후",
+                  "bloodSugarValue": 숫자값2,
                   "status": "LOW/NORMAL/HIGH"
                 }
               ],
               "medicationData": [
                 {
                   "medicationType": "약 종류1",
+                  "taken": "복용함/복용하지 않음",
+                  "takenTime": "아침/점심/저녁"
+                },
+                {
+                  "medicationType": "약 종류2",
                   "taken": "복용함/복용하지 않음",
                   "takenTime": "아침/점심/저녁"
                 }
