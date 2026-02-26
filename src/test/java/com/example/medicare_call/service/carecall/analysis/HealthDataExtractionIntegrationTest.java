@@ -118,7 +118,7 @@ class HealthDataExtractionIntegrationTest {
         assertThat(result.getBloodSugarData()).hasSize(1);
         HealthDataExtractionResponse.BloodSugarData bloodSugar = result.getBloodSugarData().get(0);
         assertThat(bloodSugar.getBloodSugarValue()).isEqualTo(120);
-        assertThat(bloodSugar.getMealTime()).isEqualTo("식후");
+        assertThat(bloodSugar.getMeasurementTime()).isEqualTo("아침");
         
         // 심리 상태 검증
         assertThat(result.getPsychologicalState()).isNotNull();
