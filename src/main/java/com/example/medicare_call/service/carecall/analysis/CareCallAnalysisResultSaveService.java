@@ -3,7 +3,7 @@ package com.example.medicare_call.service.carecall.analysis;
 import com.example.medicare_call.domain.CareCallRecord;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
 import com.example.medicare_call.repository.CareCallRecordRepository;
-import com.example.medicare_call.service.report.MealRecordService;
+import com.example.medicare_call.service.health_data.MealRecordService;
 import com.example.medicare_call.service.statistics.StatisticsUpdateService;
 import com.example.medicare_call.global.enums.HealthStatus;
 import com.example.medicare_call.global.enums.PsychologicalStatus;

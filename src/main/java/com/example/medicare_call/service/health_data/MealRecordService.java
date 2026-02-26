@@ -1,4 +1,4 @@
-package com.example.medicare_call.service.report;
+package com.example.medicare_call.service.health_data;
 
 import com.example.medicare_call.domain.MealRecord;
 import com.example.medicare_call.dto.report.DailyMealResponse;

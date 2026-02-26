@@ -5,7 +5,7 @@ import com.example.medicare_call.dto.report.DailyMealResponse;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.global.jwt.JwtProvider;
-import com.example.medicare_call.service.report.MealRecordService;
+import com.example.medicare_call.service.health_data.MealRecordService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
