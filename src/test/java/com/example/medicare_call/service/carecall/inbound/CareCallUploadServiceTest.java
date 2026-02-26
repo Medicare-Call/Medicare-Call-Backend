@@ -7,6 +7,7 @@ import com.example.medicare_call.dto.data_processor.CallDataUploadRequest;
 import com.example.medicare_call.dto.data_processor.OpenAiSttResponse;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
+import com.example.medicare_call.service.ai.OpenAiSttService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
