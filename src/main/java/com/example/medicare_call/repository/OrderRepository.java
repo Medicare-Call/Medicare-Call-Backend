@@ -36,4 +36,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * 네이버페이 결제번호가 존재하는지 확인
      */
     boolean existsByNaverpayPaymentId(String naverpayPaymentId);
+
+    /**
+     * memberId에 해당하는 주문 데이터 삭제
+     */
+    void deleteByMemberId(Integer memberId);
 }

@@ -6,6 +6,7 @@ import com.example.medicare_call.dto.MemberInfoUpdateRequest;
 import com.example.medicare_call.global.exception.CustomException;
 import com.example.medicare_call.global.exception.ErrorCode;
 import com.example.medicare_call.repository.MemberRepository;
+import com.example.medicare_call.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class MemberService {
     private final MemberRepository memberRepository;
+    private final OrderRepository orderRepository;
 
     public MemberInfoResponse getMemberInfo(Integer memberId) {
         Member member = memberRepository.findById(memberId)
@@ -51,6 +53,8 @@ public class MemberService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
+        // Orders FK에 ON DELETE CASCADE가 없어 Member 삭제 전 선행 삭제 진행
+        orderRepository.deleteByMemberId(memberId);
         // Member를 삭제하면 cascade 설정에 의해 Member_Elder 및 Subscription도 함께 삭제됩니다.
         memberRepository.delete(member);
     }
