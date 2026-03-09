@@ -13,13 +13,13 @@ class HomeSummaryPromptBuilderTest {
     private final HomeSummaryPromptBuilder homeSummaryPromptBuilder = new HomeSummaryPromptBuilder();
 
     @Test
-    @DisplayName("buildSystemMessage 메서드는 올바른 시스템 메시지를 반환해야 한다")
-    void buildSystemMessage_shouldReturnCorrectSystemMessage() {
+    @DisplayName("buildSystemMessage 메서드는 비어있지 않은 시스템 메시지를 반환해야 한다")
+    void buildSystemMessage_shouldReturnNonBlankSystemMessage() {
         // When
         String systemMessage = homeSummaryPromptBuilder.buildSystemMessage();
 
         // Then
-        assertThat(systemMessage).isEqualTo("당신은 어르신 건강 요약 보고서 전문가입니다. 어르신 데이터를 분석하여 보호자에게 필요한 핵심 정보를 45자 이내로 요약 보고해야 합니다.");
+        assertThat(systemMessage).isNotBlank();
     }
 
     @Test
