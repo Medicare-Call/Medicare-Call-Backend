@@ -1,21 +1,22 @@
 package com.example.medicare_call.service.carecall.analysis;
 
 import com.example.medicare_call.domain.CareCallRecord;
-
-import com.example.medicare_call.service.ai.CareCallDataExtractionPrompt;
-import com.example.medicare_call.service.ai.OpenAiChatService;
-import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
 import com.example.medicare_call.domain.MedicationSchedule;
+import com.example.medicare_call.dto.data_processor.CareCallDataExtractionRequest;
+import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
 import com.example.medicare_call.repository.MedicationScheduleRepository;
+import com.example.medicare_call.service.ai.OpenAiChatService;
+import com.example.medicare_call.service.ai.prompt.CareCallDataExtractionPromptBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.stereotype.Service;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,9 +25,9 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class CareCallAnalysisService {
-    public static final String MEAL_STATUS_UNKNOWN_MESSAGE = "해당 시간대 식사 여부를 명확히 확인하지 못했어요.";
 
     private final OpenAiChatService openAiChatService;
+    private final CareCallDataExtractionPromptBuilder careCallDataExtractionPromptBuilder;
     private final MedicationScheduleRepository medicationScheduleRepository;
     private final CareCallAnalysisResultSaveService careCallAnalysisResultSaveService;
     private final BeanOutputConverter<HealthDataExtractionResponse> beanOutputConverter = new BeanOutputConverter<>(HealthDataExtractionResponse.class);
@@ -68,7 +69,7 @@ public class CareCallAnalysisService {
 
     /**
      * OpenAI API를 호출하여 통화 텍스트에서 건강 데이터를 구조화된 형태로 추출한다
-     * 
+     *
      * @param callDate 통화 날짜
      * @param transcriptionText 통화 기록 텍스트
      * @param medicationNames 복용 중인 약물 목록
@@ -77,18 +78,22 @@ public class CareCallAnalysisService {
     public HealthDataExtractionResponse extractHealthData(LocalDate callDate, String transcriptionText, List<String> medicationNames) {
         log.info("OpenAI API를 통한 건강 데이터 추출 시작");
 
-        String prompt = String.format(CareCallDataExtractionPrompt.PROMPT_TEMPLATE,
-                callDate,
-                transcriptionText,
-                medicationNames != null && !medicationNames.isEmpty() ? String.join(", ", medicationNames) : "등록된 약 없음"
-        );
+        CareCallDataExtractionRequest request = CareCallDataExtractionRequest.builder()
+                .callDate(callDate)
+                .transcriptionText(transcriptionText)
+                .medicationNames(medicationNames)
+                .build();
 
         OpenAiChatOptions options = OpenAiChatOptions.builder()
                 .model(openaiModel)
                 .temperature(0.1)
                 .build();
 
-        ChatResponse response = openAiChatService.openAiChat(prompt, CareCallDataExtractionPrompt.SYSTEM_MESSAGE, options);
+        ChatResponse response = openAiChatService.openAiChat(
+                careCallDataExtractionPromptBuilder.buildPrompt(request),
+                careCallDataExtractionPromptBuilder.buildSystemMessage(),
+                options
+        );
 
         if (response != null && response.getResult() != null) {
             String content = response.getResult().getOutput().getText();
@@ -100,4 +105,4 @@ public class CareCallAnalysisService {
             throw new RuntimeException("OpenAI API 응답이 비어있습니다");
         }
     }
-} 
+}

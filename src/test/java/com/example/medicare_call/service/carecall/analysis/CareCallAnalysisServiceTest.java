@@ -5,8 +5,8 @@ import com.example.medicare_call.domain.CareCallSetting;
 import com.example.medicare_call.domain.Elder;
 import com.example.medicare_call.dto.data_processor.HealthDataExtractionResponse;
 import com.example.medicare_call.repository.MedicationScheduleRepository;
-import com.example.medicare_call.service.ai.CareCallDataExtractionPrompt;
 import com.example.medicare_call.service.ai.OpenAiChatService;
+import com.example.medicare_call.service.ai.prompt.CareCallDataExtractionPromptBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,6 +33,9 @@ public class CareCallAnalysisServiceTest {
 
     @Mock
     private OpenAiChatService openAiChatService;
+
+    @Mock
+    private CareCallDataExtractionPromptBuilder careCallDataExtractionPromptBuilder;
 
     @Mock
     private MedicationScheduleRepository medicationScheduleRepository;
@@ -70,14 +73,16 @@ public class CareCallAnalysisServiceTest {
         Generation generation = new Generation(new AssistantMessage(jsonResponse));
         ChatResponse mockChatResponse = new ChatResponse(List.of(generation));
 
-        when(openAiChatService.openAiChat(anyString(), eq(CareCallDataExtractionPrompt.SYSTEM_MESSAGE), any(OpenAiChatOptions.class)))
+        when(careCallDataExtractionPromptBuilder.buildSystemMessage()).thenReturn("system");
+        when(careCallDataExtractionPromptBuilder.buildPrompt(any())).thenReturn(callRecord.getTranscriptionText());
+        when(openAiChatService.openAiChat(anyString(), anyString(), any(OpenAiChatOptions.class)))
                 .thenReturn(mockChatResponse);
 
         // when
         careCallAnalysisService.extractAndSaveHealthDataFromAi(callRecord);
 
         // then
-        verify(openAiChatService).openAiChat(contains(callRecord.getTranscriptionText()), eq(CareCallDataExtractionPrompt.SYSTEM_MESSAGE), any(OpenAiChatOptions.class));
+        verify(openAiChatService).openAiChat(contains(callRecord.getTranscriptionText()), anyString(), any(OpenAiChatOptions.class));
         verify(careCallAnalysisResultSaveService).processAndSaveHealthData(eq(callRecord), any(HealthDataExtractionResponse.class));
     }
 
