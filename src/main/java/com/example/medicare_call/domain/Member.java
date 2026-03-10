@@ -2,6 +2,7 @@ package com.example.medicare_call.domain;
 
 import com.example.medicare_call.global.enums.Gender;
 import com.example.medicare_call.global.enums.NotificationStatus;
+import com.example.medicare_call.global.enums.SubscriptionPlan;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -46,8 +47,9 @@ public class Member {
     @Column(name = "terms_agreed_at", nullable = false)
     private LocalDateTime termsAgreedAt;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "plan") //처음 회원가입 시 plan이 없으므로  nullable=false 조건 삭제
-    private Byte plan;
+    private SubscriptionPlan plan;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "push_all", nullable = false)
@@ -70,7 +72,7 @@ public class Member {
     private String fcmToken;
 
     @Builder
-    public Member(Integer id, String name, String phone, LocalDate birthDate, Gender gender, LocalDateTime termsAgreedAt, Byte plan, String fcmToken) {
+    public Member(Integer id, String name, String phone, LocalDate birthDate, Gender gender, LocalDateTime termsAgreedAt, SubscriptionPlan plan, String fcmToken) {
         this.id = id;
         this.name = name;
         this.phone = phone;
