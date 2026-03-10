@@ -32,7 +32,7 @@ public class BloodSugarService {
             }
 
             // measurementType 결정 (식전/식후)
-            BloodSugarMeasurementType measurementType = BloodSugarMeasurementType.fromDescription(bloodSugarData.getMealTime());
+            BloodSugarMeasurementType measurementType = bloodSugarData.getMeasurementType();
 
             // status 결정 (LOW/NORMAL/HIGH)
             BloodSugarStatus status = null;
@@ -47,12 +47,12 @@ public class BloodSugarService {
                     .status(status)
                     .recordedAt(LocalDateTime.now()) // TODO: 혈당 측정한 시간을 전화를 통해 질의할 것인지 확정한 뒤에 재검토
                     .responseSummary(String.format("측정시각: %s, 식전/식후: %s",
-                            bloodSugarData.getMeasurementTime(), bloodSugarData.getMealTime()))
+                            bloodSugarData.getMeasurementTime(), bloodSugarData.getMeasurementType().name()))
                     .build();
 
             bloodSugarRecordRepository.save(bloodSugarRecord);
             log.info("혈당 데이터 저장 완료: value={}, mealTime={}, status={}",
-                    bloodSugarData.getBloodSugarValue(), bloodSugarData.getMealTime(), status);
+                    bloodSugarData.getBloodSugarValue(), bloodSugarData.getMeasurementType(), status);
         }
     }
 } 
