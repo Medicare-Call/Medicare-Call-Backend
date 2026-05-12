@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew test)",
+      "Bash(./gradlew test:*)",
+      "Bash(./gradlew clean build)",
+      "Bash(./gradlew clean build:*)",
+      "Bash(./gradlew build)",
+      "Bash(./gradlew build:*)",
+      "Bash(./gradlew compileJava)",
+      "Bash(./gradlew compileTestJava)",
+      "Bash(./gradlew dependencies)",
+      "Bash(./gradlew dependencies:*)",
+      "Bash(./gradlew cleanTest test:*)",
+      "Bash(./gradlew bootRun)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(ls:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git branch:*)",
+      "Bash(git blame:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr diff:*)",
+      "Bash(gh issue list:*)",
+      "Bash(gh issue view:*)",
+      "Bash(/usr/libexec/java_home:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
